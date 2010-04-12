@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+import getopt, sys
+from restrequest import Connection
+
+def usage():
+    print "Usage:\nflies po pull\nflies po push\nflies publican pull\nflies publican push"
+
+def main():
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
+    except getopt.GetoptError, err:
+        print str(err)
+        sys.exit(2)
+    output = None
+    if len(args) < 2:
+       usage()
+       sys.exit()
+    if args[0] == 'po':
+        if args[1] == 'pull': 
+       	   print "Pull the content of PO"
+           connection = Connection('http://developer.yahoo.com','','')
+           response = connection.request_get('')
+	   print response.status, response.reason
+        elif args[1] == 'push':
+           print "Push the content of PO"
+    elif args[0] == 'publican':
+        if args[1] == 'pull':
+	   print "Pull the content of publican"
+        if args[1] == 'push':
+	   print "Push the content of publican"
+    else: 
+        usage();
+
+    for o in opts:
+        if o in ("-h", "--help"):
+	   usage()
+	   sys.exit()
+
+if __name__ == "__main__":
+        main()       
