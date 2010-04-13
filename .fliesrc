@@ -1,0 +1,5 @@
+[config]
+server = http://localhost:8080/flies
+project.id = myproject
+project.iteration.id = 2.0
+
