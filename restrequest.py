@@ -1,4 +1,8 @@
-import httplib
+__all__ = (
+        "Connection",
+    )  
+
+import httplib2
 import urlparse
 import urllib
 import base64
@@ -10,30 +14,23 @@ class Connection:
 		self.password = password
 		self.url = urlparse.urlparse(base_url)
 
-	def request_get(self, resource, args = None):
-		return self.request(resource, "get", args)
+	def request_get(self, resource, args = None, headers = {}):
+                return self.request(resource, "get", args, headers)
 
-	def request_post(self, resource, args = None):
-		return self.request(resource, "post", args)
+	def request_post(self, resource, args = None, headers = {}):
+		return self.request(resource, "post", args, headers)
 
-	def request(self, resource, method = "get", args = None):
+	def request(self, resource, method = "get", args = None, headers = {}):
 		params = None
 		path = resource
-		headers = {}
-
 		if args:
 			path += "?" + urllib.urlencode(args)
 
-		if self.username and self.password:
-			encoded = base64.encodestring("%s:%s" % (self.username, self.password))[:-1]
-			headers["Authorization"] = "Basic %s" % encoded
-
-		if (self.url.port == 443):
-			conn = httplib.HTTPSConnection(self.url.netloc)
-		else:
-			conn = httplib.HTTPConnection(self.url.netloc)
-
-		req = conn.request(method.upper(), "/" + path, None, headers)
-
-		return conn.getresponse()
+		#if self.username and self.password:
+		#	encoded = base64.b64encode("%s:%s" % (self.username, self.password))
+		#        headers["Authorization"] = "Basic %s" % encoded
+                                
+                http = httplib2.Http()
+		response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), None, headers)
+		return (response, content.decode("UTF-8"))
   

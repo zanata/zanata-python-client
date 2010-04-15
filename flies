@@ -1,40 +1,68 @@
 #!/usr/bin/env python
 import getopt, sys
+import ConfigParser
+import json
 from restrequest import Connection
 
 def usage():
-    print "Usage:\nflies po pull\nflies po push\nflies publican pull\nflies publican push"
+    print "Client for talking to a Flies Server"
+    print "basic command:"
+    print " list        List all available projects"
+    print "use 'flies --help' for the full list of commands or 'flies -v' for details"
+
+def helpmessage():
+    print "Usage:"
+    print "publican pull     pull the content of publican file"
+    print "publican push     push the content of publican to Flies Server"
+
+def parseconfig():
+    cf = ConfigParser.ConfigParser()
+    cf.read(".fliesrc")
+    s = cf.sections()
+    print 'section:', s
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
+        opts, args = getopt.getopt(sys.argv[1:], "hv", ["help", "list", "config", "status"])
     except getopt.GetoptError, err:
         print str(err)
         sys.exit(2)
-    output = None
     if len(args) < 2:
-       usage()
-       sys.exit()
-    if args[0] == 'po':
-        if args[1] == 'pull': 
-       	   print "Pull the content of PO"
-           connection = Connection('http://developer.yahoo.com','','')
-           response = connection.request_get('')
-	   print response.status, response.reason
-        elif args[1] == 'push':
-           print "Push the content of PO"
-    elif args[0] == 'publican':
-        if args[1] == 'pull':
-	   print "Pull the content of publican"
-        if args[1] == 'push':
-	   print "Push the content of publican"
-    else: 
-        usage();
-
-    for o in opts:
-        if o in ("-h", "--help"):
-	   usage()
-	   sys.exit()
+       if len(opts) == 0:
+         usage()
+         sys.exit()
+       elif len(opts) > 0:
+         for o, a in opts:
+	   if o in ("-h", "--help"):
+              helpmessage()
+              sys.exit()
+           if o in ("--list"):
+             connection = Connection('http://hudson.englab.bne.redhat.com/flies/seam/resource/restv1', None, None)
+             headers = {}
+             headers['Accept'] = 'application/json'
+             res, content = connection.request_get('/projects', None, headers)
+             if res.get('status') == '200':
+             	projects = json.loads(content)
+                for project in projects:
+                    print "*"*40
+                    print "Name: "+project.get('name')
+                    print "Id: "+project.get('id')
+                    print "Description: "+project.get('description')
+                              
+    else:
+       if args[0] == 'po':
+          if args[1] == 'pull': 
+       	     print "Pull the content of PO"
+          elif args[1] == 'push':
+             print "Push the content of PO"
+       elif args[0] == 'publican':
+          if args[1] == 'pull':
+	     print "Pull the content of publican"
+          if args[1] == 'push':
+	     print "Push the content of publican"
+       else:
+           helpmessage()
+           sys.exit()           
 
 if __name__ == "__main__":
         main()       
