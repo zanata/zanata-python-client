@@ -2,11 +2,15 @@ __all__ = (
         "Connection",
     )  
 
-import httplib2
 import urlparse
 import urllib
 import base64
+import warnings 
 
+with warnings.catch_warnings():
+     warnings.filterwarnings("ignore",category=DeprecationWarning)
+     import httplib2
+     
 class Connection:
 	def __init__(self, base_url, username, password):
 		self.base_url = base_url

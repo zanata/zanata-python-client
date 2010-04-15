@@ -23,11 +23,11 @@ def parseconfig():
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hv", ["help", "list", "config", "status"])
+        opts, args = getopt.getopt(sys.argv[1:], "hv", ["help", "config", "status"])
     except getopt.GetoptError, err:
         print str(err)
         sys.exit(2)
-    if len(args) < 2:
+    if len(args) == 0:
        if len(opts) == 0:
          usage()
          sys.exit()
@@ -36,30 +36,29 @@ def main():
 	   if o in ("-h", "--help"):
               helpmessage()
               sys.exit()
-           if o in ("--list"):
-             connection = Connection('http://hudson.englab.bne.redhat.com/flies/seam/resource/restv1', None, None)
-             headers = {}
-             headers['Accept'] = 'application/json'
-             res, content = connection.request_get('/projects', None, headers)
-             if res.get('status') == '200':
-             	projects = json.loads(content)
-                for project in projects:
-                    print "*"*40
-                    print "Name: "+project.get('name')
-                    print "Id: "+project.get('id')
-                    print "Description: "+project.get('description')
-                              
-    else:
-       if args[0] == 'po':
-          if args[1] == 'pull': 
-       	     print "Pull the content of PO"
-          elif args[1] == 'push':
-             print "Push the content of PO"
+    else: 
+       if args[0] == 'list':
+          connection = Connection('http://hudson.englab.bne.redhat.com/flies/seam/resource/restv1', None, None)
+          headers = {}
+          headers['Accept'] = 'application/json'
+          res, content = connection.request_get('/projects', None, headers)
+          if res.get('status') == '200':
+             projects = json.loads(content)
+             for project in projects:
+                 print "*"*40
+                 print "Name: "+project.get('name')
+                 print "Id: "+project.get('id')
+                 print "Description: "+project.get('description')
+       elif args[0] == 'po':
+            if args[1] == 'pull': 
+       	       print "Pull the content of PO"
+            elif args[1] == 'push':
+               print "Push the content of PO"
        elif args[0] == 'publican':
-          if args[1] == 'pull':
-	     print "Pull the content of publican"
-          if args[1] == 'push':
-	     print "Push the content of publican"
+            if args[1] == 'pull':
+	       print "Pull the content of publican"
+            if args[1] == 'push':
+	       print "Push the content of publican"
        else:
            helpmessage()
            sys.exit()           
