@@ -44,9 +44,9 @@ def main():
              projects = json.loads(content)
              for project in projects:
                  print "*"*40
-                 print "Name: "+project.get('name')
-                 print "Id: "+project.get('id')
-                 print "Description: "+project.get('description')
+                 print 'Name: '+project['name']+' '+'id: '+project['id']+' '\
+                       +'Description: '+project['description']+' '+'Type: '\
+                       +project['type']+' '+'Links: '+''.join(project['links'])                
        elif args[0] == 'po':
             if args[1] == 'pull': 
        	       print "Pull the content of PO"
