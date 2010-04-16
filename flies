@@ -23,7 +23,7 @@ def parseconfig():
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hv", ["help", "config", "status"])
+        opts, args = getopt.getopt(sys.argv[1:], "v", ["config", "status"])
     except getopt.GetoptError, err:
         print str(err)
         sys.exit(2)
@@ -31,13 +31,11 @@ def main():
        if len(opts) == 0:
          usage()
          sys.exit()
-       elif len(opts) > 0:
-         for o, a in opts:
-	   if o in ("-h", "--help"):
-              helpmessage()
-              sys.exit()
     else: 
-       if args[0] == 'list':
+       if args[0] == 'help':
+          helpmessage()
+          sys.exit()
+       elif args[0] == 'list':
           connection = Connection('http://hudson.englab.bne.redhat.com/flies/seam/resource/restv1', None, None)
           headers = {}
           headers['Accept'] = 'application/json'
