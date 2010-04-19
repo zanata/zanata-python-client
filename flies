@@ -39,14 +39,28 @@ def main():
           connection = Connection('http://hudson.englab.bne.redhat.com/flies/seam/resource/restv1', None, None)
           headers = {}
           headers['Accept'] = 'application/json'
-          res, content = connection.request_get('/projects', None, headers)
+          res, content = connection.request_get('/projects/p/jbt/iterations/i/trunk', None, headers)
+          print res['status']
+          print content
           if res.get('status') == '200':
+             print content
              projects = json.loads(content)
              for project in projects:
                  print "*"*40
-                 print 'Name: '+project['name']+' '+'id: '+project['id']+' '\
-                       +'Description: '+project['description']+' '+'Type: '\
-                       +project['type']+' '+'Links: '+''.join(project['links'])                
+                 print project
+                # print 'Name: '+project['name']+' '+'id: '+project['id']+' '\
+                #       +'Description: '+project['description']+' '+'Type: '\
+                #       +project['type']+' '+'Links: '+''.join(project['links'])                
+       elif args[0] == 'iteration':
+          connection = Connection('http://hudson.englab.bne.redhat.com/flies/seam/resource/restv1', None, None)
+          headers = {}
+          headers['Accept'] = 'application/json'
+          if len(args) < 3:
+             print 'Please use flies iterations project_id iteration_name to get the iteration'
+          else:
+             res, content = connection.request_get('/projects/p/%s/iterations/i/%s'%(args[1],args[2]), None, headers)
+             print res['status']
+             print content
        elif args[0] == 'po':
             if args[1] == 'pull': 
        	       print "Pull the content of PO"
