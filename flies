@@ -2,6 +2,7 @@
 import getopt, sys
 import ConfigParser
 import json
+import os.path
 from restrequest import Connection
 
 def usage():
@@ -16,14 +17,26 @@ def helpmessage():
     print "publican push     push the content of publican to Flies Server"
 
 def parseconfig():
-    cf = ConfigParser.ConfigParser()
-    cf.read(".fliesrc")
-    s = cf.sections()
-    print 'section:', s
+    usrconfig = os.path.expanduser("~/.fliesrc")
+    if os.path.exists(usrconfig):
+       cf = ConfigParser.ConfigParser()
+       cf.read(usrconfig)
+       s = cf.sections()
+       return cf.items('config')
+    else:
+       print "Error, user configuration file doesn't exist"
 
 def main():
+    config = parseconfig()
+    for item in config:
+        if item[0] == 'server':
+           server = item[1]
+        elif item[0] == 'project.id':
+           projectid= item[1]
+        elif item[0] == 'project.iteration.id':
+           iterationid = item[1]
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "v", ["config", "status"])
+        opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["server=", "project=", "iteration="])
     except getopt.GetoptError, err:
         print str(err)
         sys.exit(2)
@@ -36,7 +49,7 @@ def main():
           helpmessage()
           sys.exit()
        elif args[0] == 'list':
-          connection = Connection('http://hudson.englab.bne.redhat.com/flies/seam/resource/restv1', None, None)
+          connection = Connection(server, None, None)
           headers = {}
           headers['Accept'] = 'application/json'
           res, content = connection.request_get('/projects', None, headers)
@@ -46,17 +59,18 @@ def main():
              for project in projects:
                  print "*"*40
                  print project
-                # print 'Name: '+project['name']+' '+'id: '+project['id']+' '\
-                #       +'Description: '+project['description']+' '+'Type: '\
-                #       +project['type']+' '+'Links: '+''.join(project['links'])                
-       elif args[0] == 'project':
-          connection = Connection('http://hudson.englab.bne.redhat.com/flies/seam/resource/restv1', None, None)
+       elif args[0] == 'projectinfo':
+          print opts
+          connection = Connection(server, None, None)
           headers = {}
           headers['Accept'] = 'application/json'
-          if len(args) < 2:
-             print 'Please use flies project project_id to retrieve the project info'
+          if len(opts) < 1:
+             print 'Please use flies --project=project_id to retrieve the project info'
           else:
-             res, content = connection.request_get('/projects/p/%s'%args[1], None, headers)
+             for o, a in opts:
+                 if o == "--project":
+                    id = a
+             res, content = connection.request_get('/projects/p/%s'%id, None, headers)
              print 'Status: '+res['status']
              print content
              
