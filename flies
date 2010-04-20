@@ -65,7 +65,7 @@ def main():
           headers = {}
           headers['Accept'] = 'application/json'
           if len(opts) < 1:
-             print 'Please use flies --project=project_id to retrieve the project info'
+             print 'Please use flies projectinfo --project=project_id to retrieve the project info'
           else:
              for o, a in opts:
                  if o == "--project":
@@ -73,15 +73,19 @@ def main():
              res, content = connection.request_get('/projects/p/%s'%id, None, headers)
              print 'Status: '+res['status']
              print content
-             
-       elif args[0] == 'iteration':
-          connection = Connection('http://hudson.englab.bne.redhat.com/flies/seam/resource/restv1', None, None)
+       elif args[0] == 'iterationinfo' or args[0] == 'info' :
+          connection = Connection(server, None, None)
           headers = {}
           headers['Accept'] = 'application/json'
-          if len(args) < 3:
-             print 'Please use flies iterations project_id iteration_name to get the iteration'
+          if len(opts) < 2:
+             print 'Please use flies iterationinfo|info --project=project_id --iteration=iteration_id to get the iteration'
           else:
-             res, content = connection.request_get('/projects/p/%s/iterations/i/%s'%(args[1],args[2]), None, headers)
+             for o, a in opts:
+                if o == '--project':
+                   id = a
+                elif o == '--iteration':
+                   iteration = a
+             res, content = connection.request_get('/projects/p/%s/iterations/i/%s'%(id,iteration), None, headers)
              print 'Status: '+res['status']
              print content
        elif args[0] == 'po':
