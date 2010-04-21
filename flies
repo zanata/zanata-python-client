@@ -16,91 +16,93 @@ def helpmessage():
     print "publican pull     pull the content of publican file"
     print "publican push     push the content of publican to Flies Server"
 
-def parseconfig():
-    usrconfig = os.path.expanduser("~/.fliesrc")
-    if os.path.exists(usrconfig):
-       cf = ConfigParser.ConfigParser()
-       cf.read(usrconfig)
-       s = cf.sections()
-       return cf.items('config')
-    else:
-       print "Error, user configuration file doesn't exist"
-
+def get_config_var():
+    projectconfig = "./.fliesrc"
+    config = ConfigParser.ConfigParser()
+    config.read([projectconfig, os.path.expanduser("~/.fliesrc")])
+    server = config.get('config', 'server')
+    projectid = config.get('config', 'project.id')
+    iterationid = config.get('config', 'project.iteration.id')
+    return server, projectid, iterationid    
+ 
 def main():
-    config = parseconfig()
-    for item in config:
-        if item[0] == 'server':
-           server = item[1]
-        elif item[0] == 'project.id':
-           projectid= item[1]
-        elif item[0] == 'project.iteration.id':
-           iterationid = item[1]
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["server=", "project=", "iteration="])
     except getopt.GetoptError, err:
         print str(err)
         sys.exit(2)
+    serverurl, projectid, iterationid = get_config_var() 
     if len(args) == 0:
        if len(opts) == 0:
-         usage()
-         sys.exit()
-    else: 
+          usage()
+          sys.exit()
+    else:
        if args[0] == 'help':
           helpmessage()
           sys.exit()
-       elif args[0] == 'list':
-          connection = Connection(server, None, None)
-          headers = {}
-          headers['Accept'] = 'application/json'
-          res, content = connection.request_get('/projects', None, headers)
-          print 'Status: '+res['status']
-          if res.get('status') == '200':
-             projects = json.loads(content)
-             for project in projects:
-                 print "*"*40
-                 print project
-       elif args[0] == 'projectinfo':
-          print opts
-          connection = Connection(server, None, None)
-          headers = {}
-          headers['Accept'] = 'application/json'
-          if len(opts) < 1:
-             print 'Please use flies projectinfo --project=project_id to retrieve the project info'
-          else:
-             for o, a in opts:
-                 if o == "--project":
-                    id = a
-             res, content = connection.request_get('/projects/p/%s'%id, None, headers)
-             print 'Status: '+res['status']
-             print content
-       elif args[0] == 'iterationinfo' or args[0] == 'info' :
-          connection = Connection(server, None, None)
-          headers = {}
-          headers['Accept'] = 'application/json'
-          if len(opts) < 2:
-             print 'Please use flies iterationinfo|info --project=project_id --iteration=iteration_id to get the iteration'
-          else:
-             for o, a in opts:
-                if o == '--project':
-                   id = a
-                elif o == '--iteration':
-                   iteration = a
-             res, content = connection.request_get('/projects/p/%s/iterations/i/%s'%(id,iteration), None, headers)
-             print 'Status: '+res['status']
-             print content
-       elif args[0] == 'po':
-            if args[1] == 'pull': 
-       	       print "Pull the content of PO"
-            elif args[1] == 'push':
-               print "Push the content of PO"
-       elif args[0] == 'publican':
-            if args[1] == 'pull':
-	       print "Pull the content of publican"
-            if args[1] == 'push':
-	       print "Push the content of publican"
        else:
-           helpmessage()
-           sys.exit()           
+          for o, a in opts:
+              if o == "--server":
+                 serveroption = a
+          server = serverurl or serveroption
+          if server != '':
+             connection = Connection(server, None, None)
+          else:
+             "Please use --server option to set server url"
+          headers = {}
+          if args[0] == 'list':
+             res, content = connection.request_get('/projects')
+             print 'Status: '+res['status']
+             if res.get('status') == '200':
+                projects = json.loads(content)
+                for project in projects:
+                    print "*"*40
+                    print project
+          elif args[0] == 'projectinfo':
+              if len(opts) < 1:
+                 print 'Please use flies projectinfo --project=project_id to retrieve the project info'
+              else:
+                 for o, a in opts:
+                     if o == "--project":
+                        id = a
+                 res, content = connection.request_get('/projects/p/%s'%id)
+                 print 'Status: '+res['status']
+                 print content
+          elif args[0] == 'iterationinfo' or args[0] == 'info' :
+              if len(opts) < 2:
+                 print 'Please use flies iterationinfo|info --project=project_id --iteration=iteration_id to retrieve the iteration'
+              else:
+                 for o, a in opts:
+                    if o == '--project':
+                       id = a
+                    elif o == '--iteration':
+                       iteration = a
+                 res, content = connection.request_get('/projects/p/%s/iterations/i/%s'%(id,iteration))
+                 print 'Status: '+res['status']
+                 print content
+          elif args[0] == 'create' and args[1] == 'project':
+               headers['X-Auth-User']='demo'
+               headers['X-Auth-Token']= '01234567890123345'               
+               if args[2] != '':
+                  body = {'name':'Test Project','id':'%s'%args[2],'description':'An Test Project','type':'IterationProject'} 
+                  res, content = connection.request_put('/projects/p/%s'%args[2], args=body, headers=headers)
+                  print 'Status: '+res['status']
+                  print content
+               else:
+                  print 'Please use flies create project project_id to create the project'
+          elif args[0] == 'create' and args[1] == 'iteration':
+               print "Create the iteration"
+          elif args[0] == 'po' and args[1] == 'pull': 
+       	       print "Pull the content of PO"
+          elif args[0] == 'po' and args[1] == 'push':
+               print "Push the content of PO"
+          elif args[0] == 'publican' and args[1] == 'pull':
+	       print "Pull the content of publican"
+          elif args[0] == 'publican' and args[1] == 'push':
+               print "Push the content of publican"
+          else:
+              helpmessage()
+              sys.exit()           
 
 if __name__ == "__main__":
         main()       
