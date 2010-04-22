@@ -27,7 +27,7 @@ def get_config_var():
  
 def main():
     try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["server=", "project=", "iteration="])
+        opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["server=", "project=", "iteration=", "name=", "description="])
     except getopt.GetoptError, err:
         print str(err)
         sys.exit(2)
@@ -44,6 +44,10 @@ def main():
           for o, a in opts:
               if o == "--server":
                  serveroption = a
+              elif o == "--name":
+                 projectname = a
+              elif o == "--description":
+                 desc = a
           server = serverurl or serveroption
           if server != '':
              connection = Connection(server, None, None)
@@ -81,15 +85,17 @@ def main():
                  print 'Status: '+res['status']
                  print content
           elif args[0] == 'create' and args[1] == 'project':
-               headers['X-Auth-User']='demo'
-               headers['X-Auth-Token']= '01234567890123345'               
+               headers['X-Auth-User']='admin'
+               headers['X-Auth-Token']= '12345678901234567890123456789012'               
                if args[2] != '':
-                  body = {'name':'Test Project','id':'%s'%args[2],'description':'An Test Project','type':'IterationProject'} 
-                  res, content = connection.request_put('/projects/p/%s'%args[2], args=body, headers=headers)
-                  print 'Status: '+res['status']
-                  print content
+                  #if projectname != '' and desc != '':
+                     #body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,args[2],desc)
+                     #res, content = connection.request_put('/projects/p/%s'%args[2], args=body, headers=headers)
+                     #print 'Status: '+res['status']
+                  #else:
+                     print "Please use --name project_name --description project_description"
                else:
-                  print 'Please use flies create project project_id to create the project'
+                  print 'Please use flies create project project_id --name project_name --description project_description to create project'
           elif args[0] == 'create' and args[1] == 'iteration':
                print "Create the iteration"
           elif args[0] == 'po' and args[1] == 'pull': 

@@ -34,7 +34,8 @@ class Connection:
                 if args:
                    if method == "put" or method == "post":
                       headers['Content-Type'] = 'application/json'
-                      body = urllib.urlencode(args)
+                      #body = urllib.urlencode(args)
+                      body = args
                 response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body=body, headers=headers)
 		return (response, content.decode("UTF-8"))
   
