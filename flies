@@ -20,10 +20,12 @@ def get_config_var():
     projectconfig = "./.fliesrc"
     config = ConfigParser.ConfigParser()
     config.read([projectconfig, os.path.expanduser("~/.fliesrc")])
-    server = config.get('config', 'server')
-    projectid = config.get('config', 'project.id')
-    iterationid = config.get('config', 'project.iteration.id')
-    return server, projectid, iterationid    
+    server = config.get('Config', 'server')
+    projectid = config.get('Config', 'project.id')
+    iterationid = config.get('Config', 'project.iteration.id')
+    user = config.get('Config', 'user')
+    apikey = config.get('Config', 'apikey')
+    return server, projectid, iterationid, user, apikey    
  
 def main():
     try:
@@ -31,7 +33,7 @@ def main():
     except getopt.GetoptError, err:
         print str(err)
         sys.exit(2)
-    serverurl, projectid, iterationid = get_config_var() 
+    serverurl, projectid, iterationid, user, apikey = get_config_var() 
     if len(args) == 0:
        if len(opts) == 0:
           usage()
@@ -41,6 +43,10 @@ def main():
           helpmessage()
           sys.exit()
        else:
+          serveroption = ''
+          projectname = ''
+          desc = ''
+          
           for o, a in opts:
               if o == "--server":
                  serveroption = a
@@ -48,11 +54,17 @@ def main():
                  projectname = a
               elif o == "--description":
                  desc = a
+              elif o == '--project':
+                 id = a
+              elif o == '--iteration':
+                 iteration = a
+          
           server = serverurl or serveroption
-          if server != '':
+          if server:
              connection = Connection(server, None, None)
           else:
              "Please use --server option to set server url"
+          
           headers = {}
           if args[0] == 'list':
              res, content = connection.request_get('/projects')
@@ -66,9 +78,6 @@ def main():
               if len(opts) < 1:
                  print 'Please use flies projectinfo --project=project_id to retrieve the project info'
               else:
-                 for o, a in opts:
-                     if o == "--project":
-                        id = a
                  res, content = connection.request_get('/projects/p/%s'%id)
                  print 'Status: '+res['status']
                  print content
@@ -76,26 +85,34 @@ def main():
               if len(opts) < 2:
                  print 'Please use flies iterationinfo|info --project=project_id --iteration=iteration_id to retrieve the iteration'
               else:
-                 for o, a in opts:
-                    if o == '--project':
-                       id = a
-                    elif o == '--iteration':
-                       iteration = a
                  res, content = connection.request_get('/projects/p/%s/iterations/i/%s'%(id,iteration))
                  print 'Status: '+res['status']
                  print content
-          elif args[0] == 'create' and args[1] == 'project':
-               headers['X-Auth-User']='admin'
-               headers['X-Auth-Token']= '12345678901234567890123456789012'               
-               if args[2] != '':
-                  if projectname != '' and desc != '':
-                     body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,args[2],desc)
-                     res, content = connection.request_put('/projects/p/%s'%args[2], args=body, headers=headers)
-                     print 'Status: '+res['status']
-                  else:
-                     print "Please use --name project_name --description project_description"
+          elif args[0] == 'create':
+               if user and apikey :
+                  headers['X-Auth-User']= user
+                  headers['X-Auth-Token']= apikey
                else:
-                  print 'Please use flies create project project_id --name project_name --description project_description to create project'
+                  print "Please provide username and apikey in .fliesrc"
+                  sys.exit()
+ 
+               if len(args) == 3:
+                  if args[1] == 'project':
+                     if len(opts) < 2:
+                        print "Please provide valid options: '--name=project_name --description=project_description'"             
+                     else:   
+                        if projectname and desc :
+                           body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,args[2],desc)
+                           res, content = connection.request_put('/projects/p/%s'%args[2], args=body, headers=headers)
+                           print 'Status: '+res['status']
+                        else:
+                           print "Please provide valid options: '--name=project_name --description=project_description'"
+                  elif args[1] == 'iteration':
+                     print "Create the iteration"
+                  else:
+                     print "No such command"
+               else:
+                     print "Please use 'flies create project project_id --name=project_name --description=project_description' to create project"
           elif args[0] == 'create' and args[1] == 'iteration':
                print "Create the iteration"
           elif args[0] == 'po' and args[1] == 'pull': 
