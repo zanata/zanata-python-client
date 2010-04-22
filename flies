@@ -88,11 +88,11 @@ def main():
                headers['X-Auth-User']='admin'
                headers['X-Auth-Token']= '12345678901234567890123456789012'               
                if args[2] != '':
-                  #if projectname != '' and desc != '':
-                     #body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,args[2],desc)
-                     #res, content = connection.request_put('/projects/p/%s'%args[2], args=body, headers=headers)
-                     #print 'Status: '+res['status']
-                  #else:
+                  if projectname != '' and desc != '':
+                     body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,args[2],desc)
+                     res, content = connection.request_put('/projects/p/%s'%args[2], args=body, headers=headers)
+                     print 'Status: '+res['status']
+                  else:
                      print "Please use --name project_name --description project_description"
                else:
                   print 'Please use flies create project project_id --name project_name --description project_description to create project'
