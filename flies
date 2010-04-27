@@ -55,12 +55,12 @@ def main():
           serveroption = ''
           projectname = ''
           desc = ''
-          header = {}
+          
           for o, a in opts:
               if o == "--server":
                  serveroption = a
               elif o == "--name":
-                 projectname = a
+                 name = a
               elif o == "--description":
                  desc = a
               elif o == '--project':
@@ -69,22 +69,26 @@ def main():
                  iteration = a
           
           server = serverurl or serveroption
-          
-          if server:
-             flies = Flies(server, None, None)             
-          else:
-             "Please use --server option to set server url"
-          
-          
+                    
           if args[0] == 'list':
-             res, content = flies.get_projects()
-             print 'Status: '+res['status']
-             if res.get('status') == '200':
+              if server:
+                flies = Flies(server, None, None)
+              else:
+                "Please use --server option to set server url"
+                sys.exit()
+              res, content = flies.get_projects()
+              print 'Status: '+res['status']
+              if res.get('status') == '200':
                 projects = json.loads(content)
-             for project in projects:
+              for project in projects:
                  print "*"*40
                  print project
           elif args[0] == 'projectinfo':
+              if server:
+                flies = Flies(server, None, None)
+              else:
+                "Please use --server option to set server url"
+                sys.exit()
               if len(opts) < 1:
                  print 'Please use flies projectinfo --project=project_id to retrieve the project info'
               else:
@@ -92,6 +96,11 @@ def main():
                  print 'Status: '+res['status']
                  print content
           elif args[0] == 'iterationinfo' or args[0] == 'info' :
+              if server:
+                 flies = Flies(server, None, None)
+              else:
+                 "Please use --server option to set server url"
+                 sys.exit()
               if len(opts) < 2:
                  print 'Please use flies iterationinfo|info --project=project_id --iteration=iteration_id to retrieve the iteration'
               else:
@@ -99,9 +108,8 @@ def main():
                  print 'Status: '+res['status']
                  print content
           elif args[0] == 'create':
-               if user and apikey :
-                  headers['X-Auth-User']= user
-                  headers['X-Auth-Token']= apikey
+               if server and user and apikey :
+                  flies = Flies(server, user, apikey)
                else:
                   print "Please provide username and apikey in .fliesrc"
                   sys.exit()
@@ -111,12 +119,16 @@ def main():
                      if len(opts) < 2:
                         print "Please provide valid options: '--name=project_name --desc=project_description'"             
                      else:   
-                        flies.create_project()
+                        res = flies.create_project(args[2], name, desc)
+                        print res
+                        sys.exit()
                   elif args[1] == 'iteration':
                      if len(opts) < 3:
-                        print "Please provide valid options: '--project=project_id --name=iteration_name --desc=iteration_description'"             
+                        print "Please provide valid options: '--project=project_id --name=iteration_name --desc=iteration_description'"
                      else:
-                        flies.create_iteration()
+                        res = flies.create_iteration(id, args[2], name, desc)
+                        print res
+                        sys.exit()
                   else:
                      print "No such command"
                else:

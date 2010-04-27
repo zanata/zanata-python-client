@@ -6,10 +6,10 @@ import urllib
 from restrequest import Connection     
 
 class Flies:
-	def __init__(self, base_url, username, password):
+	def __init__(self, base_url, username = None, apikey = None):
 		self.base_url = base_url
 		self.username = username
-		self.password = password
+		self.apikey = apikey
                 self.connection = Connection(base_url, None, None)
 	
         def get_projects(self):
@@ -21,13 +21,25 @@ class Flies:
         def get_iteration_info(self, projectid, iterationid):
             return self.connection.request_get('/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
 
-	def create_project(self, username, password, projectid, projectname, projectdesc):
-	    if projectname and desc :
+	def create_project(self, projectid, projectname, projectdesc):
+	    headers = {}
+            headers['X-Auth-User'] = self.username
+            headers['X-Auth-Token'] = self.apikey
+            if projectname and projectdesc :
                body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,projectid,projectdesc)
                res, content = self.connection.request_put('/projects/p/%s'%projectid, args=body, headers=headers)
-               print 'Status: '+res['status']
+               return "Status: "+res['status']
             else:
-               print "Please provide valid options: '--name=project_name --description=project_description'"
-        
-       # def create_iteration():
+               return "Please provide valid options: '--name=project_name --description=project_description'"
+        def create_iteration(self, projectid, iterationid, iterationname, iterationdesc):
+            headers = {}
+            headers['X-Auth-User'] = self.username
+            headers['X-Auth-Token'] = self.apikey
+            if iterationname and iterationdesc :
+               body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iterationname, iterationid, iterationdesc)
+               res, content = self.connection.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
+               return 'Status: '+res['status']
+            else:
+               return "Please provide valid options: '--name=iteration_name --description=iteration_desc'"
+
 
