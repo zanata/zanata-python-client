@@ -1,0 +1,6 @@
+[Config]
+server = http://hudson.englab.bne.redhat.com/flies/seam/resource/restv1
+project.id = user-guide
+project.iteration.id = trunk
+user = admin
+apikey = 12345678901234567890123456789012

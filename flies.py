@@ -27,13 +27,17 @@ def helpmessage():
 def get_config_var():
     projectconfig = "./.fliesrc"
     config = ConfigParser.ConfigParser()
-    config.read([projectconfig, os.path.expanduser("~/.fliesrc")])
-    server = config.get('Config', 'server')
-    projectid = config.get('Config', 'project.id')
-    iterationid = config.get('Config', 'project.iteration.id')
-    user = config.get('Config', 'user')
-    apikey = config.get('Config', 'apikey')
-    return server, projectid, iterationid, user, apikey    
+    configfile = config.read([projectconfig, os.path.expanduser("~/.fliesrc")])
+    if configfile:
+       server = config.get('Config', 'server')
+       projectid = config.get('Config', 'project.id')
+       iterationid = config.get('Config', 'project.iteration.id')
+       user = config.get('Config', 'user')
+       apikey = config.get('Config', 'apikey')
+       return server, projectid, iterationid, user, apikey
+    else:
+       print "Can not find valid fliesrc file on the system"  
+       sys.exit()  
  
 def main():
     try:
