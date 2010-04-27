@@ -3,7 +3,7 @@ __all__ = (
     )
 import urlparse
 import urllib  
-from restrequest import Connection     
+from flieslib import Connection     
 
 class Flies:
 	def __init__(self, base_url, username = None, apikey = None):
