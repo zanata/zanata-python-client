@@ -2,7 +2,8 @@ __all__ = (
         "Flies",
     )
 import urlparse
-import urllib  
+import urllib
+import exceptions 
 from flieslib import Connection     
 
 class Flies:
@@ -22,15 +23,17 @@ class Flies:
             return self.connection.request_get('/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
 
 	def create_project(self, projectid, projectname, projectdesc):
-	    headers = {}
+	    error = 'Invalid Options'
+            headers = {}
             headers['X-Auth-User'] = self.username
             headers['X-Auth-Token'] = self.apikey
             if projectname and projectdesc :
                body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,projectid,projectdesc)
                res, content = self.connection.request_put('/projects/p/%s'%projectid, args=body, headers=headers)
-               return "Status: "+res['status']
+               if res['status'] == '201': 
+                  return True
             else:
-               return "Please provide valid options: '--name=project_name --description=project_description'"
+               raise Exception("Invalid Options")
         def create_iteration(self, projectid, iterationid, iterationname, iterationdesc):
             headers = {}
             headers['X-Auth-User'] = self.username
@@ -38,8 +41,9 @@ class Flies:
             if iterationname and iterationdesc :
                body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iterationname, iterationid, iterationdesc)
                res, content = self.connection.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
-               return 'Status: '+res['status']
+               if res['status'] == '201':
+                  return True
             else:
-               return "Please provide valid options: '--name=iteration_name --description=iteration_desc'"
+               raise Exception("Invalid Options")
 
 

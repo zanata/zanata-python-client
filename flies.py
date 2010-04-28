@@ -121,22 +121,28 @@ def main():
                if len(args) == 3:
                   if args[1] == 'project':
                      if len(opts) < 2:
-                        print "Please provide valid options: '--name=project_name --desc=project_description'"             
+                       print "Please provide valid options: '--name=project_name --desc=project_description'"             
                      else:   
-                        res = flies.create_project(args[2], name, desc)
-                        print res
-                        sys.exit()
+                        try:
+                           result = flies.create_project(args[2], name, desc)
+                           if result:
+                              "Create project success"
+                        except Exception as detail:
+                           print "Error:", detail
                   elif args[1] == 'iteration':
                      if len(opts) < 3:
                         print "Please provide valid options: '--project=project_id --name=iteration_name --desc=iteration_description'"
                      else:
-                        res = flies.create_iteration(id, args[2], name, desc)
-                        print res
-                        sys.exit()
+                        try:
+                           result = flies.create_iteration(id, args[2], name, desc)
+                           if result:
+                              print "Create iteration of project success"
+                        except Exception as detail:
+                           print "Error:", detail   
                   else:
-                     print "No such command"
+                     print "Error: No such command"
                else:
-                     print "Please use 'flies create project project_id --name=project_name --description=project_description' to create project"
+                     print "Error: Not enough arguments for executing command"
           elif args[0] == 'po':
                if args[1] == 'pull': 
        	          print "Pull the content of PO"
