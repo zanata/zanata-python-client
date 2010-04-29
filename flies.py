@@ -1,161 +1,158 @@
 #!/usr/bin/env python
 import getopt, sys
-import ConfigParser
 import json
 import os.path
 from flieslib import Flies 
+from parseconfig import FliesConfig
 
 def usage():
-    print '''Client for talking to a Flies Server
+    print 
+    '''Client for talking to a Flies Server
     basic command:
     flies list        List all available projects
     Use 'flies help' for the full list of commands'''
 
-def helpmessage():
-    print '''Usage:
-          flies list                                  list all available projects
-          flies projectinfo --project=project_id      Retrieve a project
-          flies iterationinfo|info --project=project_id --iteration=iteration_id 
+def help_message():
+    print '''
+    Usage:
+    flies list                                  list all available projects
+    flies projectinfo --project=project_id      Retrieve a project
+    flies iterationinfo|info --project=project_id --iteration=iteration_id 
                                                       Retrieve a iteration
-          flies create project project_id --name=project_name --description=project_desc
+    flies create project project_id --name=project_name --description=project_desc
                                                       Create a project
-          flies create iteration iteration_id --project=project_id --name=itertation_name
+    flies create iteration iteration_id --project=project_id --name=itertation_name
                                                       Create a iteration of a project   
-          flies publican pull                         Pull the content of publican file
-          flies publican push                         Push the content of publican to Flies Server'''
-
-def get_config_var():
-    projectconfig = "./.fliesrc"
-    config = ConfigParser.ConfigParser()
-    configfile = config.read([projectconfig, os.path.expanduser("~/.fliesrc")])
-    if configfile:
-       server = config.get('Config', 'server')
-       projectid = config.get('Config', 'project.id')
-       iterationid = config.get('Config', 'project.iteration.id')
-       user = config.get('Config', 'user')
-       apikey = config.get('Config', 'apikey')
-       return server, projectid, iterationid, user, apikey
+    flies publican pull                         Pull the content of publican file
+    flies publican push                         Push the content of publican to Flies Server'''
+          
+def list_projects(server):
+    flies = Flies(server)
+    res, content = flies.get_projects()
+    print 'Status: '+res['status']
+    if res.get('status') == '200':
+        projects = json.loads(content)
+    for project in projects:
+        print "*"*40
+        print project
+        
+def project_info(server, project_id):
+    flies = Flies(server)
+    res, content = flies.get_project_info(project_id)
+    print 'Status: '+res['status']
+    print content
+        
+def iteration_info(server, project_id, iteration_id):
+    flies = Flies(server)
+    res, content = flies.get_iteration_info(project_id, iteration_id)
+    print 'Status: '+res['status']
+    print content
+                
+def create_project(server, id, name, user, apikey, desc = None):
+    if user and apikey :
+        flies = Flies(server, user, apikey)
     else:
-       print "Can not find valid fliesrc file on the system"  
-       sys.exit()  
- 
+        print "Please provide username and apikey in .fliesrc"
+        sys.exit()
+    
+    try:
+        result = flies.create_project(id, name, desc)
+        print "Create project success"
+    except Exception as detail:
+        print "Error:", detail
+
+def create_iteration(server, id, name, user, apikey, project_id, desc = None):
+    if user and apikey :
+        flies = Flies(server, user, apikey)
+    else:
+        print "Please provide username and apikey in .fliesrc"
+        sys.exit()
+    
+    try:
+        result = flies.create_iteration(project_id, id, name, desc)
+        print "Create iteration of project success"
+    except Exception as detail:
+        print "Error:", detail     
+
+def process_po():
+    pass
+
+def process_publican():
+    pass
+
 def main():
+    config = FliesConfig()
+    server = config.get_value("server")
+    project_id = config.get_value("project.id")
+    iteration_id = config.get_value("project.iteration.id") 
+    user = config.get_value("user")
+    apikey = config.get_value("apikey")
+    name = ''
+    desc = ''
+    
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["server=", "project=", "iteration=", "name=", "description="])
     except getopt.GetoptError, err:
         print str(err)
         sys.exit(2)
-    serverurl, projectid, iterationid, user, apikey = get_config_var() 
     
+    for o, a in opts:
+        if o in ("--server"):
+            server = a
+        elif o in ("--name"):
+            name = a
+        elif o in ("--description"):
+            desc = a
+        elif o in ("--project"):
+            project_id = a
+        elif o in ("--iteration"):
+            iteration_id = a
+        else:
+            assert False
+            
+    if not server:
+        print "Please provide valid server url by fliesrc or by '--server' option"
+        sys.exit()
+        
     if len(args) == 0:
-       if len(opts) == 0:
-          usage()
-          sys.exit()
-    elif len(args) > 0:
-       if args[0] == 'help':
-          helpmessage()
-          sys.exit()
-       else: 
-          serveroption = ''
-          projectname = ''
-          desc = ''
-          
-          for o, a in opts:
-              if o == "--server":
-                 serveroption = a
-              elif o == "--name":
-                 name = a
-              elif o == "--description":
-                 desc = a
-              elif o == '--project':
-                 id = a
-              elif o == '--iteration':
-                 iteration = a
-          
-          server = serverurl or serveroption
-                    
-          if args[0] == 'list':
-              if server:
-                flies = Flies(server, None, None)
-              else:
-                "Please use --server option to set server url"
-                sys.exit()
-              res, content = flies.get_projects()
-              print 'Status: '+res['status']
-              if res.get('status') == '200':
-                projects = json.loads(content)
-              for project in projects:
-                 print "*"*40
-                 print project
-          elif args[0] == 'projectinfo':
-              if server:
-                flies = Flies(server, None, None)
-              else:
-                "Please use --server option to set server url"
-                sys.exit()
-              if len(opts) < 1:
-                 print 'Please use flies projectinfo --project=project_id to retrieve the project info'
-              else:
-                 res, content = flies.get_project_info(id)
-                 print 'Status: '+res['status']
-                 print content
-          elif args[0] == 'iterationinfo' or args[0] == 'info' :
-              if server:
-                 flies = Flies(server, None, None)
-              else:
-                 "Please use --server option to set server url"
-                 sys.exit()
-              if len(opts) < 2:
-                 print 'Please use flies iterationinfo|info --project=project_id --iteration=iteration_id to retrieve the iteration'
-              else:
-                 res, content = flies.get_iteration_info(id, iteration)
-                 print 'Status: '+res['status']
-                 print content
-          elif args[0] == 'create':
-               if server and user and apikey :
-                  flies = Flies(server, user, apikey)
-               else:
-                  print "Please provide username and apikey in .fliesrc"
-                  sys.exit()
- 
-               if len(args) == 3:
-                  if args[1] == 'project':
-                     if len(opts) < 2:
-                       print "Please provide valid options: '--name=project_name --desc=project_description'"             
-                     else:   
-                        try:
-                           result = flies.create_project(args[2], name, desc)
-                           if result:
-                              "Create project success"
-                        except Exception as detail:
-                           print "Error:", detail
-                  elif args[1] == 'iteration':
-                     if len(opts) < 3:
-                        print "Please provide valid options: '--project=project_id --name=iteration_name --desc=iteration_description'"
-                     else:
-                        try:
-                           result = flies.create_iteration(id, args[2], name, desc)
-                           if result:
-                              print "Create iteration of project success"
-                        except Exception as detail:
-                           print "Error:", detail   
-                  else:
-                     print "Error: No such command"
-               else:
-                     print "Error: Not enough arguments for executing command"
-          elif args[0] == 'po':
-               if args[1] == 'pull': 
-       	          print "Pull the content of PO"
-               elif args[1] == 'push':
-                  print "Push the content of PO"
-          elif args[0] == 'publican': 
-               if args[1] == 'pull':
-	          print "Pull the content of publican"
-               elif args[1] == 'push':
-                  print "Push the content of publican"
-          else:
-              helpmessage()
-              sys.exit()           
+       usage()
+       sys.exit()
+    
+    command, args = args[0], args[1:]
+    
+    if command == 'help':
+        help_message()
+    elif command == 'list':
+        list_projects(server)
+    elif command == 'projectinfo':
+        if not project_id:
+            print 'Please use flies projectinfo --project=project_id to retrieve the project info'
+            sys.exit()
+        project_info(server, project_id)
+    elif command == 'iterationinfo' or command == 'info':
+        if not iteration_id or not project_id:
+            print 'Please use flies iterationinfo|info --project=project_id --iteration=iteration_id to retrieve the iteration'
+        iteration_info(server, project_id, iteration_id) 
+    elif command == 'create':
+        if len(args) < 2:
+            print "Error: Not enough arguments for executing command"
+            sys.exit()  
+        if not name or not desc:
+            print "Please provide name and description"
+            sys.exit()
+        if args[0] == 'project':
+            create_project(server, args[1], name, user, apikey, desc)
+        elif args[0] == 'iteration':
+            create_iteration(server, args[1], name, user, apikey, project_id, desc)
+        else:
+            print "Error: No such command"
+    elif command == 'po':
+        process_po(args) 
+    elif command == 'publican': 
+        process_publican(args)
+    else:
+        help_message()
+        sys.exit(2)
 
 if __name__ == "__main__":
         main()       
