@@ -82,11 +82,11 @@ def process_publican():
 
 def main():
     config = FliesConfig()
-    server = config.get_value("server")
-    project_id = config.get_value("project.id")
-    iteration_id = config.get_value("project.iteration.id") 
-    user = config.get_value("user")
-    apikey = config.get_value("apikey")
+    server = config.get_config_value("server")
+    project_id = config.get_config_value("project.id")
+    iteration_id = config.get_config_value("project.iteration.id") 
+    user = config.get_config_value("user")
+    apikey = config.get_config_value("apikey")
     name = ''
     desc = ''
     
@@ -113,7 +113,7 @@ def main():
     if not server:
         print "Please provide valid server url by fliesrc or by '--server' option"
         sys.exit()
-        
+    
     if len(args) == 0:
        usage()
        sys.exit()
