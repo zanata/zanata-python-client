@@ -37,6 +37,7 @@ class Flies:
                   raise NoSuchProjectException('Error 404', 'No Such project')
             else:
                raise InvalidOptionException('Error','Invalid Options')
+        
         def create_iteration(self, projectid, iterationid, iterationname, iterationdesc):
             headers = {}
             headers['X-Auth-User'] = self.username
@@ -46,7 +47,9 @@ class Flies:
                res, content = self.connection.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
                if res['status'] == '201':
                   return True
+               elif res['status'] == '404':
+                  raise NoSuchProjectException('Error 404', 'No Such project')
             else:
-               raise Exception("Invalid Options")
+               raise InvalidOptionException('Error', 'Invalid Options')
 
 

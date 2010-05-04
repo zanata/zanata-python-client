@@ -72,8 +72,8 @@ def create_iteration(server, id, name, user, apikey, project_id, desc = None):
     try:
         result = flies.create_iteration(project_id, id, name, desc)
         print "Create iteration of project success"
-    except Exception as detail:
-        print "Error:", detail     
+    except InvalidOptionException, e:
+        print "Error: Invalid Option"     
 
 def process_po():
     pass
