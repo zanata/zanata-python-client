@@ -3,6 +3,7 @@ import getopt, sys
 import json
 import os.path
 from flieslib import Flies 
+from flieslib import InvalidOptionException
 from parseconfig import FliesConfig
 
 def usage():
@@ -58,8 +59,8 @@ def create_project(server, id, name, user, apikey, desc = None):
     try:
         result = flies.create_project(id, name, desc)
         print "Create project success"
-    except Exception as detail:
-        print "Error:", detail
+    except InvalidOptionException, e:
+        print "Error: Invalid Option",
 
 def create_iteration(server, id, name, user, apikey, project_id, desc = None):
     if user and apikey :
@@ -137,9 +138,9 @@ def main():
         if len(args) < 2:
             print "Error: Not enough arguments for executing command"
             sys.exit()  
-        if not name or not desc:
-            print "Please provide name and description"
-            sys.exit()
+        #if not name or not desc:
+        #    print "Please provide name and description"
+        #    sys.exit()
         if args[0] == 'project':
             create_project(server, args[1], name, user, apikey, desc)
         elif args[0] == 'iteration':

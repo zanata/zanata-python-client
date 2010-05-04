@@ -5,6 +5,7 @@ import urlparse
 import urllib
 import exceptions 
 from flieslib import Connection     
+from flieslib.Exception import InvalidOptionException
 
 class Flies:
 	def __init__(self, base_url, username = None, apikey = None):
@@ -32,8 +33,10 @@ class Flies:
                res, content = self.connection.request_put('/projects/p/%s'%projectid, args=body, headers=headers)
                if res['status'] == '201': 
                   return True
+               elif res['status'] == '404':
+                  raise NoSuchProjectException('Error 404', 'No Such project')
             else:
-               raise Exception("Invalid Options")
+               raise InvalidOptionException('Error','Invalid Options')
         def create_iteration(self, projectid, iterationid, iterationname, iterationdesc):
             headers = {}
             headers['X-Auth-User'] = self.username
