@@ -131,10 +131,6 @@ def main():
             iteration_id = a
         else:
             assert False
-            
-    if not server:
-        print "Please provide valid server url by fliesrc or by '--server' option"
-        sys.exit()
     
     if len(args) == 0:
 	usage()
@@ -145,17 +141,33 @@ def main():
     if command == 'help':
         help_message()
     elif command == 'list':
+        if not server:
+           print "Please provide valid server url by fliesrc or by '--server' option"
+           sys.exit()
+
         list_projects(server)
     elif command == 'projectinfo':
+        if not server:
+           print "Please provide valid server url by fliesrc or by '--server' option"
+           sys.exit()
+
         if not project_id:
             print 'Please use flies projectinfo --project=project_id to retrieve the project info'
             sys.exit()
         project_info(server, project_id)
     elif command == 'iterationinfo' or command == 'info':
+        if not server:
+           print "Please provide valid server url by fliesrc or by '--server' option"
+           sys.exit()
+
         if not iteration_id or not project_id:
             print 'Please use flies iterationinfo|info --project=project_id --iteration=iteration_id to retrieve the iteration'
         iteration_info(server, project_id, iteration_id) 
     elif command == 'create':
+        if not server:
+            print "Please provide valid server url by fliesrc or by '--server' option"
+            sys.exit()
+
         if len(args) < 2:
             print "Error: Not enough arguments for executing command"
             sys.exit()  
