@@ -54,9 +54,11 @@ def list_projects(server):
     print 'Status: '+res['status']
     if res.get('status') == '200':
         projects = json.loads(content)
-    for project in projects:
-        print "*"*40
-        print project
+        for project in projects:
+           print "*"*40
+           print project
+    else:
+        print "No project exists on the server"
         
 def project_info(server, project_id):
     flies = Flies(server)
