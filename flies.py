@@ -28,8 +28,8 @@ from flieslib import InvalidOptionException
 from parseconfig import FliesConfig
 
 def usage():
-    print 
-    '''Client for talking to a Flies Server
+    print ''' 
+    Client for talking to a Flies Server
     basic command:
     flies list        List all available projects
     Use 'flies help' for the full list of commands'''
@@ -137,8 +137,8 @@ def main():
         sys.exit()
     
     if len(args) == 0:
-       usage()
-       sys.exit()
+	usage()
+       	sys.exit()
     
     command, args = args[0], args[1:]
     
