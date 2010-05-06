@@ -34,7 +34,7 @@ class Flies:
 		self.base_url = base_url
 		self.username = username
 		self.apikey = apikey
-                self.connection = Connection(base_url, None, None)
+                self.connection = Connection(base_url)
 	
         def get_projects(self):
             return self.connection.request_get('/projects')

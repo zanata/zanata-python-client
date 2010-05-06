@@ -27,16 +27,16 @@ import urlparse
 import urllib
 import base64
 import warnings 
+import socket
+import sys
 
 with warnings.catch_warnings():
      warnings.filterwarnings("ignore",category=DeprecationWarning)
      import httplib2
      
 class Connection:
-	def __init__(self, base_url, username, password):
+	def __init__(self, base_url):
 		self.base_url = base_url
-		self.username = username
-		self.password = password
 		self.url = urlparse.urlparse(base_url)
 
 	def request_get(self, resource, args = None, body = None, headers = {}):
@@ -57,6 +57,10 @@ class Connection:
                       headers['Content-Type'] = 'application/json'
                       #body = urllib.urlencoded(args)
                       body = args
-                response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body=body, headers=headers)
-		return (response, content.decode("UTF-8"))
+                try:
+	  	   response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body=body, headers=headers)
+		   return (response, content.decode("UTF-8"))
+                except socket.error, msg:
+                   print msg 
+                   sys.exit(1)
   
