@@ -58,7 +58,7 @@ def list_projects(server):
            print "*"*40
            print project
     else:
-        print "No project exists on the server"
+        print 'Flies REST service not available at %s' % server
         
 def project_info(server, project_id):
     flies = Flies(server)
