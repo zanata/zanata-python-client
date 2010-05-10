@@ -2,12 +2,12 @@
 """
 Build script for flies-python-client
 """
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup (name = "flies-python-client",
     version = '0.0.1',
-    packages = ['flieslib'],
-    py_modules = ['flies'], 
+    packages = find_packages(),
+    py_modules = ['flies', 'flieslib'],
     description = "Flies Python Client.",
     author = 'Jian Ni',
     author_email = 'jni@redhat.com',
