@@ -20,6 +20,7 @@ It also provide publican support for pull or push the content with Flies server.
 %setup -q
 
 %build
+python setup.py build
 
 %install
 %{__python} setup.py install --skip-build --root $RPM_BUILD_ROOT
