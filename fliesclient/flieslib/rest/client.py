@@ -20,7 +20,7 @@
 # Boston, MA  02111-1307  USA
 
 __all__ = (
-        "Connection",
+        "RestClient",
     )  
 
 import urlparse
@@ -34,12 +34,12 @@ with warnings.catch_warnings():
      warnings.filterwarnings("ignore",category=DeprecationWarning)
      import httplib2
      
-class Connection:
+class RestClient(object):
 	def __init__(self, base_url):
 		self.base_url = base_url
 		self.url = urlparse.urlparse(base_url)
 
-	def request_get(self, resource, args = None, body = None, headers = {}):
+	def Get(self, resource, args = None, body = None, headers = {}):
                 return self.request(resource, "get", args, body, headers)
 
 	def request_post(self, resource, args = None, body = None, headers = {}):

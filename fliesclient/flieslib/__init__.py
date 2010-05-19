@@ -19,6 +19,6 @@
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 # Boston, MA  02111-1307  USA
 
-from RESTRequest import *
-from Flies import *
-from Exception import *
+
+from client import *
+from parseconfig import *
