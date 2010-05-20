@@ -108,38 +108,45 @@ class FliesConsole:
         print 'Status: '+res['status']
         print content
                 
-    def _CreateProject(server, id, name, user, apikey, desc = None):
-        if not server:
+    def _CreateProject(self):
+        if not self.server:
             print "Please provide valid server url by fliesrc or by '--server' option"
             sys.exit()
         if len(args) < 2:
             print "Error: Not enough arguments for executing command"
             sys.exit()  
     
-        if user and apikey :
-            flies = Flies(server, user, apikey)
+        if self.user and self.apikey :
+            flies = FliesClient(self.server, self.user, self.apikey)
         else:
             print "Please provide username and apikey in .fliesrc"
             sys.exit()
     
         try:
-            result = flies.create_project(id, name, desc)
+            result = flies.CreateProject(self.id, self.name, self.desc)
             print "Create project success"
         except InvalidOptionException, e:
             print "Error: Invalid Option",
 
-    def _CreateIteration(server, id, name, user, apikey, project_id, desc = None):
-        if user and apikey :
-            flies = Flies(server, user, apikey)
+    def _CreateIteration(self):
+        if self.user and self.apikey :
+            flies = FliesClient(self.server, self.user, self.apikey)
         else:
             print "Please provide username and apikey in .fliesrc"
             sys.exit()
     
         try:
-            result = flies.create_iteration(project_id, id, name, desc)
+            result = flies.CreateIteration(self.project_id, self.id, self.name, self.desc)
             print "Create iteration of project success"
         except InvalidOptionException, e:
             print "Error: Invalid Option"     
+
+    def _PushPublican(self):
+        if not self.server:
+            print "Please provide valid server url by fliesrc or by '--server' option"
+            sys.exit()
+        flies = FliesClient(self.server)
+        flies.PushPublican()
 
     def Run(self):
         if self.command == 'help':
@@ -158,9 +165,9 @@ class FliesConsole:
             else:
                 print "Error: No such command"
         elif self.command == 'po':
-            process_po(args) 
+            pass 
         elif self.command == 'publican': 
-            process_publican(args)
+            self._PushPublican()           
         else:
             self._PrintHelpInfo()
             sys.exit(2)

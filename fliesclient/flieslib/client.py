@@ -25,7 +25,8 @@ __all__ = (
    )
 import urlparse
 import urllib
-import rest.client 
+import rest.client
+from publican import Publican
 
 class FliesClient(rest.client.RestClient):
     def __init__(self, base_url, username = None, apikey = None):
@@ -71,8 +72,10 @@ class FliesClient(rest.client.RestClient):
             else:
                raise InvalidOptionException('Error', 'Invalid Options')
     
-    def PushPublican():
-        pass
+    def PushPublican(self):
+        publican = Publican("/home/jni/Deployment_Guide/pot/Email.pot") 
+        content = publican.read_po()
+        print content    
         
     def PullPublican():
         pass    
