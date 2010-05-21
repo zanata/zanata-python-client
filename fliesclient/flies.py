@@ -27,6 +27,7 @@ from parseconfig import FliesConfig
 from flieslib.client import FliesClient
 
 class FliesConsole:
+
     def __init__(self, opts, args):
     	config = FliesConfig()
     	self.server = config.get_config_value("server")
@@ -75,7 +76,7 @@ class FliesConsole:
            sys.exit()
         
         flies = FliesClient(self.server)
-        res, content = flies.ListProjects()
+        res, content = flies.list_projects()
         print 'Status: '+res['status']
         if res.get('status') == '200':
             projects = json.loads(content)
@@ -83,7 +84,7 @@ class FliesConsole:
                 print "*"*40
                 print project
         else:
-            print 'Flies REST service not available at %s' % server
+            print 'Flies REST service not available at %s' % self.server
         
     def _GetProject(self):
         if not self.server:
@@ -93,7 +94,7 @@ class FliesConsole:
             print 'Please use flies projectinfo --project=project_id to retrieve the project info'
             sys.exit()
         flies = FliesClient(self.server)
-        res, content = flies.GetProjectInfo(self.project_id)
+        res, content = flies.get_project_info(self.project_id)
         print 'Status: '+res['status']
         print content
         
@@ -104,7 +105,7 @@ class FliesConsole:
         if not self.iteration_id or not self.project_id:
             print 'Please use flies iterationinfo|info --project=project_id --iteration=iteration_id to retrieve the iteration'
         flies = FliesClient(self.server)
-        res, content = flies.GetIterationInfo(self.project_id, self.iteration_id)
+        res, content = flies.get_iteration_info(self.project_id, self.iteration_id)
         print 'Status: '+res['status']
         print content
                 
@@ -123,7 +124,7 @@ class FliesConsole:
             sys.exit()
     
         try:
-            result = flies.CreateProject(self.id, self.name, self.desc)
+            result = flies.create_project(self.id, self.name, self.desc)
             print "Create project success"
         except InvalidOptionException, e:
             print "Error: Invalid Option",
@@ -136,7 +137,7 @@ class FliesConsole:
             sys.exit()
     
         try:
-            result = flies.CreateIteration(self.project_id, self.id, self.name, self.desc)
+            result = flies.create_iteration(self.project_id, self.id, self.name, self.desc)
             print "Create iteration of project success"
         except InvalidOptionException, e:
             print "Error: Invalid Option"     
@@ -146,7 +147,7 @@ class FliesConsole:
             print "Please provide valid server url by fliesrc or by '--server' option"
             sys.exit()
         flies = FliesClient(self.server)
-        flies.PushPublican()
+        flies.push_publican()
 
     def Run(self):
         if self.command == 'help':

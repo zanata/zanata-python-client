@@ -25,32 +25,45 @@ __all__ = (
    )
 import urlparse
 import urllib
-import rest.client
+from rest.client import RestClient
+import exceptions
 from publican import Publican
 
-class FliesClient(rest.client.RestClient):
+class NoSuchProjectException(Exception):
+	def __init__(self, expr, msg):
+        	self.expr = expr
+        	self.msg = msg
+
+class InvalidOptionException(Exception):
+	def __init__(self, expr, msg):
+                self.expr = expr
+                self.msg = msg
+
+class FliesClient:
+
     def __init__(self, base_url, username = None, apikey = None):
 		self.base_url = base_url
 		self.username = username
 		self.apikey = apikey
+		self.restclient = RestClient(self.base_url)
        	
-    def ListProjects(self):
-            return rest.client.RestClient.Get(self,'/projects')
+    def list_projects(self):
+            return self.restclient.Get('/projects')
     
-    def GetProjectInfo(self, projectid):
-            return rest.client.RestClient.Get(self,'/projects/p/%s'%projectid)
+    def get_project_info(self, projectid):
+            return self.restclient.Get('/projects/p/%s'%projectid)
         
-    def GetIterationInfo(self, projectid, iterationid):
-            return rest.client.RestClient.Get(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
+    def get_iteration_info(self, projectid, iterationid):
+            return self.restclient.Get(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
 
-    def CreateProject(self, projectid, projectname, projectdesc):
+    def create_project(self, projectid, projectname, projectdesc):
             error = 'Invalid Options'
             headers = {}
             headers['X-Auth-User'] = self.username
             headers['X-Auth-Token'] = self.apikey
             if projectname and projectdesc :
                body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,projectid,projectdesc)
-               res, content = rest.client.RestClient.Put(self,'/projects/p/%s'%projectid, args=body, headers=headers)
+               res, content = restclient.Put(self,'/projects/p/%s'%projectid, args=body, headers=headers)
                if res['status'] == '201': 
                   return True
                elif res['status'] == '404':
@@ -58,13 +71,13 @@ class FliesClient(rest.client.RestClient):
             else:
                raise InvalidOptionException('Error','Invalid Options')
         
-    def CreateIteration(self, projectid, iterationid, iterationname, iterationdesc):
+    def create_iteration(self, projectid, iterationid, iterationname, iterationdesc):
             headers = {}
             headers['X-Auth-User'] = self.username
             headers['X-Auth-Token'] = self.apikey
             if iterationname and iterationdesc :
                body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iterationname, iterationid, iterationdesc)
-               res, content = rest.client.RestClient.Put(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
+               res, content = restclient.Put(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
                if res['status'] == '201':
                   return True
                elif res['status'] == '404':
@@ -72,12 +85,12 @@ class FliesClient(rest.client.RestClient):
             else:
                raise InvalidOptionException('Error', 'Invalid Options')
     
-    def PushPublican(self):
+    def push_publican(self):
         publican = Publican("/home/jni/Deployment_Guide/pot/Email.pot") 
         content = publican.read_po()
         print content    
         
-    def PullPublican():
+    def pull_publican():
         pass    
 
 
