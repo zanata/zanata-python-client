@@ -31,35 +31,37 @@ class FliesConsole:
     def __init__(self, opts, args):
     	config = FliesConfig()
     	self.server = config.get_config_value("server")
-    	self.roject_id = config.get_config_value("project.id")
+    	self.project_id = config.get_config_value("project.id")
     	self.iteration_id = config.get_config_value("project.iteration.id") 
     	self.user = config.get_config_value("user")
     	self.apikey = config.get_config_value("apikey")
-    	name = ''
-    	desc = ''
-        
-        for o, a in opts:
-           if o in ("--server"):
+        self.name = '' 
+    	self.desc = ''
+        if opts:
+         for o, a in opts:
+            if o in ("--server"):
                self.server = a
-           elif o in ("--name"):
+            elif o in ("--name"):
                self.name = a
-           elif o in ("--description"):
+            elif o in ("--description"):
                self.desc = a
-           elif o in ("--project"):
+            elif o in ("--project"):
                self.project_id = a
-           elif o in ("--iteration"):
+            elif o in ("--iteration"):
                self.iteration_id = a
-           else:
+            else:
                assert False
+        if args: 
+    	   self.command, self.args = args[0], args[1:]
+        else:
+           self.command = ''
     
-    	self.command, self.args = args[0], args[1:]
-    
-    def _PrintUsage():
-        print ('\nClient for talking to a Flies Server\n'
-               'basic commands:\n'
+    def _PrintUsage(self):
+        print ('\nClient for talking to a Flies Server\n\n'
+               'basic commands:\n\n'
                'list             List all available projects\n'
                'projectinfo      Retrieve a project\n'
-               'iterationinfo    Retrieve a iteration\n'
+               'iterationinfo    Retrieve a iteration\n\n'
                "Use 'flies help' for the full list of commands\n")
 
     def _PrintHelpInfo(self):
@@ -130,9 +132,10 @@ class FliesConsole:
         if not self.server:
             print "Please provide valid server url by fliesrc or by '--server' option"
             sys.exit()
-        if len(args) < 2:
+        if not self.args[0]:
             print "Error: Not enough arguments for executing command"
-            sys.exit()  
+            sys.exit() 
+         
     
         if self.user and self.apikey :
             flies = FliesClient(self.server, self.user, self.apikey)
@@ -141,20 +144,28 @@ class FliesConsole:
             sys.exit()
     
         try:
-            result = flies.create_project(self.id, self.name, self.desc)
+            result = flies.create_project(self.args[0], self.name, self.desc)
             print "Create project success"
         except InvalidOptionException, e:
             print "Error: Invalid Option",
 
     def _CreateIteration(self):
+        if not self.server:
+            print "Please provide valid server url by fliesrc or by '--server' option"
+            sys.exit()
+
         if self.user and self.apikey :
             flies = FliesClient(self.server, self.user, self.apikey)
         else:
             print "Please provide username and apikey in .fliesrc"
             sys.exit()
-    
+        
+        if not self.project_id:
+            print "Please provide PROJECT_ID for creating iteration"
+            sys.exit()
+
         try:
-            result = flies.create_iteration(self.project_id, self.id, self.name, self.desc)
+            result = flies.create_iteration(self.project_id, self.args[0], self.name, self.desc)
             print "Create iteration of project success"
         except InvalidOptionException, e:
             print "Error: Invalid Option"     
