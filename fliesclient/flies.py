@@ -56,19 +56,36 @@ class FliesConsole:
     
     def _PrintUsage():
         print ('\nClient for talking to a Flies Server\n'
-               'basic command:\n'
-               'flies list        List all available projects\n'
+               'basic commands:\n'
+               'list             List all available projects\n'
+               'projectinfo      Retrieve a project\n'
+               'iterationinfo    Retrieve a iteration\n'
                "Use 'flies help' for the full list of commands\n")
 
     def _PrintHelpInfo(self):
-        print ('\nUsage:\n'
-               'flies list                                                               List all available projects\n'
-               'flies projectinfo --project=project_id                                            Retrieve a project\n'
-               'flies iterationinfo|info --project=project_id --iteration=iteration_id            Retrieve a iteration\n'
-               'flies create project project_id --name=project_name --description=project_desc    Create a project\n'
-               'flies create iteration iteration_id --project=project_id --name=itertation_name   Create a iteration of a project\n'   
-               'flies publican pull                                                               Pull the content of publican file\n'
-               'flies publican push                                                      Push the content of publican to Flies Server\n')
+        if self.args[0] == 'list':
+           print ('flies list [OPTIONS]\n\n'
+                  'list all available projects\n\n'
+                  'options:\n\n'
+                  ' --server url address of the Flies server')
+        elif self.args[0] == 'projectinfo':
+           print ('flies projectinfo [OPTIONS]')
+        elif self.args[0] == 'iterationinfo':
+           print ('flies iterationinfo [OPTIONS]')
+        elif self.args[0] == 'create' and self.args[1] == 'project':
+           print ('flies create project [PROJECT_ID] [OPTIONS]') 
+        elif self.args[0] == 'create' and self.args[1] == 'iteration':
+           print ('flies create iteration [ITERATION_ID] [OPTIONS]')
+        else:
+           print ('Client for talking to a Flies Server:\n\n'
+               'list of commands:\n\n'
+               ' list                List all available projects\n'
+               ' projectinfo         Retrieve a project\n'
+               ' iterationinfo       Retrieve a iteration\n'
+               ' create project      Create a project\n'
+               ' create iteration    Create a iteration of a project\n'   
+               ' publican pull       Pull the content of publican file\n'
+               ' publican push       Push the content of publican to Flies Server\n')
           
     def _ListProjects(self):
         if not self.server:
@@ -170,7 +187,7 @@ class FliesConsole:
         elif self.command == 'publican': 
             self._PushPublican()           
         else:
-            self._PrintHelpInfo()
+            self._PrintUsage()
             sys.exit(2)
 
 def main():
