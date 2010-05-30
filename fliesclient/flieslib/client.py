@@ -27,6 +27,7 @@ __all__ = (
 import urlparse
 import urllib
 import os
+import json
 from rest.client import RestClient
 from publican import Publican
 
@@ -69,7 +70,7 @@ class FliesClient:
             headers['X-Auth-Token'] = self.apikey
             if projectname and projectdesc :
                body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,projectid,projectdesc)
-               res, content = restclient.Put(self,'/projects/p/%s'%projectid, args=body, headers=headers)
+               res, content = self.restclient.request_put(self,'/projects/p/%s'%projectid, args=body, headers=headers)
                if res['status'] == '201': 
                   return True
                elif res['status'] == '404':
@@ -83,7 +84,7 @@ class FliesClient:
             headers['X-Auth-Token'] = self.apikey
             if iterationname and iterationdesc :
                body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iterationname, iterationid, iterationdesc)
-               res, content = restclient.Put(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
+               res, content = self.restclient.request_put(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
                if res['status'] == '201':
                   return True
                elif res['status'] == '404':
@@ -101,15 +102,18 @@ class FliesClient:
                 raise NoSuchFileException('Error', 'No Such File')
             
             publican = Publican(filepath) 
-            name = filename
-            contenttype = 'text/plain',
-            type = 'file'
-            lang = 'en'
-            extensions = []
-            textFlows = publican.read_po()
-            body = textFlows
+            textflows = publican.read_po()
+            content = {
+                    'name': filename,
+                    'contenttype': 'text/plain',
+                    'type': 'file',
+                    'lang': 'en',
+                    'extensions': [],
+                    'textFlows': textflows
+                    }
+            body = json.JSONEncoder().encode(content)
             if projectid and iterationid :
-               res, content = restclient.Put(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
+               res, content = self.restclient.request_put(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid), body = body, headers=headers)
                if res['status'] == '201':
                   return True
                elif res['status'] == '404':
@@ -119,5 +123,4 @@ class FliesClient:
            
     def pull_publican():
 	pass    
-
 
