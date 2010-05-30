@@ -1,3 +1,4 @@
+#vim:set et sts=4 sw=4: 
 # 
 # Flies Python Client
 #
@@ -25,8 +26,8 @@ __all__ = (
    )
 import urlparse
 import urllib
+import os
 from rest.client import RestClient
-import exceptions
 from publican import Publican
 
 class NoSuchProjectException(Exception):
@@ -38,6 +39,11 @@ class InvalidOptionException(Exception):
 	def __init__(self, expr, msg):
                 self.expr = expr
                 self.msg = msg
+
+class NoSuchFileException(Exception):
+	def __init__(self, expr, msg):
+        	self.expr = expr
+        	self.msg = msg
 
 class FliesClient:
 
@@ -85,12 +91,33 @@ class FliesClient:
             else:
                raise InvalidOptionException('Error', 'Invalid Options')
     
-    def push_publican(self):
-        publican = Publican("/home/jni/Deployment_Guide/pot/Email.pot") 
-        content = publican.read_po()
-        print content    
-        
+    def push_publican(self, filename, projectid, iterationid):
+            headers = {}
+            headers['X-Auth-User'] = self.username
+            headers['X-Auth-Token'] = self.apikey
+            filepath = os.path.join(os.getcwd(), filename)
+
+            if not os.path.isfile(filepath):
+                raise NoSuchFileException('Error', 'No Such File')
+            
+            publican = Publican(filepath) 
+            name = filename
+            contenttype = 'text/plain',
+            type = 'file'
+            lang = 'en'
+            extensions = []
+            textFlows = publican.read_po()
+            body = textFlows
+            if projectid and iterationid :
+               res, content = restclient.Put(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
+               if res['status'] == '201':
+                  return True
+               elif res['status'] == '404':
+                  raise NoSuchProjectException('Error 404', 'No Such project')
+            else:
+               raise InvalidOptionException('Error', 'Invalid Options')
+           
     def pull_publican():
-        pass    
+	pass    
 
 

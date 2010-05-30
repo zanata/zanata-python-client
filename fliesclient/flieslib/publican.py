@@ -1,3 +1,4 @@
+# vim:set et sts=4 sw=4: 
 # 
 # Flies Python Client
 #
@@ -27,8 +28,19 @@ class Publican:
 	    
         def read_po(self):
             po = polib.pofile(self.path)
-            return po
-            
+            id = 1
+            textflows = []
+            for entry in po:
+                textflowId = 'tf'+str(id)
+                textflow = {
+                    'id' : textflowId,
+                    'lang' : 'en',
+                    'content' : entry.msgid,
+                    'extensions' : []}
+                textflows.append(textflow)
+                id = id+1
+            return textflows
+ 
         def create(self):
             pass
 
