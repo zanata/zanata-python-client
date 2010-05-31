@@ -29,11 +29,12 @@ from parseconfig import FliesConfig
 from flieslib.client import FliesClient
 from flieslib.client import NoSuchFileException
 from flieslib.client import NoSuchProjectException
+from flieslib.client import UnAuthorizedException
 
 class FliesConsole:
 
     def __init__(self, opts, args):
-    	config = FliesConfig()
+        config = FliesConfig()
     	self.server = config.get_config_value("server")
     	self.project_id = config.get_config_value("project.id")
     	self.iteration_id = config.get_config_value("project.iteration.id") 
@@ -44,19 +45,19 @@ class FliesConsole:
         self.args = args      
          
         if opts:
-         for o, a in opts:
-            if o in ("--server"):
-               self.server = a
-            elif o in ("--name"):
-               self.name = a
-            elif o in ("--description"):
-               self.desc = a
-            elif o in ("--project"):
-               self.project_id = a
-            elif o in ("--iteration"):
-               self.iteration_id = a
-            else:
-               assert False
+            for o, a in opts:
+                if o in ("--server"):
+                    self.server = a
+                elif o in ("--name"):
+                    self.name = a
+                elif o in ("--description"):
+                    self.desc = a
+                elif o in ("--project"):
+                    self.project_id = a
+                elif o in ("--iteration"):
+                    self.iteration_id = a
+                else:
+                    assert False
      
     def _PrintUsage(self):
         print ('\nClient for talking to a Flies Server\n\n'
@@ -76,19 +77,21 @@ class FliesConsole:
                   ' create iteration    Create a iteration of a project\n'   
                   ' publican pull       Pull the content of publican file\n'
                   ' publican push       Push the content of publican to Flies Server\n')
+    
     def _PrintListHelp(self):
        	print ('flies list [OPTIONS]\n\n'
-                          'list all available projects\n\n'
-                          'options:\n\n'
-                          ' --server url address of the Flies server')
+               'list all available projects\n\n'
+               'options:\n\n'
+               ' --server url address of the Flies server')
+    
     def _PrintProjectInfoHelp(self):
-	print ('flies project info [OPTIONS]')
+	    print ('flies project info [OPTIONS]')
 
     def _PrintProjectCreateHelp(self):
         print ('flies project create [PROJECT_ID] [OPTIONS]') 
 
     def _PrintIterationInfoHelp(self):
-	print ('flies iterationinfo [OPTIONS]')
+	    print ('flies iterationinfo [OPTIONS]')
 
     def _PrintIterationCreateHelp(self):
         print ('flies create iteration [ITERATION_ID] [OPTIONS]')
@@ -96,8 +99,8 @@ class FliesConsole:
                
     def _ListProjects(self):
         if not self.server:
-           print "Please provide valid server url by fliesrc or by '--server' option"
-           sys.exit()
+            print "Please provide valid server url by fliesrc or by '--server' option"
+            sys.exit()
         
         flies = FliesClient(self.server)
         res, content = flies.list_projects()
@@ -117,7 +120,7 @@ class FliesConsole:
         if not self.project_id:
             print 'Please use flies project info --project=project_id to retrieve the project info'
             sys.exit()
-        print self.project_id
+        
         flies = FliesClient(self.server)
         res, content = flies.get_project_info(self.project_id)
         print 'Status: '+res['status']
@@ -127,8 +130,10 @@ class FliesConsole:
         if not self.server:
             print "Please provide valid server url by fliesrc or by '--server' option"
             sys.exit()
+        
         if not self.iteration_id or not self.project_id:
             print 'Please use flies iterationinfo|info --project=project_id --iteration=iteration_id to retrieve the iteration'
+        
         flies = FliesClient(self.server)
         res, content = flies.get_iteration_info(self.project_id, self.iteration_id)
         print 'Status: '+res['status']
@@ -139,23 +144,25 @@ class FliesConsole:
             print "Please provide valid server url by fliesrc or by '--server' option"
             sys.exit()
     
-        if self.user and self.apikey :
+        if self.user and self.apikey:
             flies = FliesClient(self.server, self.user, self.apikey)
         else:
             print "Please provide username and apikey in .fliesrc"
             sys.exit()
         
         try:
-               result = flies.create_project(project_id, self.name, self.desc)
+            result = flies.create_project(project_id, self.name, self.desc)
         except NoSuchProjectException as e:
-               print "No Such Project on the server" 
+            print "No Such Project on the server" 
+        except UnAuthorizedException as e:
+            print "Unauthorized Operation"
 
     def _CreateIteration(self):
         if not self.server:
             print "Please provide valid server url by fliesrc or by '--server' option"
             sys.exit()
 
-        if self.user and self.apikey :
+        if self.user and self.apikey:
             flies = FliesClient(self.server, self.user, self.apikey)
         else:
             print "Please provide username and apikey in .fliesrc"
@@ -164,62 +171,61 @@ class FliesConsole:
         if not self.project_id:
             print "Please provide PROJECT_ID for creating iteration"
             sys.exit()
+        
         try:
-        	result = flies.create_iteration(self.project_id, self.args[0], self.name, self.desc)
+            result = flies.create_iteration(self.project_id, self.args[0], self.name, self.desc)
         except NoSuchProjectException as e:
-               print "No Such Project on the server"
+            print "No Such Project on the server"
 
     def _PushPublican(self):
-	if not self.server:
-        	print "Please provide valid server url by fliesrc or by '--server' option"
-            	sys.exit()
+        if not self.server:
+            print "Please provide valid server url by fliesrc or by '--server' option"
+            sys.exit()
         
-        if self.user and self.apikey :
-            	flies = FliesClient(self.server, self.user, self.apikey)
+        if self.user and self.apikey:
+            flies = FliesClient(self.server, self.user, self.apikey)
         else:
-            	print "Please provide username and apikey in .fliesrc"
-            	sys.exit()
+            print "Please provide username and apikey in .fliesrc"
+            sys.exit()
 
         if not self.project_id:
-           	print "Please provide PROJECT_ID for creating iteration"
-            	sys.exit()
+            print "Please provide PROJECT_ID for creating iteration"
+            sys.exit()
 
         if len(self.args) == 1:
-                print "Please provide POT file name for pushing"
+            print "Please provide POT file name for pushing"
         else:
-           try:
-           	result = flies.push_publican(self.args[1], self.project_id, self.iteration_id)
-           except NoSuchFileException as e:
-           	print "Can not find file"
-           except NoSuchProjectException as e:
+            try:
+           	    result = flies.push_publican(self.args[1], self.project_id, self.iteration_id)
+            except NoSuchFileException as e:
+           	    print "Can not find file"
+            except NoSuchProjectException as e:
                 print "No Such Project on the server"
 
     def Run(self):
         size = len(self.args) 
        	if self.args[0] == 'help':
-           if size ==1:
-            	self._PrintHelpInfo()
-           else:
+            if size ==1:
+                self._PrintHelpInfo()
+            else:
                 if self.args[1] == 'list':
-                   self._PrintListHelpInfo()
+                    self._PrintListHelpInfo()
         elif self.args[0] == 'list':
-            		self._ListProjects()
+            self._ListProjects()
         elif self.args[0] == 'project':
-            		if self.args[1] == 'info':
-                                print "oh"	
-                   		self._GetProject()
-                        elif self.args[1] == 'create':
-                		self._CreateProject(self.args[2])
-
+            if self.args[1] == 'info':
+                self._GetProject()
+            elif self.args[1] == 'create':
+            	self._CreateProject(self.args[2])
         elif self.args[0] == 'iteration':
-                         if self.args[1] == 'info':
-                                self._GetIteration()
-                         elif self.args[1] == 'create':
-                                self._CreateIteration()
+            if self.args[1] == 'info':
+                self._GetIteration()
+            elif self.args[1] == 'create':
+                self._CreateIteration()
                 
         elif self.args[0] == 'publican':
-                         if self.args[1] == 'push':
-            	                self._PushPublican(self.args[2])           
+            if self.args[1] == 'push':
+                self._PushPublican(self.args[2])           
         else:
             self._PrintUsage()
             sys.exit(2)
@@ -235,4 +241,4 @@ def main():
     client.Run()
 
 if __name__ == "__main__":
-      main()       
+    main()       

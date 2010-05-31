@@ -32,95 +32,105 @@ from rest.client import RestClient
 from publican import Publican
 
 class NoSuchProjectException(Exception):
-	def __init__(self, expr, msg):
-        	self.expr = expr
-        	self.msg = msg
+    def __init__(self, expr, msg):
+        self.expr = expr
+        self.msg = msg
 
 class InvalidOptionException(Exception):
-	def __init__(self, expr, msg):
-                self.expr = expr
-                self.msg = msg
+    def __init__(self, expr, msg):
+        self.expr = expr
+        self.msg = msg
 
 class NoSuchFileException(Exception):
-	def __init__(self, expr, msg):
-        	self.expr = expr
-        	self.msg = msg
+    def __init__(self, expr, msg):
+       	self.expr = expr
+       	self.msg = msg
+
+class UnAuthorizedException(Exception):
+    def __init__(self, expr, msg):
+        self.expr = expr
+        self.msg = msg
 
 class FliesClient:
 
     def __init__(self, base_url, username = None, apikey = None):
-		self.base_url = base_url
-		self.username = username
-		self.apikey = apikey
-		self.restclient = RestClient(self.base_url)
+	self.base_url = base_url
+	self.username = username
+	self.apikey = apikey
+	self.restclient = RestClient(self.base_url)
        	
     def list_projects(self):
-            return self.restclient.Get('/projects')
+        return self.restclient.Get('/projects')
     
     def get_project_info(self, projectid):
-            return self.restclient.Get('/projects/p/%s'%projectid)
+        return self.restclient.Get('/projects/p/%s'%projectid)
         
     def get_iteration_info(self, projectid, iterationid):
-            return self.restclient.Get(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
+        return self.restclient.Get(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
 
     def create_project(self, projectid, projectname, projectdesc):
-            headers = {}
-            headers['X-Auth-User'] = self.username
-            headers['X-Auth-Token'] = self.apikey
+        headers = {}
+        headers['X-Auth-User'] = self.username
+        headers['X-Auth-Token'] = self.apikey
            
-            if projectname and projectdesc :
-               body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,projectid,projectdesc)
-               res, content = self.restclient.request_put('/projects/p/%s'%projectid, args=body, headers=headers)
-               if res['status'] == '201': 
-                  return True
-               elif res['status'] == '404':
-                  raise NoSuchProjectException('Error 404', 'No Such project')
-            else:
-               raise InvalidOptionException('Error','Invalid Options')
+        if projectname and projectdesc :
+            body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,projectid,projectdesc)
+            res, content = self.restclient.request_put('/projects/p/%s'%projectid, args=body, headers=headers)
+                         
+            if res['status'] == '201': 
+                return True
+            elif res['status'] == '404':
+                raise NoSuchProjectException('Error 404', 'No Such project')
+            elif res['status'] == '401':
+                raise UnAuthorizedException('Error 401', 'Un Authorized Operation')
+        else:
+            raise InvalidOptionException('Error','Invalid Options')
         
     def create_iteration(self, projectid, iterationid, iterationname, iterationdesc):
-            headers = {}
-            headers['X-Auth-User'] = self.username
-            headers['X-Auth-Token'] = self.apikey
-            if iterationname and iterationdesc :
-               body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iterationname, iterationid, iterationdesc)
-               res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
-               if res['status'] == '201':
-                  return True
-               elif res['status'] == '404':
-                  raise NoSuchProjectException('Error 404', 'No Such project')
-            else:
-               raise InvalidOptionException('Error', 'Invalid Options')
+        headers = {}
+        headers['X-Auth-User'] = self.username
+        headers['X-Auth-Token'] = self.apikey
+        
+        if iterationname and iterationdesc :
+            body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iterationname, iterationid, iterationdesc)
+            res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
+            if res['status'] == '201':
+                return True
+            elif res['status'] == '404':
+                raise NoSuchProjectException('Error 404', 'No Such project')
+        else:
+            raise InvalidOptionException('Error', 'Invalid Options')
     
     def push_publican(self, filename, projectid, iterationid):
-            headers = {}
-            headers['X-Auth-User'] = self.username
-            headers['X-Auth-Token'] = self.apikey
-            filepath = os.path.join(os.getcwd(), filename)
+        headers = {}
+        headers['X-Auth-User'] = self.username
+        headers['X-Auth-Token'] = self.apikey
+        filepath = os.path.join(os.getcwd(), filename)
 
-            if not os.path.isfile(filepath):
-                raise NoSuchFileException('Error', 'No Such File')
+        if not os.path.isfile(filepath):
+            raise NoSuchFileException('Error', 'No Such File')
             
-            publican = Publican(filepath) 
-            textflows = publican.read_po()
-            content = {
+        publican = Publican(filepath) 
+        textflows = publican.read_po()
+        content ={
                     'name': filename,
                     'contenttype': 'text/plain',
                     'type': 'file',
                     'lang': 'en',
                     'extensions': [],
                     'textFlows': textflows
-                    }
-            body = json.JSONEncoder().encode(content)
-            if projectid and iterationid :
-               res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
-               if res['status'] == '201':
+                 }
+        body = json.JSONEncoder().encode(content)
+        
+        if projectid and iterationid :
+            res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
+            if res['status'] == '201':
                   return True
-               elif res['status'] == '404':
+            elif res['status'] == '404':
                   raise NoSuchProjectException('Error 404', 'No Such project')
-            else:
-               raise InvalidOptionException('Error', 'Invalid Options')
+        else:
+            raise InvalidOptionException('Error', 'Invalid Options')
            
     def pull_publican():
-	pass    
+	    pass    
 
