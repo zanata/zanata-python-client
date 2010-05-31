@@ -64,13 +64,13 @@ class FliesClient:
             return self.restclient.Get(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
 
     def create_project(self, projectid, projectname, projectdesc):
-            error = 'Invalid Options'
             headers = {}
             headers['X-Auth-User'] = self.username
             headers['X-Auth-Token'] = self.apikey
+           
             if projectname and projectdesc :
                body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,projectid,projectdesc)
-               res, content = self.restclient.request_put(self,'/projects/p/%s'%projectid, args=body, headers=headers)
+               res, content = self.restclient.request_put('/projects/p/%s'%projectid, args=body, headers=headers)
                if res['status'] == '201': 
                   return True
                elif res['status'] == '404':
@@ -84,7 +84,7 @@ class FliesClient:
             headers['X-Auth-Token'] = self.apikey
             if iterationname and iterationdesc :
                body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iterationname, iterationid, iterationdesc)
-               res, content = self.restclient.request_put(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
+               res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
                if res['status'] == '201':
                   return True
                elif res['status'] == '404':
@@ -113,7 +113,7 @@ class FliesClient:
                     }
             body = json.JSONEncoder().encode(content)
             if projectid and iterationid :
-               res, content = self.restclient.request_put(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid), body = body, headers=headers)
+               res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
                if res['status'] == '201':
                   return True
                elif res['status'] == '404':

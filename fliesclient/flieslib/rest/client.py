@@ -34,7 +34,7 @@ with warnings.catch_warnings():
      warnings.filterwarnings("ignore",category=DeprecationWarning)
      import httplib2
      
-class RestClient(object):
+class RestClient():
 	def __init__(self, base_url):
 		self.base_url = base_url
 		self.url = urlparse.urlparse(base_url)
