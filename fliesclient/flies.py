@@ -78,27 +78,26 @@ class FliesConsole:
                   ' publican push       Push the content of publican to Flies Server\n')
         else:
             if args[0] == 'list':
-                self._print_list_help()
+                self._list_help()
     
-    def _print_list_help(self):
+    def _list_help(self):
        	print ('flies list [OPTIONS]\n\n'
                'list all available projects\n\n'
                'options:\n\n'
                ' --server url address of the Flies server')
     
-    def _PrintProjectInfoHelp(self):
+    def _projec_info_help(self):
 	    print ('flies project info [OPTIONS]')
 
-    def _PrintProjectCreateHelp(self):
+    def _project_create_help(self):
         print ('flies project create [PROJECT_ID] [OPTIONS]') 
 
-    def _PrintIterationInfoHelp(self):
+    def _iteration_info_help(self):
 	    print ('flies iterationinfo [OPTIONS]')
 
-    def _PrintIterationCreateHelp(self):
+    def _iteration_create_help(self):
         print ('flies create iteration [ITERATION_ID] [OPTIONS]')
-           
-               
+              
     def _list_projects(self):
         if not self.options['server']:
             print "Please provide valid server url by fliesrc or by '--server' option"
