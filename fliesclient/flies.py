@@ -105,7 +105,7 @@ class FliesConsole:
         if not self.options['server']:
             print "Please provide valid server url by fliesrc or by '--server' option"
             sys.exit()
-        
+        print self.options['server']
         flies = FliesClient(self.options['server'])
         res, content = flies.list_projects()
         print 'Status: '+res['status']
@@ -115,7 +115,7 @@ class FliesConsole:
                 print "*"*40
                 print project
         else:
-            print 'Flies REST service not available at %s' % self.server
+            print 'Flies REST service not available at %s' % self.options['server']
         
     def _get_project(self):
         if not self.options['server']:
@@ -241,8 +241,10 @@ class FliesConsole:
                         command_args = sub[1:]
                     else:
                         print "Can not find such command"
+                        sys.exit()
                 else:
-                    print "Please complete the command!"      
+                    print "Please complete the command!"
+                    sys.exit()
             else: 
                 command_args = sub           
         else:

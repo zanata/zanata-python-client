@@ -35,32 +35,33 @@ with warnings.catch_warnings():
      import httplib2
      
 class RestClient():
-	def __init__(self, base_url):
-		self.base_url = base_url
-		self.url = urlparse.urlparse(base_url)
-
-	def Get(self, resource, args = None, body = None, headers = {}):
-                return self.request(resource, "get", args, body, headers)
-
-	def request_post(self, resource, args = None, body = None, headers = {}):
-		return self.request(resource, "post", args, body, headers)
+    def __init__(self, base_url):
+        self.base_url = base_url
+        self.url = urlparse.urlparse(base_url)
+    
+    def request_get(self, resource, args = None, body = None, headers = {}):
+        return self.request(resource, "get", args, body, headers)
+    
+    def request_post(self, resource, args = None, body = None, headers = {}):
+        return self.request(resource, "post", args, body, headers)
+    
+    def request_put(self, resource, args = None, body = None, headers = {}):
+        return self.request(resource, "put", args, body, headers)
+    
+    def request(self, resource, method = "get", args = None, body = None, headers = {}):
+        path = resource
+        headers['Accept'] = 'application/json'
+        http = httplib2.Http()
         
-        def request_put(self, resource, args = None, body = None, headers = {}):
-                return self.request(resource, "put", args, body, headers)
-
-	def request(self, resource, method = "get", args = None, body = None, headers = {}):
-		path = resource
-                headers['Accept'] = 'application/json'       
-                http = httplib2.Http('.cache')
-                if args:
-                   if method == "put" or method == "post":
-                      headers['Content-Type'] = 'application/json'
-                      #body = urllib.urlencoded(args)
-                      body = args
-                try:
-	  	   response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body=body, headers=headers)
-		   return (response, content.decode("UTF-8"))
-                except socket.error, msg:
-                   print msg 
-                   sys.exit(1)
-  
+        if args:
+            if method == "put" or method == "post":
+                headers['Content-Type'] = 'application/json'
+                #body = urllib.urlencoded(args)
+                body = args
+        
+        try:
+            response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body=body, headers=headers)
+            return (response, content.decode("UTF-8"))
+        except socket.error, msg:
+            print msg 
+            sys.exit(1)

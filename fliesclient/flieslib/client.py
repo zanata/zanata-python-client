@@ -60,13 +60,13 @@ class FliesClient:
 	self.restclient = RestClient(self.base_url)
        	
     def list_projects(self):
-        return self.restclient.Get('/projects')
+        return self.restclient.request_get('/projects')
     
     def get_project_info(self, projectid):
-        return self.restclient.Get('/projects/p/%s'%projectid)
+        return self.restclient.request_get('/projects/p/%s'%projectid)
         
     def get_iteration_info(self, projectid, iterationid):
-        return self.restclient.Get(self,'/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
+        return self.restclient.request_get('/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
 
     def create_project(self, projectid, projectname, projectdesc):
         headers = {}
