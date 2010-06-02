@@ -121,7 +121,7 @@ class FliesConsole:
         if not self.options['server']:
             print "Please provide valid server url by fliesrc or by '--server' option"
             sys.exit()
-
+        
         if not self.options['project_id']:
             print 'Please use flies project info --project=project_id to retrieve the project info'
             sys.exit()
@@ -138,7 +138,8 @@ class FliesConsole:
         
         if not self.options['iteration_id'] or not self.options['project_id']:
             print 'Please use flies iteration info --project=project_id --iteration=iteration_id to retrieve the iteration'
-        
+            sys.exit()
+
         flies = FliesClient(self.options['server'])
         res, content = flies.get_iteration_info(self.options['project_id'], self.options['iteration_id'])
         print 'Status: '+res['status']
