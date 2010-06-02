@@ -98,6 +98,9 @@ class FliesClient:
                 return True
             elif res['status'] == '404':
                 raise NoSuchProjectException('Error 404', 'No Such project')
+            elif res['status'] == '401':
+                raise UnAuthorizedException('Error 401', 'Un Authorized Operation')
+
         else:
             raise InvalidOptionException('Error', 'Invalid Options')
     
@@ -123,11 +126,14 @@ class FliesClient:
         body = json.JSONEncoder().encode(content)
         
         if projectid and iterationid :
-            res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
+            res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s/resources'%(projectid,iterationid), args=body, headers=headers)
+            print res
             if res['status'] == '201':
-                  return True
+                return True
             elif res['status'] == '404':
-                  raise NoSuchProjectException('Error 404', 'No Such project')
+                raise NoSuchProjectException('Error 404', 'No Such project')
+            elif res['status'] == '401':
+                raise UnAuthorizedException('Error 401', 'Un Authorized Operation')
         else:
             raise InvalidOptionException('Error', 'Invalid Options')
            
