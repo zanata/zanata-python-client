@@ -64,8 +64,8 @@ class FliesConsole:
         print ('\nClient for talking to a Flies Server\n\n'
                'basic commands:\n\n'
                'list             List all available projects\n'
-               'projectinfo      Retrieve a project\n'
-               'iterationinfo    Retrieve a iteration\n\n'
+               'project info      Retrieve a project\n'
+               'iteration info    Retrieve a iteration\n\n'
                "Use 'flies help' for the full list of commands")
 
     def _print_help_info(self, args):
@@ -73,16 +73,49 @@ class FliesConsole:
             print ('Client for talking to a Flies Server:\n\n'
                   'list of commands:\n\n'
                   ' list                List all available projects\n'
-                  ' projectinfo         Retrieve a project\n'
-                  ' iterationinfo       Retrieve a iteration\n'
-                  ' create project      Create a project\n'
-                  ' create iteration    Create a iteration of a project\n'   
+                  ' project info         Retrieve a project\n'
+                  ' iteration info       Retrieve a iteration\n'
+                  ' project create      Create a project\n'
+                  ' iteration create    Create a iteration of a project\n'   
                   ' publican pull       Pull the content of publican file\n'
                   ' publican push       Push the content of publican to Flies Server\n')
         else:
-            if args[0] == 'list':
-                self._list_help()
-    
+            command = args[0]
+            sub = args[1:]
+            if sub_command.has_key(command):
+                if sub_command[command]:
+                    if sub:
+                        if sub[0] in sub_command[command]:
+                            command = command+'_'+sub[0]
+                        else:
+                            print "Can not find such command"
+                            sys.exit()
+                    else:
+                        print "Please complete the command!"
+                        sys.exit()
+            else:
+                print "Can not find such command"
+                sys.exit()
+
+            self._command_help(command)
+
+    def _command_help(self, command):      
+        if command == 'list':
+            self._list_help()
+        elif command == 'project_info':
+            self._projec_info_help()
+        elif command == 'project_create':
+            self._project_create_help()
+        elif command == 'iteration_info':
+            self._iteration_info_help()
+        elif command == 'iteration_create':
+            self._iteration_create_help()
+        elif command == 'publican_push':
+            self._publican_push_help()
+        elif command == 'publican_pull':
+            self._publican_pull_help()
+                
+
     def _list_help(self):
        	print ('flies list [OPTIONS]\n\n'
                'list all available projects\n\n'
@@ -96,10 +129,16 @@ class FliesConsole:
         print ('flies project create [PROJECT_ID] [OPTIONS]') 
 
     def _iteration_info_help(self):
-	    print ('flies iterationinfo [OPTIONS]')
+	    print ('flies iteration info [OPTIONS]')
 
     def _iteration_create_help(self):
-        print ('flies create iteration [ITERATION_ID] [OPTIONS]')
+        print ('flies iteration create [ITERATION_ID] [OPTIONS]')
+
+    def _publican_push_help(self):
+        print ('flies publican push [OPTIONS] {document}')
+
+    def _publican_pull_help(self):
+        print ('flies publican pull [OPTIONS] {document}')
               
     def _list_projects(self):
         if not self.options['server']:
@@ -243,19 +282,23 @@ class FliesConsole:
         if args:
             command = args[0]
             sub = args[1:]            
-            if sub_command[command]:
-                if sub[0]:
-                    if sub[0] in sub_command[command]:
-                        command = command+'_'+sub[0]
-                        command_args = sub[1:]
+            if sub_command.has_key(command):
+                if sub_command[command]:
+                    if sub[0]:
+                        if sub[0] in sub_command[command]:
+                            command = command+'_'+sub[0]
+                            command_args = sub[1:]
+                        else:
+                            print "Can not find such command"
+                            sys.exit()
                     else:
-                        print "Can not find such command"
+                        print "Please complete the command!"
                         sys.exit()
-                else:
-                    print "Please complete the command!"
-                    sys.exit()
-            else: 
-                command_args = sub           
+                else: 
+                    command_args = sub
+            else:
+                print "Can not find such command"
+                sys.exit()
         else:
             self._print_usage()
             sys.exit(2)
