@@ -158,6 +158,8 @@ class FliesConsole:
         
         try:
             result = flies.create_project(args[0], self.options['name'], self.options['desc'])
+            if result == "Success":
+                print "Success create the project"
         except NoSuchProjectException as e:
             print "No Such Project on the server" 
         except UnAuthorizedException as e:
@@ -183,6 +185,8 @@ class FliesConsole:
         try:
             result = flies.create_iteration(self.options['project_id'], args[0], self.options['name'],
             self.options['desc'])
+            if result == "Success":
+                print "Success create the itearion"
         except NoSuchProjectException as e:
             print "No Such Project on the server"
         except UnAuthorizedException as e:
@@ -202,15 +206,20 @@ class FliesConsole:
             sys.exit()
 
         if not args:
-            print "Please provide file name"
+            print "Please provide at least one file name for processing"
             sys.exit()
 
-        try:
-       	    result = flies.push_publican(args[0], self.options['project_id'], self.options['iteration_id'])
-        except NoSuchFileException as e:
-       	    print "Can not find file"
-        except NoSuchProjectException as e:
-            print "No Such Project on the server"
+        for filename in args:
+            try:
+       	        result = flies.push_publican(filename, self.options['project_id'], self.options['iteration_id'])
+                if result == "Success":
+                    print "Success push the content of %s to %s"%(filename, self.options['project_id'])
+            except NoSuchFileException as e:
+       	        print "Can not find file"
+            except UnAuthorizedException as e:
+                print "Unauthorized Operation"
+            except NoSuchProjectException as e:
+                print "No Such Project on the server"
 
     def _pull_publican(self):
         pass
@@ -278,7 +287,6 @@ class FliesConsole:
         elif command == 'project_info':
             self._get_project()
         elif command == 'project_create':
-            print command_args
             self._create_project(command_args)
         elif command == 'project_remove':
             self._remove_project(command_args)

@@ -78,7 +78,7 @@ class FliesClient:
             res, content = self.restclient.request_put('/projects/p/%s'%projectid, args=body, headers=headers)
                          
             if res['status'] == '201': 
-                return True
+                return "Success"
             elif res['status'] == '404':
                 raise NoSuchProjectException('Error 404', 'No Such project')
             elif res['status'] == '401':
@@ -95,11 +95,11 @@ class FliesClient:
             body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iterationname, iterationid, iterationdesc)
             res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
             if res['status'] == '201':
-                return True
+                return "Success"
             elif res['status'] == '404':
                 raise NoSuchProjectException('Error 404', 'No Such project')
             elif res['status'] == '401':
-                raise UnAuthorizedException('Error 401', 'Un Authorized Operation')
+                raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
 
         else:
             raise InvalidOptionException('Error', 'Invalid Options')
@@ -115,28 +115,37 @@ class FliesClient:
             
         publican = Publican(filepath) 
         textflows = publican.read_po()
+        
         content ={
+                    'textFlows':textflows,
                     'name': filename,
-                    'contenttype': 'text/plain',
-                    'type': 'file',
-                    'lang': 'en',
+                    'type': 'FILE',
+                    'contentType': 'application/x-gettext',
                     'extensions': [],
-                    'textFlows': textflows
+                    'lang': 'en'
                  }
         body = json.JSONEncoder().encode(content)
-        
+               
         if projectid and iterationid :
-            res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s/resources'%(projectid,iterationid), args=body, headers=headers)
-            print res
+            res, content = self.restclient.request_post('/projects/p/%s/iterations/i/%s/resources/'%(projectid,iterationid), args=body, headers=headers)
+            
             if res['status'] == '201':
-                return True
+                return "Success"
             elif res['status'] == '404':
                 raise NoSuchProjectException('Error 404', 'No Such project')
             elif res['status'] == '401':
-                raise UnAuthorizedException('Error 401', 'Un Authorized Operation')
+                raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
         else:
             raise InvalidOptionException('Error', 'Invalid Options')
            
     def pull_publican():
 	    pass    
 
+    def remove_project():
+        pass
+
+    def remove_iteration():
+        pass
+
+    def project_status():
+        pass
