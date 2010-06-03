@@ -248,7 +248,7 @@ class FliesConsole:
             else: 
                 command_args = sub           
         else:
-            self._PrintUsage()
+            self._print_usage()
             sys.exit(2)
                          
         if opts:
@@ -292,9 +292,7 @@ class FliesConsole:
             self._push_publican(command_args)
         elif command == 'publican_pull':
             self._push_publican(command_args)      
-        else:
-            self._print_usage()
-            sys.exit(2)
+        
 
 def main():
     client = FliesConsole()
