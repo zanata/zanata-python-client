@@ -15,7 +15,7 @@ setup (name = "flies-python-client",
    
     entry_points = {
 	'console_scripts': [
-		'flies = flieslib.flies:main',
+		'flies = fliesclient.flies:main',
 	]
     },
     classifiers=['License :: OSI Approved ::  GNU Lesser General Public License (LGPL)',

@@ -32,4 +32,5 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root, -)
 %doc README COPYING
 %{_bindir}/*
+%{_libdir}/*
 

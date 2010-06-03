@@ -21,4 +21,4 @@
 
 
 from client import *
-from parseconfig import *
+from publican import *

@@ -144,7 +144,7 @@ class FliesConsole:
         if not self.options['server']:
             print "Please provide valid server url by fliesrc or by '--server' option"
             sys.exit()
-        print self.options['server']
+        
         flies = FliesClient(self.options['server'])
         res, content = flies.list_projects()
         print 'Status: '+res['status']
