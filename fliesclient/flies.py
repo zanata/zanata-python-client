@@ -147,12 +147,14 @@ class FliesConsole:
         
         flies = FliesClient(self.options['server'])
         res, content = flies.list_projects()
-        print 'Status: '+res['status']
+        
         if res.get('status') == '200':
             projects = json.loads(content)
             for project in projects:
-                print "*"*40
-                print project
+                print ('Id: '+project['id']+'\n'
+                       'Name: '+project['name']+'\n'
+                       'Type: '+project['type']+'\n'
+                       'links: '+self.options['server']+'/projects/'+project['links'][0]['href']+'\n')
         else:
             print 'Flies REST service not available at %s' % self.options['server']
         
