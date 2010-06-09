@@ -66,8 +66,8 @@ class FliesClient:
     def get_project_info(self, projectid):
         res, content = self.restclient.request_get('/projects/p/%s'%projectid)
         if res['status'] == '200':
-            project = json.loads(content)
-            p = Project(project['id'], project['name'], project['type'], project['description'], None, content)
+            p = Project()
+            p.import_json(content)
             return p
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')
