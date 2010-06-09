@@ -30,6 +30,7 @@ import os
 import json
 from rest.client import RestClient
 from publican import Publican
+from project import Project
 
 class NoSuchProjectException(Exception):
     def __init__(self, expr, msg):
@@ -63,8 +64,14 @@ class FliesClient:
         return self.restclient.request_get('/projects')
     
     def get_project_info(self, projectid):
-        return self.restclient.request_get('/projects/p/%s'%projectid)
-        
+        res, content = self.restclient.request_get('/projects/p/%s'%projectid)
+        if res['status'] == '200':
+            project = json.loads(content)
+            p = Project(project['id'], project['name'], project['type'], project['description'], None, content)
+            return p
+        elif res['status'] == '404':
+            raise NoSuchProjectException('Error 404', 'No Such project')
+
     def get_iteration_info(self, projectid, iterationid):
         return self.restclient.request_get('/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
 

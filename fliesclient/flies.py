@@ -27,6 +27,7 @@ import json
 import os.path
 from parseconfig import FliesConfig
 from flieslib.client import FliesClient
+from flieslib.client import Project
 from flieslib.client import NoSuchFileException
 from flieslib.client import NoSuchProjectException
 from flieslib.client import UnAuthorizedException
@@ -168,10 +169,13 @@ class FliesConsole:
             sys.exit()
         
         flies = FliesClient(self.options['server'])
-        res, content = flies.get_project_info(self.options['project_id'])
-        print 'Status: '+res['status']
-        print content
-        
+        try:
+            p = flies.get_project_info(self.options['project_id'])
+            print "Name: %s" % p.get_name()
+            print "Type: %s" % p.get_type()
+        except NoSuchProjectException as e:
+            print "No Such Project on the server"
+               
     def _get_iteration(self):
         if not self.options['server']:
             print "Please provide valid server url by fliesrc or by '--server' option"
