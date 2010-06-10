@@ -29,15 +29,20 @@ import json
 
 class BaseJsonModel():
     def __init__(self, content):
-        self.content = content
-    
+        self.jsoncontent = content
+        self.pycontent = json.loads(content)
+        if self.pycontent.__class__.__name__ == 'list':
+            self.type = 'list'
+        else:
+            self.type = 'object'
+
     def get_json(self):
-        return self.content
+        return self.jsoncontent
+
+    def load_json(self):
+        return self.pycontent
 
     def create_json(self, pycontent):
         return json.JSONEncoder().encode(pycontent)
 
-    def get_attr(self, name):
-        pobject = json.loads(self.content)
-        if pobject.has_key(name):
-            return pobject[name]
+

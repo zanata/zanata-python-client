@@ -32,7 +32,10 @@ class Project():
         self.name = name
         self.desc = desc
         self.type = type
-        
+ 
+    def get_id(self):
+        return self.id
+
     def get_name(self):
         return self.name
 

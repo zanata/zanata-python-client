@@ -61,15 +61,29 @@ class FliesClient:
 	self.restclient = RestClient(self.base_url)
        	
     def list_projects(self):
-        return self.restclient.request_get('/projects')
-    
+        res, content = self.restclient.request_get('/projects')
+        if res['status'] == '200':
+            jsonmodel = BaseJsonModel(content)
+            projects = jsonmodel.load_json()
+            project = []
+            for p in projects:
+                id = p['id']
+                name = p['name']
+                type = p['type']
+                p = Project(id=id, name = name, type = type)
+                project.append(p)
+            return project
+
     def get_project_info(self, projectid):
         res, content = self.restclient.request_get('/projects/p/%s'%projectid)
         if res['status'] == '200':
             jsonmodel = BaseJsonModel(content)
-            name = jsonmodel.get_attr('name')
-            type = jsonmodel.get_attr('type')
-            p = Project(name = name, type = type)
+            project = jsonmodel.load_json()
+            id = project['id']
+            name = project['name']
+            type = project['type']
+            desc = project['description']
+            p = Project(id=id, name = name, type = type, desc = desc)
             return p
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')
