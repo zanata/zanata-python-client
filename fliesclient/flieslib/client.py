@@ -27,7 +27,7 @@ __all__ = (
 import urlparse
 import urllib
 import os
-import json
+from jsonmodel import BaseJsonModel
 from rest.client import RestClient
 from publican import Publican
 from project import Project
@@ -66,8 +66,10 @@ class FliesClient:
     def get_project_info(self, projectid):
         res, content = self.restclient.request_get('/projects/p/%s'%projectid)
         if res['status'] == '200':
-            p = Project()
-            p.import_json(content)
+            jsonmodel = BaseJsonModel(content)
+            name = jsonmodel.get_attr('name')
+            type = jsonmodel.get_attr('type')
+            p = Project(name = name, type = type)
             return p
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')

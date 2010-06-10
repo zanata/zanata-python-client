@@ -25,36 +25,23 @@ __all__ = (
         "Project",
    )
 import json
-from jsonmodel import BaseJsonModel
 
 class Project():
-    def __init__(self, id = None, name = None, desc = None, type = None, content = None):
+    def __init__(self, id = None, name = None, desc = None, type = None):
         self.id = id
         self.name = name
         self.desc = desc
         self.type = type
-        self.content = content
         
     def get_name(self):
-        if self.content:
-           return self.content.get_attr('name')
+        return self.name
 
     def get_type(self):
-        if self.content:
-            return self.content.get_attr('type')
+        return self.type
 
     def get_desc(self):
-        if self.content:
-            return self.content.get_attr('description')
+        return self.desc
 
     def get_links(self):
-        if self.content:
-            return self.content.get_attr('links')
-
-    def import_json(self, content):
-        self.content = BaseJsonModel(content)
-
-    def export_json(self):
-        if self.content:
-            return self.content.get_json()
+        return self.links
         

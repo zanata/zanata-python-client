@@ -147,17 +147,15 @@ class FliesConsole:
             sys.exit()
         
         flies = FliesClient(self.options['server'])
-        res, content = flies.list_projects()
+        projects = flies.list_projects()
         
-        if res.get('status') == '200':
-            projects = json.loads(content)
-            for project in projects:
-                print ('Id: '+project['id']+'\n'
-                       'Name: '+project['name']+'\n'
-                       'Type: '+project['type']+'\n'
-                       'links: '+self.options['server']+'/projects/'+project['links'][0]['href']+'\n')
-        else:
-            print 'Flies REST service not available at %s' % self.options['server']
+        for project in projects:
+            print ('Id: '+project.get_id()+'\n'
+                   'Name: '+project.get_name+'\n'
+                   'Type: '+project.get_type+'\n')
+                   
+        #else:
+        #    print 'Flies REST service not available at %s' % self.options['server']
         
     def _get_project(self):
         if not self.options['server']:
@@ -175,6 +173,8 @@ class FliesConsole:
             print "Type: %s" % p.get_type()
         except NoSuchProjectException as e:
             print "No Such Project on the server"
+        except InvalidOptionException as e:
+            print "Options are not valid"
                
     def _get_iteration(self):
         if not self.options['server']:
