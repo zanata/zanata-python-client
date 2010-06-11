@@ -26,21 +26,24 @@ __all__ = (
    )
 
 import json
+from project import Project
 
 class BaseJsonModel():
+    
     def __init__(self, content):
         self.jsoncontent = content
-        self.pycontent = json.loads(content)
-        if self.pycontent.__class__.__name__ == 'list':
-            self.type = 'list'
-        else:
-            self.type = 'object'
+        self.project = json.loads(content, object_hook = self.custom_decode)
+    
+    def custom_decode(self, json_thread):
+        if 'type' in json_thread:
+            if json_thread['type'] == 'IterationProject':
+                return Project(json_thread['id'], json_thread['name'], type = json_thread['type'])
 
     def get_json(self):
         return self.jsoncontent
 
     def load_json(self):
-        return self.pycontent
+        return self.project
 
     def create_json(self, pycontent):
         return json.JSONEncoder().encode(pycontent)
