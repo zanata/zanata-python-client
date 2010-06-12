@@ -28,23 +28,30 @@ import json
 
 class Project():
     def __init__(self, id = None, name = None, desc = None, type = None):
-        self.id = id
-        self.name = name
-        self.desc = desc
-        self.type = type
+        self.__id = id
+        self.__name = name
+        self.__desc = desc
+        self.__type = type
  
     def get_id(self):
-        return self.id
+        return self.__id
+
+    def set_id(self, id):
+        self.__id = id
 
     def get_name(self):
-        return self.name
+        return self.__name
 
     def get_type(self):
-        return self.type
+        return self.__type
 
     def get_desc(self):
-        return self.desc
+        return self.__desc
 
     def get_links(self):
-        return self.links
-        
+        return self.__links
+    
+    id = property(get_id, set_id)
+    name = property(get_name)
+    type = property(get_type)
+    desc = property(get_desc)
