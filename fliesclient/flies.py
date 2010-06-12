@@ -153,6 +153,7 @@ class FliesConsole:
             print ("Id:          %s")%project.id
             print ("Name:        %s")%project.name
             print ("Type:        %s")%project.type
+            print ("Links:       %s")%[project.links.href, project.links.type, project.links.rel]
             print ("Description: %s\n")%project.desc
         
     def _get_project(self):
@@ -169,7 +170,8 @@ class FliesConsole:
             p = flies.get_project_info(self.options['project_id'])
             print ("Id:          %s")%p.id 
             print ("Name:        %s")%p.name 
-            print ("Type:        %s")%p.type 
+            print ("Type:        %s")%p.type
+            print ("Links:       %s")%p.links
             print ("Description: %s")%p.desc
         except NoSuchProjectException as e:
             print "No Such Project on the server"
@@ -184,12 +186,16 @@ class FliesConsole:
         if not self.options['iteration_id'] or not self.options['project_id']:
             print 'Please use flies iteration info --project=project_id --iteration=iteration_id to retrieve the iteration'
             sys.exit()
-
+        
         flies = FliesClient(self.options['server'])
-        res, content = flies.get_iteration_info(self.options['project_id'], self.options['iteration_id'])
-        print 'Status: '+res['status']
-        print content
-                
+        try:
+            iteration = flies.get_iteration_info(self.options['project_id'], self.options['iteration_id'])
+            print ("Id:          %s")%iteration.id
+            print ("Name:        %s")%iteration.name
+            print ("Description: %s")%iteration.desc
+        except NoSuchProjectException as e:
+            print "No Such Project on the server"
+
     def _create_project(self, args):
         if not self.options['server']:
             print "Please provide valid server url by fliesrc or by '--server' option"

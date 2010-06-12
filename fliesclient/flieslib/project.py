@@ -26,12 +26,52 @@ __all__ = (
    )
 import json
 
+class Links():
+    def __init__(self, href = None, type = None, rel = None):
+        self.__href = href
+        self.__type = type
+        self.__rel = rel
+
+    def get_href(self):
+        return self.__href
+
+    def get_type(self):
+        return self.__type
+
+    def get_rel(self):
+        return self.__rel
+    
+    href = property(get_href)
+    type = property(get_type)
+    rel = property(get_rel)
+
+
+class Iteration():
+    def __init__(self, id = None, name = None, desc = None):
+        self.__id = id
+        self.__name = name
+        self.__desc = desc
+    
+    def get_id(self):
+        return self.__id
+
+    def get_name(self):
+        return self.__name
+
+    def get_desc(self):
+        return self.__desc
+
+    id = property(get_id)
+    name = property(get_name)
+    desc = property(get_desc)
+
 class Project():
-    def __init__(self, id = None, name = None, desc = None, type = None):
+    def __init__(self, id = None, name = None, desc = None, type = None, links = None):
         self.__id = id
         self.__name = name
         self.__desc = desc
         self.__type = type
+        self.__links = links
  
     def get_id(self):
         return self.__id
@@ -55,3 +95,4 @@ class Project():
     name = property(get_name)
     type = property(get_type)
     desc = property(get_desc)
+    links = property(get_links)

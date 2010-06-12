@@ -27,23 +27,36 @@ __all__ = (
 
 import json
 from project import Project
+from project import Iteration
+from project import Links
 
 class BaseJsonModel():
-    
-    def __init__(self, content):
-        self.jsoncontent = content
-        self.project = json.loads(content, object_hook = self.custom_decode)
-    
-    def custom_decode(self, json_thread):
-        if 'type' in json_thread:
-            if json_thread['type'] == 'IterationProject':
-                return Project(json_thread['id'], json_thread['name'], type = json_thread['type'])
+    def __init__(self):
+        self.jsoncontent = None
+        self.pyroject = None
+        self.links = None
 
+    def custom_decode(self, json_thread):
+        print json_thread
+        if 'type' in json_thread:
+            if json_thread['type'] == 'application/vnd.flies.project+json':
+                self.links =  Links(json_thread['href'], json_thread['type'], json_thread['rel'])
+            elif json_thread['type'] == 'IterationProject':
+                if 'description' in json_thread:
+                    desc = json_thread['description']
+                else:
+                    desc = None
+                return Project(json_thread['id'], json_thread['name'], desc = desc, type = json_thread['type'], links =
+                self.links)
+        else:
+            return Iteration(json_thread['id'], json_thread['name'], json_thread['description'])
+    
     def get_json(self):
         return self.jsoncontent
 
-    def load_json(self):
-        return self.project
+    def load_json(self, content):
+        self.pycontent = json.loads(content, object_hook = self.custom_decode)
+        return self.pycontent
 
     def create_json(self, pycontent):
         return json.JSONEncoder().encode(pycontent)
