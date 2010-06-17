@@ -88,6 +88,12 @@ class Iteration():
     name = property(get_name, set_name)
     desc = property(get_desc, set_desc)
 
+    def get_property(self, content, property):
+        if property in content:
+            return content.get(property)
+        else:
+            return None
+
 class Project(object):
     def __init__(self):
         self.__id = None

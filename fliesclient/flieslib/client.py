@@ -31,6 +31,7 @@ from jsonmodel import JsonParser
 from rest.client import RestClient
 from publican import Publican
 from project import Project
+from project import Iteration
 
 class NoSuchProjectException(Exception):
     def __init__(self, expr, msg):
@@ -90,8 +91,12 @@ class FliesClient:
     def get_iteration_info(self, projectid, iterationid):
         res, content = self.restclient.request_get('/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
         if res['status'] == '200':
-            iteration = BaseJsonModel().load_json(content)
-            return iteration
+            iteration = JsonParser().parse_json(content)
+            iter = Iteration()
+            iter.id = iter.get_property(iteration, 'id')
+            iter.name = iter.get_property(iteration, 'name')
+            iter.desc = iter.get_property(iteration, 'description')
+            return iter
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')
 
