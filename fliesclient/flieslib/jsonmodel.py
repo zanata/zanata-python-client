@@ -30,12 +30,12 @@ from project import Project
 from project import Iteration
 from project import Links
 
-class BaseJsonModel():
+class JsonParser():
     def __init__(self):
         self.jsoncontent = None
-        self.pyroject = None
-        self.links = None
-
+        self.pycontent = None
+        #self.links = None
+    '''
     def custom_decode(self, json_thread):
         print json_thread
         if 'type' in json_thread:
@@ -50,12 +50,12 @@ class BaseJsonModel():
                 self.links)
         else:
             return Iteration(json_thread['id'], json_thread['name'], json_thread['description'])
-    
+    '''
     def get_json(self):
         return self.jsoncontent
 
-    def load_json(self, content):
-        self.pycontent = json.loads(content, object_hook = self.custom_decode)
+    def parse_json(self, content):
+        self.pycontent = json.loads(content)
         return self.pycontent
 
     def create_json(self, pycontent):

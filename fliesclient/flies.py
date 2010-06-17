@@ -153,8 +153,8 @@ class FliesConsole:
             print ("Id:          %s")%project.id
             print ("Name:        %s")%project.name
             print ("Type:        %s")%project.type
-            print ("Links:       %s")%[project.links.href, project.links.type, project.links.rel]
-            print ("Description: %s\n")%project.desc
+            for link in project.links:
+                print ("Links:       %s\n")%[link.href, link.type, link.rel]
         
     def _get_project(self):
         if not self.options['server']:
@@ -171,7 +171,6 @@ class FliesConsole:
             print ("Id:          %s")%p.id 
             print ("Name:        %s")%p.name 
             print ("Type:        %s")%p.type
-            print ("Links:       %s")%p.links
             print ("Description: %s")%p.desc
         except NoSuchProjectException as e:
             print "No Such Project on the server"

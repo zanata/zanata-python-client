@@ -27,52 +27,45 @@ __all__ = (
 import json
 
 class Links():
-    def __init__(self, href = None, type = None, rel = None):
-        self.__href = href
-        self.__type = type
-        self.__rel = rel
+    def __init__(self):
+        self.__href = None
+        self.__type = None
+        self.__rel = None
 
     def get_href(self):
         return self.__href
 
+    def set_href(self, href):
+        self.__href = href
+    
     def get_type(self):
         return self.__type
 
+    def set_type(self, type):
+        self.__type = type
+
     def get_rel(self):
         return self.__rel
-    
-    href = property(get_href)
-    type = property(get_type)
-    rel = property(get_rel)
 
+    def set_rel(self, rel):
+        self.__rel = rel
+    
+    href = property(get_href, set_href)
+    type = property(get_type, set_type)
+    rel = property(get_rel, set_rel)
+
+    def get_property(self, content, property):
+        if property in content:
+            return content.get(property)        
+        else:
+            return None
 
 class Iteration():
-    def __init__(self, id = None, name = None, desc = None):
-        self.__id = id
-        self.__name = name
-        self.__desc = desc
+    def __init__(self):
+        self.__id = None
+        self.__name = None
+        self.__desc = None
     
-    def get_id(self):
-        return self.__id
-
-    def get_name(self):
-        return self.__name
-
-    def get_desc(self):
-        return self.__desc
-
-    id = property(get_id)
-    name = property(get_name)
-    desc = property(get_desc)
-
-class Project():
-    def __init__(self, id = None, name = None, desc = None, type = None, links = None):
-        self.__id = id
-        self.__name = name
-        self.__desc = desc
-        self.__type = type
-        self.__links = links
- 
     def get_id(self):
         return self.__id
 
@@ -82,17 +75,75 @@ class Project():
     def get_name(self):
         return self.__name
 
-    def get_type(self):
-        return self.__type
+    def set_name(self, name):
+        self.__name = name
 
     def get_desc(self):
         return self.__desc
 
+    def set_desc(self, desc):
+        self.__desc = desc
+
+    id = property(get_id, set_id)
+    name = property(get_name, set_name)
+    desc = property(get_desc, set_desc)
+
+class Project(object):
+    def __init__(self):
+        self.__id = None
+        self.__name = None
+        self.__desc = None
+        self.__type = None
+        self.__links = None
+ 
+    def get_id(self):
+        return self.__id
+    
+    def set_id(self, id):
+        self.__id = id
+
+    def get_name(self):
+        return self.__name
+
+    def set_name(self, name):
+        self.__name = name
+
+    def get_desc(self):
+        return self.__desc
+
+    def set_desc(self, desc):
+        self.__desc = desc
+
+    def get_type(self):
+        return self.__type
+
+    def set_type(self, type):
+        self.__type = type
+
     def get_links(self):
         return self.__links
-    
+
+    def set_links(self,links):
+        self.__links = links
+
+    def get_property(self, content, property):
+        if property in content:
+            if 'links' == property:
+                links = []
+                for cont in content.get('links'):
+                    iter = Links()
+                    iter.href = iter.get_property(cont, 'href')
+                    iter.type = iter.get_property(cont, 'type')
+                    iter.rel = iter.get_property(cont, 'rel')
+                    links.append(iter)
+                return links
+            else:
+                return content.get(property)        
+        else:
+            return None
+   
     id = property(get_id, set_id)
-    name = property(get_name)
-    type = property(get_type)
-    desc = property(get_desc)
-    links = property(get_links)
+    name = property(get_name, set_name)
+    type = property(get_type, set_type)
+    desc = property(get_desc, set_desc)
+    links = property(get_links, set_links)
