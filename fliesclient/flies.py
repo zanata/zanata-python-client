@@ -151,9 +151,9 @@ class FliesConsole:
         for project in projects:
             print ("Id:          %s")%project.id
             print ("Name:        %s")%project.name
-            print ("Type:        %s\n")%project.type
-            #for link in project.links:
-            #    print ("Links:       %s\n")%[link.href, link.type, link.rel]
+            print ("Type:        %s")%project.type
+            for link in project.links:
+                print ("Links:       %s\n")%[link.href, link.type, link.rel]
         
     def _get_project(self):
         if not self.options['server']:

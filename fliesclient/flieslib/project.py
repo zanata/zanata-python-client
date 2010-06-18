@@ -25,150 +25,56 @@ __all__ = (
         "Project", 
    )
 import json
+from jsonmodel import BaseModel
 
 class Links():
-    def __init__(self):
-        self.__href = None
-        self.__type = None
-        self.__rel = None
-
-    def get_href(self):
-        return self.__href
-
-    def set_href(self, href):
-        self.__href = href
-    
-    def get_type(self):
-        return self.__type
-
-    def set_type(self, type):
-        self.__type = type
-
-    def get_rel(self):
-        return self.__rel
-
-    def set_rel(self, rel):
-        self.__rel = rel
-    
-    href = property(get_href, set_href)
-    type = property(get_type, set_type)
-    rel = property(get_rel, set_rel)
-
-    def get_property(self, content, property):
-        if property in content:
-            return content.get(property)        
-        else:
-            return None
-
-class Iteration(object):
-    def __init__(self, json = {}):
-        self.__id = None
-        self.__name = None
-        self.__type = None
-        self.__desc = None
-        self.__json = json
-
-    def to_json(self):
-        return json.JSONEncoder().encode(self.__json)
+    def __init__(self, json):
+        self.json = json
 
     @property
-    def id(self):
-        return self.__json.get('id')
-
-    @id.setter
-    def id(self, id):
-        self.__id = id
-
-    @property
-    def name(self):
-        return self.__name
+    def href(self):
+        return self.json.get('href')
     
-    @name.setter
-    def name(self, name):
-        self.__name = name
-
-    @property
-    def desc(self):
-        return self.__json.get('description')
-
-    @desc.setter
-    def desc(self, desc):
-        self.__desc = desc
-
+    @href.setter
+    def href(self, href):
+        self.json['href'] = href
+    
     @property
     def type(self):
-        return self.__json.get('type')
+        return self.json.get('type')
 
     @type.setter
     def type(self, type):
-        self.__type = type
+        self.json['type'] = type
 
-class Project(object):
+    @property
+    def rel(self):
+        return self.json.get('rel')
+
+    @rel.setter
+    def rel(self, rel):
+        self.json['rel'] = rel
+    
+class Iteration(BaseModel):
+    def __init__(self, json = {}):
+        BaseModel.__init__(self, json)
+
+class Project(BaseModel):
     def __init__(self, json = {}, iterations = None):
-        self.__id = None
-        self.__name = None
-        self.__desc = None
-        self.__type = None
-        self.__links = None
-        self.__json = json
+        BaseModel.__init__(self, json)
         self.__iterations = iterations
  
-    def to_json(self):
-        return json.JSONEncoder().encode(self.__json)
-
     @property
-    def id(self):
-        return self.__json.get('id')
+    def links(self):
+        links = []
+        for cont in self.json.get('links'):
+            iter = Links(cont)
+            links.append(iter)
+        return links
     
-    @id.setter
-    def id(self, id):
-        self.__id = id
+    @links.setter
+    def links(self,links):
+        self.json['links'] = links
 
-    @property
-    def name(self):
-        return self.__json.get('name')
-    
-    @name.setter
-    def name(self, name):
-        self.__name = name
-
-    @property
-    def desc(self):
-        return self.__json.get('description')
-
-    @desc.setter
-    def desc(self, desc):
-        self.__desc = desc
-
-    @property
-    def type(self):
-        return self.__json.get('type')
-    
-    @type.setter
-    def type(self, type):
-        self.__type = type
-
-    def get_links(self):
-        return self.__links
-
-    def set_links(self,links):
-        self.__links = links
-
-    def get_property(self, content, property):
-        if property in content:
-            if 'links' == property:
-                links = []
-                for cont in content.get('links'):
-                    iter = Links()
-                    iter.href = iter.get_property(cont, 'href')
-                    iter.type = iter.get_property(cont, 'type')
-                    iter.rel = iter.get_property(cont, 'rel')
-                    links.append(iter)
-                return links
-            else:
-                return content.get(property)        
-        else:
-            return None
-    
     def get_iteration(self, id):
         return self.__iterations.get(self.id, id)

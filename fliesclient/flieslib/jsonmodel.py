@@ -22,43 +22,48 @@
 
 
 __all__ = (
-        "BaseJsonModel",
+        "BaseModel",
    )
 
 import json
-from project import Project
-#from project import Iteration
-from project import Links
 
-class JsonParser():
-    def __init__(self):
-        self.jsoncontent = None
-        self.pycontent = None
-        #self.links = None
-    '''
-    def custom_decode(self, json_thread):
-        print json_thread
-        if 'type' in json_thread:
-            if json_thread['type'] == 'application/vnd.flies.project+json':
-                self.links =  Links(json_thread['href'], json_thread['type'], json_thread['rel'])
-            elif json_thread['type'] == 'IterationProject':
-                if 'description' in json_thread:
-                    desc = json_thread['description']
-                else:
-                    desc = None
-                return Project(json_thread['id'], json_thread['name'], desc = desc, type = json_thread['type'], links =
-                self.links)
-        else:
-            return Iteration(json_thread['id'], json_thread['name'], json_thread['description'])
-    '''
-    def get_json(self):
-        return self.jsoncontent
+class BaseModel():
+    def __init__(self, json = {}):
+        self.json = json
 
-    def parse_json(self, content):
-        self.pycontent = json.loads(content)
-        return self.pycontent
+    def to_json(self):
+        return json.JSONEncoder().encode(self.__json)
 
-    def create_json(self, pycontent):
-        return json.JSONEncoder().encode(pycontent)
+    @property
+    def id(self):
+        return self.json.get('id')
+
+    @id.setter
+    def id(self, id):
+        self.json['id'] = id
+
+    @property
+    def name(self):
+        return self.json.get('name')
+    
+    @name.setter
+    def name(self, name):
+        self.json['name'] = name
+
+    @property
+    def desc(self):
+        return self.json.get('description')
+
+    @desc.setter
+    def desc(self, desc):
+        self.json['description'] = desc
+
+    @property
+    def type(self):
+        return self.json.get('type')
+
+    @type.setter
+    def type(self, type):
+        self.json['type'] = type
 
 

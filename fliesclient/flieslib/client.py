@@ -28,7 +28,6 @@ import urlparse
 import urllib
 import os
 import json
-from jsonmodel import JsonParser
 from rest.client import RestClient
 from publican import Publican
 from project import Project
