@@ -22,11 +22,12 @@
 
 
 __all__ = (
-        "FliesClient",
+        "FliesResource", "ProjectService"
    )
 import urlparse
 import urllib
 import os
+import json
 from jsonmodel import JsonParser
 from rest.client import RestClient
 from publican import Publican
@@ -53,78 +54,69 @@ class UnAuthorizedException(Exception):
         self.expr = expr
         self.msg = msg
 
-class FliesClient:
+class ProjectService:
+    def __init__(self, base_url):
+        self.restclient = RestClient(base_url)
+        self.iterations = IterationService(base_url)
 
-    def __init__(self, base_url, username = None, apikey = None):
-	self.base_url = base_url
-	self.username = username
-	self.apikey = apikey
-	self.restclient = RestClient(self.base_url)
-       	
-    def list_projects(self):
+    def list(self):
         res, content = self.restclient.request_get('/projects')
         if res['status'] == '200':
-            content = JsonParser().parse_json(content)
             projects = []
-            for project in content:
-                p = Project()
-                p.id = p.get_property(project, 'id')
-                p.name = p.get_property(project, 'name')
-                p.type = p.get_property(project, 'type')
-                p.links = p.get_property(project, 'links')
-                projects.append(p)
+            projects_json = json.loads(content)
+            for p in projects_json:
+                projects.append(Project(json = p))
             return projects
 
-    def get_project_info(self, projectid):
+    def get(self, projectid):
         res, content = self.restclient.request_get('/projects/p/%s'%projectid)
         if res['status'] == '200':
-            project = JsonParser().parse_json(content)
-            p = Project()
-            p.id = p.get_property(project, 'id')
-            p.name = p.get_property(project, 'name')
-            p.type = p.get_property(project, 'type')
-            p.desc = p.get_property(project, 'description')
-            return p
+            my_project = Project(json = json.loads(content), iterations = self.iterations)
+            return my_project
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')
 
-    def get_iteration_info(self, projectid, iterationid):
-        res, content = self.restclient.request_get('/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
-        if res['status'] == '200':
-            iteration = JsonParser().parse_json(content)
-            iter = Iteration()
-            iter.id = iter.get_property(iteration, 'id')
-            iter.name = iter.get_property(iteration, 'name')
-            iter.desc = iter.get_property(iteration, 'description')
-            return iter
-        elif res['status'] == '404':
-            raise NoSuchProjectException('Error 404', 'No Such project')
-
-    def create_project(self, projectid, projectname, projectdesc):
+    def create(self, projectid, projectname, projectdesc):
         headers = {}
         headers['X-Auth-User'] = self.username
         headers['X-Auth-Token'] = self.apikey
-           
         if projectname and projectdesc :
             body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,projectid,projectdesc)
             res, content = self.restclient.request_put('/projects/p/%s'%projectid, args=body, headers=headers)
-                         
-            if res['status'] == '201': 
-                return "Success"
-            elif res['status'] == '404':
-                raise NoSuchProjectException('Error 404', 'No Such project')
-            elif res['status'] == '401':
-                raise UnAuthorizedException('Error 401', 'Un Authorized Operation')
+        if res['status'] == '201':
+            return "Success"
+        elif res['status'] == '404':
+            raise NoSuchProjectException('Error 404', 'No Such project')
+        elif res['status'] == '401':
+            raise UnAuthorizedException('Error 401', 'Un Authorized Operation')
         else:
             raise InvalidOptionException('Error','Invalid Options')
+    
+    def delete(self):
+        pass
+
+    def status(self):
+        pass
+
+class IterationService:   
+    def __init__(self, base_url):
+        self.restclient = RestClient(base_url)
+    
+    def get(self, projectid, iterationid):
+        res, content = self.restclient.request_get('/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
+        if res['status'] == '200':
+            iter = Iteration(json.loads(content))
+            return iter
+        elif res['status'] == '404':
+            raise NoSuchProjectException('Error 404', 'No Such project')
         
-    def create_iteration(self, projectid, iterationid, iterationname, iterationdesc):
+    def create(self, projectid, iterationid, iterationname, iterationdesc):
         headers = {}
         headers['X-Auth-User'] = self.username
         headers['X-Auth-Token'] = self.apikey
         
         if iterationname and iterationdesc :
-            body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iterationname, iterationid, iterationdesc)
+            body = {"name":"%s","id":"%s","description":"%s"}%(iterationname, iterationid, iterationdesc)
             res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
             if res['status'] == '201':
                 return "Success"
@@ -136,6 +128,9 @@ class FliesClient:
         else:
             raise InvalidOptionException('Error', 'Invalid Options')
     
+    def delete(self):
+        pass
+    '''
     def push_publican(self, filename, projectid, iterationid):
         headers = {}
         headers['X-Auth-User'] = self.username
@@ -172,12 +167,13 @@ class FliesClient:
            
     def pull_publican():
 	    pass    
+    '''
 
-    def remove_project():
-        pass
+class FliesResource:
+    def __init__(self, base_url, username = None, apikey = None):
+        self.base_url = base_url
+        self.username = username
+        self.apikey = apikey
+        self.projects = ProjectService(base_url)
 
-    def remove_iteration():
-        pass
 
-    def project_status():
-        pass

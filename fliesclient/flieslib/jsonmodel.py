@@ -27,7 +27,7 @@ __all__ = (
 
 import json
 from project import Project
-from project import Iteration
+#from project import Iteration
 from project import Links
 
 class JsonParser():

@@ -22,7 +22,7 @@
 
 
 __all__ = (
-        "Project",
+        "Project", 
    )
 import json
 
@@ -60,70 +60,92 @@ class Links():
         else:
             return None
 
-class Iteration():
-    def __init__(self):
+class Iteration(object):
+    def __init__(self, json = {}):
         self.__id = None
         self.__name = None
+        self.__type = None
         self.__desc = None
-    
-    def get_id(self):
-        return self.__id
+        self.__json = json
 
-    def set_id(self, id):
+    def to_json(self):
+        return json.JSONEncoder().encode(self.__json)
+
+    @property
+    def id(self):
+        return self.__json.get('id')
+
+    @id.setter
+    def id(self, id):
         self.__id = id
 
-    def get_name(self):
+    @property
+    def name(self):
         return self.__name
-
-    def set_name(self, name):
+    
+    @name.setter
+    def name(self, name):
         self.__name = name
 
-    def get_desc(self):
-        return self.__desc
+    @property
+    def desc(self):
+        return self.__json.get('description')
 
-    def set_desc(self, desc):
+    @desc.setter
+    def desc(self, desc):
         self.__desc = desc
 
-    id = property(get_id, set_id)
-    name = property(get_name, set_name)
-    desc = property(get_desc, set_desc)
+    @property
+    def type(self):
+        return self.__json.get('type')
 
-    def get_property(self, content, property):
-        if property in content:
-            return content.get(property)
-        else:
-            return None
+    @type.setter
+    def type(self, type):
+        self.__type = type
 
 class Project(object):
-    def __init__(self):
+    def __init__(self, json = {}, iterations = None):
         self.__id = None
         self.__name = None
         self.__desc = None
         self.__type = None
         self.__links = None
+        self.__json = json
+        self.__iterations = iterations
  
-    def get_id(self):
-        return self.__id
+    def to_json(self):
+        return json.JSONEncoder().encode(self.__json)
+
+    @property
+    def id(self):
+        return self.__json.get('id')
     
-    def set_id(self, id):
+    @id.setter
+    def id(self, id):
         self.__id = id
 
-    def get_name(self):
-        return self.__name
-
-    def set_name(self, name):
+    @property
+    def name(self):
+        return self.__json.get('name')
+    
+    @name.setter
+    def name(self, name):
         self.__name = name
 
-    def get_desc(self):
-        return self.__desc
+    @property
+    def desc(self):
+        return self.__json.get('description')
 
-    def set_desc(self, desc):
+    @desc.setter
+    def desc(self, desc):
         self.__desc = desc
 
-    def get_type(self):
-        return self.__type
-
-    def set_type(self, type):
+    @property
+    def type(self):
+        return self.__json.get('type')
+    
+    @type.setter
+    def type(self, type):
         self.__type = type
 
     def get_links(self):
@@ -147,9 +169,6 @@ class Project(object):
                 return content.get(property)        
         else:
             return None
-   
-    id = property(get_id, set_id)
-    name = property(get_name, set_name)
-    type = property(get_type, set_type)
-    desc = property(get_desc, set_desc)
-    links = property(get_links, set_links)
+    
+    def get_iteration(self, id):
+        return self.__iterations.get(self.id, id)

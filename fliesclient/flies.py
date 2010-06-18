@@ -26,7 +26,7 @@ import getopt, sys
 import json
 import os.path
 from parseconfig import FliesConfig
-from flieslib.client import FliesClient
+from flieslib.client import FliesResource
 from flieslib.client import Project
 from flieslib.client import NoSuchFileException
 from flieslib.client import NoSuchProjectException
@@ -146,15 +146,14 @@ class FliesConsole:
             print "Please provide valid server url by fliesrc or by '--server' option"
             sys.exit()
         
-        flies = FliesClient(self.options['server'])
-        projects = flies.list_projects()
-        
+        flies = FliesResource(self.options['server'])
+        projects = flies.projects.list()
         for project in projects:
             print ("Id:          %s")%project.id
             print ("Name:        %s")%project.name
-            print ("Type:        %s")%project.type
-            for link in project.links:
-                print ("Links:       %s\n")%[link.href, link.type, link.rel]
+            print ("Type:        %s\n")%project.type
+            #for link in project.links:
+            #    print ("Links:       %s\n")%[link.href, link.type, link.rel]
         
     def _get_project(self):
         if not self.options['server']:
@@ -165,9 +164,9 @@ class FliesConsole:
             print 'Please use flies project info --project=project_id to retrieve the project info'
             sys.exit()
         
-        flies = FliesClient(self.options['server'])
+        flies = FliesResource(self.options['server'])
         try:
-            p = flies.get_project_info(self.options['project_id'])
+            p = flies.projects.get(self.options['project_id'])
             print ("Id:          %s")%p.id 
             print ("Name:        %s")%p.name 
             print ("Type:        %s")%p.type
@@ -186,9 +185,10 @@ class FliesConsole:
             print 'Please use flies iteration info --project=project_id --iteration=iteration_id to retrieve the iteration'
             sys.exit()
         
-        flies = FliesClient(self.options['server'])
+        flies = FliesResource(self.options['server'])
         try:
-            iteration = flies.get_iteration_info(self.options['project_id'], self.options['iteration_id'])
+            project = flies.projects.get(self.options['project_id'])
+            iteration = project.get_iteration(self.options['iteration_id'])
             print ("Id:          %s")%iteration.id
             print ("Name:        %s")%iteration.name
             print ("Description: %s")%iteration.desc
@@ -207,7 +207,8 @@ class FliesConsole:
             sys.exit()
         
         try:
-            result = flies.create_project(args[0], self.options['name'], self.options['desc'])
+            p = Project(id = args[0], name = self.options['name'], desc = self.options['desc'])
+            result = flies.projects.create(p)
             if result == "Success":
                 print "Success create the project"
         except NoSuchProjectException as e:
@@ -233,8 +234,8 @@ class FliesConsole:
             sys.exit()
          
         try:
-            result = flies.create_iteration(self.options['project_id'], args[0], self.options['name'],
-            self.options['desc'])
+            
+            result = flies.projects.iterations.create()
             if result == "Success":
                 print "Success create the itearion"
         except NoSuchProjectException as e:
