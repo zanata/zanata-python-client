@@ -32,7 +32,7 @@ class BaseModel():
         self.json = json
 
     def to_json(self):
-        return json.JSONEncoder().encode(self.__json)
+        return json.JSONEncoder().encode(self.json)
 
     @property
     def id(self):

@@ -22,7 +22,7 @@
 
 
 __all__ = (
-        "FliesResource", "ProjectService"
+        "FliesResource", 
    )
 import urlparse
 import urllib
