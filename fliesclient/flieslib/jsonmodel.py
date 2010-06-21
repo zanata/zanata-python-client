@@ -48,6 +48,7 @@ class BaseModel():
     
     @name.setter
     def name(self, name):
+        print "name"+name
         self.json['name'] = name
 
     @property

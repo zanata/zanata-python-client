@@ -53,10 +53,17 @@ class UnAuthorizedException(Exception):
         self.expr = expr
         self.msg = msg
 
+class BadRequestException(Exception):
+    def __init__(self, expr, msg):
+        self.expr = expr
+        self.msg = msg
+
 class ProjectService:
-    def __init__(self, base_url):
+    def __init__(self, base_url, usrname, apikey):
         self.restclient = RestClient(base_url)
-        self.iterations = IterationService(base_url)
+        self.iterations = IterationService(base_url, usrname, apikey)
+        self.username = usrname
+        self.apikey = apikey
 
     def list(self):
         res, content = self.restclient.request_get('/projects')
@@ -75,22 +82,24 @@ class ProjectService:
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')
 
-    def create(self, projectid, projectname, projectdesc):
+    def create(self, project):
         headers = {}
         headers['X-Auth-User'] = self.username
         headers['X-Auth-Token'] = self.apikey
-        if projectname and projectdesc :
-            body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(projectname,projectid,projectdesc)
-            res, content = self.restclient.request_put('/projects/p/%s'%projectid, args=body, headers=headers)
-        if res['status'] == '201':
-            return "Success"
-        elif res['status'] == '404':
-            raise NoSuchProjectException('Error 404', 'No Such project')
-        elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 'Un Authorized Operation')
+        if project.name and project.desc :
+            body ='''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(project.name,project.id,project.desc)
+            res, content = self.restclient.request_put('/projects/p/%s'%project.id, args=body, headers=headers)
+            if res['status'] == '201':
+                return "Success"
+            elif res['status'] == '404':
+                raise NoSuchProjectException('Error 404', 'No Such project')
+            elif res['status'] == '401':
+                raise UnAuthorizedException('Error 401', 'Un Authorized Operation')
+            elif res['status'] == '400':
+                raise BadRequestException('Error 400', 'Bad Request')
         else:
-            raise InvalidOptionException('Error','Invalid Options')
-    
+            raise InvalidOptionException('Error','Invalid Options') 
+            
     def delete(self):
         pass
 
@@ -98,8 +107,10 @@ class ProjectService:
         pass
 
 class IterationService:   
-    def __init__(self, base_url):
+    def __init__(self, base_url, usrname = None, apikey = None):
         self.restclient = RestClient(base_url)
+        self.username = usrname
+        self.apikey = apikey
     
     def get(self, projectid, iterationid):
         res, content = self.restclient.request_get('/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
@@ -109,27 +120,27 @@ class IterationService:
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')
         
-    def create(self, projectid, iterationid, iterationname, iterationdesc):
+    def create(self, projectid, iteration):
         headers = {}
         headers['X-Auth-User'] = self.username
         headers['X-Auth-Token'] = self.apikey
         
-        if iterationname and iterationdesc :
-            body = {"name":"%s","id":"%s","description":"%s"}%(iterationname, iterationid, iterationdesc)
-            res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iterationid), args=body, headers=headers)
+        if iteration.name and iteration.desc :
+            body = {"name":"%s","id":"%s","description":"%s"}%(iteration.name, iteration.id, iteration.desc)
+            res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iteration.id), args=body, headers=headers)
             if res['status'] == '201':
                 return "Success"
             elif res['status'] == '404':
                 raise NoSuchProjectException('Error 404', 'No Such project')
             elif res['status'] == '401':
                 raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
-
         else:
             raise InvalidOptionException('Error', 'Invalid Options')
     
     def delete(self):
         pass
-    '''
+    
+class PublicanService:    
     def push_publican(self, filename, projectid, iterationid):
         headers = {}
         headers['X-Auth-User'] = self.username
@@ -166,13 +177,10 @@ class IterationService:
            
     def pull_publican():
 	    pass    
-    '''
 
 class FliesResource:
     def __init__(self, base_url, username = None, apikey = None):
         self.base_url = base_url
-        self.username = username
-        self.apikey = apikey
-        self.projects = ProjectService(base_url)
+        self.projects = ProjectService(base_url, username, apikey)
 
 

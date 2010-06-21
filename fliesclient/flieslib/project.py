@@ -63,7 +63,8 @@ class Project(BaseModel):
     def __init__(self, json = {}, iterations = None):
         BaseModel.__init__(self, json)
         self.__iterations = iterations
- 
+        self._test = None
+    
     @property
     def links(self):
         links = []

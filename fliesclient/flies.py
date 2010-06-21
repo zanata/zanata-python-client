@@ -201,13 +201,16 @@ class FliesConsole:
             sys.exit()
     
         if self.options['user'] and self.options['apikey']:
-            flies = FliesClient(self.options['server'], self.options['user'], self.options['apikey'])
+            flies = FliesResource(self.options['server'], self.options['user'], self.options['apikey'])
         else:
             print "Please provide username and apikey in .fliesrc"
             sys.exit()
         
         try:
-            p = Project(id = args[0], name = self.options['name'], desc = self.options['desc'])
+            p = Project()
+            p.id = args[0]
+            p.name = self.options['name']
+            p.desc = self.options['desc']
             result = flies.projects.create(p)
             if result == "Success":
                 print "Success create the project"
@@ -224,7 +227,7 @@ class FliesConsole:
             sys.exit()
 
         if self.options['user'] and self.options['apikey']:
-            flies = FliesClient(self.options['server'], self.options['user'], self.options['apikey'])
+            flies = FliesResource(self.options['server'], self.options['user'], self.options['apikey'])
         else:
             print "Please provide username and apikey in .fliesrc"
             sys.exit()
@@ -234,8 +237,11 @@ class FliesConsole:
             sys.exit()
          
         try:
-            
-            result = flies.projects.iterations.create()
+            iteration = Iteration()
+            iteration.id = self.options['iteration_id']
+            iteration.name = self.options['name']
+            iteration.desc = self.options['desc']
+            result = flies.projects.iterations.create(self.options['project_id'], iteration)
             if result == "Success":
                 print "Success create the itearion"
         except NoSuchProjectException as e:

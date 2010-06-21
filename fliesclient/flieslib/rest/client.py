@@ -56,9 +56,7 @@ class RestClient():
         if args:
             if method == "put" or method == "post":
                 headers['Content-Type'] = 'application/json'
-                #body = urllib.urlencoded(args)
                 body = args
-        
         try:
             response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body=body, headers=headers)
             return (response, content.decode("UTF-8"))
