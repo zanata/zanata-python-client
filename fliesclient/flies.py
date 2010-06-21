@@ -33,6 +33,8 @@ from flieslib.client import NoSuchFileException
 from flieslib.client import NoSuchProjectException
 from flieslib.client import UnAuthorizedException
 from flieslib.client import InvalidOptionException
+from flieslib.client import ProjectExistException
+from flieslib.client import BadRequestException
 
 sub_command = {
                 'help':[],
@@ -218,6 +220,8 @@ class FliesConsole:
             print "Unauthorized Operation"
         except InvalidOptionException as e:
             print "Options are not valid"
+        except ProjectExistException as e:
+            print "The project is alreasy exist on the server"
 
     def _create_iteration(self, args):
         if not self.options['server']:

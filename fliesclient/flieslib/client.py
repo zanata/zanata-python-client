@@ -88,10 +88,17 @@ class ProjectService:
             raise NoSuchProjectException('Error 404', 'No Such project')
 
     def create(self, project):
+        exist = False
         headers = {}
         headers['X-Auth-User'] = self.username
         headers['X-Auth-Token'] = self.apikey
-        if project.name and project.desc :
+        try:
+            self.get(project.id)
+            raise ProjectExistException('Status 200', 'The project is already exist')
+        except NoSuchProjectException:
+            exist = False
+
+        if project.name and project.desc and not exist:
             body ='''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(project.name,project.id,project.desc)
             res, content = self.restclient.request_put('/projects/p/%s'%project.id, args=body, headers=headers)
             if res['status'] == '201':
