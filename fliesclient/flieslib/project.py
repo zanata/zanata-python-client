@@ -60,10 +60,12 @@ class Iteration(BaseModel):
         BaseModel.__init__(self, json)
 
 class Project(BaseModel):
-    def __init__(self, json = {}, iterations = None):
+    def __init__(self, json = {}, id = None, name = None, desc = None, iterations = None):
         BaseModel.__init__(self, json)
         self.__iterations = iterations
-        self._test = None
+        self.json['id'] = id
+        self.json['name'] = name
+        self.json['description'] = desc
     
     @property
     def links(self):

@@ -58,6 +58,11 @@ class BadRequestException(Exception):
         self.expr = expr
         self.msg = msg
 
+class ProjectExistException(Exception):
+    def __init__(self, expr, msg):
+        self.expr = expr
+        self.msg = msg
+
 class ProjectService:
     def __init__(self, base_url, usrname, apikey):
         self.restclient = RestClient(base_url)
@@ -91,6 +96,8 @@ class ProjectService:
             res, content = self.restclient.request_put('/projects/p/%s'%project.id, args=body, headers=headers)
             if res['status'] == '201':
                 return "Success"
+            elif rest['status'] == '200':
+                raise ProjectExistException('Status 200', 'The project is already exist')
             elif res['status'] == '404':
                 raise NoSuchProjectException('Error 404', 'No Such project')
             elif res['status'] == '401':
@@ -130,6 +137,8 @@ class IterationService:
             res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iteration.id), args=body, headers=headers)
             if res['status'] == '201':
                 return "Success"
+            elif rest['status'] == '200':
+                raise ProjectExistException('Status 200', 'The project is already exist')
             elif res['status'] == '404':
                 raise NoSuchProjectException('Error 404', 'No Such project')
             elif res['status'] == '401':

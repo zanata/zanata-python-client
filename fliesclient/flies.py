@@ -208,10 +208,7 @@ class FliesConsole:
             sys.exit()
         
         try:
-            p = Project()
-            p.id = args[0]
-            p.name = self.options['name']
-            p.desc = self.options['desc']
+            p = Project(id = args[0], name = self.options['name'], desc = self.options['desc'])
             result = flies.projects.create(p)
             if result == "Success":
                 print "Success create the project"
