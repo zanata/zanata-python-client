@@ -22,7 +22,7 @@
 
 
 __all__ = (
-        "Project", 
+        "Project","Iteration" 
    )
 import json
 from jsonmodel import BaseModel

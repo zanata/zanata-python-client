@@ -28,6 +28,7 @@ import os.path
 from parseconfig import FliesConfig
 from flieslib.client import FliesResource
 from flieslib.client import Project
+from flieslib.client import Iteration
 from flieslib.client import NoSuchFileException
 from flieslib.client import NoSuchProjectException
 from flieslib.client import UnAuthorizedException
@@ -238,7 +239,7 @@ class FliesConsole:
          
         try:
             iteration = Iteration()
-            iteration.id = self.options['iteration_id']
+            iteration.id = args[0]
             iteration.name = self.options['name']
             iteration.desc = self.options['desc']
             result = flies.projects.iterations.create(self.options['project_id'], iteration)

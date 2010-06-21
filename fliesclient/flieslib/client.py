@@ -126,7 +126,7 @@ class IterationService:
         headers['X-Auth-Token'] = self.apikey
         
         if iteration.name and iteration.desc :
-            body = {"name":"%s","id":"%s","description":"%s"}%(iteration.name, iteration.id, iteration.desc)
+            body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iteration.name, iteration.id, iteration.desc)
             res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iteration.id), args=body, headers=headers)
             if res['status'] == '201':
                 return "Success"
