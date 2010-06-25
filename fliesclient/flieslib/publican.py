@@ -27,27 +27,27 @@ __all__ = (
 import polib
 
 class Publican:
-	def __init__(self, filepath):
-            self.path = filepath
+    def __init__(self, filepath):
+        self.path = filepath
 	    
-        def read_po(self):
-            po = polib.pofile(self.path)
-            id = 1
-            textflows = []
-            for entry in po:
-                textflowId = 'tf'+str(id)
-                textflow = {
-                    'id' : textflowId,
-                    'lang' : 'en',
-                    'content' : entry.msgid,
-                    'extensions' : []}
-                textflows.append(textflow)
-                id = id+1
-            return textflows
+    def read_po(self):
+        po = polib.pofile(self.path)
+        id = 1
+        textflows = []
+        for entry in po:
+            textflowId = 'tf'+str(id)
+            textflow = {
+                'id' : textflowId,
+                'lang' : 'en',
+                'content' : entry.msgid,
+                'extensions' : []}
+            textflows.append(textflow)
+            id = id+1
+        return textflows
  
-        def create(self):
-            pass
+    def load_po(self):
+        return polib.pofile(self.path)
 
-        
-  
+    def create(self):
+        pass
        

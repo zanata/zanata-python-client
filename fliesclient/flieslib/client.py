@@ -28,6 +28,9 @@ import urlparse
 import urllib
 import os
 import json
+import hashlib
+import polib
+import shutil
 from rest.client import RestClient
 from publican import Publican
 from project import Project
@@ -157,7 +160,28 @@ class IterationService:
         pass
     
 class PublicanService:    
-    def push_publican(self, filename, projectid, iterationid):
+    def __init__(self, base_url, usrname = None, apikey = None):
+        self.restclient = RestClient(base_url)
+        self.username = usrname
+        self.apikey = apikey
+    
+    def get_translations_from_flies(self, projectid, iterationid, filename, lang):
+        if projectid and iterationid :
+            res, content = self.restclient.request_get('/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,
+            iterationid, filename, lang))
+            return content     
+        
+    def hash_matches(self, message, id):
+        m = hashlib.md5()
+        #m.update('')
+        #m.update('#')
+        m.update(message.msgid)
+        if m.hexdigest() == id:
+            return True
+        else:
+            return False
+   
+    def push(self, filename, projectid, iterationid):
         headers = {}
         headers['X-Auth-User'] = self.username
         headers['X-Auth-Token'] = self.apikey
@@ -191,12 +215,39 @@ class PublicanService:
         else:
             raise InvalidOptionException('Error', 'Invalid Options')
            
-    def pull_publican():
-	    pass    
+    def pull(self, lang, file, projectid, iterationid):
+        # create a PO file based on POT and language
+        locale = lang[-2:]
+        filename = file[:-4]
+        poname = filename+'_%s.po'%locale
+        
+        #copy the content of pot file to po file
+        potfile = os.path.join(os.getcwd(), file)
+        pofile = os.path.join(os.getcwd(), poname)
+        shutil.copy(potfile, pofile)
+        
+        #read the content of the po file
+        publican = Publican(pofile)
+        po = publican.load_po()
+        
+        #retrieve the content from the flies server
+        translations = self.get_translations_from_flies(projectid, iterationid, filename, lang)
+        content = json.loads(translations)
+        targets = content.get('textFlowTargets')    
+        
+        for message in po:
+            for translation in targets:
+                if self.hash_matches(message, translation.get('resId')):
+                    message.msgstr = translation.get('content')
+              
+        # copy any other stuff you need to transfer
+        # finally save resulting pot as as e.g. myfile_lang.po
+        po.save()
+        
 
 class FliesResource:
     def __init__(self, base_url, username = None, apikey = None):
         self.base_url = base_url
         self.projects = ProjectService(base_url, username, apikey)
-
+        self.publican = PublicanService(base_url, username, apikey)
 

@@ -259,7 +259,7 @@ class FliesConsole:
             sys.exit()
         
         if self.options['user'] and self.options['apikey']:
-            flies = FliesClient(self.options['server'], self.options['user'], self.options['apikey'])
+            flies = FliesResource(self.options['server'], self.options['user'], self.options['apikey'])
         else:
             print "Please provide username and apikey in .fliesrc"
             sys.exit()
@@ -270,7 +270,7 @@ class FliesConsole:
 
         for filename in args:
             try:
-       	        result = flies.push_publican(filename, self.options['project_id'], self.options['iteration_id'])
+       	        result = flies.publican.push(filename, self.options['project_id'], self.options['iteration_id'])
                 if result == "Success":
                     print "Success push the content of %s to %s"%(filename, self.options['project_id'])
             except NoSuchFileException as e:
@@ -280,8 +280,22 @@ class FliesConsole:
             except NoSuchProjectException as e:
                 print "No Such Project on the server"
 
-    def _pull_publican(self):
-        pass
+    def _pull_publican(self, args):
+        if not self.options['server']:
+            print "Please provide valid server url by fliesrc or by '--server' option"
+            sys.exit()
+
+        if self.options['user'] and self.options['apikey']:
+            flies = FliesResource(self.options['server'], self.options['user'], self.options['apikey'])
+        else:
+            print "Please provide username and apikey in .fliesrc"
+            sys.exit()
+        
+        '''
+        Get the content of the documents and save to the folder
+        '''
+        flies.publican.pull('zh-CN', args[0], self.options['project_id'], self.options['iteration_id'])
+
 
     def _remove_project(self):
         pass
@@ -362,7 +376,7 @@ class FliesConsole:
         elif command == 'publican_push':
             self._push_publican(command_args)
         elif command == 'publican_pull':
-            self._push_publican(command_args)      
+            self._pull_publican(command_args)      
         
 
 def main():
