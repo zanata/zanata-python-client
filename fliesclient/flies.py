@@ -294,8 +294,10 @@ class FliesConsole:
         '''
         Get the content of the documents and save to the folder
         '''
-        flies.publican.pull('zh-CN', args[0], self.options['project_id'], self.options['iteration_id'])
-
+        if args:
+            flies.publican.pull(self.options['lang'], args[0], self.options['project_id'], self.options['iteration_id'])
+        else:
+            flies.publican.pull(self.options['lang'], None, self.options['project_id'], self.options['iteration_id'])
 
     def _remove_project(self):
         pass
@@ -308,7 +310,7 @@ class FliesConsole:
     
     def _process_command_line(self):
         try:
-            opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["server=", "project=", "iteration=", "name=", "description="])
+            opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["server=", "project=", "iteration=", "name=", "description=", "lang="])
         except getopt.GetoptError, err:
             print str(err)
             sys.exit(2)
@@ -349,6 +351,8 @@ class FliesConsole:
                     self.options['project_id'] = a
                 elif o in ("--iteration"):
                     self.options['iteration_id'] = a
+                elif o in ("--lang"):
+                    self.options['lang'] = a
     
         return command, command_args
  

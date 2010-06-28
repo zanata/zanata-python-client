@@ -181,6 +181,52 @@ class PublicanService:
         else:
             return False
    
+    def check_pot(self, file):
+        #search pot folder in current folder
+        potfolder = os.path.join(os.getcwd(), 'pot')    
+        if file in os.listdir(potfolder):
+            return True
+        else:
+            return False
+    
+    def search_pot(self):
+        #search pot folder in current folder        
+        potfolder = os.path.join(os.getcwd(), 'pot')
+        if os.path.isdir(potfolder):
+            filelist = os.listdir(potfolder)
+        return filelist        
+
+    def create_pofile(self, lang, file, projectid, iterationid):
+        filename = file[:-4]
+        poname = filename+'_%s.po'%lang.replace('-','_')
+        pofile = os.path.join(os.getcwd(), poname)        
+        
+        # If the PO file doesn't exist
+        # create a PO file based on POT and language        
+        if not os.path.isfile(pofile): 
+            #copy the content of pot file to po file
+            potfile = os.path.join(os.getcwd(), 'pot/'+file)
+            shutil.copy(potfile, pofile)
+        
+        #read the content of the po file
+        publican = Publican(pofile)
+        po = publican.load_po()
+        
+        #retrieve the content from the flies server
+        translations = self.get_translations_from_flies(projectid, iterationid, filename, lang)
+        
+        content = json.loads(translations)
+        targets = content.get('textFlowTargets')    
+        
+        for message in po:
+            for translation in targets:
+                if self.hash_matches(message, translation.get('resId')):
+                    message.msgstr = translation.get('content')
+              
+        # copy any other stuff you need to transfer
+        # finally save resulting pot as as myfile_lang.po
+        po.save()
+
     def push(self, filename, projectid, iterationid):
         headers = {}
         headers['X-Auth-User'] = self.username
@@ -216,34 +262,15 @@ class PublicanService:
             raise InvalidOptionException('Error', 'Invalid Options')
            
     def pull(self, lang, file, projectid, iterationid):
-        # create a PO file based on POT and language
-        locale = lang[-2:]
-        filename = file[:-4]
-        poname = filename+'_%s.po'%locale
-        
-        #copy the content of pot file to po file
-        potfile = os.path.join(os.getcwd(), file)
-        pofile = os.path.join(os.getcwd(), poname)
-        shutil.copy(potfile, pofile)
-        
-        #read the content of the po file
-        publican = Publican(pofile)
-        po = publican.load_po()
-        
-        #retrieve the content from the flies server
-        translations = self.get_translations_from_flies(projectid, iterationid, filename, lang)
-        content = json.loads(translations)
-        targets = content.get('textFlowTargets')    
-        
-        for message in po:
-            for translation in targets:
-                if self.hash_matches(message, translation.get('resId')):
-                    message.msgstr = translation.get('content')
-              
-        # copy any other stuff you need to transfer
-        # finally save resulting pot as as e.g. myfile_lang.po
-        po.save()
-        
+        #if file no specified, retrieving all the file in project
+        if not file:
+            #check the pot folder to find all the pot file
+            filelist = self.search_pot()
+            for pot in filelist:
+                self.create_pofile(lang, pot, projectid, iterationid)
+        else:
+            if self.check_pot(file):            
+                self.create_pofile(lang, file, projectid, iterationid)
 
 class FliesResource:
     def __init__(self, base_url, username = None, apikey = None):
