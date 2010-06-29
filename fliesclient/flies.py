@@ -30,6 +30,7 @@ from flieslib.client import FliesResource
 from flieslib.client import Project
 from flieslib.client import Iteration
 from flieslib.client import NoSuchFileException
+from flieslib.client import NoSuchFolderException
 from flieslib.client import NoSuchProjectException
 from flieslib.client import UnAuthorizedException
 from flieslib.client import InvalidOptionException
@@ -297,8 +298,11 @@ class FliesConsole:
         if args:
             flies.publican.pull(self.options['lang'], args[0], self.options['project_id'], self.options['iteration_id'])
         else:
-            flies.publican.pull(self.options['lang'], None, self.options['project_id'], self.options['iteration_id'])
-
+            try:
+                flies.publican.pull(self.options['lang'], None, self.options['project_id'], self.options['iteration_id'])
+            except NoSuchFolderException, err:
+                print "Can not find POT folder under current folder, please create one"
+    
     def _remove_project(self):
         pass
 

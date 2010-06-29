@@ -51,6 +51,11 @@ class NoSuchFileException(Exception):
        	self.expr = expr
        	self.msg = msg
 
+class NoSuchFolderException(Exception):
+    def __init__(self, expr, msg):
+        self.expr = expr
+        self.msg = msg
+
 class UnAuthorizedException(Exception):
     def __init__(self, expr, msg):
         self.expr = expr
@@ -194,7 +199,9 @@ class PublicanService:
         potfolder = os.path.join(os.getcwd(), 'pot')
         if os.path.isdir(potfolder):
             filelist = os.listdir(potfolder)
-        return filelist        
+            return filelist
+        else:
+            return None
 
     def create_pofile(self, lang, file, projectid, iterationid):
         filename = file[:-4]
@@ -266,8 +273,11 @@ class PublicanService:
         if not file:
             #check the pot folder to find all the pot file
             filelist = self.search_pot()
-            for pot in filelist:
-                self.create_pofile(lang, pot, projectid, iterationid)
+            if filelist:
+                for pot in filelist:
+                    self.create_pofile(lang, pot, projectid, iterationid)
+            else:
+                raise NoSuchFolderException('Error', 'Can not find pot folder')
         else:
             if self.check_pot(file):            
                 self.create_pofile(lang, file, projectid, iterationid)
