@@ -51,7 +51,7 @@ class NoSuchFileException(Exception):
        	self.expr = expr
        	self.msg = msg
 
-class NoSuchFolderException(Exception):
+class InvalidPOTFileoException(Exception):
     def __init__(self, expr, msg):
         self.expr = expr
         self.msg = msg
@@ -277,10 +277,12 @@ class PublicanService:
                 for pot in filelist:
                     self.create_pofile(lang, pot, projectid, iterationid)
             else:
-                raise NoSuchFolderException('Error', 'Can not find pot folder')
+                raise InvalidPOTFileException('Error', 'Can not find pot file')
         else:
             if self.check_pot(file):            
                 self.create_pofile(lang, file, projectid, iterationid)
+            else:
+                raise InvalidPOTFileException('Error', 'Can not find pot file')
 
 class FliesResource:
     def __init__(self, base_url, username = None, apikey = None):
