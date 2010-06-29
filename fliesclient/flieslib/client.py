@@ -51,7 +51,7 @@ class NoSuchFileException(Exception):
        	self.expr = expr
        	self.msg = msg
 
-class InvalidPOTFileoException(Exception):
+class InvalidPOTFileException(Exception):
     def __init__(self, expr, msg):
         self.expr = expr
         self.msg = msg
@@ -268,7 +268,7 @@ class PublicanService:
         else:
             raise InvalidOptionException('Error', 'Invalid Options')
            
-    def pull(self, lang, file, projectid, iterationid):
+    def pull(self, lang, projectid, iterationid, file = None):
         #if file no specified, retrieving all the file in project
         if not file:
             #check the pot folder to find all the pot file

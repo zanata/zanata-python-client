@@ -296,10 +296,13 @@ class FliesConsole:
         Get the content of the documents and save to the folder
         '''
         if args:
-            flies.publican.pull(self.options['lang'], args[0], self.options['project_id'], self.options['iteration_id'])
+            try:
+                flies.publican.pull(self.options['lang'], self.options['project_id'], self.options['iteration_id'], args[0])
+            except InvalidPOTFileException, err:
+                print "Can not find POT file under current folder"
         else:
             try:
-                flies.publican.pull(self.options['lang'], None, self.options['project_id'], self.options['iteration_id'])
+                flies.publican.pull(self.options['lang'], self.options['project_id'], self.options['iteration_id'])
             except InvalidPOTFileException, err:
                 print "Can not find POT file under current folder"
     
