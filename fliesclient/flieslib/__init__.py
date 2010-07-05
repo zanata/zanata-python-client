@@ -22,3 +22,4 @@
 
 from client import *
 from publican import *
+from potservice import *

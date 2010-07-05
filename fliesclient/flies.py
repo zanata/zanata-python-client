@@ -27,15 +27,9 @@ import json
 import os.path
 from parseconfig import FliesConfig
 from flieslib.client import FliesResource
-from flieslib.client import Project
-from flieslib.client import Iteration
-from flieslib.client import NoSuchFileException
-from flieslib.client import InvalidPOTFileException
-from flieslib.client import NoSuchProjectException
-from flieslib.client import UnAuthorizedException
-from flieslib.client import InvalidOptionException
-from flieslib.client import ProjectExistException
-from flieslib.client import BadRequestException
+from flieslib.project import Project
+from flieslib.project import Iteration
+from flieslib.error import *
 
 sub_command = {
                 'help':[],
@@ -270,8 +264,9 @@ class FliesConsole:
             sys.exit()
 
         for filename in args:
+            print "filename %s"%filename
             try:
-       	        result = flies.publican.push(filename, self.options['project_id'], self.options['iteration_id'])
+       	        result = flies.publican.push(self.options['project_id'], self.options['iteration_id'], filename)
                 if result == "Success":
                     print "Success push the content of %s to %s"%(filename, self.options['project_id'])
             except NoSuchFileException as e:
@@ -280,6 +275,8 @@ class FliesConsole:
                 print "Unauthorized Operation"
             except NoSuchProjectException as e:
                 print "No Such Project on the server"
+            except InvalidOptionException as e:
+                print "Options are not valid"
 
     def _pull_publican(self, args):
         if not self.options['server']:

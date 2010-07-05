@@ -25,6 +25,7 @@ __all__ = (
           )
 
 import polib
+from ordereddict import OrderedDict
 
 class Publican:
     def __init__(self, filepath):
@@ -36,12 +37,9 @@ class Publican:
         textflows = []
         for entry in po:
             textflowId = 'tf'+str(id)
-            textflow = {
-                'id' : textflowId,
-                'lang' : 'en',
-                'content' : entry.msgid,
-                'extensions' : []}
-            textflows.append(textflow)
+            textflow = [('id', textflowId), ('lang', 'en'), ('content', entry.msgid), ('extensions', [])]
+            orderedtf = OrderedDict(textflow)            
+            textflows.append(orderedtf)
             id = id+1
         return textflows
  
