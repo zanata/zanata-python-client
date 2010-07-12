@@ -36,28 +36,19 @@ from publican import Publican
 from error import *
 
 class PublicanService:    
-    def __init__(self, base_url, usrname = None, apikey = None):
-        self.restclient = RestClient(base_url)
-        self.username = usrname
-        self.apikey = apikey
+    def __init__(self, projects):
+        self.projects = projects
     
     def get_translations_from_flies(self, projectid, iterationid, filename, lang):
-        print projectid
-        print iterationid
-        print filename
-        print lang
-        if projectid and iterationid :
-            res, content = self.restclient.request_get('/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,
-            iterationid, filename, lang))
-            if res['status'] == '201':
-                return content
-            elif res['status'] == '404':
-                raise NoSuchProjectException('Error 404', 'No Such project')
-            elif res['status'] == '401':
-                raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
-        else:
-            raise InvalidOptionException('Error', 'Invalid Options')     
-        
+        res, content = self.projects.restclient.request_get('/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, filename, lang))
+
+        if res['status'] == '200':
+            return content
+        elif res['status'] == '404':
+            raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')
+        elif res['status'] == '401':
+            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
+                
     def hash_matches(self, message, id):
         m = hashlib.md5()
         m.update(message.msgid)
@@ -83,16 +74,30 @@ class PublicanService:
         else:
             return None
 
+    def get_file_list(self, projectid, iterationid):
+        res, content = self.projects.restclient.request_get('/projects/p/%s/iterations/i/%s/r'%(projectid, iterationid))
+        
+        if res['status'] == '200':
+            list = json.loads(content)
+            filelist = [file.get('name') for file in list]
+            return filelist
+    
     def create_pofile(self, lang, file, projectid, iterationid):
-        filename = file[:-4]
+        if '.' in file:        
+            filename = file.split('.')[0]
+        else:
+            filename = file
         poname = filename+'_%s.po'%lang.replace('-','_')
         pofile = os.path.join(os.getcwd(), poname)        
-        
+        potfile = os.path.join(os.getcwd(), 'pot/'+filename+'.pot')
+
+        if not os.path.isfile(potfile):
+            raise UnAvaliablePOTException('Error', 'The requested POT file is not available')                                    
+                   
         # If the PO file doesn't exist
         # create a PO file based on POT and language        
         if not os.path.isfile(pofile): 
             #copy the content of pot file to po file
-            potfile = os.path.join(os.getcwd(), 'pot/'+file)
             shutil.copy(potfile, pofile)
         
         #read the content of the po file
@@ -100,8 +105,11 @@ class PublicanService:
         po = publican.load_po()
         
         #retrieve the content from the flies server
-        translations = self.get_translations_from_flies(projectid, iterationid, filename, lang)
-        
+        try:        
+            translations = self.get_translations_from_flies(projectid, iterationid, filename, lang)
+        except Exception as e:
+            raise
+
         content = json.loads(translations)
         targets = content.get('textFlowTargets')    
         
@@ -113,63 +121,105 @@ class PublicanService:
         # copy any other stuff you need to transfer
         # finally save resulting pot as as myfile_lang.po
         po.save()
+        print "Successfully create %s"%poname
 
-    def post_server(self, projectid, iterationid, filename):
-        print 'filename %s'%filename
+    def _post_server(self, projectid, iterationid, file):
+        if '.' in file:
+            # Strip the file name        
+            filename = file.split('.')[0]
+        else:
+            filename = file        
+    
         headers = {}
-        headers['X-Auth-User'] = self.username
-        headers['X-Auth-Token'] = self.apikey        
-        filepath = os.path.join(os.getcwd(), filename)        
+        headers['X-Auth-User'] = self.projects.username
+        headers['X-Auth-Token'] = self.projects.apikey        
+        filepath = os.path.join(os.getcwd(), file)        
+        
         if not os.path.isfile(filepath):
             raise NoSuchFileException('Error', 'No Such File')
         
         publican = Publican(filepath) 
         textflows = publican.read_po()
-        items = [('name', filename), ('contentType','application/x-gettext'), ('lang', 'en'), ('extensions', []),
-        ('textFlows',textflows)]
+      
+        items = [('name', filename), ('contentType','application/x-gettext'), ('lang', 'en'), ('extensions', []), ('textFlows',textflows)]
         body = json.dumps(OrderedDict(items))
-               
-        if projectid and iterationid :
-            res, content = self.restclient.request_post('/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=body, headers=headers)
+      
+        res, content = self.projects.restclient.request_post('/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=body, headers=headers)
+
+        if res['status'] == '201':
+            print "Successfully push %s to the Flies server"%file
+        elif res['status'] == '401':
+            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
             
-            print res['status'] 
-            print content
-            if res['status'] == '201':
-                return "Success"
-            elif res['status'] == '404':
-                raise NoSuchProjectException('Error 404', 'No Such project')
-            elif res['status'] == '401':
-                raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
-        else:
-            raise InvalidOptionException('Error', 'Invalid Options')
-    
-    def push(self, projectid, iterationid, filename = None):
-        #if file no specified, push all the files in pot folder to flies server
+    def list(self, projectid, iterationid):
+        pass
+        
+    def push(self, projectid, iterationid, file = None):
+        if projectid and iterationid:
+            try:
+                self.projects.iterations.get(projectid, iterationid)
+            except NoSuchProjectException as e:
+                print "%s :%s"%(e.expr, e.msg)
+        
+        #if file not specified, push all the files in pot folder to flies server
         if not file:
             #check the pot folder to find all the pot file
             filelist = self.search_pot()
-            if filelist:
+            if filelist:                
                 for pot in filelist:
-                    self.post_server(projectid, iterationid, pot)
+                    print "\nPush the content of %s to Flies server: "%pot
+                    try:
+                        self._post_server(projectid, iterationid, pot)
+                    except UnAuthorizedException:
+                        print "%s :%s"%(e.expr, e.msg)                                            
+                        break
+                    else:
+                        continue
             else:
-                raise InvalidPOTFileException('Error', 'Can not find pot file')
+                raise NoSuchFileException('Error', 'No Such File')
         else:
-            print "push filename%s"%filename
-            self.post_server(projectid, iterationid, filename)
-           
+            print "\nPush the content of %s to Flies server: "%file
+            try:
+                self._post_server(projectid, iterationid, file)
+            except UnAuthorizedException:            
+                print "%s :%s"%(e.expr, e.msg)                    
+
     def pull(self, lang, projectid, iterationid, file = None):
-        #if file no specified, retrieving all the file in project
+        if projectid and iterationid:
+            try:
+                self.projects.iterations.get(projectid, iterationid)
+            except NoSuchProjectException as e:
+                print "%s :%s"%(e.expr, e.msg)
+
+        #if file no specified, retrieve all the file in project
         if not file:
-            #check the pot folder to find all the pot file
-            filelist = self.search_pot()
+            #list the files in project
+            filelist = self.get_file_list(projectid, iterationid)
             if filelist:
-                for pot in filelist:
-                    self.create_pofile(lang, pot, projectid, iterationid)
-            else:
-                raise InvalidPOTFileException('Error', 'Can not find pot file')
+                for file in filelist:
+                    print "\nFetch the content of %s from Flies server: "%file                    
+                    try:    
+                        self.create_pofile(lang, file, projectid, iterationid)
+                    except UnAuthorizedException:
+                        print "%s :%s"%(e.expr, e.msg)                        
+                        break
+                    except UnAvaliableResourceException as e:
+                        print "%s :%s"%(e.expr, e.msg)
+                        continue
+                    except UnAvaliablePOTException as e:
+                        print "%s :%s"%(e.expr, e.msg)
+                        continue                   
+                    else:
+                        continue
         else:
-            if self.check_pot(file):            
+            print "\nFetch the content of %s from Flies server: "%file
+            try:            
                 self.create_pofile(lang, file, projectid, iterationid)
-            else:
-                raise InvalidPOTFileException('Error', 'Can not find pot file')
+            except UnAuthorizedException:
+                print "%s :%s"%(e.expr, e.msg)                        
+            except UnAvaliableResourceException as e:
+                print "%s :%s"%(e.expr, e.msg)
+            except UnAvaliablePOTException as e:
+                print "%s :%s"%(e.expr, e.msg)
+            
 

@@ -25,7 +25,8 @@ __all__ = (
         "NoSuchProjectException", "InvalidOptionException", 
         "NoSuchFileException", "InvalidPOTFileException",
         "UnAuthorizedException", "BadRequestException",
-        "ProjectExistException"
+        "ProjectExistException", "UnAvaliableResourceException",
+        "UnAvaliablePOTException"
 )
 
 class NoSuchProjectException(Exception):
@@ -49,6 +50,16 @@ class InvalidPOTFileException(Exception):
         self.msg = msg
 
 class UnAuthorizedException(Exception):
+    def __init__(self, expr, msg):
+        self.expr = expr
+        self.msg = msg
+
+class UnAvaliablePOTException(Exception):
+    def __init__(self, expr, msg):
+        self.expr = expr
+        self.msg = msg
+
+class UnAvaliableResourceException(Exception):
     def __init__(self, expr, msg):
         self.expr = expr
         self.msg = msg

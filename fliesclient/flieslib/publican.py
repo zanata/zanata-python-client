@@ -25,6 +25,7 @@ __all__ = (
           )
 
 import polib
+import hashlib
 from ordereddict import OrderedDict
 
 class Publican:
@@ -33,14 +34,14 @@ class Publican:
 	    
     def read_po(self):
         po = polib.pofile(self.path)
-        id = 1
         textflows = []
         for entry in po:
-            textflowId = 'tf'+str(id)
+            m = hashlib.md5()
+            m.update(entry.msgid)
+            textflowId = m.hexdigest() 
             textflow = [('id', textflowId), ('lang', 'en'), ('content', entry.msgid), ('extensions', [])]
             orderedtf = OrderedDict(textflow)            
             textflows.append(orderedtf)
-            id = id+1
         return textflows
  
     def load_po(self):

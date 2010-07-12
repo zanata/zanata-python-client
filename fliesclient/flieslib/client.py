@@ -33,5 +33,5 @@ class FliesResource:
     def __init__(self, base_url, username = None, apikey = None):
         self.base_url = base_url
         self.projects = ProjectService(base_url, username, apikey)
-        self.publican = PublicanService(base_url, username, apikey)
+        self.publican = PublicanService(self.projects)
 

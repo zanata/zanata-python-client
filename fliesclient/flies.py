@@ -56,7 +56,8 @@ class FliesConsole:
                         'user':user,
                         'apikey':apikey,
                         'name':'',
-                        'desc':''
+                        'desc':'',
+                        'lang':''
                        }
      
     def _print_usage(self):
@@ -259,50 +260,44 @@ class FliesConsole:
             print "Please provide username and apikey in .fliesrc"
             sys.exit()
 
-        if not args:
-            print "Please provide at least one file name for processing"
+        if not self.options['project_id']:
+            print "Please provide valid project id by '--project' option"
             sys.exit()
-
-        for filename in args:
-            print "filename %s"%filename
-            try:
-       	        result = flies.publican.push(self.options['project_id'], self.options['iteration_id'], filename)
-                if result == "Success":
-                    print "Success push the content of %s to %s"%(filename, self.options['project_id'])
-            except NoSuchFileException as e:
-       	        print "Can not find file"
-            except UnAuthorizedException as e:
-                print "Unauthorized Operation"
-            except NoSuchProjectException as e:
-                print "No Such Project on the server"
-            except InvalidOptionException as e:
-                print "Options are not valid"
+        
+        if not self.options['iteration_id']:
+            print "Please provide valid iteration id by fliesrc or by '--iteration' option"
+            sys.exit()
+        
+        if args:
+            flies.publican.push(self.options['project_id'], self.options['iteration_id'], args[0])
+        else:
+            flies.publican.push(self.options['project_id'], self.options['iteration_id'])
 
     def _pull_publican(self, args):
         if not self.options['server']:
             print "Please provide valid server url by fliesrc or by '--server' option"
             sys.exit()
+        
+        if not self.options['lang']:
+            print "Please specify the language by '--lang' option"
+            sys.exit()
 
-        if self.options['user'] and self.options['apikey']:
-            flies = FliesResource(self.options['server'], self.options['user'], self.options['apikey'])
-        else:
-            print "Please provide username and apikey in .fliesrc"
+        if not self.options['project_id']:
+            print "Please provide valid project id by '--project' option"
             sys.exit()
         
+        if not self.options['iteration_id']:
+            print "Please provide valid iteration id by fliesrc or by '--iteration' option"
+            sys.exit()
+
         '''
         Get the content of the documents and save to the folder
         '''
         if args:
-            try:
-                flies.publican.pull(self.options['lang'], self.options['project_id'], self.options['iteration_id'], args[0])
-            except InvalidPOTFileException, err:
-                print "Can not find POT file under current folder"
+            flies.publican.pull(self.options['lang'], self.options['project_id'], self.options['iteration_id'], args[0])
         else:
-            try:
-                flies.publican.pull(self.options['lang'], self.options['project_id'], self.options['iteration_id'])
-            except InvalidPOTFileException, err:
-                print "Can not find POT file under current folder"
-    
+            flies.publican.pull(self.options['lang'], self.options['project_id'], self.options['iteration_id'])
+   
     def _remove_project(self):
         pass
 

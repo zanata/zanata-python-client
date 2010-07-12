@@ -50,8 +50,7 @@ class ProjectService:
     def get(self, projectid):
         res, content = self.restclient.request_get('/projects/p/%s'%projectid)
         if res['status'] == '200':
-            my_project = Project(json = json.loads(content), iterations = self.iterations)
-            return my_project
+            return Project(json = json.loads(content), iterations = self.iterations)
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')
 
