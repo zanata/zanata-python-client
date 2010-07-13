@@ -290,6 +290,8 @@ class FliesConsole:
             print "Please provide valid iteration id by fliesrc or by '--iteration' option"
             sys.exit()
 
+        flies = FliesResource(self.options['server'])
+        
         '''
         Get the content of the documents and save to the folder
         '''
