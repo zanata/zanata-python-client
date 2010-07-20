@@ -204,6 +204,14 @@ class FliesConsole:
         else:
             print "Please provide username and apikey in .fliesrc"
             sys.exit()
+
+        if not args:
+            print "Please provide PROJECT_ID for creating project"
+            sys.exit()
+
+        if not self.options['name']:
+            print "Please provide Project name by '--name' option"
+            sys.exit()
         
         try:
             p = Project(id = args[0], name = self.options['name'], desc = self.options['desc'])
@@ -214,8 +222,6 @@ class FliesConsole:
             print "No Such Project on the server" 
         except UnAuthorizedException as e:
             print "Unauthorized Operation"
-        except InvalidOptionException as e:
-            print "Options are not valid"
         except ProjectExistException as e:
             print "The project is alreasy exist on the server"
 
@@ -232,6 +238,10 @@ class FliesConsole:
         
         if not args:
             print "Please provide ITERATION_ID for creating iteration"
+            sys.exit()
+
+        if not self.options['name']:
+            print "Please provide Iteration name by '--name' option"
             sys.exit()
          
         try:

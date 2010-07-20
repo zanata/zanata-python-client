@@ -24,6 +24,7 @@ __all__ = (
         "ProjectService", 
    )
 
+import sys
 import json
 from ordereddict import OrderedDict
 from rest.client import RestClient
@@ -39,13 +40,17 @@ class ProjectService:
         self.apikey = apikey
 
     def list(self):
-        res, content = self.restclient.request_get('/projects')
-        if res['status'] == '200':
-            projects = []
-            projects_json = json.loads(content)
-            for p in projects_json:
-                projects.append(Project(json = p))
-            return projects
+        try:
+            res, content = self.restclient.request_get('/projects')
+            if res['status'] == '200':
+                projects = []
+                projects_json = json.loads(content)
+                for p in projects_json:
+                    projects.append(Project(json = p))
+                return projects
+        except Exception as e:
+            print e
+            sys.exit(2)
 
     def get(self, projectid):
         res, content = self.restclient.request_get('/projects/p/%s'%projectid)
@@ -65,22 +70,20 @@ class ProjectService:
         except NoSuchProjectException:
             exist = False
 
-        if project.name and project.desc and not exist:
-            body ='''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(project.name,project.id,project.desc)
-            res, content = self.restclient.request_put('/projects/p/%s'%project.id, args=body, headers=headers)
-            if res['status'] == '201':
-                return "Success"
-            elif rest['status'] == '200':
-                raise ProjectExistException('Status 200', 'The project is already exist')
-            elif res['status'] == '404':
-                raise NoSuchProjectException('Error 404', 'No Such project')
-            elif res['status'] == '401':
-                raise UnAuthorizedException('Error 401', 'Un Authorized Operation')
-            elif res['status'] == '400':
-                raise BadRequestException('Error 400', 'Bad Request')
-        else:
-            raise InvalidOptionException('Error','Invalid Options') 
-            
+        body ='''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(project.name,project.id,project.desc)
+        res, content = self.restclient.request_put('/projects/p/%s'%project.id, args=body, headers=headers)
+        
+        if res['status'] == '201':
+            return "Success"
+        elif rest['status'] == '200':
+            raise ProjectExistException('Status 200', 'The project is already exist')
+        elif res['status'] == '404':
+            raise NoSuchProjectException('Error 404', 'No Such project')
+        elif res['status'] == '401':
+            raise UnAuthorizedException('Error 401', 'Un Authorized Operation')
+        elif res['status'] == '400':
+            raise BadRequestException('Error 400', 'Bad Request')
+                    
     def delete(self):
         pass
 
@@ -106,19 +109,16 @@ class IterationService:
         headers['X-Auth-User'] = self.username
         headers['X-Auth-Token'] = self.apikey
         
-        if iteration.name and iteration.desc :
-            body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iteration.name, iteration.id, iteration.desc)
-            res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iteration.id), args=body, headers=headers)
-            if res['status'] == '201':
-                return "Success"
-            elif rest['status'] == '200':
-                raise ProjectExistException('Status 200', 'The project is already exist')
-            elif res['status'] == '404':
-                raise NoSuchProjectException('Error 404', 'No Such project')
-            elif res['status'] == '401':
-                raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
-        else:
-            raise InvalidOptionException('Error', 'Invalid Options')
-    
+        body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iteration.name, iteration.id, iteration.desc)
+        res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iteration.id), args=body, headers=headers)
+        if res['status'] == '201':
+            return "Success"
+        elif rest['status'] == '200':
+            raise ProjectExistException('Status 200', 'The project is already exist')
+        elif res['status'] == '404':
+            raise NoSuchProjectException('Error 404', 'No Such project')
+        elif res['status'] == '401':
+            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
+            
     def delete(self):
         pass

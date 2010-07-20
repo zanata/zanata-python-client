@@ -60,6 +60,6 @@ class RestClient():
         try:
             response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body=body, headers=headers)
             return (response, content.decode("UTF-8"))
-        except socket.error, msg:
-            print msg 
-            sys.exit(1)
+        except Exception as e:
+            raise 
+
