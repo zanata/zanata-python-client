@@ -2,7 +2,7 @@
 # 
 # Flies Python Client
 #
-# Copyright (c) 2010 Jian Ni <jni@gmail.com>
+# Copyright (c) 2010 Jian Ni <jni@redhat.com>
 # Copyright (c) 2010 Red Hat, Inc.
 #
 # This library is free software; you can redistribute it and/or
