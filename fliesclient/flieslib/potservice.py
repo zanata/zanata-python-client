@@ -215,7 +215,7 @@ class PublicanService:
             print "\nFetch the content of %s from Flies server: "%file
             try:            
                 self.create_pofile(lang, file, projectid, iterationid)
-            except UnAuthorizedException:
+            except UnAuthorizedException as e:
                 print "%s :%s"%(e.expr, e.msg)                        
             except UnAvaliableResourceException as e:
                 print "%s :%s"%(e.expr, e.msg)

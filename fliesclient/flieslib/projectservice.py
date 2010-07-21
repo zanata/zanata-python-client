@@ -24,6 +24,9 @@ __all__ = (
         "ProjectService", 
    )
 
+"""Provides services to interact with Project and Iteration Resources
+ProjectService: handle operaions of list, create and retrieve Project Resources  
+"""
 import sys
 import json
 from ordereddict import OrderedDict
@@ -40,25 +43,27 @@ class ProjectService:
         self.apikey = apikey
 
     def list(self):
-        try:
-            res, content = self.restclient.request_get('/projects')
-            if res['status'] == '200':
-                projects = []
-                projects_json = json.loads(content)
-                for p in projects_json:
-                    projects.append(Project(json = p))
-                return projects
-        except Exception as e:
-            print e
-            sys.exit(2)
-
+        res, content = self.restclient.request_get('/projects')
+        if res['status'] == '200':
+            projects = []
+            projects_json = json.loads(content)
+            for p in projects_json:
+                projects.append(Project(json = p))
+            return projects
+       
+    """
+    Retrieve specified Project Resources on the Flies server
+    Args: projectid: Id of Project Resource
+    Returns: Project object
+    Raise: a NoSuchProjectException
+    """    
     def get(self, projectid):
         res, content = self.restclient.request_get('/projects/p/%s'%projectid)
         if res['status'] == '200':
             return Project(json = json.loads(content), iterations = self.iterations)
         elif res['status'] == '404':
-            raise NoSuchProjectException('Error 404', 'No Such project')
-
+            raise NoSuchProjectException('Error 404', 'No Such project') 
+        
     def create(self, project):
         exist = False
         headers = {}
@@ -99,8 +104,7 @@ class IterationService:
     def get(self, projectid, iterationid):
         res, content = self.restclient.request_get('/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
         if res['status'] == '200':
-            iter = Iteration(json.loads(content))
-            return iter
+            return Iteration(json.loads(content))
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')
         

@@ -61,5 +61,6 @@ class RestClient():
             response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body=body, headers=headers)
             return (response, content.decode("UTF-8"))
         except Exception as e:
-            raise 
+            print e
+            sys.exit(2) 
 
