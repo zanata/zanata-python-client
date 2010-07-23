@@ -42,6 +42,11 @@ class ProjectService:
         self.username = usrname
         self.apikey = apikey
 
+    """
+    List the Project Resources on the Flies server
+    Args: None
+    Returns: list of Project object
+    """
     def list(self):
         res, content = self.restclient.request_get('/projects')
         if res['status'] == '200':
@@ -52,7 +57,7 @@ class ProjectService:
             return projects
        
     """
-    Retrieve specified Project Resources on the Flies server
+    Retrieve a specified Project Resource on Flies server
     Args: projectid: Id of Project Resource
     Returns: Project object
     Raise: a NoSuchProjectException
@@ -63,7 +68,13 @@ class ProjectService:
             return Project(json = json.loads(content), iterations = self.iterations)
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project') 
-        
+    
+    """
+    Create a Project Resource on Flies Server
+    Args: project: Project object
+    Returns: Success if status of response is 201
+    Raises: ProjectExistException, NoSuchProjectException, UnAuthorizedException and BadRequestException
+    """
     def create(self, project):
         exist = False
         headers = {}
@@ -82,7 +93,7 @@ class ProjectService:
             return "Success"
         elif rest['status'] == '200':
             raise ProjectExistException('Status 200', 'The project is already exist')
-        elif res['status'] == '404':
+        eloif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'Un Authorized Operation')
@@ -101,13 +112,29 @@ class IterationService:
         self.username = usrname
         self.apikey = apikey
     
+    """
+    Retrieve a specified Iteration Resource on Flies server
+    Args: 
+        projectid: Id of Project Resource
+        iteraionid: Id of Iteration Resource
+    Returns: Iteration object
+    Raise: a NoSuchProjectException
+    """
     def get(self, projectid, iterationid):
         res, content = self.restclient.request_get('/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
         if res['status'] == '200':
             return Iteration(json.loads(content))
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')
-        
+    
+    """
+    Create a Iteration Resource on Flies Server
+    Args: 
+        projectid: Id of Project Resource
+        iteraion: Iteration object
+    Returns: Success if status of response is 201
+    Raises: ProjectExistException, NoSuchProjectException, UnAuthorizedException and BadRequestException
+    """    
     def create(self, projectid, iteration):
         headers = {}
         headers['X-Auth-User'] = self.username
