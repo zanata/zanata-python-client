@@ -93,7 +93,7 @@ class ProjectService:
             return "Success"
         elif rest['status'] == '200':
             raise ProjectExistException('Status 200', 'The project is already exist')
-        eloif res['status'] == '404':
+        elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'Un Authorized Operation')

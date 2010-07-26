@@ -39,6 +39,18 @@ class PublicanService:
     def __init__(self, projects):
         self.projects = projects
     
+    """
+    Get translation content of specified file from Flies server
+    Args: 
+        projectid: Id of project
+        iterationid: Id of iteration
+        filename: name of PO file
+        lang: language
+    Returns:
+        content: translation content
+    Raises:
+        UnAvaliableResourceException, UnAuthorizedException 
+    """
     def get_translations_from_flies(self, projectid, iterationid, filename, lang):
         res, content = self.projects.restclient.request_get('/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, filename, lang))
 
@@ -57,6 +69,14 @@ class PublicanService:
         else:
             return False
    
+    """
+    Search POT file in POT folder
+    Args:
+        file:the POT file
+    Returns:
+        True: If the POT file exist in POT folder
+        False: If the POT file does not exist in POT folder 
+    """
     def check_pot(self, file):
         #search pot folder in current folder
         potfolder = os.path.join(os.getcwd(), 'pot')    
@@ -82,6 +102,10 @@ class PublicanService:
             filelist = [file.get('name') for file in list]
             return filelist
     
+    """
+    Create PO file based on the POT file in POT folder
+
+    """
     def create_pofile(self, lang, file, projectid, iterationid):
         if '.' in file:        
             filename = file.split('.')[0]
@@ -184,6 +208,13 @@ class PublicanService:
             except UnAuthorizedException:            
                 print "%s :%s"%(e.expr, e.msg)                    
 
+    """
+    Retrieve all the files of a project
+    Args:
+        lang: language
+        projectid: Id of project
+        iterationid: Id of iteration
+    """
     def pull(self, lang, projectid, iterationid, file = None):
         if projectid and iterationid:
             try:
@@ -191,7 +222,7 @@ class PublicanService:
             except NoSuchProjectException as e:
                 print "%s :%s"%(e.expr, e.msg)
 
-        #if file no specified, retrieve all the file in project
+        #if file no specified, retrieve all the files of project
         if not file:
             #list the files in project
             filelist = self.get_file_list(projectid, iterationid)

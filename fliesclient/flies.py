@@ -49,6 +49,8 @@ class FliesConsole:
     	iteration_id = config.get_config_value("project.iteration.id") 
     	user = config.get_config_value("user")
     	apikey = config.get_config_value("apikey")
+        potfolder = config.get_config_value("potfolder")
+        pofolder = config.get_config_value("pofolder")
         self.options = {
                         'server' : server,
                         'project_id':project_id,
