@@ -39,19 +39,19 @@ class PublicanService:
     def __init__(self, projects):
         self.projects = projects
     
-    """
-    Get translation content of specified file from Flies server
-    Args: 
-        projectid: Id of project
-        iterationid: Id of iteration
-        filename: name of PO file
-        lang: language
-    Returns:
-        content: translation content
-    Raises:
-        UnAvaliableResourceException, UnAuthorizedException 
-    """
     def get_translations_from_flies(self, projectid, iterationid, filename, lang):
+        """
+        Get translation content of specified file from Flies server
+        Args: 
+            projectid: Id of project
+            iterationid: Id of iteration
+            filename: name of PO file
+            lang: language
+        Returns:
+            content: translation content
+        Raises:
+            UnAvaliableResourceException, UnAuthorizedException 
+        """
         res, content = self.projects.restclient.request_get('/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, filename, lang))
 
         if res['status'] == '200':
@@ -68,17 +68,16 @@ class PublicanService:
             return True
         else:
             return False
-   
-    """
-    Search POT file in POT folder
-    Args:
-        file:the POT file
-    Returns:
-        True: If the POT file exist in POT folder
-        False: If the POT file does not exist in POT folder 
-    """
+
     def check_pot(self, file):
-        #search pot folder in current folder
+        """
+        Search POT file in POT folder
+        Args:
+            file:the POT file
+        Returns:
+            True: If the POT file exist in POT folder
+            False: If the POT file does not exist in POT folder 
+        """
         potfolder = os.path.join(os.getcwd(), 'pot')    
         if file in os.listdir(potfolder):
             return True
@@ -86,7 +85,6 @@ class PublicanService:
             return False
     
     def search_pot(self):
-        #search pot folder in current folder        
         potfolder = os.path.join(os.getcwd(), 'pot')
         if os.path.isdir(potfolder):
             filelist = os.listdir(potfolder)
@@ -102,11 +100,16 @@ class PublicanService:
             filelist = [file.get('name') for file in list]
             return filelist
     
-    """
-    Create PO file based on the POT file in POT folder
-
-    """
     def create_pofile(self, lang, file, projectid, iterationid):
+        """
+        Create PO file based on the POT file in POT folder
+        Args:
+            lang: language 
+            projectid: Id of project
+            iterationid: Id of iteration
+            file: name of PO file
+            
+        """
         if '.' in file:        
             filename = file.split('.')[0]
         else:
@@ -208,14 +211,15 @@ class PublicanService:
             except UnAuthorizedException:            
                 print "%s :%s"%(e.expr, e.msg)                    
 
-    """
-    Retrieve all the files of a project
-    Args:
-        lang: language
-        projectid: Id of project
-        iterationid: Id of iteration
-    """
+
     def pull(self, lang, projectid, iterationid, file = None):
+        """
+        Retrieve all the files of a project
+        Args:
+            lang: language
+            projectid: Id of project
+            iterationid: Id of iteration
+        """
         if projectid and iterationid:
             try:
                 self.projects.iterations.get(projectid, iterationid)
