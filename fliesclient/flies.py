@@ -255,7 +255,7 @@ class FliesConsole:
 
     def _push_publican(self, args):
         """
-        Push the document to the Flies server
+        Push the documents to Project on Flies server
         """
         if self.options['user'] and self.options['apikey']:
             flies = FliesResource(self.options['server'], self.options['user'], self.options['apikey'])
@@ -278,7 +278,7 @@ class FliesConsole:
 
     def _pull_publican(self, args):
         """
-        Retrieve the content of documents on Flies server
+        Retrieve the content of documents in a Project on Flies server
         """
         if not self.options['lang']:
             print "Please specify the language by '--lang' option"

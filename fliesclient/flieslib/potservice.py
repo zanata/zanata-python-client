@@ -30,7 +30,6 @@ import json
 import hashlib
 import polib
 import shutil
-from ordereddict import OrderedDict
 from rest.client import RestClient
 from publican import Publican
 from error import *
@@ -160,24 +159,29 @@ class PublicanService:
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
-        filepath = os.path.join(os.getcwd(), file)        
+        filepath = os.path.join(os.getcwd(), "pot/"+file)        
         
+        print "File path:%s"%filepath
         if not os.path.isfile(filepath):
             raise NoSuchFileException('Error', 'No Such File')
         
         publican = Publican(filepath) 
         textflows = publican.read_po()
       
-        items = [('name', filename), ('contentType','application/x-gettext'), ('lang', 'en'), ('extensions', []), ('textFlows',textflows)]
+        items = [('name',filename), ('contentType','application/x-gettext'), ('lang','en'), ('extensions',[]),
+        ('textFlows',textflows)]
         body = json.dumps(OrderedDict(items))
-      
+        print body 
         res, content = self.projects.restclient.request_post('/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=body, headers=headers)
 
+        print "Respond:%s Content:%s"%(res['status'], content)
         if res['status'] == '201':
             print "Successfully push %s to the Flies server"%file
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
-            
+        elif res['status'] == '400':
+            print "Unable to read request body"
+                      
     def list(self, projectid, iterationid):
         pass
         
@@ -197,7 +201,7 @@ class PublicanService:
                     print "\nPush the content of %s to Flies server: "%pot
                     try:
                         self._post_server(projectid, iterationid, pot)
-                    except UnAuthorizedException:
+                    except UnAuthorizedException as e:
                         print "%s :%s"%(e.expr, e.msg)                                            
                         break
                     else:

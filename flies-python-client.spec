@@ -10,6 +10,8 @@ Group: Development/Tools
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 BuildRequires: python-setuptools
+BuildRequires: python-polib
+Requires: python-polib
 
 %description
 Flies Python client is a client that communicate with Flies server for creating project

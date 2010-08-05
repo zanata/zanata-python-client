@@ -7,6 +7,9 @@ from setuptools import setup, find_packages
 setup (name = "flies-python-client",
     version = '0.0.1',
     packages = find_packages(),
+    install_requires=[
+        'polib'        
+    ]
     description = "Flies Python Client.",
     author = 'Jian Ni',
     author_email = 'jni@redhat.com',
