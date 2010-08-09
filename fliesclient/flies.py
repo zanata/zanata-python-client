@@ -57,6 +57,8 @@ class FliesConsole:
                         'iteration_id':iteration_id,
                         'user':user,
                         'apikey':apikey,
+                        'potfolder':potfolder,
+                        'pofolder':pofolder,
                         'name':'',
                         'desc':'',
                         'lang':''
@@ -270,11 +272,11 @@ class FliesConsole:
         if not self.options['iteration_id']:
             print "Please provide valid iteration id by fliesrc or by '--iteration' option"
             sys.exit()
-        
+
         if args:
             flies.publican.push(self.options['project_id'], self.options['iteration_id'], args[0])
         else:
-            flies.publican.push(self.options['project_id'], self.options['iteration_id'])
+            flies.publican.push(self.options['project_id'], self.options['iteration_id'], None, self.options['potfolder'])
 
     def _pull_publican(self, args):
         """
@@ -291,14 +293,23 @@ class FliesConsole:
         if not self.options['iteration_id']:
             print "Please provide valid iteration id by fliesrc or by '--iteration' option"
             sys.exit()
+        
+        if not self.options['potfolder']:
+            print "Please provide folder for storting the template files in .fliesrc"
+            sys.exit()
+
+        if not self.options['pofolder']:
+            print "Please provide folder for storting the output files in .fliesrc"
+            sys.exit()
 
         flies = FliesResource(self.options['server'])
         
         #Get the content of the documents and save to the folder
         if args:
-            flies.publican.pull(self.options['lang'], self.options['project_id'], self.options['iteration_id'], args[0])
+            flies.publican.pull(self.options['lang'], self.options['project_id'], self.options['iteration_id'],self.options['potfolder'], self.options['pofolder'], args[0])
         else:
-            flies.publican.pull(self.options['lang'], self.options['project_id'], self.options['iteration_id'])
+            flies.publican.pull(self.options['lang'], self.options['project_id'],
+            self.options['iteration_id'], self.options['potfolder'], self.options['pofolder'])
    
     def _remove_project(self):
         pass
