@@ -26,50 +26,44 @@ __all__ = (
         "NoSuchFileException", "InvalidPOTFileException",
         "UnAuthorizedException", "BadRequestException",
         "ProjectExistException", "UnAvaliableResourceException",
-        "UnAvaliablePOTException"
+        "UnAvaliablePOTException", "BadRequestBodyException",
+        "SameNameDocumentException"
 )
-
-class NoSuchProjectException(Exception):
+class FliesException(Exception):
     def __init__(self, expr, msg):
         self.expr = expr
         self.msg = msg
 
-class InvalidOptionException(Exception):
-    def __init__(self, expr, msg):
-        self.expr = expr
-        self.msg = msg
+class NoSuchProjectException(FliesException):
+    pass
 
-class NoSuchFileException(Exception):
-    def __init__(self, expr, msg):
-       	self.expr = expr
-       	self.msg = msg
+class InvalidOptionException(FliesException):
+    pass 
 
-class InvalidPOTFileException(Exception):
-    def __init__(self, expr, msg):
-        self.expr = expr
-        self.msg = msg
+class NoSuchFileException(FliesException):
+    pass 
 
-class UnAuthorizedException(Exception):
-    def __init__(self, expr, msg):
-        self.expr = expr
-        self.msg = msg
+class InvalidPOTFileException(FliesException):
+    pass 
 
-class UnAvaliablePOTException(Exception):
-    def __init__(self, expr, msg):
-        self.expr = expr
-        self.msg = msg
+class UnAuthorizedException(FliesException):
+    pass 
 
-class UnAvaliableResourceException(Exception):
-    def __init__(self, expr, msg):
-        self.expr = expr
-        self.msg = msg
+class UnAvaliablePOTException(FliesException):
+    pass 
 
-class BadRequestException(Exception):
-    def __init__(self, expr, msg):
-        self.expr = expr
-        self.msg = msg
+class UnAvaliableResourceException(FliesException):
+    pass
 
-class ProjectExistException(Exception):
-    def __init__(self, expr, msg):
-        self.expr = expr
-        self.msg = msg
+class BadRequestException(FliesException):
+    pass
+
+class ProjectExistException(FliesException):
+    pass
+
+class BadRequestBodyException(FliesException):
+    pass
+
+class SameNameDocumentException(FliesException):
+    pass
+

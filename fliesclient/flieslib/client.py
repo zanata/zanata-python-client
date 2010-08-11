@@ -26,12 +26,12 @@ __all__ = (
    )
 
 
-from potservice import PublicanService
+from resservice import ResourceService
 from projectservice import ProjectService
 
 class FliesResource:
     def __init__(self, base_url, username = None, apikey = None):
         self.base_url = base_url
         self.projects = ProjectService(base_url, username, apikey)
-        self.publican = PublicanService(self.projects)
+        self.resources = ResourceService(self.projects)
 
