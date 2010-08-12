@@ -26,7 +26,6 @@ __all__ = (
 
 import sys
 import json
-from ordereddict import OrderedDict
 from rest.client import RestClient
 from project import Project
 from project import Iteration
