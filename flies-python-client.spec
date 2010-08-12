@@ -2,8 +2,8 @@
 
 Summary: Python Client for Flies Server
 Name: flies-python-client
-Version: 0.0.1
-Release: 2%{?dist}
+Version: 0.0.2
+Release: 1%{?dist}
 Source0: http://jamesni.fedorapeople.org/%{name}/%{name}-%{version}.tar.gz
 License: LGPLv2+
 Group: Development/Tools
