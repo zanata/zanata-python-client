@@ -8,15 +8,13 @@ Source0: http://jamesni.fedorapeople.org/%{name}/%{name}-%{version}.tar.gz
 License: LGPLv2+
 Group: Development/Tools
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildArch: noarch
 BuildRequires: python-setuptools
 BuildRequires: python-polib
-Requires: python-polib
+BuildArch: noarch
+URL: http://code.google.com/p/flies/wiki/FliesPythonClient
 
 %description
-Flies Python client is a client that communicate with Flies server for creating project
-or iteration, retrieving info of projects, single project or single iteration.
-It also provide publican support for pull or push the content with Flies server.
+Flies Python client is a client that communicate with Flies server.
 
 %prep
 %setup -q
@@ -36,3 +34,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 %{_libdir}/*
 
+%changelog 
+
+* Fri Aug 13 2010 James Ni <jni@redhat.com> - 0.0.2-1
+- initial package (#623871)

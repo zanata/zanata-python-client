@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 #vim:set et sts=4 sw=4:
 #
 # Flies Python Client

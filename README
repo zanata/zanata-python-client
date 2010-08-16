@@ -1,0 +1,40 @@
+Flies Python client is a client that communicate with Flies server for creating project or iteration, retrieving info of projects, single project or single iteration.
+It also provide publican support for pull or push the content with Flies server.
+
+http://code.google.com/p/flies/wiki/FliesPythonClient
+
+Command of Usage:
+
+Basic Usage: flies COMMAND [ARGS] [COMMAND_OPTIONS]
+Listing / Querying for Projects
+
+$ flies list
+
+Creating a project
+
+$ flies project create {project_id} --name={projec_name} --description={project_description}
+
+Working within a single container (i.e. project iteration)
+
+These commands would take settings from the local .fliesrc or you could use the --project and --iteration parameters.
+Create a Project iteration
+
+$ flies iteration create {iteration_id} --project={project_id} --name={iteration_name} --description={iteration_description}
+
+Query for information of a project
+
+$ flies project info --project={project_id} 
+
+Query for information of a project iteration
+
+$ flies iteration info --project={project_id} --iteration={iteration_id} 
+
+Retrieving translated Documents from Flies
+
+$ flies publican pull --project={project_id} --iteration={iteration_id} --lang=language [documentIds..]
+
+Publishing translations of Documents to Flies
+
+$ flies publican push --project={project_id} --iteration={iteration_id} --lang=language [documentIds..]
+
+
