@@ -35,6 +35,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*
 
 %changelog 
+* Mon Aug 16 2010 James Ni <jni@redhat.com> - 0.0.2-1
+- remove shebang from flies.py 
 
 * Fri Aug 13 2010 James Ni <jni@redhat.com> - 0.0.2-1
 - initial package (#623871)
