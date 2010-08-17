@@ -3,7 +3,7 @@
 Summary: Python Client for Flies Server
 Name: flies-python-client
 Version: 0.0.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 Source0: http://jamesni.fedorapeople.org/%{name}/%{name}-%{version}.tar.gz
 License: LGPLv2+
 Group: Development/Tools
@@ -23,6 +23,7 @@ Flies Python client is a client that communicate with Flies server.
 python setup.py build
 
 %install
+rm -rf $RPM_BUILD_ROOT
 %{__python} setup.py install --skip-build --root $RPM_BUILD_ROOT
 
 %clean
@@ -31,11 +32,11 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-, root, root, -)
 %doc README COPYING
+%{python_sitelib}/*
 %{_bindir}/*
-%{_libdir}/*
 
 %changelog 
-* Mon Aug 16 2010 James Ni <jni@redhat.com> - 0.0.2-1
+* Mon Aug 16 2010 James Ni <jni@redhat.com> - 0.0.2-2
 - remove shebang from flies.py 
 
 * Fri Aug 13 2010 James Ni <jni@redhat.com> - 0.0.2-1
