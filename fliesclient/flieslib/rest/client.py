@@ -51,7 +51,7 @@ class RestClient():
     def request(self, resource, method = "get", args = None, body = None, headers = {}):
         path = resource
         headers['Accept'] = 'application/json'
-        http = httplib2.Http()
+        http = httplib2.Http(".cache")
         
         if args:
             if method == "put" or method == "post":

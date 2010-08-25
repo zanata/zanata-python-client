@@ -1,5 +1,5 @@
-#vim:set et sts=4 sw=4: 
-#  
+# vim:set et sts=4 sw=4: 
+# 
 # Flies Python Client
 #
 # Copyright (c) 2010 Jian Ni <jni@redhat.com>
@@ -20,9 +20,31 @@
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 # Boston, MA  02111-1307  USA
 
-from client import *
-from resservice import *
-from error import *
-from projectservice import *
-from project import *
-from jsonmodel import *
+__all__ = (
+            "Publican",
+          )
+
+import polib
+import hashlib
+
+class Publican:
+    def __init__(self, filepath):
+        self.path = filepath
+	    
+    def read_po(self):
+        po = polib.pofile(self.path)
+        textflows = []
+        for entry in po:
+            m = hashlib.md5()
+            m.update(entry.msgid)
+            textflowId = m.hexdigest() 
+            textflow = {'id': textflowId, 'lang':'en', 'content':entry.msgid, 'extensions':[]}
+            textflows.append(textflow)
+        return textflows
+ 
+    def load_po(self):
+        return polib.pofile(self.path)
+
+    def create(self):
+        pass
+       

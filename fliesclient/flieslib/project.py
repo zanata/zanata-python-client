@@ -24,6 +24,7 @@
 __all__ = (
         "Project","Iteration" 
    )
+
 import json
 from jsonmodel import BaseModel
 

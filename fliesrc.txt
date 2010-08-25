@@ -1,6 +1,7 @@
 [Config]
 server = http://hudson.englab.bne.redhat.com/flies/seam/resource/restv1
-project.id = 
-project.iteration.id = 
-user = admin
-apikey = 94efea48f4da24735ee90de285bdaec5 
+user = user name
+apikey = api key of user on Flies server
+potfolder = /home/username/pot
+pofolder = /home/username/po
+

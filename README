@@ -1,40 +1,40 @@
+Introduction:
 Flies Python client is a client that communicate with Flies server for creating project or iteration, retrieving info of projects, single project or single iteration.
 It also provide publican support for pull or push the content with Flies server.
 
+You can find more infomation on:
 http://code.google.com/p/flies/wiki/FliesPythonClient
 
-Command of Usage:
+Install:
+You can install the flies-python-client by yum install, or you can download the rpm package from http://jamesni.fedorapeople.org/flies-python-client/ and install by youself.
 
-Basic Usage: flies COMMAND [ARGS] [COMMAND_OPTIONS]
-Listing / Querying for Projects
+Currently, the external dependency for the flies-python-client is an library named python-polib. You need to install the dependency before running the flies-python-client.
 
-$ flies list
+Configuration:
+After you install the flies-python-client, you need to create a configuration file named .fliesrc in the root of your home folder. You can set the Flies server's url, user name, api key,template folder and output folder in ~/.fliesrc file. There is an template for the ~/.fliesrc in the flies-python-client package, you can just copy it to the home folder and rename to .fliesrc.
 
-Creating a project
+You can edit the "server" variable and add the location of Flies server. The "user" variable reference the user name that you used for logging into the Flies Server. For value of "apikey" variable,  you need to log into the Flies Server, click "My Profile", generate or regenerate the api key and copy it to ~/.fliesrc.
 
-$ flies project create {project_id} --name={projec_name} --description={project_description}
+How to use flies client:
+Type "flies" in the shell, it will give you basic information of command for working with Flies server. You can use "flies --help" to get more information about the commands of flies   
 
-Working within a single container (i.e. project iteration)
+Use flies python library:
+You can "import fliesclient.flieslib" in you program and use FliesResource class to create a resource instance, then you can access project, iteration or document by manipulating this resource instance. Here's a short program to print a list of project:
 
-These commands would take settings from the local .fliesrc or you could use the --project and --iteration parameters.
-Create a Project iteration
+import fliesclient.flieslib
 
-$ flies iteration create {iteration_id} --project={project_id} --name={iteration_name} --description={iteration_description}
+# URL of Flies server
+server = "url of Flies Server"
 
-Query for information of a project
+# Authenticate using your user name and api key on Flies Server.
+user = "admin"
+apikey = "api key of admin"
 
-$ flies project info --project={project_id} 
+# Create a FliesResource instance which will call project service and resource service.
+client = fliesclient.flieslib.FliesResource(server, user, apikey)
 
-Query for information of a project iteration
+# Query the Flies server for a list of all projects.
+project_list = client.projectservice.list()
 
-$ flies iteration info --project={project_id} --iteration={iteration_id} 
-
-Retrieving translated Documents from Flies
-
-$ flies publican pull --project={project_id} --iteration={iteration_id} --lang=language [documentIds..]
-
-Publishing translations of Documents to Flies
-
-$ flies publican push --project={project_id} --iteration={iteration_id} --lang=language [documentIds..]
 
 

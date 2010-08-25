@@ -50,6 +50,8 @@ class ProjectService:
         Returns: list of Project object
         """
         res, content = self.restclient.request_get('/projects')
+        
+        
         if res['status'] == '200':
             projects = []
             projects_json = json.loads(content)

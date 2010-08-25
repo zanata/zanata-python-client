@@ -25,7 +25,6 @@ __all__ = (
         "FliesResource", 
    )
 
-
 from resservice import ResourceService
 from projectservice import ProjectService
 

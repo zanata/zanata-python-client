@@ -20,6 +20,10 @@
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 # Boston, MA  02111-1307  USA
 
+__all__ = (
+            "FliesConsole",
+        )
+
 import getopt, sys
 import json
 import os.path
@@ -27,10 +31,7 @@ import hashlib
 import shutil
 from parseconfig import FliesConfig
 from publican import Publican
-from flieslib.client import FliesResource
-from flieslib.project import Project
-from flieslib.project import Iteration
-from flieslib.error import *
+from flieslib import *
 
 sub_command = {
                 'help':[],
@@ -150,6 +151,9 @@ class FliesConsole:
         """
         flies = FliesResource(self.options['server'])
         projects = flies.projects.list()
+        if not projects:
+            print "There is no projects on the server or the server not working"
+            sys.exit()
         for project in projects:
             print ("Id:          %s")%project.id
             print ("Name:        %s")%project.name
