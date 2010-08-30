@@ -1,8 +1,8 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name: flies-python-client
-Version: 0.0.3
-Release: 3%{?dist}
+Version: 0.0.4
+Release: 1%{?dist}
 Summary: Python Client for Flies Server
 
 Group: Development/Tools
