@@ -31,12 +31,12 @@ class Publican:
     def __init__(self, filepath):
         self.path = filepath
 	    
-    def read_po(self):
+    def covert_txtflow(self):
         po = polib.pofile(self.path)
         textflows = []
         for entry in po:
             m = hashlib.md5()
-            m.update(entry.msgid)
+            m.update(entry.msgid.encode('utf-8'))
             textflowId = m.hexdigest() 
             textflow = {'id': textflowId, 'lang':'en', 'content':entry.msgid, 'extensions':[]}
             textflows.append(textflow)
@@ -44,7 +44,4 @@ class Publican:
  
     def load_po(self):
         return polib.pofile(self.path)
-
-    def create(self):
-        pass
-       
+        

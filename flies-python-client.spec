@@ -2,7 +2,7 @@
 
 Name: flies-python-client
 Version: 0.0.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Python Client for Flies Server
 
 Group: Development/Tools
@@ -41,7 +41,11 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 %{_bindir}/*
 
-%changelog 
+%changelog
+* Wed Aug 25 2010 James Ni <jni@redhat.com> - 0.0.3-3
+- Add an error handler for list command
+- Add cache to httplib2 
+
 * Mon Aug 23 2010 James Ni <jni@redhat.com> - 0.0.3-2
 - Include the example configuration file
 - Add dependency of python-httplib2 for fedora 12(and less) 

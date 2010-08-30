@@ -25,12 +25,12 @@ __all__ = (
         "FliesResource", 
    )
 
-from resservice import ResourceService
+from docservice import DocumentService
 from projectservice import ProjectService
 
 class FliesResource:
     def __init__(self, base_url, username = None, apikey = None):
         self.base_url = base_url
         self.projects = ProjectService(base_url, username, apikey)
-        self.resources = ResourceService(self.projects)
+        self.documents = DocumentService(self.projects)
 

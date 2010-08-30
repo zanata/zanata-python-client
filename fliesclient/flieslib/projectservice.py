@@ -51,10 +51,10 @@ class ProjectService:
         """
         res, content = self.restclient.request_get('/projects')
         
-        
         if res['status'] == '200':
             projects = []
             projects_json = json.loads(content)
+            
             for p in projects_json:
                 projects.append(Project(json = p))
             return projects

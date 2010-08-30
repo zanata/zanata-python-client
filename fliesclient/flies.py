@@ -151,6 +151,7 @@ class FliesConsole:
         """
         flies = FliesResource(self.options['server'])
         projects = flies.projects.list()
+        
         if not projects:
             print "There is no projects on the server or the server not working"
             sys.exit()
@@ -260,7 +261,7 @@ class FliesConsole:
         except InvalidOptionException as e:
             print "Options are not valid"
 
-    def list_folder(self, tmlpath):
+    def _list_folder(self, tmlpath):
         """
         Search POT file in POT folder
         """
@@ -270,7 +271,7 @@ class FliesConsole:
         else:
             return None
 
-    def create_resource(self, filepath):
+    def _create_resource(self, filepath):
         if '/' in filepath:
             file = filepath.split('/')[-1]
             path = filepath
@@ -288,7 +289,7 @@ class FliesConsole:
             raise NoSuchFileException('Error', 'The file %s does not exist'%file)
         
         publican = Publican(path)
-        textflows = publican.read_po()
+        textflows = publican.covert_txtflow()
         items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en', 'extensions':[], 'textFlows':textflows}
         return json.dumps(items)
 
@@ -324,13 +325,13 @@ class FliesConsole:
                     print "\nPush the content of %s to Flies server: "%pot
                     
                     try: 
-                        body = self.create_resource(tmlfolder+'/'+pot)
+                        body = self._create_resource(tmlfolder+'/'+pot)
                     except NoSuchFileException as e:
                         print "%s :%s"%(e.expr, e.msg)
                         continue 
                     
                     try:
-                        result = flies.resources.commit_translation(self.options['project_id'], self.options['iteration_id'], body)
+                        result = flies.documents.commit_translation(self.options['project_id'], self.options['iteration_id'], body)
                         if result:
                             print "Successfully push %s to the Flies server"%pot    
                     except UnAuthorizedException as e:
@@ -344,26 +345,26 @@ class FliesConsole:
         else:
             print "\nPush the content of %s to Flies server: "%args[0]
             try:
-                body = self.create_resource(args[0])
+                body = self._create_resource(args[0])
             except NoSuchFileException as e:
                 print "%s :%s"%(e.expr, e.msg)
                 sys.exit()                                            
             try:
-                result = flies.resources.commit_translation(self.options['project_id'], self.options['iteration_id'], body)
+                result = flies.documents.commit_translation(self.options['project_id'], self.options['iteration_id'], body)
                 if result:
                     print "Successfully push %s to the Flies server"%args[0]
             except (UnAuthorizedException, BadRequestBodyException, SameNameDocumentException) as e:
                 print "%s :%s"%(e.expr, e.msg)  
 
-    def hash_matches(self, message, id):
+    def _hash_matches(self, message, id):
         m = hashlib.md5()
-        m.update(message.msgid)
+        m.update(message.msgid.encode('utf-8'))
         if m.hexdigest() == id:
             return True
         else:
             return False     
 
-    def create_pofile(self, lang, file, translations, tmlpath, outpath):
+    def _create_pofile(self, lang, file, translations, tmlpath, outpath):
         """
         Create PO file based on the POT file in POT folder
         Args:
@@ -394,13 +395,13 @@ class FliesConsole:
         #read the content of the po file
         publican = Publican(pofile)
         po = publican.load_po()
-        
+               
         content = json.loads(translations)
         targets = content.get('textFlowTargets')    
         
         for message in po:
             for translation in targets:
-                if self.hash_matches(message, translation.get('resId')):
+                if self._hash_matches(message, translation.get('resId')):
                     message.msgstr = translation.get('content')
               
         # copy any other stuff you need to transfer
@@ -437,13 +438,14 @@ class FliesConsole:
         #if file no specified, retrieve all the files of project
         if not args:
             #list the files in project
-            filelist = flies.resources.get_file_list(self.options['project_id'], self.options['iteration_id'])
+            filelist = flies.documents.get_file_list(self.options['project_id'], self.options['iteration_id'])
+            
             if filelist:
                 for file in filelist:
                     print "\nFetch the content of %s from Flies server: "%file                    
                     try:    
-                        result = flies.resources.retrieve_translation(self.options['lang'], self.options['project_id'], self.options['iteration_id'], file)
-                        self.create_pofile(self.options['lang'], file, result, self.options['potfolder'], self.options['pofolder'])
+                        result = flies.documents.retrieve_translation(self.options['lang'], self.options['project_id'], self.options['iteration_id'], file)
+                        self._create_pofile(self.options['lang'], file, result, self.options['potfolder'], self.options['pofolder'])
                     except UnAuthorizedException as e:
                         print "%s :%s"%(e.expr, e.msg)                        
                         break
@@ -453,8 +455,8 @@ class FliesConsole:
         else:
             print "\nFetch the content of %s from Flies server: "%args[0]
             try:            
-                result = flies.resources.retrieve_translation(self.options['lang'], self.options['project_id'], self.options['iteration_id'], args[0])
-                self.create_pofile(self.options['lang'], args[0], result, self.options['potfolder'], self.options['pofolder'])
+                result = flies.documents.retrieve_translation(self.options['lang'], self.options['project_id'], self.options['iteration_id'], args[0])
+                self._create_pofile(self.options['lang'], args[0], result, self.options['potfolder'], self.options['pofolder'])
             except (UnAuthorizedException, UnAvaliableResourceException) as e:
                 print "%s :%s"%(e.expr, e.msg)                        
 
