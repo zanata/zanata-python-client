@@ -46,6 +46,8 @@ rm -rf $RPM_BUILD_ROOT
 - Rename module resservice to docservice
 - Set encode to UTF-8 when generate hash value for msgid of the po file
 - Change functions in flies.py to private
+- Fix a exception in projectservice and exception handler in flies
+- Provide more "readable" output for httplib2 connection error
 
 * Wed Aug 25 2010 James Ni <jni@redhat.com> - 0.0.3-3
 - Add an error handler for list command
