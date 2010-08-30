@@ -254,6 +254,8 @@ class FliesConsole:
             result = flies.projects.iterations.create(self.options['project_id'], iteration)
             if result == "Success":
                 print "Success create the itearion"
+        except ProjectExistException as e:
+            print "The iteration is already exist on the server"
         except NoSuchProjectException as e:
             print "No Such Project on the server"
         except UnAuthorizedException as e:

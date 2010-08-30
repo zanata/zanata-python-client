@@ -60,7 +60,10 @@ class RestClient():
         try:
             response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body=body, headers=headers)
             return (response, content.decode("UTF-8"))
-        except Exception as e:
-            print e
-            sys.exit(2) 
-
+        except httplib2.ServerNotFoundError as e:
+            print "Error:%s, Maybe the flies sever is down?"%e
+            sys.exit(2)
+        except httplib2.HttpLib2Error as e:
+            print "Error:%s"%e
+            sys.exit(2)
+ 
