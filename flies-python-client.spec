@@ -42,6 +42,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 
 %changelog
+* Mon Aug 30 2010 James Ni <jni@redhat.com> - 0.0.4-1
+- Rename module resservice to docservice
+- Set encode to UTF-8 when generate hash value for msgid of the po file
+- Change functions in flies.py to private
+
 * Wed Aug 25 2010 James Ni <jni@redhat.com> - 0.0.3-3
 - Add an error handler for list command
 - Add cache to httplib2 
