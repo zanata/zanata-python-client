@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name: flies-python-client
-Version: 0.0.4
+Version: 0.0.5
 Release: 1%{?dist}
 Summary: Python Client for Flies Server
 
@@ -42,6 +42,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 
 %changelog
+* Tue Aug 31 2010 James Ni <jni@redhat.com> - 0.0.5-1
+- Rename resservice in flieslib/__init__.py to docservice
+
 * Mon Aug 30 2010 James Ni <jni@redhat.com> - 0.0.4-1
 - Rename module resservice to docservice
 - Set encode to UTF-8 when generate hash value for msgid of the po file
