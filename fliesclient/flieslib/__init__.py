@@ -21,7 +21,7 @@
 # Boston, MA  02111-1307  USA
 
 from client import *
-from resservice import *
+from docservice import *
 from error import *
 from projectservice import *
 from project import *
