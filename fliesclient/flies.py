@@ -75,6 +75,10 @@ class FliesConsole:
                "Use 'flies help' for the full list of commands")
 
     def _print_help_info(self, args):
+        """
+        Output the general help information or the help information for each command
+        @param args: the name of command and sub command
+        """
         if not args:
             print ('Client for talking to a Flies Server:\n\n'
                   'list of commands:\n\n'
@@ -148,6 +152,7 @@ class FliesConsole:
               
     def _list_projects(self):
         """
+        List the information of all the project on the flies server
         """
         flies = FliesResource(self.options['server'])
         projects = flies.projects.list()
@@ -164,6 +169,7 @@ class FliesConsole:
         
     def _get_project(self):
         """
+        Retrieve the information of a project
         """
         if not self.options['project_id']:
             print 'Please use flies project info --project=project_id to retrieve the project info'
@@ -183,6 +189,7 @@ class FliesConsole:
                
     def _get_iteration(self):
         """
+        Retrieve the information of a project iteration.
         """
         if not self.options['iteration_id'] or not self.options['project_id']:
             print 'Please use flies iteration info --project=project_id --iteration=iteration_id to retrieve the iteration'
@@ -200,7 +207,8 @@ class FliesConsole:
 
     def _create_project(self, args):
         """
-        Create project with project id
+        Create project with the project id
+        @param args: project id
         """
         if self.options['user'] and self.options['apikey']:
             flies = FliesResource(self.options['server'], self.options['user'], self.options['apikey'])
@@ -230,7 +238,8 @@ class FliesConsole:
 
     def _create_iteration(self, args):
         """
-        Create iteration with iteration id
+        Create iteration with the iteration id
+        @param args: iteration id
         """
         if self.options['user'] and self.options['apikey']:
             flies = FliesResource(self.options['server'], self.options['user'], self.options['apikey'])
@@ -264,9 +273,6 @@ class FliesConsole:
             print "Options are not valid"
 
     def _list_folder(self, tmlpath):
-        """
-        Search POT file in POT folder
-        """
         if os.path.isdir(tmlpath):
             filelist = os.listdir(tmlpath)
             return filelist
@@ -274,6 +280,10 @@ class FliesConsole:
             return None
 
     def _create_resource(self, filepath):
+        """
+        Parse the pot file and create the request body
+        @param filepath: the path of the pot file
+        """
         if '/' in filepath:
             file = filepath.split('/')[-1]
             path = filepath
@@ -297,7 +307,8 @@ class FliesConsole:
 
     def _push_publican(self, args):
         """
-        Push the documents to Project on Flies server
+        Push the content of publican files to a Project iteration on Flies server
+        @param args: name of the publican file
         """
         if self.options['user'] and self.options['apikey']:
             flies = FliesResource(self.options['server'], self.options['user'], self.options['apikey'])
@@ -369,12 +380,10 @@ class FliesConsole:
     def _create_pofile(self, lang, file, translations, tmlpath, outpath):
         """
         Create PO file based on the POT file in POT folder
-        Args:
-            lang: language 
-            projectid: Id of project
-            iterationid: Id of iteration
-            file: name of PO file
-            
+        @param lang: language 
+        @param translations: the json object of the content retrieved from server
+        @param tmlpath: the pot folder 
+        @param outpath: the po folder for output
         """
         if '.' in file:        
             filename = file.split('.')[0]
@@ -413,7 +422,10 @@ class FliesConsole:
     
     def _pull_publican(self, args):
         """
-        Retrieve the content of documents in a Project on Flies server
+        Retrieve the content of documents in a Project iteration from Flies server. If the name of publican
+        file is specified, the content of that file will be pulled from server. Otherwise, all the document of that
+        Project iteration will be pulled from server.
+        @param args: the name of publican file
         """
         if not self.options['lang']:
             print "Please specify the language by '--lang' option"
@@ -473,6 +485,7 @@ class FliesConsole:
     
     def _process_command_line(self):
         """
+        Parse the command line to generate command options and sub_command
         """
         try:
             opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["server=", "project=", "iteration=", "name=", "description=", "lang="])

@@ -2,7 +2,7 @@
 
 Name: flies-python-client
 Version: 0.0.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Python Client for Flies Server
 
 Group: Development/Tools
@@ -13,7 +13,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch: noarch
 BuildRequires: python-setuptools
-BuildRequires: python-polib
+Requires: python-polib
 %if 0%{?fedora} < 13
 BuildRequires: python-devel
 Requires: python-httplib2
@@ -42,6 +42,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 
 %changelog
+* Mon Sep 06 2010 James Ni <jni@redhat.com> - 0.0.5-2
+- Add requires for python-polib
+
 * Tue Aug 31 2010 James Ni <jni@redhat.com> - 0.0.5-1
 - Rename resservice in flieslib/__init__.py to docservice
 

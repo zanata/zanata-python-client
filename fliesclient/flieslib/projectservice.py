@@ -33,8 +33,7 @@ from error import *
 
 class ProjectService:
     """
-    Provides services to interact with Project and Iteration Resources
-    ProjectService: handle operaions of list, create and retrieve Project Resources  
+    Provides services to interact with Project, handle operaions of list, create and retrieve Project Resources  
     """
     def __init__(self, base_url, usrname, apikey):
         self.restclient = RestClient(base_url)
@@ -45,9 +44,7 @@ class ProjectService:
     def list(self):
         """
         List the Project Resources on the Flies server
-        Args: 
-            None
-        Returns: list of Project object
+        @return: list of Project object
         """
         res, content = self.restclient.request_get('/projects')
         
@@ -62,10 +59,9 @@ class ProjectService:
     def get(self, projectid):
         """
         Retrieve a specified Project Resource on Flies server
-        Args: 
-            projectid: Id of Project Resource
-        Returns: Project object
-        Raise: a NoSuchProjectException
+        @param projectid: Id of Project Resource
+        @return: Project object
+        @raise NoSuchProjectException:
         """     
         res, content = self.restclient.request_get('/projects/p/%s'%projectid)
         if res['status'] == '200':
@@ -76,10 +72,12 @@ class ProjectService:
     def create(self, project):
         """
         Create a Project Resource on Flies Server
-        Args: 
-            project: Project object
-        Returns: Success if status of response is 201
-        Raises: ProjectExistException, NoSuchProjectException, UnAuthorizedException and BadRequestException
+        @param project: Project object
+        @return: Success if status of response is 201
+        @raise ProjectExistException:
+        @raise NoSuchProjectException:
+        @raise UnAuthorizedException:
+        @raise BadRequestException:
         """
         exist = False
         headers = {}
@@ -111,7 +109,10 @@ class ProjectService:
     def status(self):
         pass
 
-class IterationService:   
+class IterationService:
+    """
+    Provides services to interact with Project iteration, handle operaions of list, create and retrieve iteration Resources
+    """
     def __init__(self, base_url, usrname = None, apikey = None):
         self.restclient = RestClient(base_url)
         self.username = usrname
@@ -120,11 +121,10 @@ class IterationService:
     def get(self, projectid, iterationid):
         """
         Retrieve a specified Iteration Resource on Flies server
-        Args: 
-            projectid: Id of Project Resource
-            iteraionid: Id of Iteration Resource
-        Returns: Iteration object
-        Raise: a NoSuchProjectException
+        @param projectid: Id of Project Resource
+        @param iterationid: Id of Iteration Resource
+        @return: Iteration object
+        @raise NoSuchProjectException:
         """
         res, content = self.restclient.request_get('/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
         if res['status'] == '200':
@@ -135,11 +135,13 @@ class IterationService:
     def create(self, projectid, iteration):
         """
         Create a Iteration Resource on Flies Server
-        Args: 
-            projectid: Id of Project Resource
-            iteraion: Iteration object
-        Returns: Success if status of response is 201
-        Raises: ProjectExistException, NoSuchProjectException, UnAuthorizedException and BadRequestException
+        @param projectid: Id of Project Resource
+        @param iteration: Iteration object
+        @return: Success if status of response is 201
+        @raise ProjectExistException:
+        @raise NoSuchProjectException:
+        @raise UnAuthorizedException:
+        @raise BadRequestException:
         """ 
         headers = {}
         headers['X-Auth-User'] = self.username

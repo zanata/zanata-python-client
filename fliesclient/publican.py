@@ -32,6 +32,10 @@ class Publican:
         self.path = filepath
 	    
     def covert_txtflow(self):
+        """
+        Convert the content of the po file to a list of text flow.
+        @return: the dictionary object of textflow
+        """
         po = polib.pofile(self.path)
         textflows = []
         for entry in po:
@@ -43,5 +47,9 @@ class Publican:
         return textflows
  
     def load_po(self):
+        """
+        Convert the po file to a pofile object in polib.
+        @return: pofile object
+        """
         return polib.pofile(self.path)
         
