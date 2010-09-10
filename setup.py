@@ -8,19 +8,22 @@ setup (name = "flies-python-client",
     version = '0.0.5',
     packages = find_packages(),
     install_requires=[
-        'polib'        
+        'polib' ,
+        'httplib2'
     ],
     description = "Flies Python Client.",
     author = 'Jian Ni',
     author_email = 'jni@redhat.com',
     license = 'LGPLv2+',
     platforms=["Linux"],
-   
-    entry_points = {
-	'console_scripts': [
-		'flies = fliesclient.flies:main',
-	]
-    },
+    scripts = ["flies"],
+    
+    #entry_points = {
+	#'console_scripts': [
+	#	'flies = fliesclient.flies:main',
+	#]
+    #},
+
     classifiers=['License :: OSI Approved ::  GNU Lesser General Public License (LGPL)',
                  'Operating System :: Unix',
                  'Programming Language :: Python',

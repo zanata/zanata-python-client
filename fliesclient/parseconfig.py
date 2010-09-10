@@ -29,19 +29,22 @@ import os.path
 class FliesConfig:
      def __init__(self):
     	 projectconfig = "./.fliesrc"
-         userconfig = "~/.fliesrc"
+         userconfig = "~/.config/flies.ini"
          self.configparser = ConfigParser.ConfigParser()
-         self._config = self.configparser.read([projectconfig, os.path.expanduser(userconfig)])
-        
-     def get_value(self, name, section, default_value = None):
+         self._config = self.configparser.read([userconfig, os.path.expanduser(userconfig)])
+         
+     def get_value(self, name, section):
+         server_value = self.configparser.get(section, 'server')
+         
          if self._config:
             try:
-            	value = self.configparser.get(section, name)
+                value = self.configparser.get('servers', server_value+'.'+name)
+                print value
                 return value
             except ConfigParser.NoOptionError, NoSectionError:
-                return default_value
+                return None
          else:
-            return default_value
+            return None
      
-     def get_config_value(self, name, default_value = None):
-         return self.get_value(name, 'Config', default_value) 
+     def get_config_value(self, name):
+         return self.get_value(name, 'defaults') 

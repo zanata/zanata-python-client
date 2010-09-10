@@ -1,8 +1,8 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name: flies-python-client
-Version: 0.0.5
-Release: 2%{?dist}
+Version: 0.0.6
+Release: 1%{?dist}
 Summary: Python Client for Flies Server
 
 Group: Development/Tools
@@ -14,6 +14,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 BuildRequires: python-setuptools
 Requires: python-polib
+Requires: python-httplib2
 %if 0%{?fedora} < 13
 BuildRequires: python-devel
 Requires: python-httplib2
@@ -42,6 +43,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 
 %changelog
+* Wed Sep 06 2010 James Ni <jni@redhat.com> - 0.0.6-1
+- Try to resolve the dependency of python-setuptools
+
 * Mon Sep 06 2010 James Ni <jni@redhat.com> - 0.0.5-2
 - Add requires for python-polib
 
