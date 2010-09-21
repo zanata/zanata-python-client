@@ -31,6 +31,7 @@ import hashlib
 import shutil
 from parseconfig import FliesConfig
 from publican import Publican
+from xml.dom import minidom 
 from flieslib import *
 
 sub_command = {
@@ -44,10 +45,12 @@ sub_command = {
 
 options = {
             'url' : '',
-            'project_id':'',
-            'iteration_id':'',
             'user_name':'',
             'apikey':'',
+            'user_config':'',
+            'project_config':'',
+            'project_id':'',
+            'project_version':'',
             'potfolder':'',
             'pofolder':'',
             'name':'',
@@ -55,19 +58,17 @@ options = {
             'lang':''
             }
 
+project_config = {'project_id':'', 'project_version':''}
+
 class FliesConsole:
 
     def __init__(self):
-        config = FliesConfig()
-    	server = config.get_config_value("url")
-    	user = config.get_config_value("username")
-    	apikey = config.get_config_value("key")
-        options['url'] = server+'seam/resource/restv1'
-        options['user_name'] = user
-        options['apikey'] = apikey
+        self.url = ''
+        self.user_name = ''
+        self.apikey = ''
+        self.user_config = ''
+        self.project_config = ''
 
-        print "server: %s"%options['url']
-     
     def _print_usage(self):
         print ('\nClient for talking to a Flies Server\n\n'
                'basic commands:\n\n'
@@ -156,8 +157,7 @@ class FliesConsole:
         """
         List the information of all the project on the flies server
         """
-        print "Server:%s"%options['url']
-        flies = FliesResource(options['url'])
+        flies = FliesResource(self.url)
         projects = flies.projects.list()
         
         if not projects:
@@ -174,13 +174,18 @@ class FliesConsole:
         """
         Retrieve the information of a project
         """
-        if not options['project_id']:
-            print 'Please use flies project info --project=project_id to retrieve the project info'
+        if options['project_id']:
+            project_id =  options['project_id'] 
+        else:
+            project_id = project_config['project_id']        
+        
+        if not project_id:
+            print 'Please use flies project info --project=project_id or flies.xml to retrieve the project info'
             sys.exit()
         
-        flies = FliesResource(options['url'])
+        flies = FliesResource(self.url)
         try:
-            p = flies.projects.get(options['project_id'])
+            p = flies.projects.get(project_id)
             print ("Id:          %s")%p.id 
             print ("Name:        %s")%p.name 
             print ("Type:        %s")%p.type
@@ -194,14 +199,24 @@ class FliesConsole:
         """
         Retrieve the information of a project iteration.
         """
-        if not options['iteration_id'] or not options['project_id']:
-            print 'Please use flies iteration info --project=project_id --iteration=iteration_id to retrieve the iteration'
+        if options['project_id']:
+            project_id =  options['project_id'] 
+        else:
+            project_id = project_config['project_id']
+        
+        if options['project_version']:
+            iteration_id = options['project_version'] 
+        else:
+            iteration_id = read_project_config('project_version')
+
+        if not project_version or not project_id:
+            print 'Please use flies iteration info --project=project_id --project-version=project_version to retrieve the iteration'
             sys.exit()
         
-        flies = FliesResource(options['url'])
+        flies = FliesResource(self.url)
         try:
-            project = flies.projects.get(options['project_id'])
-            iteration = project.get_iteration(options['iteration_id'])
+            project = flies.projects.get(self.project_id)
+            iteration = project.get_iteration(self.project_version)
             print ("Id:          %s")%iteration.id
             print ("Name:        %s")%iteration.name
             print ("Description: %s")%iteration.desc
@@ -213,10 +228,10 @@ class FliesConsole:
         Create project with the project id
         @param args: project id
         """
-        if options['user'] and options['apikey']:
-            flies = FliesResource(options['url'], options['user'], options['apikey'])
+        if self.user_name and self.apikey:
+            flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
-            print "Please provide username and apikey in .fliesrc"
+            print "Please provide username and apikey in flies.ini"
             sys.exit()
 
         if not args:
@@ -244,11 +259,16 @@ class FliesConsole:
         Create iteration with the iteration id
         @param args: iteration id
         """
-        if options['user'] and options['apikey']:
-            flies = FliesResource(options['url'], options['user'], options['apikey'])
+        if self.user_name and self.apikey:
+            flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
             print "Please provide username and apikey in .fliesrc"
             sys.exit()
+        
+        if options['project_id']:
+            project_id =  options['project_id'] 
+        else:
+            project_id = project_config['project_id']
         
         if not args:
             print "Please provide ITERATION_ID for creating iteration"
@@ -263,7 +283,7 @@ class FliesConsole:
             iteration.id = args[0]
             iteration.name = options['name']
             iteration.desc = options['desc']
-            result = flies.projects.iterations.create(options['project_id'], iteration)
+            result = flies.projects.iterations.create(project_id, iteration)
             if result == "Success":
                 print "Success create the itearion"
         except ProjectExistException as e:
@@ -313,18 +333,28 @@ class FliesConsole:
         Push the content of publican files to a Project iteration on Flies server
         @param args: name of the publican file
         """
-        if options['user'] and options['apikey']:
-            flies = FliesResource(options['url'], options['user'], options['apikey'])
+        if self.user_name and self.apikey:
+            flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
             print "Please provide username and apikey in .fliesrc"
             sys.exit()
 
-        if not options['project_id']:
-            print "Please provide valid project id by '--project' option"
+        if options['project_id']:
+            project_id =  options['project_id'] 
+        else:
+            project_id = read_project_config('project_id')
+        
+        if options['project_version']:
+            iteration_id = options['project_version'] 
+        else:
+            iteration_id = read_project_config('project_version')
+
+        if not project_id:
+            print "Please provide valid project id by flies.xml or by '--project' option"
             sys.exit()
         
-        if not options['iteration_id']:
-            print "Please provide valid iteration id by fliesrc or by '--iteration' option"
+        if not iteration_id:
+            print "Please provide valid iteration id by flies.xml or by '--project-version' option"
             sys.exit()
 
         tmlfolder = options['potfolder'] 
@@ -434,12 +464,22 @@ class FliesConsole:
             print "Please specify the language by '--lang' option"
             sys.exit()
 
-        if not options['project_id']:
-            print "Please provide valid project id by '--project' option"
+        if project:
+            project_id =  options['project_id'] 
+        else:
+            project_id = read_project_config('project_id')
+        
+        if options['project_version']:
+            iteration_id = options['project_version'] 
+        else:
+            iteration_id = read_project_config('project_version')
+
+        if not project_id:
+            print "Please provide valid project id by flies.xml or by '--project' option"
             sys.exit()
         
-        if not options['iteration_id']:
-            print "Please provide valid iteration id by fliesrc or by '--iteration' option"
+        if not iteration_id:
+            print "Please provide valid iteration id by flies.xml or by '--iteration' option"
             sys.exit()
         
         if not options['potfolder']:
@@ -450,18 +490,18 @@ class FliesConsole:
             print "Please provide folder for storting the output files in fliesrc"
             sys.exit()
 
-        flies = FliesResource(options['url'])
+        flies = FliesResource(self.url)
         
         #if file no specified, retrieve all the files of project
         if not args:
             #list the files in project
-            filelist = flies.documents.get_file_list(options['project_id'], options['iteration_id'])
+            filelist = flies.documents.get_file_list(project_id, iteration_id)
             
             if filelist:
                 for file in filelist:
                     print "\nFetch the content of %s from Flies server: "%file                    
                     try:    
-                        result = flies.documents.retrieve_translation(options['lang'], options['project_id'], options['iteration_id'], file)
+                        result = flies.documents.retrieve_translation(options['lang'], project_id, iteration_id, file)
                         self._create_pofile(options['lang'], file, result, options['potfolder'], options['pofolder'])
                     except UnAuthorizedException as e:
                         print "%s :%s"%(e.expr, e.msg)                        
@@ -472,7 +512,7 @@ class FliesConsole:
         else:
             print "\nFetch the content of %s from Flies server: "%args[0]
             try:            
-                result = flies.documents.retrieve_translation(options['lang'], options['project_id'], options['iteration_id'], args[0])
+                result = flies.documents.retrieve_translation(options['lang'], project_id, iteration_id, args[0])
                 self._create_pofile(options['lang'], args[0], result, options['potfolder'], options['pofolder'])
             except (UnAuthorizedException, UnAvaliableResourceException) as e:
                 print "%s :%s"%(e.expr, e.msg)                        
@@ -491,7 +531,7 @@ class FliesConsole:
         Parse the command line to generate command options and sub_command
         """
         try:
-            opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["url=", "project=", "iteration=", "name=", "description=", "lang="])
+            opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["url=", "project=", "project-version=", "name=", "description=", "lang=",  "usr-config=", "project-config=", "apikey=", "username="])
         except getopt.GetoptError, err:
             print str(err)
             sys.exit(2)
@@ -522,7 +562,9 @@ class FliesConsole:
                          
         if opts:
             for o, a in opts:
-                if o in ("--url"):
+                if o in ("--user-config"):
+                    options['user_config'] = a                     
+                elif o in ("--url"):
                     options['url'] = a
                 elif o in ("--name"):
                     options['name'] = a
@@ -530,56 +572,86 @@ class FliesConsole:
                     options['desc'] = a
                 elif o in ("--project"):
                     options['project_id'] = a
-                elif o in ("--iteration"):
-                    options['iteration_id'] = a
                 elif o in ("--lang"):
                     options['lang'] = a
                 elif o in ("--username"):
                     options['user_name'] = a
-                elif o in ("--key"):
+                elif o in ("--apikey"):
                     options['key'] = a
                 elif o in ("--project-config"):
                     options['project_config'] = a
                 elif o in ("--project-version"): 
                     options['project_version'] = a
-                elif o in ("--user-config"):
-                    options['user-config'] = a 
-   
+                   
         return command, command_args
  
+    def read_project_config(self, filename = None):
+        if filename:        
+            xmldoc = minidom.parse(filename)
+        else:
+            xmldoc = minidom.parse(os.getcwd()+'/flies.xml')
+
+        node = xmldoc.getElementsByTagName("project")[0]
+        rc = ""
+
+        for node in node.childNodes:
+            if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
+                rc = rc + node.data
+                
+        project_config['project_id'] = rc
+
+
     def run(self):
         command, command_args = self._process_command_line()        
         
         if command == 'help':
             self._print_help_info(command_args)
         else:
-            # Read the project configuration file
+            if options['user_config']:
+                config = FliesConfig(options['user_config'])
+            else:
+                homedir = os.path.expanduser("~")
+                config = FliesConfig(homedir)
+
+    	    self.url = config.get_config_value("url")
+    	    self.user_name = config.get_config_value("username")
+    	    self.apikey = config.get_config_value("key")
             
-            if not options['url']:
-                print "Please provide valid server url by fliesrc or by '--server' option"
+            if options['url']:
+                self.url = options['url']            
+            
+            if not self.url:
+                print "Please provide valid server url in flies.ini or by '--url' option"
                 sys.exit()
             
             if command == 'list':
                 self._list_projects()
-            elif command == 'status':
-                self._poject_status()
-            elif command == 'project_info':
-                self._get_project()
-            elif command == 'project_create':
-                self._create_project(command_args)
-            elif command == 'project_remove':
-                self._remove_project(command_args)
-            elif command == 'iteration_info':
-                self._get_iteration()
-            elif command == 'iteration_create':
-                self._create_iteration(command_args)
-            elif command == 'iteration_remove':
-                self._remove_iteration(command_args)
-            elif command == 'publican_push':
-                self._push_publican(command_args)
-            elif command == 'publican_pull':
-                self._pull_publican(command_args)      
-        
+            else:
+                #Read the project configuration file using --project-config option
+                if options['project_config']:
+                    self.read_project_config(options['project_config'])
+                else:
+                    #If the option is not valid, try to read the project configuration from current path
+                    self.read_project_config()   
+
+                if command == 'status':
+                    self._poject_status()
+                elif command == 'project_info':
+                    self._get_project()
+                elif command == 'project_create':
+                    self._create_project(command_args)
+                elif command == 'project_remove':
+                    self._remove_project(command_args)
+                elif command == 'iteration_info':
+                    self._get_iteration()
+                elif command == 'iteration_create':
+                    self._create_iteration(command_args)
+                elif command == 'iteration_remove':
+                    self._remove_iteration(command_args)
+                elif command == 'publican_push':
+                    self._push_publican(command_args)
+                elif command == 'publican_pull':
+                    self._pull_publican(command_args)      
 
 def main():
     client = FliesConsole()

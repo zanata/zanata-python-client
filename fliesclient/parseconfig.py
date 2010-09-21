@@ -27,9 +27,9 @@ import ConfigParser
 import os.path
 
 class FliesConfig:
-     def __init__(self):
-    	 projectconfig = "./.fliesrc"
-         userconfig = "~/.config/flies.ini"
+     def __init__(self, path):
+    	 userconfig = path+"/.config/flies.ini"
+         print userconfig
          self.configparser = ConfigParser.ConfigParser()
          self._config = self.configparser.read([userconfig, os.path.expanduser(userconfig)])
          
@@ -39,7 +39,6 @@ class FliesConfig:
          if self._config:
             try:
                 value = self.configparser.get('servers', server_value+'.'+name)
-                print value
                 return value
             except ConfigParser.NoOptionError, NoSectionError:
                 return None

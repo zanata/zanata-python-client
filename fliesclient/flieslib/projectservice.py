@@ -64,7 +64,7 @@ class ProjectService:
         @raise NoSuchProjectException:
         """     
         res, content = self.restclient.request_get('/projects/p/%s'%projectid)
-        if res['status'] == '200':
+        if res['status'] == '200' or res['status'] == '304':
             return Project(json = json.loads(content), iterations = self.iterations)
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project') 
@@ -127,7 +127,7 @@ class IterationService:
         @raise NoSuchProjectException:
         """
         res, content = self.restclient.request_get('/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
-        if res['status'] == '200':
+        if res['status'] == '200' or res['status'] == '304':
             return Iteration(json.loads(content))
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')
