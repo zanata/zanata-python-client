@@ -28,8 +28,7 @@ import os.path
 
 class FliesConfig:
      def __init__(self, path):
-    	 userconfig = path+"/.config/flies.ini"
-         print userconfig
+    	 userconfig = path
          self.configparser = ConfigParser.ConfigParser()
          self._config = self.configparser.read([userconfig, os.path.expanduser(userconfig)])
          

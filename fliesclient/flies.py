@@ -46,7 +46,7 @@ sub_command = {
 options = {
             'url' : '',
             'user_name':'',
-            'apikey':'',
+            'key':'',
             'user_config':'',
             'project_config':'',
             'project_id':'',
@@ -207,16 +207,16 @@ class FliesConsole:
         if options['project_version']:
             iteration_id = options['project_version'] 
         else:
-            iteration_id = read_project_config('project_version')
+            iteration_id = project_config['project_version']
 
-        if not project_version or not project_id:
+        if not iteration_id or not project_id:
             print 'Please use flies iteration info --project=project_id --project-version=project_version to retrieve the iteration'
             sys.exit()
         
         flies = FliesResource(self.url)
         try:
-            project = flies.projects.get(self.project_id)
-            iteration = project.get_iteration(self.project_version)
+            project = flies.projects.get(project_id)
+            iteration = project.get_iteration(iteration_id)
             print ("Id:          %s")%iteration.id
             print ("Name:        %s")%iteration.name
             print ("Description: %s")%iteration.desc
@@ -262,13 +262,15 @@ class FliesConsole:
         if self.user_name and self.apikey:
             flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
-            print "Please provide username and apikey in .fliesrc"
+            print "Please provide username and apikey in flies.ini or by --username and --apikey options"
             sys.exit()
         
         if options['project_id']:
             project_id =  options['project_id'] 
-        else:
+        elif project_config['project_id']:
             project_id = project_config['project_id']
+        else:
+            print "Please provide PROJECT_ID by --project option or using flies.xml"
         
         if not args:
             print "Please provide ITERATION_ID for creating iteration"
@@ -336,7 +338,7 @@ class FliesConsole:
         if self.user_name and self.apikey:
             flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
-            print "Please provide username and apikey in .fliesrc"
+            print "Please provide username and apikey in flies.ini or by '--username' and '--apikey' options"
             sys.exit()
 
         if options['project_id']:
@@ -357,15 +359,15 @@ class FliesConsole:
             print "Please provide valid iteration id by flies.xml or by '--project-version' option"
             sys.exit()
 
-        tmlfolder = options['potfolder'] 
         #if file not specified, push all the files in pot folder to flies server
         if not args:
-            if not tmlfolder:
-                print "Please provide template folder for processing in fliesrc"
-                sys.exit()
-
+            if options['potfolder']:
+                tmlfolder = options['potfolder']
+            else:
+                tmlfolder = os.getcwd()+'/pot'
+                       
             #check the pot folder to find all the pot file
-            filelist = self.list_folder(tmlfolder)
+            filelist = self._list_folder(tmlfolder)
             if filelist:                
                 for pot in filelist:
                     print "\nPush the content of %s to Flies server: "%pot
@@ -377,7 +379,8 @@ class FliesConsole:
                         continue 
                     
                     try:
-                        result = flies.documents.commit_translation(options['project_id'], options['iteration_id'], body)
+                        result = flies.documents.commit_translation(project_id, iteration_id, body)
+                        print result
                         if result:
                             print "Successfully push %s to the Flies server"%pot    
                     except UnAuthorizedException as e:
@@ -387,7 +390,7 @@ class FliesConsole:
                         print "%s :%s"%(e.expr, e.msg)
                         continue
             else:
-                raise NoSuchFileException('Error', 'The template folder is empty')
+                print "Error, The template folder is empty or not exist"
         else:
             print "\nPush the content of %s to Flies server: "%args[0]
             try:
@@ -410,7 +413,7 @@ class FliesConsole:
         else:
             return False     
 
-    def _create_pofile(self, lang, file, translations, tmlpath, outpath):
+    def _create_pofile(self, lang, file, translations):
         """
         Create PO file based on the POT file in POT folder
         @param lang: language 
@@ -418,25 +421,45 @@ class FliesConsole:
         @param tmlpath: the pot folder 
         @param outpath: the po folder for output
         """
+        if options['potfolder']:
+            tmlpath = options['potfolder']
+        else:
+            tmlpath = os.getcwd()+'/pot'
+
+        if options['pofolder']:
+            outpath = options['pofolder']
+        else:
+            outpath = os.getcwd()+'/po'    
+        
+        if not os.path.isdir(tmlpath):
+            print "Please provide folder for storing the template files by '--template' option "
+            sys.exit()
+
+        if not os.path.isdir(outpath):
+            print "Please provide folder for storing the output files by '--output' option"
+            sys.exit()
+        
+        #Check the pot file
         if '.' in file:        
             filename = file.split('.')[0]
         else:
             filename = file
         
-        pofilename = filename+'_%s.po'%lang.replace('-', '_')
-        pofile = os.path.join(outpath, pofilename)        
         potfile = os.path.join(tmlpath, filename+'.pot')
-
+       
         if not os.path.isfile(potfile):
-            raise UnAvaliablePOTException('Error', 'The requested POT file is not available')                                    
+            raise UnAvaliablePOTException('Error', 'The requested POT file is not available') 
+
+        # Create a PO file based on POT and language  
+        pofilename = filename+'_%s.po'%lang.replace('-', '_')
+        pofile = os.path.join(outpath, pofilename)         
                    
         # If the PO file doesn't exist
-        # create a PO file based on POT and language        
         if not os.path.isfile(pofile): 
             #copy the content of pot file to po file
             shutil.copy(potfile, pofile)
         
-        #read the content of the po file
+        #If the PO file is already exist, read the content of the po file
         publican = Publican(pofile)
         po = publican.load_po()
                
@@ -481,14 +504,6 @@ class FliesConsole:
         if not iteration_id:
             print "Please provide valid iteration id by flies.xml or by '--iteration' option"
             sys.exit()
-        
-        if not options['potfolder']:
-            print "Please provide folder for storting the template files in fliesrc"
-            sys.exit()
-
-        if not options['pofolder']:
-            print "Please provide folder for storting the output files in fliesrc"
-            sys.exit()
 
         flies = FliesResource(self.url)
         
@@ -502,7 +517,7 @@ class FliesConsole:
                     print "\nFetch the content of %s from Flies server: "%file                    
                     try:    
                         result = flies.documents.retrieve_translation(options['lang'], project_id, iteration_id, file)
-                        self._create_pofile(options['lang'], file, result, options['potfolder'], options['pofolder'])
+                        self._create_pofile(options['lang'], file, result)
                     except UnAuthorizedException as e:
                         print "%s :%s"%(e.expr, e.msg)                        
                         break
@@ -513,7 +528,7 @@ class FliesConsole:
             print "\nFetch the content of %s from Flies server: "%args[0]
             try:            
                 result = flies.documents.retrieve_translation(options['lang'], project_id, iteration_id, args[0])
-                self._create_pofile(options['lang'], args[0], result, options['potfolder'], options['pofolder'])
+                self._create_pofile(options['lang'], args[0], result)
             except (UnAuthorizedException, UnAvaliableResourceException) as e:
                 print "%s :%s"%(e.expr, e.msg)                        
 
@@ -531,7 +546,8 @@ class FliesConsole:
         Parse the command line to generate command options and sub_command
         """
         try:
-            opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["url=", "project=", "project-version=", "name=", "description=", "lang=",  "usr-config=", "project-config=", "apikey=", "username="])
+            opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["url=", "project=", "project-version=", "name=",
+            "description=", "lang=",  "user-config=", "project-config=", "apikey=", "username=", "template=", "output="])
         except getopt.GetoptError, err:
             print str(err)
             sys.exit(2)
@@ -582,23 +598,30 @@ class FliesConsole:
                     options['project_config'] = a
                 elif o in ("--project-version"): 
                     options['project_version'] = a
+                elif o in ("--template"):
+                    options['potfolder'] = a
+                elif o in ("--output"):
+                    options['pofolder'] = a
                    
         return command, command_args
  
-    def read_project_config(self, filename = None):
-        if filename:        
-            xmldoc = minidom.parse(filename)
-        else:
-            xmldoc = minidom.parse(os.getcwd()+'/flies.xml')
-
+    def _read_project_config(self, filename):
+        xmldoc = minidom.parse(filename)
         node = xmldoc.getElementsByTagName("project")[0]
         rc = ""
 
         for node in node.childNodes:
             if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
                 rc = rc + node.data
-                
         project_config['project_id'] = rc
+        
+        node = xmldoc.getElementsByTagName("project-version")[0]
+        rc = ""
+
+        for node in node.childNodes:
+            if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
+                rc = rc + node.data
+        project_config['project_version'] = rc
 
 
     def run(self):
@@ -607,18 +630,30 @@ class FliesConsole:
         if command == 'help':
             self._print_help_info(command_args)
         else:
-            if options['user_config']:
-                config = FliesConfig(options['user_config'])
-            else:
-                homedir = os.path.expanduser("~")
-                config = FliesConfig(homedir)
+            #Try to find user-config file
+            if options['user_config'] and os.path.isfile(options['user_config']):  
+                user_config = options['user_config']
+            elif os.path.isfile(os.path.expanduser("~")+'/.config/flies.ini'):
+                user_config = os.path.expanduser("~")+'/.config/flies.ini'
+            else:    
+                print "Can not find user-config file in home folder or in 'user-config' option"
+                sys.exit()
 
+            #Read the user-config file    
+            config = FliesConfig(user_config)
     	    self.url = config.get_config_value("url")
     	    self.user_name = config.get_config_value("username")
     	    self.apikey = config.get_config_value("key")
             
+            #The value in options will override the value in user-config file 
             if options['url']:
-                self.url = options['url']            
+                self.url = options['url']
+
+            if options['user_name']:
+                self.user_name = options['user_name']
+
+            if options['key']:
+                self.apikey = options['key']
             
             if not self.url:
                 print "Please provide valid server url in flies.ini or by '--url' option"
@@ -628,11 +663,11 @@ class FliesConsole:
                 self._list_projects()
             else:
                 #Read the project configuration file using --project-config option
-                if options['project_config']:
-                    self.read_project_config(options['project_config'])
-                else:
+                if options['project_config']  and os.path.isfile(options['user_config']):
+                    self._read_project_config(options['project_config'])
+                elif os.path.isfile(os.getcwd()+'/flies.xml'):
                     #If the option is not valid, try to read the project configuration from current path
-                    self.read_project_config()   
+                    self._read_project_config(os.getcwd()+'/flies.xml')
 
                 if command == 'status':
                     self._poject_status()

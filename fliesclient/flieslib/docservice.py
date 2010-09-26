@@ -36,7 +36,7 @@ class DocumentService:
         self.projects = projects
     
     def get_file_list(self, projectid, iterationid):
-        res, content = self.projects.restclient.request_get('/projects/p/%s/iterations/i/%s/r'%(projectid, iterationid))
+        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid, iterationid))
         
         if res['status'] == '200' or res['status'] == '304':
             list = json.loads(content)
@@ -65,8 +65,8 @@ class DocumentService:
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
         
-        res, content = self.projects.restclient.request_post('/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers)
-
+        res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers)
+        
         if res['status'] == '201':
             return True
         elif res['status'] == '401':
@@ -94,7 +94,7 @@ class DocumentService:
                 print "%s :%s"%(e.expr, e.msg)
 
         
-        res, content = self.projects.restclient.request_get('/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file, lang))
+        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file, lang))
         
         if res['status'] == '200' or res['status'] == '304':
             return content
@@ -104,5 +104,24 @@ class DocumentService:
             raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
   
     def update_translation(self, projectid, iterationid):
-        pass            
+        if projectid and iterationid:
+            try:
+                self.projects.iterations.get(projectid, iterationid)
+            except NoSuchProjectException as e:
+                print "%s :%s"%(e.expr, e.msg)
+                sys.exit()
+
+        headers = {}
+        headers['X-Auth-User'] = self.projects.username
+        headers['X-Auth-Token'] = self.projects.apikey        
+        
+        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers)
+        
+        if res['status'] == '201':
+            return True
+        elif res['status'] == '401':
+            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
+        elif res['status'] == '400':
+            raise BadRequestBodyException('Error 400', 'Unable to read request body.')
+      
 

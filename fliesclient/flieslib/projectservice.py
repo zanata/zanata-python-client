@@ -46,8 +46,8 @@ class ProjectService:
         List the Project Resources on the Flies server
         @return: list of Project object
         """
-        res, content = self.restclient.request_get('/projects')
-        
+        res, content = self.restclient.request_get('/seam/resource/restv1/projects')
+       
         if res['status'] == '200':
             projects = []
             projects_json = json.loads(content)
@@ -63,7 +63,7 @@ class ProjectService:
         @return: Project object
         @raise NoSuchProjectException:
         """     
-        res, content = self.restclient.request_get('/projects/p/%s'%projectid)
+        res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s'%projectid)
         if res['status'] == '200' or res['status'] == '304':
             return Project(json = json.loads(content), iterations = self.iterations)
         elif res['status'] == '404':
@@ -90,7 +90,7 @@ class ProjectService:
             exist = False
 
         body ='''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(project.name,project.id,project.desc)
-        res, content = self.restclient.request_put('/projects/p/%s'%project.id, args=body, headers=headers)
+        res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s'%project.id, args=body, headers=headers)
         
         if res['status'] == '201':
             return "Success"
@@ -126,7 +126,7 @@ class IterationService:
         @return: Iteration object
         @raise NoSuchProjectException:
         """
-        res, content = self.restclient.request_get('/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
+        res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
         if res['status'] == '200' or res['status'] == '304':
             return Iteration(json.loads(content))
         elif res['status'] == '404':
@@ -148,7 +148,7 @@ class IterationService:
         headers['X-Auth-Token'] = self.apikey
         
         body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iteration.name, iteration.id, iteration.desc)
-        res, content = self.restclient.request_put('/projects/p/%s/iterations/i/%s'%(projectid,iteration.id), args=body, headers=headers)
+        res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iteration.id), args=body, headers=headers)
         if res['status'] == '201':
             return "Success"
         elif res['status'] == '200':
