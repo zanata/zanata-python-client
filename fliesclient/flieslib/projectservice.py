@@ -47,7 +47,7 @@ class ProjectService:
         @return: list of Project object
         """
         res, content = self.restclient.request_get('/seam/resource/restv1/projects')
-       
+         
         if res['status'] == '200':
             projects = []
             projects_json = json.loads(content)

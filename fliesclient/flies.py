@@ -157,6 +157,7 @@ class FliesConsole:
         """
         List the information of all the project on the flies server
         """
+        
         flies = FliesResource(self.url)
         projects = flies.projects.list()
         

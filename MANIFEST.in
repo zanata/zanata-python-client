@@ -1,4 +1,4 @@
 include COPYING
 include COPYING.LESSER
-include fliesrc.txt
+include flies.xml
 include flies
