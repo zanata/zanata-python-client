@@ -40,7 +40,7 @@ sub_command = {
                 'status':[],
                 'project':['info','create', 'remove'],
                 'iteration':['info', 'create', 'remove'],
-                'publican':['push', 'pull']
+                'publican':['push', 'pull', 'update']
                 }
 
 options = {
@@ -370,7 +370,7 @@ class FliesConsole:
             filelist = self._list_folder(tmlfolder)
             if filelist:                
                 for pot in filelist:
-                    print "\nPush the content of %s to Flies server: "%pot
+                    print "\nPush the content of %s to Flies server:"%pot
                     
                     try: 
                         body = self._create_resource(tmlfolder+'/'+pot)
@@ -392,7 +392,7 @@ class FliesConsole:
             else:
                 print "Error, The template folder is empty or not exist"
         else:
-            print "\nPush the content of %s to Flies server: "%args[0]
+            print "\nPush the content of %s to Flies server:"%args[0]
             try:
                 body = self._create_resource(args[0])
             except NoSuchFileException as e:
@@ -404,6 +404,84 @@ class FliesConsole:
                     print "Successfully push %s to the Flies server"%args[0]
             except (UnAuthorizedException, BadRequestBodyException, SameNameDocumentException) as e:
                 print "%s :%s"%(e.expr, e.msg)  
+
+    def _update_publican(self, args):
+        """
+        Update the content of publican files to a Project iteration on Flies server
+        @param args: name of the publican file
+        """
+        if self.user_name and self.apikey:
+            flies = FliesResource(self.url, self.user_name, self.apikey)
+        else:
+            print "Please provide username and apikey in flies.ini or by '--username' and '--apikey' options"
+            sys.exit()
+
+        if options['project_id']:
+            project_id =  options['project_id'] 
+        else:
+            project_id = read_project_config('project_id')
+        
+        if options['project_version']:
+            iteration_id = options['project_version'] 
+        else:
+            iteration_id = read_project_config('project_version')
+
+        if not project_id:
+            print "Please provide valid project id by flies.xml or by '--project' option"
+            sys.exit()
+        
+        if not iteration_id:
+            print "Please provide valid iteration id by flies.xml or by '--project-version' option"
+            sys.exit()
+
+        #if file not specified, update all the files in po folder to flies server
+        if not args:
+            if options['pofolder']:
+                upfolder = options['pofolder']
+            else:
+                upfolder = os.getcwd()+'/po'
+                       
+            #check the po folder to find all the po file
+            filelist = self._list_folder(upfolder)
+            if filelist:                
+                for po in filelist:
+                    print "\nUpdate the content of %s to Flies server: "%po
+                    
+                    try: 
+                        body = self._create_resource(upfolder+'/'+po)
+                    except NoSuchFileException as e:
+                        print "%s :%s"%(e.expr, e.msg)
+                        continue 
+                    
+                    try:
+                        result = flies.documents.update_translation(project_id, iteration_id, body)
+                        if result:
+                            print "Successfully push %s to the Flies server"%po 
+                        else:
+                            print "Error"
+                    except UnAuthorizedException as e:
+                        print "%s :%s"%(e.expr, e.msg)                                            
+                        break
+                    except (BadRequestBodyException) as e:
+                        print "%s :%s"%(e.expr, e.msg)
+                        continue
+            else:
+                print "Error, The update folder is empty or not exist"
+        else:
+            print "\nUpdate the content of %s to Flies server:"%args[0]
+            try:
+                body = self._create_resource(args[0])
+            except NoSuchFileException as e:
+                print "%s :%s"%(e.expr, e.msg)
+                sys.exit()                                            
+            try:
+                result = flies.documents.update_translation(project_id, iteration_id, body)
+                if result:
+                    print "Successfully update %s to the Flies server"%args[0]
+                else:
+                    print "Error"
+            except (UnAuthorizedException, BadRequestBodyException) as e:
+                print "%s :%s"%(e.expr, e.msg) 
 
     def _hash_matches(self, message, id):
         m = hashlib.md5()
@@ -686,7 +764,9 @@ class FliesConsole:
                 elif command == 'publican_push':
                     self._push_publican(command_args)
                 elif command == 'publican_pull':
-                    self._pull_publican(command_args)      
+                    self._pull_publican(command_args)
+                elif command == 'publican_update':
+                    self._update_publican(command_args)
 
 def main():
     client = FliesConsole()

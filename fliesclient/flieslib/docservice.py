@@ -103,7 +103,7 @@ class DocumentService:
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
   
-    def update_translation(self, projectid, iterationid):
+    def update_translation(self, projectid, iterationid, resources):
         if projectid and iterationid:
             try:
                 self.projects.iterations.get(projectid, iterationid)
@@ -115,8 +115,8 @@ class DocumentService:
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
         
-        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers)
-        
+        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/Acls/translations/zh-CN'%(projectid,iterationid), args=resources, headers=headers)
+               
         if res['status'] == '201':
             return True
         elif res['status'] == '401':
