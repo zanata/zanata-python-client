@@ -53,12 +53,14 @@ options = {
             'project_version':'',
             'potfolder':'',
             'pofolder':'',
-            'name':'',
-            'desc':'',
+            'project_name':'',
+            'project_desc':'',
+            'version_name':'',
+            'version_desc':'',
             'lang':''
             }
 
-project_config = {'project_id':'', 'project_version':''}
+project_config = {'project_id':'', 'project_version':'', 'locale_map':{}}
 
 class FliesConsole:
 
@@ -68,13 +70,13 @@ class FliesConsole:
         self.apikey = ''
         self.user_config = ''
         self.project_config = ''
-
+        
     def _print_usage(self):
         print ('\nClient for talking to a Flies Server\n\n'
                'basic commands:\n\n'
                'list             List all available projects\n'
                'project info      Retrieve a project\n'
-               'iteration info    Retrieve a iteration\n\n'
+               'version info    Retrieve a iteration\n\n'
                "Use 'flies help' for the full list of commands")
 
     def _print_help_info(self, args):
@@ -84,14 +86,17 @@ class FliesConsole:
         """
         if not args:
             print ('Client for talking to a Flies Server:\n\n'
-                  'list of commands:\n\n'
+                  'Usage: flies <command> [COMMANDOPTION]...\n\n'
+                  'list of commands:\n'
+                  ' help                Display this help and exit\n'
                   ' list                List all available projects\n'
                   ' project info         Retrieve a project\n'
-                  ' iteration info       Retrieve a iteration\n'
+                  ' version info       Retrieve a iteration\n'
                   ' project create      Create a project\n'
-                  ' iteration create    Create a iteration of a project\n'   
+                  ' version create    Create a iteration of a project\n'   
                   ' publican pull       Pull the content of publican file\n'
-                  ' publican push       Push the content of publican to Flies Server\n')
+                  ' publican push       Push the content of publican file to Flies Server\n'
+                  ' publican update     Update the translation of publican file to Flies Server\n')
         else:
             command = args[0]
             sub = args[1:]
@@ -181,7 +186,7 @@ class FliesConsole:
             project_id = project_config['project_id']        
         
         if not project_id:
-            print 'Please use flies project info --project=project_id or flies.xml to retrieve the project info'
+            print 'Please use flies project info --project-id=project_id or flies.xml to retrieve the project info'
             sys.exit()
         
         flies = FliesResource(self.url)
@@ -244,7 +249,7 @@ class FliesConsole:
             sys.exit()
         
         try:
-            p = Project(id = args[0], name = options['name'], desc = options['desc'])
+            p = Project(id = args[0], name = options['project_name'], desc = options['project_desc'])
             result = flies.projects.create(p)
             if result == "Success":
                 print "Success create the project"
@@ -271,21 +276,21 @@ class FliesConsole:
         elif project_config['project_id']:
             project_id = project_config['project_id']
         else:
-            print "Please provide PROJECT_ID by --project option or using flies.xml"
+            print "Please provide PROJECT_ID by --project-id option or using flies.xml"
         
         if not args:
             print "Please provide ITERATION_ID for creating iteration"
             sys.exit()
 
-        if not options['name']:
-            print "Please provide Iteration name by '--name' option"
+        if not options['version_name']:
+            print "Please provide Iteration name by '--version-name' option"
             sys.exit()
          
         try:
             iteration = Iteration()
             iteration.id = args[0]
-            iteration.name = options['name']
-            iteration.desc = options['desc']
+            iteration.name = options['version_name']
+            iteration.desc = options['version_desc']
             result = flies.projects.iterations.create(project_id, iteration)
             if result == "Success":
                 print "Success create the itearion"
@@ -329,6 +334,32 @@ class FliesConsole:
         publican = Publican(path)
         textflows = publican.covert_txtflow()
         items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en', 'extensions':[], 'textFlows':textflows}
+        return json.dumps(items)
+
+    def _create_translation(self, filepath):
+        if '/' in filepath:
+            file = filepath.split('/')[-1]
+            path = filepath
+        else:
+            file = filepath
+            path = os.path.join(os.getcwd(), file)
+
+        if '.' in file:
+            # Strip the file name
+            filename = file.split('.')[0]
+        else:
+            filename = file
+     
+        if not os.path.isfile(path):
+            raise NoSuchFileException('Error', 'The file %s does not exist'%file)
+        
+        publican = Publican(path)
+        textflowtargets = publican.covert_txtflowtarget()
+        #this functions have not implemented yet
+        extensions = publican.extract_potheader()
+
+        items = {'links':[],'extensions':[], 'textFlowsTargets':textflowtargets}
+        
         return json.dumps(items)
 
     def _push_publican(self, args):
@@ -381,7 +412,6 @@ class FliesConsole:
                     
                     try:
                         result = flies.documents.commit_translation(project_id, iteration_id, body)
-                        print result
                         if result:
                             print "Successfully push %s to the Flies server"%pot    
                     except UnAuthorizedException as e:
@@ -400,7 +430,7 @@ class FliesConsole:
                 print "%s :%s"%(e.expr, e.msg)
                 sys.exit()                                            
             try:
-                result = flies.documents.commit_translation(options['project_id'], options['iteration_id'], body)
+                result = flies.documents.commit_translation(project_id, iteration_id, body)
                 if result:
                     print "Successfully push %s to the Flies server"%args[0]
             except (UnAuthorizedException, BadRequestBodyException, SameNameDocumentException) as e:
@@ -449,17 +479,17 @@ class FliesConsole:
                     print "\nUpdate the content of %s to Flies server: "%po
                     
                     try: 
-                        body = self._create_resource(upfolder+'/'+po)
+                        body = self._create_translation(upfolder+'/'+po)
                     except NoSuchFileException as e:
                         print "%s :%s"%(e.expr, e.msg)
                         continue 
                     
                     try:
-                        result = flies.documents.update_translation(project_id, iteration_id, body)
-                        if result:
-                            print "Successfully push %s to the Flies server"%po 
-                        else:
-                            print "Error"
+                        #result = flies.documents.update_translation(project_id, iteration_id, body)
+                        #if result:
+                            print "Successfully update %s to the Flies server"%po 
+                        #else:
+                        #    print "Error"
                     except UnAuthorizedException as e:
                         print "%s :%s"%(e.expr, e.msg)                                            
                         break
@@ -471,12 +501,13 @@ class FliesConsole:
         else:
             print "\nUpdate the content of %s to Flies server:"%args[0]
             try:
-                body = self._create_resource(args[0])
+                body = self._create_translation(args[0])
             except NoSuchFileException as e:
                 print "%s :%s"%(e.expr, e.msg)
                 sys.exit()                                            
             try:
                 result = flies.documents.update_translation(project_id, iteration_id, body)
+                
                 if result:
                     print "Successfully update %s to the Flies server"%args[0]
                 else:
@@ -562,7 +593,12 @@ class FliesConsole:
         Project iteration will be pulled from server.
         @param args: the name of publican file
         """
-        if not options['lang']:
+        if options['lang']:
+            if options['lang'] in self.localemap:
+                lang = self.localemap[options['lang']]
+            else:
+                lang = options['lang']
+        else:
             print "Please specify the language by '--lang' option"
             sys.exit()
 
@@ -590,13 +626,13 @@ class FliesConsole:
         if not args:
             #list the files in project
             filelist = flies.documents.get_file_list(project_id, iteration_id)
-            
+            print filelist            
             if filelist:
                 for file in filelist:
                     print "\nFetch the content of %s from Flies server: "%file                    
                     try:    
-                        result = flies.documents.retrieve_translation(options['lang'], project_id, iteration_id, file)
-                        self._create_pofile(options['lang'], file, result)
+                        result = flies.documents.retrieve_translation(lang, project_id, iteration_id, file)
+                        self._create_pofile(lang, file, result)
                     except UnAuthorizedException as e:
                         print "%s :%s"%(e.expr, e.msg)                        
                         break
@@ -606,8 +642,8 @@ class FliesConsole:
         else:
             print "\nFetch the content of %s from Flies server: "%args[0]
             try:            
-                result = flies.documents.retrieve_translation(options['lang'], project_id, iteration_id, args[0])
-                self._create_pofile(options['lang'], args[0], result)
+                result = flies.documents.retrieve_translation(lang, project_id, iteration_id, args[0])
+                self._create_pofile(lang, args[0], result)
             except (UnAuthorizedException, UnAvaliableResourceException) as e:
                 print "%s :%s"%(e.expr, e.msg)                        
 
@@ -625,8 +661,8 @@ class FliesConsole:
         Parse the command line to generate command options and sub_command
         """
         try:
-            opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["url=", "project=", "project-version=", "name=",
-            "description=", "lang=",  "user-config=", "project-config=", "apikey=", "username=", "template=", "output="])
+            opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["url=", "project-id=", "project-version=", "project-name=",
+            "project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=", "username=", "template=", "output="])
         except getopt.GetoptError, err:
             print str(err)
             sys.exit(2)
@@ -661,12 +697,16 @@ class FliesConsole:
                     options['user_config'] = a                     
                 elif o in ("--url"):
                     options['url'] = a
-                elif o in ("--name"):
-                    options['name'] = a
-                elif o in ("--description"):
-                    options['desc'] = a
-                elif o in ("--project"):
+                elif o in ("--project-name"):
+                    options['project_name'] = a
+                elif o in ("--project-desc"):
+                    options['project_desc'] = a
+                elif o in ("--project-id"):
                     options['project_id'] = a
+                elif o in ("--version-name"):
+                    options['version_name'] = a
+                elif o in ("--version-desc"):
+                    options['version_desc'] = a
                 elif o in ("--lang"):
                     options['lang'] = a
                 elif o in ("--username"):
@@ -686,6 +726,8 @@ class FliesConsole:
  
     def _read_project_config(self, filename):
         xmldoc = minidom.parse(filename)
+        
+        #Read the project id
         node = xmldoc.getElementsByTagName("project")[0]
         rc = ""
 
@@ -694,14 +736,27 @@ class FliesConsole:
                 rc = rc + node.data
         project_config['project_id'] = rc
         
+        #Read the project-version
         node = xmldoc.getElementsByTagName("project-version")[0]
         rc = ""
-
+        
         for node in node.childNodes:
             if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
                 rc = rc + node.data
         project_config['project_version'] = rc
 
+        #Read the locale map
+        locale = xmldoc.getElementsByTagName("locales")[0]
+        rc = ""
+        
+        localelist = locales.getElementByTagName("locale")
+        for locale in localelist
+            if locale.getAttribute("map-from")
+                for node in locale:
+                    if node.nodeType == node.TEXT_NODE:
+                        rc = rc+node.data
+                        map = {locale.getAttribute("map-from"):rc}
+                        project_config['locale_map'].update(map)
 
     def run(self):
         command, command_args = self._process_command_line()        

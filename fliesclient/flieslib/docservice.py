@@ -37,11 +37,12 @@ class DocumentService:
     
     def get_file_list(self, projectid, iterationid):
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid, iterationid))
-        
         if res['status'] == '200' or res['status'] == '304':
             list = json.loads(content)
             filelist = [file.get('name') for file in list]
             return filelist
+        elif res['status'] == '500':
+            raise InternalServerError('Error 500', 'An internal server error happens')
                      
     def commit_translation(self, projectid, iterationid, resources):
         """
@@ -92,10 +93,10 @@ class DocumentService:
                 self.projects.iterations.get(projectid, iterationid)
             except NoSuchProjectException as e:
                 print "%s :%s"%(e.expr, e.msg)
-
-        
+        print projectid, iterationid
+        print lang
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file, lang))
-        
+        print res,content
         if res['status'] == '200' or res['status'] == '304':
             return content
         elif res['status'] == '404':
@@ -116,8 +117,9 @@ class DocumentService:
         headers['X-Auth-Token'] = self.projects.apikey        
         
         res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/Acls/translations/zh-CN'%(projectid,iterationid), args=resources, headers=headers)
-               
-        if res['status'] == '201':
+        print res, content
+
+        if res['status'] == '200':
             return True
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
