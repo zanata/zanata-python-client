@@ -442,6 +442,15 @@ class FliesConsole:
         Update the content of publican files to a Project iteration on Flies server
         @param args: name of the publican file
         """
+        if options['lang']:
+            if options['lang'] in project_config['locale_map']:
+                lang = project_config['locale_map'][options['lang']]
+            else:
+                lang = options['lang']
+        else:
+            print "Please specify the language by '--lang' option"
+            sys.exit()
+
         if self.user_name and self.apikey:
             flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
@@ -486,7 +495,7 @@ class FliesConsole:
                         continue 
                     
                     try:
-                        result = flies.documents.update_translation(project_id, iteration_id,filename, body)
+                        result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body)
                         if result:
                             print "Successfully update %s to the Flies server"%po 
                         else:
@@ -507,12 +516,11 @@ class FliesConsole:
                 print "%s :%s"%(e.expr, e.msg)
                 sys.exit()                                            
             try:
-                result = flies.documents.update_translation(project_id, iteration_id, filename, body)
-                
+                result = flies.documents.update_translation(project_id, iteration_id, filename, lang, body)
                 if result:
                     print "Successfully update %s to the Flies server"%args[0]
                 else:
-                    print "Error"
+                    print "Something Error happens"
             except (UnAuthorizedException, BadRequestBodyException) as e:
                 print "%s :%s"%(e.expr, e.msg) 
 

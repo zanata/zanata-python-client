@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name: flies-python-client
-Version: 0.2.0
+Version: 0.3.0
 Release: 1%{?dist}
 Summary: Python Client for Flies Server
 
@@ -43,6 +43,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 
 %changelog
+* Thu Oct 21 2010 James Ni <jni@redhat.com> - 0.3.0-1
+- Fix the issues in extension support and update translation command
+
 * Thu Oct 21 2010 James Ni <jni@redhat.com> - 0.2.0-1
 - Add extension support and update translation command
 
