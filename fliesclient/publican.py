@@ -43,6 +43,7 @@ class Publican:
         po = polib.pofile(self.path)
         textflows = []
         for entry in po:
+            reflist = []
             m = hashlib.md5()
             m.update(entry.msgid.encode('utf-8'))
             textflowId = m.hexdigest()
@@ -53,10 +54,13 @@ class Publican:
             """
             extracted_comment = entry.comment
             references = entry.occurrences
-            flags = entry.flags[0]
-            extensions = [{"object-type":"pot-entry-header","context":"","references":"",
+            for ref in references:
+                node = ref[0]+":"+ref[1]
+                reflist.append(node)
+            flags = entry.flags
+            extensions = [{"object-type":"pot-entry-header","context":"","references":reflist,
             "extractedComment":extracted_comment,"flags":flags}]
-            textflow = {'id': textflowId, 'lang':'en', 'content':entry.msgid, 'extensions':[]}
+            textflow = {'id': textflowId, 'lang':'en', 'content':entry.msgid, 'extensions':extensions}
             textflows.append(textflow)
         return textflows
     
