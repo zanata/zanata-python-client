@@ -361,7 +361,7 @@ class FliesConsole:
 
         items = {'links':[],'extensions':[], 'textFlowsTargets':textflowtargets}
         
-        return json.dumps(items)
+        return json.dumps(items), filename
 
     def _push_publican(self, args):
         """
@@ -480,17 +480,17 @@ class FliesConsole:
                     print "\nUpdate the content of %s to Flies server: "%po
                     
                     try: 
-                        body = self._create_translation(upfolder+'/'+po)
+                        body, filename = self._create_translation(upfolder+'/'+po)
                     except NoSuchFileException as e:
                         print "%s :%s"%(e.expr, e.msg)
                         continue 
                     
                     try:
-                        #result = flies.documents.update_translation(project_id, iteration_id, body)
-                        #if result:
+                        result = flies.documents.update_translation(project_id, iteration_id,filename, body)
+                        if result:
                             print "Successfully update %s to the Flies server"%po 
-                        #else:
-                        #    print "Error"
+                        else:
+                            print "Something Error happens"
                     except UnAuthorizedException as e:
                         print "%s :%s"%(e.expr, e.msg)                                            
                         break
@@ -502,12 +502,12 @@ class FliesConsole:
         else:
             print "\nUpdate the content of %s to Flies server:"%args[0]
             try:
-                body = self._create_translation(args[0])
+                body, filename = self._create_translation(args[0])
             except NoSuchFileException as e:
                 print "%s :%s"%(e.expr, e.msg)
                 sys.exit()                                            
             try:
-                result = flies.documents.update_translation(project_id, iteration_id, body)
+                result = flies.documents.update_translation(project_id, iteration_id, filename, body)
                 
                 if result:
                     print "Successfully update %s to the Flies server"%args[0]
