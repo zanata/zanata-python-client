@@ -335,7 +335,6 @@ class FliesConsole:
         textflows = publican.covert_txtflow()
         items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en', 'extensions':[], 'textFlows':textflows}
         
-        print json.dumps(items)
         return json.dumps(items)
 
     def _create_translation(self, filepath):
