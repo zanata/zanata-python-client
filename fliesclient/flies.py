@@ -39,7 +39,7 @@ sub_command = {
                 'list':[],
                 'status':[],
                 'project':['info','create', 'remove'],
-                'iteration':['info', 'create', 'remove'],
+                'version':['info', 'create', 'remove'],
                 'publican':['push', 'pull', 'update']
                 }
 
@@ -216,7 +216,7 @@ class FliesConsole:
             iteration_id = project_config['project_version']
 
         if not iteration_id or not project_id:
-            print 'Please use flies iteration info --project=project_id --project-version=project_version to retrieve the iteration'
+            print 'Please use flies iteration info --project-id=project_id --project-version=project_version to retrieve the iteration'
             sys.exit()
         
         flies = FliesResource(self.url)
@@ -334,6 +334,8 @@ class FliesConsole:
         publican = Publican(path)
         textflows = publican.covert_txtflow()
         items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en', 'extensions':[], 'textFlows':textflows}
+        
+        print json.dumps(items)
         return json.dumps(items)
 
     def _create_translation(self, filepath):
@@ -576,8 +578,18 @@ class FliesConsole:
         content = json.loads(translations)
         targets = content.get('textFlowTargets')    
         
+        """
+        extensions":[{"object-type":"po-target-header",
+        "comment":"target header comment",
+        "entries":[{"key":"ht","value":"vt1"},{"key":"th2","value":"tv2"}]}]
+        """ 
+
         for message in po:
             for translation in targets:
+                extensions=translation.get('extensions')
+                ext_type = extensions.get('object-type')
+                comment = extensions.get('comment')
+                entries = extensions.get('entries')
                 if self._hash_matches(message, translation.get('resId')):
                     message.msgstr = translation.get('content')
               
@@ -746,13 +758,13 @@ class FliesConsole:
         project_config['project_version'] = rc
 
         #Read the locale map
-        locale = xmldoc.getElementsByTagName("locales")[0]
+        locales = xmldoc.getElementsByTagName("locales")[0]
         rc = ""
         
-        localelist = locales.getElementByTagName("locale")
-        for locale in localelist
-            if locale.getAttribute("map-from")
-                for node in locale:
+        localelist = locales.getElementsByTagName("locale")
+        for locale in localelist:
+            if locale.getAttribute("map-from"):
+                for node in locale.childNodes:
                     if node.nodeType == node.TEXT_NODE:
                         rc = rc+node.data
                         map = {locale.getAttribute("map-from"):rc}
@@ -811,11 +823,11 @@ class FliesConsole:
                     self._create_project(command_args)
                 elif command == 'project_remove':
                     self._remove_project(command_args)
-                elif command == 'iteration_info':
+                elif command == 'version_info':
                     self._get_iteration()
-                elif command == 'iteration_create':
+                elif command == 'version_create':
                     self._create_iteration(command_args)
-                elif command == 'iteration_remove':
+                elif command == 'version_remove':
                     self._remove_iteration(command_args)
                 elif command == 'publican_push':
                     self._push_publican(command_args)

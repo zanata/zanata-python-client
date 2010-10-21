@@ -67,7 +67,8 @@ class DocumentService:
         headers['X-Auth-Token'] = self.projects.apikey        
         
         res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers)
-       
+      
+        print res, content
         if res['status'] == '201':
             return True
         elif res['status'] == '401':

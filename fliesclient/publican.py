@@ -26,6 +26,7 @@ __all__ = (
 
 import polib
 import hashlib
+import json
 
 class Publican:
     def __init__(self, filepath):
@@ -44,9 +45,18 @@ class Publican:
         for entry in po:
             m = hashlib.md5()
             m.update(entry.msgid.encode('utf-8'))
-            textflowId = m.hexdigest() 
-            
-            textflow = {'id': textflowId, 'lang':'en', 'content':entry.msgid, 'extensions':}
+            textflowId = m.hexdigest()
+            """
+            "extensions":[{"object-type":"pot-entry-header","context":"context",
+            "references":["fff"],"extractedComment":"extractedComment",
+            "flags":["java-format"]}]
+            """
+            extracted_comment = entry.comment
+            references = entry.occurrences
+            flags = entry.flags[0]
+            extensions = [{"object-type":"pot-entry-header","context":"","references":"",
+            "extractedComment":extracted_comment,"flags":flags}]
+            textflow = {'id': textflowId, 'lang':'en', 'content':entry.msgid, 'extensions':[]}
             textflows.append(textflow)
         return textflows
     
