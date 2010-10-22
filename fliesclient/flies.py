@@ -244,8 +244,8 @@ class FliesConsole:
             print "Please provide PROJECT_ID for creating project"
             sys.exit()
 
-        if not options['name']:
-            print "Please provide Project name by '--name' option"
+        if not options['project_name']:
+            print "Please provide Project name by '--project-name' option"
             sys.exit()
         
         try:
