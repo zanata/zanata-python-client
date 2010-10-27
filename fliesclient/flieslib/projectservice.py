@@ -94,7 +94,7 @@ class ProjectService:
         
         if res['status'] == '201':
             return "Success"
-        elif rest['status'] == '200':
+        elif res['status'] == '200':
             raise ProjectExistException('Status 200', 'The project is already exist')
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project')
