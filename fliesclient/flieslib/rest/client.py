@@ -52,13 +52,14 @@ class RestClient():
         path = resource
         headers['Accept'] = 'application/json'
         http = httplib2.Http(".cache")
-        
+         
         if args:
             if method == "put" or method == "post":
                 headers['Content-Type'] = 'application/json'
+                print "there is args"
                 body = args
         try:
-            response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body=body, headers=headers)
+            response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body, headers=headers)
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError as e:
             print "Error:%s, Maybe the flies sever is down?"%e

@@ -66,7 +66,7 @@ class Publican:
     
     def covert_txtflowtarget(self):
         """
-        Convert the content of the po file to a list of text flow.
+        Convert the content of the po file to a list of textflowtarget.
         @return: the dictionary object of textflow
         """
         po = polib.pofile(self.path)
@@ -82,7 +82,12 @@ class Publican:
                 state = 3
             else:
                 state = 1
-            textflowtarget = {'resId': textflowId, 'state': state, 'content':entry.msgstr, 'extensions':[]}
+            #need judge for fuzzy state
+            #create extensions
+            # {"resId":"782f49c4e93c32403ba0b51821b38b90","state":"Approved","translator":{"email":"id","name":"name"},"content":"title:
+            # ttff","extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]}
+            textflowtarget = {'resId': textflowId, 'state': "Approved", "translator":{"email":"id","name":"name"},'content':entry.msgstr,
+            'extensions':[]}
             textflowtargets.append(textflowtarget)
         return textflowtargets
 

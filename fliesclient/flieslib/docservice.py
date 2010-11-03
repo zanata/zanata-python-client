@@ -67,7 +67,7 @@ class DocumentService:
         headers['X-Auth-Token'] = self.projects.apikey        
         
         res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers)
-      
+        print res,content
         if res['status'] == '201':
             return True
         elif res['status'] == '401':
@@ -93,10 +93,9 @@ class DocumentService:
                 self.projects.iterations.get(projectid, iterationid)
             except NoSuchProjectException as e:
                 print "%s :%s"%(e.expr, e.msg)
-        print projectid, iterationid
-        print lang
+        
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file, lang))
-        print res,content
+        
         if res['status'] == '200' or res['status'] == '304':
             return content
         elif res['status'] == '404':
@@ -117,7 +116,9 @@ class DocumentService:
         headers['X-Auth-Token'] = self.projects.apikey        
         
         res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers)
-         
+        print fileid, localeid
+        print resources
+        print res, content 
         if res['status'] == '200':
             return True
         elif res['status'] == '401':

@@ -377,12 +377,12 @@ class FliesConsole:
         if options['project_id']:
             project_id =  options['project_id'] 
         else:
-            project_id = read_project_config('project_id')
+            project_id = project_config['project_id']
         
         if options['project_version']:
             iteration_id = options['project_version'] 
         else:
-            iteration_id = read_project_config('project_version')
+            iteration_id = project_config['project_version']
 
         if not project_id:
             print "Please provide valid project id by flies.xml or by '--project' option"
@@ -460,12 +460,12 @@ class FliesConsole:
         if options['project_id']:
             project_id =  options['project_id'] 
         else:
-            project_id = read_project_config('project_id')
+            project_id = project_config['project_id']
         
         if options['project_version']:
             iteration_id = options['project_version'] 
         else:
-            iteration_id = read_project_config('project_version')
+            iteration_id = project_config['project_version']
 
         if not project_id:
             print "Please provide valid project id by flies.xml or by '--project' option"
@@ -624,12 +624,12 @@ class FliesConsole:
         if project:
             project_id =  options['project_id'] 
         else:
-            project_id = read_project_config('project_id')
+            project_id = project_config['project_id']
         
         if options['project_version']:
             iteration_id = options['project_version'] 
         else:
-            iteration_id = read_project_config('project_version')
+            iteration_id = project_config['project_version']
 
         if not project_id:
             print "Please provide valid project id by flies.xml or by '--project' option"
