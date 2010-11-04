@@ -359,7 +359,7 @@ class FliesConsole:
         #this functions have not implemented yet
         extensions = publican.extract_potheader()
 
-        items = {'links':[],'extensions':[], 'textFlowsTargets':textflowtargets}
+        items = {'links':[],'extensions':[], 'textFlowTargets':textflowtargets}
         
         return json.dumps(items), filename
 
