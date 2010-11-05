@@ -57,7 +57,8 @@ options = {
             'project_desc':'',
             'version_name':'',
             'version_desc':'',
-            'lang':''
+            'lang':'',
+            'email':''
             }
 
 project_config = {'project_id':'', 'project_version':'', 'locale_map':{}}
@@ -681,7 +682,8 @@ class FliesConsole:
         """
         try:
             opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["url=", "project-id=", "project-version=", "project-name=",
-            "project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=", "username=", "template=", "output="])
+            "project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=",
+            "username=", "template=", "output=", "email="])
         except getopt.GetoptError, err:
             print str(err)
             sys.exit(2)
@@ -740,6 +742,8 @@ class FliesConsole:
                     options['potfolder'] = a
                 elif o in ("--output"):
                     options['pofolder'] = a
+                elif o in ("--email"):
+                    options['email'] = a
                    
         return command, command_args
  
@@ -766,15 +770,14 @@ class FliesConsole:
 
         #Read the locale map
         locales = xmldoc.getElementsByTagName("locales")[0]
-        rc = ""
+        
         
         localelist = locales.getElementsByTagName("locale")
         for locale in localelist:
             if locale.getAttribute("map-from"):
                 for node in locale.childNodes:
                     if node.nodeType == node.TEXT_NODE:
-                        rc = rc+node.data
-                        map = {locale.getAttribute("map-from"):rc}
+                        map = {locale.getAttribute("map-from"):node.data}
                         project_config['locale_map'].update(map)
 
     def run(self):

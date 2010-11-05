@@ -56,7 +56,6 @@ class RestClient():
         if args:
             if method == "put" or method == "post":
                 headers['Content-Type'] = 'application/json'
-                print "there is args"
                 body = args
         try:
             response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body, headers=headers)

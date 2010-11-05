@@ -79,15 +79,18 @@ class Publican:
             m.update(entry.msgid.encode('utf-8'))
             textflowId = m.hexdigest()
             if entry.msgstr:
-                state = 3
+                state = "Approved"
             else:
-                state = 1
+                state = "New"
             #need judge for fuzzy state
+            
             #create extensions
+            
             # {"resId":"782f49c4e93c32403ba0b51821b38b90","state":"Approved","translator":{"email":"id","name":"name"},"content":"title:
             # ttff","extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]}
-            textflowtarget = {'resId': textflowId, 'state': "Approved", "translator":{"email":"id","name":"name"},'content':entry.msgstr,
-            'extensions':[]}
+            #Temporary fill in the admin info for translator to pass the validation, waiting for server side change
+            textflowtarget = {'resId': textflowId, 'state': state, "translator":{"email":"admin@example.com",
+            "name":"admin"},'content':entry.msgstr, 'extensions':[]}
             textflowtargets.append(textflowtarget)
         return textflowtargets
 
