@@ -70,11 +70,14 @@ class Publican:
         @return: the dictionary object of textflow
         """
         po = polib.pofile(self.path)
+        obs_list=po.obsolete_entries()
         textflowtargets = []
         """
         "resId", "state", "translator", "content", "extensions" 
         """
         for entry in po:
+            if entry in obs_list:
+                continue
             m = hashlib.md5()
             m.update(entry.msgid.encode('utf-8'))
             textflowId = m.hexdigest()
@@ -85,13 +88,14 @@ class Publican:
             #need judge for fuzzy state
             
             #create extensions
-            
             # {"resId":"782f49c4e93c32403ba0b51821b38b90","state":"Approved","translator":{"email":"id","name":"name"},"content":"title:
             # ttff","extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]}
+            extensions = [{"object-type":"comment","value":"testcomment","space":"preserve"}]
+            textflowtarget = {'resId': textflowId, 'state': state, "translator":{"email":"admin@example.com", "name":"admin"},'content':entry.msgstr,'extensions':extensions}
+            
             #Temporary fill in the admin info for translator to pass the validation, waiting for server side change
-            textflowtarget = {'resId': textflowId, 'state': state, "translator":{"email":"admin@example.com",
-            "name":"admin"},'content':entry.msgstr, 'extensions':[]}
             textflowtargets.append(textflowtarget)
+        
         return textflowtargets
 
     def extract_potheader(self):

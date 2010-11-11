@@ -51,8 +51,8 @@ options = {
             'project_config':'',
             'project_id':'',
             'project_version':'',
-            'potfolder':'',
-            'pofolder':'',
+            'srcdir':'',
+            'dstdir':'',
             'project_name':'',
             'project_desc':'',
             'version_name':'',
@@ -304,12 +304,19 @@ class FliesConsole:
         except InvalidOptionException as e:
             print "Options are not valid"
 
-    def _list_folder(self, tmlpath):
-        if os.path.isdir(tmlpath):
-            filelist = os.listdir(tmlpath)
-            return filelist
-        else:
-            return None
+    def _search_folder(self, path, ext):
+        final_file_list = []
+        root_list = os.listdir(path)
+        for item in root_list:
+            if item == '.svn':
+                continue
+            full_path = os.path.join(path,item)    
+            if full_path.endswith(ext):
+                final_file_list.append(full_path)
+            if os.path.isdir(full_path):
+                final_file_list+=self._search_folder(full_path, ext)
+        return final_file_list
+
 
     def _create_resource(self, filepath):
         """
@@ -395,19 +402,19 @@ class FliesConsole:
 
         #if file not specified, push all the files in pot folder to flies server
         if not args:
-            if options['potfolder']:
-                tmlfolder = options['potfolder']
+            if options['srcdir']:
+                tmlfolder = options['srcdir']
             else:
                 tmlfolder = os.getcwd()+'/pot'
                        
             #check the pot folder to find all the pot file
-            filelist = self._list_folder(tmlfolder)
+            filelist = self._search_folder(tmlfolder, ".pot")
             if filelist:                
                 for pot in filelist:
                     print "\nPush the content of %s to Flies server:"%pot
                     
                     try: 
-                        body = self._create_resource(tmlfolder+'/'+pot)
+                        body = self._create_resource(pot)
                     except NoSuchFileException as e:
                         print "%s :%s"%(e.expr, e.msg)
                         continue 
@@ -478,23 +485,27 @@ class FliesConsole:
 
         #if file not specified, update all the files in po folder to flies server
         if not args:
-            if options['pofolder']:
-                upfolder = options['pofolder']
+            if options['srcdir']:
+                upfolder = options['srcdir']+'/'+options['lang']
+                print upfolder
             else:
-                upfolder = os.getcwd()+'/po'
-                       
+                upfolder = os.getcwd()+'/'+options['lang']
+                print upfolder       
             #check the po folder to find all the po file
-            filelist = self._list_folder(upfolder)
+            filelist = self._search_folder(upfolder, ".po")
             if filelist:                
                 for po in filelist:
                     print "\nUpdate the content of %s to Flies server: "%po
                     
                     try: 
-                        body, filename = self._create_translation(upfolder+'/'+po)
+                        body, filename = self._create_translation(po)
                     except NoSuchFileException as e:
                         print "%s :%s"%(e.expr, e.msg)
-                        continue 
-                    
+                        continue
+
+                    if not body:
+                        print "No content or all the entry is obsolete in %s": %filename
+                        continue
                     try:
                         result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body)
                         if result:
@@ -541,39 +552,44 @@ class FliesConsole:
         @param tmlpath: the pot folder 
         @param outpath: the po folder for output
         """
-        if options['potfolder']:
-            tmlpath = options['potfolder']
+        if options['srcdir']:
+            tmlpath = options['srcdir']+'/pot'
         else:
             tmlpath = os.getcwd()+'/pot'
 
-        if options['pofolder']:
-            outpath = options['pofolder']
+        if options['dstdir']:
+            outpath = options['dstdir']+'/'+options['lang']
         else:
-            outpath = os.getcwd()+'/po'    
+            outpath = os.getcwd()+'/'+options['lang']
         
         if not os.path.isdir(tmlpath):
-            print "Please provide folder for storing the template files by '--template' option "
+            print "Please provide folder for storing the template files by '--srcDir' option "
             sys.exit()
 
         if not os.path.isdir(outpath):
-            print "Please provide folder for storing the output files by '--output' option"
+            print "Please provide folder for storing the output files by '--dstDir' option"
             sys.exit()
         
-        #Check the pot file
+        #Search the pot file
         if '.' in file:        
             filename = file.split('.')[0]
         else:
             filename = file
         
-        potfile = os.path.join(tmlpath, filename+'.pot')
+        filelist = self._search_pot(tmlpath)
        
-        if not os.path.isfile(potfile):
+        for item in filelist:
+            name = item.split('/')[-1].split('.')[0]
+            if name == filename:
+                potfile = item
+                
+        if not potfile:
             raise UnAvaliablePOTException('Error', 'The requested POT file is not available') 
 
         # Create a PO file based on POT and language  
-        pofilename = filename+'_%s.po'%lang.replace('-', '_')
-        pofile = os.path.join(outpath, pofilename)         
-                   
+        pofilename = potfile.split(tmlpath)[1].replace('pot','po')
+        pofile = outpath+pofilename
+          
         # If the PO file doesn't exist
         if not os.path.isfile(pofile): 
             #copy the content of pot file to po file
@@ -584,27 +600,27 @@ class FliesConsole:
         po = publican.load_po()
                
         content = json.loads(translations)
-        targets = content.get('textFlowTargets')    
-        
+        targets = content.get('textFlowTargets')
+                
         """
-        extensions":[{"object-type":"po-target-header",
-        "comment":"target header comment",
-        "entries":[{"key":"ht","value":"vt1"},{"key":"th2","value":"tv2"}]}]
+        "extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
         """ 
 
         for message in po:
             for translation in targets:
                 extensions=translation.get('extensions')
-                ext_type = extensions.get('object-type')
-                comment = extensions.get('comment')
-                entries = extensions.get('entries')
+                if extensions:
+                    ext_type = extensions.get('object-type')
+                    comment = extensions.get('comment')
+                    entries = extensions.get('value')
                 if self._hash_matches(message, translation.get('resId')):
                     message.msgstr = translation.get('content')
+                    
               
         # copy any other stuff you need to transfer
         # finally save resulting pot to outpath as myfile_lang.po
         po.save()
-        print "Successfully create %s in %s"%(pofilename, outpath)
+        print "Successfully create po file: %s"%(pofile)
     
     def _pull_publican(self, args):
         """
@@ -614,15 +630,15 @@ class FliesConsole:
         @param args: the name of publican file
         """
         if options['lang']:
-            if options['lang'] in self.localemap:
-                lang = self.localemap[options['lang']]
+            if options['lang'] in project_config['locale_map']:
+                lang = project_config['locale_map'][options['lang']]
             else:
                 lang = options['lang']
         else:
             print "Please specify the language by '--lang' option"
             sys.exit()
 
-        if project:
+        if options['project_id']:
             project_id =  options['project_id'] 
         else:
             project_id = project_config['project_id']
@@ -633,11 +649,11 @@ class FliesConsole:
             iteration_id = project_config['project_version']
 
         if not project_id:
-            print "Please provide valid project id by flies.xml or by '--project' option"
+            print "Please provide valid project id by flies.xml or by '--project-id' option"
             sys.exit()
         
         if not iteration_id:
-            print "Please provide valid iteration id by flies.xml or by '--iteration' option"
+            print "Please provide valid iteration id by flies.xml or by '--project-version' option"
             sys.exit()
 
         flies = FliesResource(self.url)
@@ -646,7 +662,7 @@ class FliesConsole:
         if not args:
             #list the files in project
             filelist = flies.documents.get_file_list(project_id, iteration_id)
-            print filelist            
+                        
             if filelist:
                 for file in filelist:
                     print "\nFetch the content of %s from Flies server: "%file                    
@@ -683,7 +699,7 @@ class FliesConsole:
         try:
             opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["url=", "project-id=", "project-version=", "project-name=",
             "project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=",
-            "username=", "template=", "output=", "email="])
+            "username=", "srcDir=", "dstDir=", "email="])
         except getopt.GetoptError, err:
             print str(err)
             sys.exit(2)
@@ -738,10 +754,10 @@ class FliesConsole:
                     options['project_config'] = a
                 elif o in ("--project-version"): 
                     options['project_version'] = a
-                elif o in ("--template"):
-                    options['potfolder'] = a
-                elif o in ("--output"):
-                    options['pofolder'] = a
+                elif o in ("--srcDir"):
+                    options['srcdir'] = a
+                elif o in ("--dstDir"):
+                    options['dstdir'] = a
                 elif o in ("--email"):
                     options['email'] = a
                    
