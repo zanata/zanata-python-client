@@ -29,6 +29,7 @@ import base64
 import warnings 
 import socket
 import sys
+import exceptions
 
 with warnings.catch_warnings():
      warnings.filterwarnings("ignore",category=DeprecationWarning)
@@ -64,6 +65,9 @@ class RestClient():
             print "Error:%s, Maybe the flies sever is down?"%e
             sys.exit(2)
         except httplib2.HttpLib2Error as e:
+            print "Error:%s"%e
+            sys.exit(2)
+        except Exception as e:
             print "Error:%s"%e
             sys.exit(2)
  

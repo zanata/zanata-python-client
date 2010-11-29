@@ -28,21 +28,31 @@ import os.path
 
 class FliesConfig:
      def __init__(self, path):
-    	 userconfig = path
-         self.configparser = ConfigParser.ConfigParser()
-         self._config = self.configparser.read([userconfig, os.path.expanduser(userconfig)])
-         
-     def get_value(self, name, section):
-         server_value = self.configparser.get(section, 'server')
-         
-         if self._config:
+        userconfig = path
+        self.configparser = ConfigParser.ConfigParser()
+        self._config = self.configparser.read([userconfig, os.path.expanduser(userconfig)])
+     
+     def get_server(self, url):
+        if self._config:
             try:
-                value = self.configparser.get('servers', server_value+'.'+name)
+                item_list = self.configparser.items('servers')
+                for item in item_list:
+                    if url in item:
+                        return item[0][:-4]
+            except ConfigParser.NoOptionError, NoSectionError:
+                return None
+        else:
+            return None       
+             
+     def get_value(self, name, section, server):
+        if self._config:
+            try:
+                value = self.configparser.get('servers', server+'.'+name)
                 return value
             except ConfigParser.NoOptionError, NoSectionError:
                 return None
-         else:
+        else:
             return None
      
-     def get_config_value(self, name):
-         return self.get_value(name, 'defaults') 
+     def get_config_value(self, name, server):
+         return self.get_value(name, 'defaults', server) 
