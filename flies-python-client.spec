@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name: flies-python-client
-Version: 0.3.2
+Version: 0.4.0
 Release: 1%{?dist}
 Summary: Python Client for Flies Server
 
@@ -43,6 +43,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 
 %changelog
+* Mon Nov 29 2010 James Ni <jni@redhat.com> - 0.4.0-1
+- Add command line option for translation folder and importPo, read and write multiple locale, read the flies.xml first
+
 * Wed Oct 27 2010 James Ni <jni@redhat.com> - 0.3.2-1
 - Fix a typo in project creation
 

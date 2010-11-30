@@ -586,54 +586,77 @@ class FliesConsole:
 
         #if file not specified, update all the files in po folder to flies server
         if not args:
-            if options['srcdir']:
-                upfolder = options['srcdir']+'/'+options['lang']
-            else:
-                upfolder = os.getcwd()+'/'+options['lang']
-            #check the po folder to find all the po file
-            filelist = self._search_folder(upfolder, ".po")
-            if filelist:                
-                for po in filelist:
-                    print "\nUpdate the content of %s to Flies server: "%po
+            for item in list:
+                if item in project_config['locale_map']:
+                    lang = project_config['locale_map'][item]
+                else:
+                    lang = item
+
+                if options['srcdir']:
+                    folder = options['srcdir']
+                else:
+                    folder = os.getcwd()
+
+                upfolder=folder+'/'+item
+
+                #check the po folder to find all the po file
+                filelist = self._search_folder(upfolder, ".po")
+                if filelist:                
+                    for po in filelist:
+                        print "\nUpdate the content of %s to Flies server: "%po
                     
-                    try: 
-                        body, filename = self._create_translation(po)
+                        try: 
+                            body, filename = self._create_translation(po)
+                        except NoSuchFileException as e:
+                            print "%s :%s"%(e.expr, e.msg)
+                            continue
+
+                        if not body:
+                            print "No content or all the entry is obsolete in %s"%filename
+                            continue
+                        
+                        try:
+                            result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body)
+                            if result:
+                                print "Successfully update %s to the Flies server"%po 
+                            else:
+                                print "Something Error happens"
+                        except UnAuthorizedException as e:
+                            print "%s :%s"%(e.expr, e.msg)                                            
+                            break
+                        except (BadRequestBodyException) as e:
+                            print "%s :%s"%(e.expr, e.msg)
+                            continue
+                else:
+                    print "Error, The update folder is empty or not exist"
+            else:
+                print "\nUpdate the content of %s to Flies server:"%args[0]
+                for item in list:
+                    if item in project_config['locale_map']:
+                        lang = project_config['locale_map'][item]
+                    else:
+                        lang = item
+
+                    if options['srcdir']:
+                        folder = options['srcdir']
+                    else:
+                        folder = os.getcwd()
+
+                    upfolder=folder+'/'+item
+                
+                    try:
+                        body, filename = self._create_translation(args[0])
                     except NoSuchFileException as e:
                         print "%s :%s"%(e.expr, e.msg)
-                        continue
-
-                    if not body:
-                        print "No content or all the entry is obsolete in %s"%filename
-                        continue
+                        sys.exit()                                            
                     try:
-                        result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body)
+                        result = flies.documents.update_translation(project_id, iteration_id, filename, lang, body)
                         if result:
-                            print "Successfully update %s to the Flies server"%po 
+                            print "Successfully update %s to the Flies server"%args[0]
                         else:
                             print "Something Error happens"
-                    except UnAuthorizedException as e:
-                        print "%s :%s"%(e.expr, e.msg)                                            
-                        break
-                    except (BadRequestBodyException) as e:
-                        print "%s :%s"%(e.expr, e.msg)
-                        continue
-            else:
-                print "Error, The update folder is empty or not exist"
-        else:
-            print "\nUpdate the content of %s to Flies server:"%args[0]
-            try:
-                body, filename = self._create_translation(args[0])
-            except NoSuchFileException as e:
-                print "%s :%s"%(e.expr, e.msg)
-                sys.exit()                                            
-            try:
-                result = flies.documents.update_translation(project_id, iteration_id, filename, lang, body)
-                if result:
-                    print "Successfully update %s to the Flies server"%args[0]
-                else:
-                    print "Something Error happens"
-            except (UnAuthorizedException, BadRequestBodyException) as e:
-                print "%s :%s"%(e.expr, e.msg) 
+                    except (UnAuthorizedException, BadRequestBodyException) as e:
+                        print "%s :%s"%(e.expr, e.msg) 
 
     def _hash_matches(self, message, id):
         m = hashlib.md5()
