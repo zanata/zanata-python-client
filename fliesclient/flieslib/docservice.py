@@ -26,7 +26,10 @@ __all__ = (
    )
 
 import os
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
 import sys
 from rest.client import RestClient
 from error import *
@@ -58,7 +61,7 @@ class DocumentService:
         if projectid and iterationid:
             try:
                 self.projects.iterations.get(projectid, iterationid)
-            except NoSuchProjectException as e:
+            except NoSuchProjectException,e:
                 print "%s :%s"%(e.expr, e.msg)
                 sys.exit()
 
@@ -67,7 +70,7 @@ class DocumentService:
         headers['X-Auth-Token'] = self.projects.apikey        
         
         res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers)
-        
+         
         if res['status'] == '201':
             return True
         elif res['status'] == '401':
@@ -91,7 +94,7 @@ class DocumentService:
         if projectid and iterationid:
             try:
                 self.projects.iterations.get(projectid, iterationid)
-            except NoSuchProjectException as e:
+            except NoSuchProjectException, e:
                 print "%s :%s"%(e.expr, e.msg)
         
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file, lang))
@@ -107,7 +110,7 @@ class DocumentService:
         if projectid and iterationid:
             try:
                 self.projects.iterations.get(projectid, iterationid)
-            except NoSuchProjectException as e:
+            except NoSuchProjectException, e:
                 print "%s :%s"%(e.expr, e.msg)
                 sys.exit()
 
@@ -116,7 +119,6 @@ class DocumentService:
         headers['X-Auth-Token'] = self.projects.apikey        
         
         res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers)
-
         if res['status'] == '200':
             return True
         elif res['status'] == '401':

@@ -26,7 +26,11 @@ __all__ = (
 
 import polib
 import hashlib
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
+import sys
 
 class Publican:
     def __init__(self, filepath):
@@ -40,7 +44,12 @@ class Publican:
         Convert the content of the pot file to a list of text flow.
         @return: the dictionary object of textflow
         """
-        po = polib.pofile(self.path)
+        try:
+            po = polib.pofile(self.path)
+        except Exception:
+            print "Can not processing the po file"
+            sys.exit()
+
         textflows = []
         for entry in po:
             reflist = []
@@ -69,7 +78,12 @@ class Publican:
         Convert the content of the po file to a list of textflowtarget.
         @return: the dictionary object of textflow
         """
-        po = polib.pofile(self.path)
+        try:
+            po = polib.pofile(self.path)
+        except Exception:
+            print "Can not processing the po file"
+            sys.exit()
+                       
         obs_list=po.obsolete_entries()
         textflowtargets = []
         """
@@ -106,5 +120,11 @@ class Publican:
         Convert the po file to a pofile object in polib.
         @return: pofile object
         """
-        return polib.pofile(self.path)
+        try:
+            po = polib.pofile(self.path)
+        except Exception:
+            print "Can not processing the po file"
+            sys.exit()
+
+        return po
         

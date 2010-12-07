@@ -24,62 +24,35 @@
 __all__ = (
         "Project","Iteration" 
    )
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
-import json
-from jsonmodel import BaseModel
 
-class Links():
-    def __init__(self, json):
-        self.json = json
+class Link(object):
+    def __init__(self, dict):
+        for a, b in dict.items():
+            setattr(self, str(a), b)
 
-    @property
-    def href(self):
-        return self.json.get('href')
-    
-    @href.setter
-    def href(self, href):
-        self.json['href'] = href
-    
-    @property
-    def type(self):
-        return self.json.get('type')
+class Iteration(object):
+    def __init__(self, dict):
+        for a, b in dict.items():
+            setattr(self, str(a), b)
 
-    @type.setter
-    def type(self, type):
-        self.json['type'] = type
+class Project(object):
+    def __init__(self, d):
+        for a, b in d.items():
+            if not a == 'links': 
+                setattr(self, str(a), b)
+            else:
+                setattr(self, str(a), [Link(item) for item in b])
 
-    @property
-    def rel(self):
-        return self.json.get('rel')
-
-    @rel.setter
-    def rel(self, rel):
-        self.json['rel'] = rel
-    
-class Iteration(BaseModel):
-    def __init__(self, json = {}):
-        BaseModel.__init__(self, json)
-
-class Project(BaseModel):
-    def __init__(self, json = {}, id = None, name = None, desc = None, iterations = None):
-        BaseModel.__init__(self, json)
+    def set_iteration(self, iterations):
         self.__iterations = iterations
-        if not json:
-            self.json['id'] = id
-            self.json['name'] = name
-            self.json['description'] = desc
-    
-    @property
-    def links(self):
-        links = []
-        for cont in self.json.get('links'):
-            iter = Links(cont)
-            links.append(iter)
-        return links
-    
-    @links.setter
-    def links(self,links):
-        self.json['links'] = links
 
     def get_iteration(self, id):
         return self.__iterations.get(self.id, id)
+
+
+

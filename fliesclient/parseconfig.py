@@ -36,9 +36,13 @@ class FliesConfig:
         if self._config:
             try:
                 item_list = self.configparser.items('servers')
+                server = ""                
                 for item in item_list:
-                    if url in item:
-                        return item[0][:-4]
+                    if item[1][-1] == "/":
+                        address = item[1][:-1]
+                    if url == address:
+                        server = item[0][:-4]
+                return server
             except ConfigParser.NoOptionError, NoSectionError:
                 return None
         else:

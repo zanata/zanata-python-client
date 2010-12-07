@@ -25,7 +25,10 @@ __all__ = (
    )
 
 import sys
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
 from rest.client import RestClient
 from project import Project
 from project import Iteration
@@ -53,7 +56,7 @@ class ProjectService:
             projects_json = json.loads(content)
             
             for p in projects_json:
-                projects.append(Project(json = p))
+                projects.append(Project(p))
             return projects
        
     def get(self, projectid):
@@ -65,7 +68,9 @@ class ProjectService:
         """     
         res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s'%projectid)
         if res['status'] == '200' or res['status'] == '304':
-            return Project(json = json.loads(content), iterations = self.iterations)
+            project = Project(json.loads(content))
+            project.set_iteration(self.iterations)
+            return project
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', 'No Such project') 
 
@@ -126,7 +131,8 @@ class IterationService:
         @return: Iteration object
         @raise NoSuchProjectException:
         """
-        res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
+        print projectid, iterationid
+        res, content = self.restclient.request_get('seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
         if res['status'] == '200' or res['status'] == '304':
             return Iteration(json.loads(content))
         elif res['status'] == '404':

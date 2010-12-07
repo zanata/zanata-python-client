@@ -30,12 +30,11 @@ import warnings
 import socket
 import sys
 import exceptions
+import warnings
+warnings.simplefilter("ignore",DeprecationWarning)
+import httplib2
 
-with warnings.catch_warnings():
-     warnings.filterwarnings("ignore",category=DeprecationWarning)
-     import httplib2
-     
-class RestClient():
+class RestClient(object):
     def __init__(self, base_url):
         self.base_url = base_url
         self.url = urlparse.urlparse(base_url)
@@ -61,13 +60,13 @@ class RestClient():
         try:
             response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body, headers=headers)
             return (response, content.decode("UTF-8"))
-        except httplib2.ServerNotFoundError as e:
+        except httplib2.ServerNotFoundError, e:
             print "Error:%s, Maybe the flies sever is down?"%e
             sys.exit(2)
-        except httplib2.HttpLib2Error as e:
+        except httplib2.HttpLib2Error, e:
             print "Error:%s"%e
             sys.exit(2)
-        except Exception as e:
+        except Exception, e:
             print "Error:%s"%e
             sys.exit(2)
  
