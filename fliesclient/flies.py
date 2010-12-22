@@ -371,7 +371,7 @@ class FliesConsole:
         publican = Publican(path)
         textflowtargets = publican.covert_txtflowtarget()
         #this functions have not implemented yet
-        extensions = publican.extract_potheader()
+        #extensions = publican.extract_potheader()
 
         items = {'links':[],'extensions':[], 'textFlowTargets':textflowtargets}
         
@@ -424,6 +424,20 @@ class FliesConsole:
         print "[INFO] Project: %s"%project_id
         print "[INFO] Version: %s"%iteration_id
         print "[INFO] Username: %s"%self.user_name
+
+        #Check the iteration for exist content 
+        filelist = flies.documents.get_file_list(project_id, iteration_id)
+
+        if filelist:
+            #Give an option to user for keep or delete the content
+            option = raw_input("[INFO]Do you want to delete the content on the flies server:")
+            if option == "yes":
+                for file in filelist:
+                    print "[INFO]Delete the %s"%file
+                    flies.documents.delete_pot(project_id, iteration_id, file, "gettext")
+            elif option == "no":
+                print "[INFO]Keep the content on the flies server"
+                 
 
         #if file not specified, push all the files in pot folder to flies server
         if not args:
@@ -510,8 +524,6 @@ class FliesConsole:
             print "\nPush the content of %s to Flies server:"%args[0]
             try:
                 body = self._create_resource(args[0])
-                from pprint import pprint
-                pprint(body)
             except NoSuchFileException, e:
                 print "%s :%s"%(e.expr, e.msg)
                 sys.exit()

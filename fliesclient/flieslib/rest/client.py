@@ -47,6 +47,9 @@ class RestClient(object):
             
     def request_put(self, resource, args = None, body = None, headers = {}, extension = None):
         return self.request(resource, "put", args, body, headers, extension)
+
+    def request_delete(self, resource, args = None, body = None, headers = {}, extension = None):
+        return self.request(resource, "delete", args, body, headers, extension)
     
     def request(self, resource, method = "get", args = None, body = None, headers = {}, extension = None):
         path = resource
