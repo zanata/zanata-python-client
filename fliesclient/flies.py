@@ -510,8 +510,6 @@ class FliesConsole:
             print "\nPush the content of %s to Flies server:"%args[0]
             try:
                 body = self._create_resource(args[0])
-                from pprint import pprint
-                pprint(body)
             except NoSuchFileException, e:
                 print "%s :%s"%(e.expr, e.msg)
                 sys.exit()
