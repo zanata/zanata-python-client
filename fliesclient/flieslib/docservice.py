@@ -79,6 +79,26 @@ class DocumentService:
             raise BadRequestBodyException('Error 400', 'Unable to read request body.')
         elif res['status'] == '409':
             raise SameNameDocumentException('Error 409', 'A document with same name already exists.')
+
+    def delete_pot(self, projectid, iterationid, file, extension):
+        if projectid and iterationid:
+            try:
+                self.projects.iterations.get(projectid, iterationid)
+            except NoSuchProjectException, e:
+                print "%s :%s"%(e.expr, e.msg)
+        
+        headers = {}
+        headers['X-Auth-User'] = self.projects.username
+        headers['X-Auth-Token'] = self.projects.apikey    
+        
+        res, content = self.projects.restclient.request_delete('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file), headers=headers, extension=extension)
+        
+        if res['status'] == '200' or res['status'] == '304':
+            return content
+        elif res['status'] == '404':
+            raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')
+        elif res['status'] == '401':
+            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation') 
     
     def retrieve_pot(self, projectid, iterationid, file, extension):
         if projectid and iterationid:
