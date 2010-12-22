@@ -131,8 +131,8 @@ class IterationService:
         @return: Iteration object
         @raise NoSuchProjectException:
         """
-        print projectid, iterationid
-        res, content = self.restclient.request_get('seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
+        
+        res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
         if res['status'] == '200' or res['status'] == '304':
             return Iteration(json.loads(content))
         elif res['status'] == '404':

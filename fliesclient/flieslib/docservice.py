@@ -47,7 +47,7 @@ class DocumentService:
         elif res['status'] == '500':
             raise InternalServerError('Error 500', 'An internal server error happens')
                      
-    def commit_translation(self, projectid, iterationid, resources):
+    def commit_translation(self, projectid, iterationid, resources, extension):
         """
         Push the json object to flies server
         @param projectid: id of project
@@ -69,7 +69,9 @@ class DocumentService:
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
         
-        res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers)
+        res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers, extension=extension)
+
+        print res, content
          
         if res['status'] == '201':
             return True
@@ -79,8 +81,24 @@ class DocumentService:
             raise BadRequestBodyException('Error 400', 'Unable to read request body.')
         elif res['status'] == '409':
             raise SameNameDocumentException('Error 409', 'A document with same name already exists.')
-                
-    def retrieve_translation(self, lang, projectid, iterationid, file):
+    
+    def retrieve_pot(self, projectid, iterationid, file, extension):
+        if projectid and iterationid:
+            try:
+                self.projects.iterations.get(projectid, iterationid)
+            except NoSuchProjectException, e:
+                print "%s :%s"%(e.expr, e.msg)
+        
+        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file), extension=extension)
+        
+        if res['status'] == '200' or res['status'] == '304':
+            return content
+        elif res['status'] == '404':
+            raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')
+        elif res['status'] == '401':
+            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')        
+
+    def retrieve_translation(self, lang, projectid, iterationid, file, extension):
         """
         Get translation content of file from Flies server
         @param lang: language
@@ -97,7 +115,7 @@ class DocumentService:
             except NoSuchProjectException, e:
                 print "%s :%s"%(e.expr, e.msg)
         
-        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file, lang))
+        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file, lang), extension=extension)
         
         if res['status'] == '200' or res['status'] == '304':
             return content
@@ -106,7 +124,7 @@ class DocumentService:
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
   
-    def update_translation(self, projectid, iterationid, fileid, localeid, resources):
+    def update_translation(self, projectid, iterationid, fileid, localeid, resources, extension):
         if projectid and iterationid:
             try:
                 self.projects.iterations.get(projectid, iterationid)
@@ -118,7 +136,7 @@ class DocumentService:
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
         
-        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers)
+        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers, extension=extension)
         if res['status'] == '200':
             return True
         elif res['status'] == '401':

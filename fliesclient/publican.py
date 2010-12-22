@@ -67,9 +67,12 @@ class Publican:
                 node = ref[0]+":"+ref[1]
                 reflist.append(node)
             flags = entry.flags
-            extensions = [{"object-type":"pot-entry-header","context":"","references":reflist,
-            "extractedComment":extracted_comment,"flags":flags}]
-            textflow = {'id': textflowId, 'lang':'en', 'content':entry.msgid, 'extensions':extensions}
+            
+            #extensions_single_comment = [{'object-type':'comment','value':'test','space':'preserve'}]
+            #extensions_pot_entry_header = [{"object-type":"pot-entry-header","context":"context","references":["fff"],"extractedComment":"extractedComment","flags":["java-format"]}]
+
+            extensions=[{"object-type":"pot-entry-header","context":"","references":reflist,"extractedComment":extracted_comment,"flags":flags}]
+            textflow = {'id': textflowId, 'lang':'en', 'content':entry.msgid, 'extensions':extensions, 'revision':1}
             textflows.append(textflow)
         return textflows
     
@@ -113,8 +116,23 @@ class Publican:
         return textflowtargets
 
     def extract_potheader(self):
-        pass
-        
+        try:
+            po = polib.pofile(self.path)
+        except Exception:
+            print "Can not processing the po file"
+            sys.exit()
+        """
+        "extensions":[{"object-type":"po-header","comment":"comment_value", "entries":[{"key":"h1","value":"v1"}]}]
+        """
+        entries = []
+        list = po.ordered_metadata()
+        for item in list:
+            entry = {"key":item[0], "value":item[1]}
+            entries.append(entry)
+       
+        extensions = [{"object-type":"po-header","comment":po.header, "entries":entries}]
+        return extensions
+
     def load_po(self):
         """
         Convert the po file to a pofile object in polib.

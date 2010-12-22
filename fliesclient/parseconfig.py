@@ -40,6 +40,9 @@ class FliesConfig:
                 for item in item_list:
                     if item[1][-1] == "/":
                         address = item[1][:-1]
+                    else:
+                        address = item[1]
+
                     if url == address:
                         server = item[0][:-4]
                 return server

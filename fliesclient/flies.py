@@ -32,6 +32,7 @@ except ImportError:
 import os.path
 import hashlib
 import shutil
+from polib import *
 from parseconfig import FliesConfig
 from publican import Publican
 from xml.dom import minidom 
@@ -339,14 +340,15 @@ class FliesConsole:
             filename = file.split('.')[0]
         else:
             filename = file
-               
+        
         if not os.path.isfile(path):
             raise NoSuchFileException('Error', 'The file %s does not exist'%file)
         
         publican = Publican(path)
         textflows = publican.covert_txtflow()
-        items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en', 'extensions':[], 'textFlows':textflows}
-        
+        extensions = publican.extract_potheader()
+        items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en', 'extensions':extensions, 'textFlows':textflows}
+         
         return json.dumps(items)
 
     def _create_translation(self, filepath):
@@ -442,12 +444,13 @@ class FliesConsole:
                     
                     try: 
                         body = self._create_resource(pot)
+                        
                     except NoSuchFileException, e:
                         print "%s :%s"%(e.expr, e.msg)
                         continue 
-                    print project_id, iteration_id 
+                                          
                     try:
-                        result = flies.documents.commit_translation(project_id, iteration_id, body)
+                        result = flies.documents.commit_translation(project_id, iteration_id, body, "gettext")
                         if result:
                             print "Successfully push %s to the Flies server"%pot    
                     except UnAuthorizedException, e:
@@ -488,7 +491,7 @@ class FliesConsole:
                                 continue
                         
                             try:
-                                result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body)
+                                result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body, "gettext")
                                 if result:
                                     print "Successfully push translation %s to the Flies server"%po 
                                 else:
@@ -499,17 +502,22 @@ class FliesConsole:
                             except BadRequestBodyException, e:
                                 print "%s :%s"%(e.expr, e.msg)
                                 continue
+                    
+
             else:
                 print "Error, The template folder is empty or not exist"
         else:
             print "\nPush the content of %s to Flies server:"%args[0]
             try:
                 body = self._create_resource(args[0])
+                from pprint import pprint
+                pprint(body)
             except NoSuchFileException, e:
                 print "%s :%s"%(e.expr, e.msg)
-                sys.exit()                                            
+                sys.exit()
+                
             try:
-                result = flies.documents.commit_translation(project_id, iteration_id, body)
+                result = flies.documents.commit_translation(project_id, iteration_id, body, "gettext")                
                 if result:
                     print "Successfully push %s to the Flies server"%args[0]
             except UnAuthorizedException, e:
@@ -549,7 +557,7 @@ class FliesConsole:
                         continue
                         
                     try:
-                        result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body)
+                        result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body, "gettext")
                         if result:
                             print "Successfully push translation %s to the Flies server"%po 
                         else:
@@ -632,7 +640,7 @@ class FliesConsole:
                             continue
                         
                         try:
-                            result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body)
+                            result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body, "gettext")
                             if result:
                                 print "Successfully update %s to the Flies server"%po 
                             else:
@@ -660,7 +668,7 @@ class FliesConsole:
                     sys.exit()                                            
                 
                 try:
-                    result = flies.documents.update_translation(project_id, iteration_id, filename, lang, body)
+                    result = flies.documents.update_translation(project_id, iteration_id, filename, lang, body, "gettext")
                     if result:
                         print "Successfully update %s to the Flies server"%args[0]
                     else:
@@ -678,69 +686,50 @@ class FliesConsole:
         else:
             return False     
 
-    def _create_pofile(self, lang, file, translations):
+    def _create_pofile(self, lang, file, translations, pot):
         """
         Create PO file based on the POT file in POT folder
         @param lang: language 
         @param translations: the json object of the content retrieved from server
-        @param tmlpath: the pot folder 
         @param outpath: the po folder for output
         """
-        if options['srcdir']:
-            tmlpath = options['srcdir']+'/pot'
-        else:
-            tmlpath = os.getcwd()+'/pot'
-
         if options['dstdir']:
             outpath = options['dstdir']+'/'+lang
         else:
             outpath = os.getcwd()+'/'+lang
-        
-        if not os.path.isdir(tmlpath):
-            print "Please provide folder for storing the template files by '--srcDir' option "
-            sys.exit()
 
         if not os.path.isdir(outpath):
             os.mkdir(outpath)
         
-        #Search the pot file
-        if '.' in file:        
-            filename = file.split('.')[0]
-        else:
-            filename = file
+        #Create the po file
+        pofile = outpath+'/'+file+'.po'
+        po = POFile(fpath=pofile)
         
-        filelist = self._search_folder(tmlpath, ".pot")
-      
-        potfile=""
-        for item in filelist:
-            name = item.split('/')[-1].split('.')[0]
-            if name == filename:
-                potfile = item
-                
-        if not potfile:
-            raise UnAvaliablePOTException('Error', 'The requested POT file is not available') 
-        
-        # Create a PO file based on POT and language  
-        pofilename = potfile.split(tmlpath)[1].replace('pot','po')
-        pofile = outpath+pofilename
+        potcontent = json.loads(pot)
+        textflows = potcontent.get('textFlows')
+        extensions = potcontent.get('extensions')[0]
+        po.header = extensions.get('comment')     
+        for item in extensions.get('entries'):
+            po.metadata[item['key']]=item['value']                    
+
+        for textflow in textflows:
+            poentry = POEntry()
+            extension = textflow.get('extensions')[0]
+            poentry.comment = extension.get('extractedComment')
+            poentry.occurrences = [tuple(item.split(':')) for item in extension.get('references')]
+            poentry.flags = extension.get('flags')            
+            poentry.msgid = textflow.get('content')
+            po.append(poentry)
           
-        # If the PO file doesn't exist
-        if not os.path.isfile(pofile): 
-            #copy the content of pot file to po file
-            shutil.copy(potfile, pofile)
-        
         #If the translation is exist, read the content of the po file
         if translations:
-            publican = Publican(pofile)
-            po = publican.load_po()
-               
             content = json.loads(translations)
             targets = content.get('textFlowTargets')
                 
             """
             "extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
             """ 
-
+            # copy any other stuff you need to transfer
             for message in po:
                 for translation in targets:
                     extensions=translation.get('extensions')
@@ -752,9 +741,9 @@ class FliesConsole:
                         message.msgstr = translation.get('content')
                     
               
-            # copy any other stuff you need to transfer
-            # finally save resulting pot to outpath as myfile_lang.po
-            po.save()
+            
+        # finally save resulting po to outpath as lang/myfile.po
+        po.save()
         print "Writing po file %s"%(pofile)
     
     def _pull_publican(self, args):
@@ -807,22 +796,16 @@ class FliesConsole:
                         else:
                             lang = item
                                     
-                        try:    
+                        try:
+                            pot = flies.documents.retrieve_pot(project_id, iteration_id, args[0], "gettext")                    
                             result = flies.documents.retrieve_translation(lang, project_id, iteration_id, file)
-                            
-
                         except UnAuthorizedException, e:
                             print "%s :%s"%(e.expr, e.msg)                        
                             break
                         except UnAvaliableResourceException, e:
                             print "There is no %s translation for %s"%(item, file)
-                            
-                        
-                        try:                       
-                            self._create_pofile(item, file, result)
-                        except UnAvaliablePOTException, e:
-                            print "[ERROR] Can not find pot file for %s"%file
-                            continue
+                     
+                        self._create_pofile(item, file, result, pot)
         else:
             print "\nFetch the content of %s from Flies server: "%args[0]
             for item in list:
@@ -832,12 +815,14 @@ class FliesConsole:
                     lang = item
 
                 try:            
-                    result = flies.documents.retrieve_translation(lang, project_id, iteration_id, args[0])
-                    self._create_pofile(item, args[0], result)
+                    result = flies.documents.retrieve_translation(lang, project_id, iteration_id, args[0], "gettext")
+                    pot = flies.documents.retrieve_pot(project_id, iteration_id, args[0], "gettext")
                 except UnAuthorizedException, e:
                     print "%s :%s"%(e.expr, e.msg)
                 except UnAvaliableResourceException, e:
-                    print "%s :%s"%(e.expr, e.msg)                        
+                    print "%s :%s"%(e.expr, e.msg)    
+                
+                self._create_pofile(item, args[0], result, pot)                    
 
     def _remove_project(self):
         pass
@@ -1018,14 +1003,13 @@ class FliesConsole:
     	    server = config.get_server(self.url)
             if server:
                 print "[INFO] The server is %s"%server
+                print "[INFO] Read user name and api key from user-config file"
+                self.user_name = config.get_config_value("username", server)
+    	        self.apikey = config.get_config_value("key", server)
             else:
-                print "[ERROR] Can not find the definition of server from user-config file"
-                sys.exit()
+                print "[INFO] Can not find the definition of server from user-config file"
             
-            print "[INFO] Read user name and api key from user-config file or from command line options"
-            self.user_name = config.get_config_value("username", server)
-    	    self.apikey = config.get_config_value("key", server)
-                        
+            print "[INFO] Read user name and api key from command line options"
             if options['user_name']:
                 self.user_name = options['user_name']
 

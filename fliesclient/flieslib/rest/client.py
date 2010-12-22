@@ -39,26 +39,33 @@ class RestClient(object):
         self.base_url = base_url
         self.url = urlparse.urlparse(base_url)
     
-    def request_get(self, resource, args = None, body = None, headers = {}):
-        return self.request(resource, "get", args, body, headers)
+    def request_get(self, resource, args = None, body = None, headers = {}, extension = None):        
+        return self.request(resource, "get", args, body, headers, extension)
     
-    def request_post(self, resource, args = None, body = None, headers = {}):
-        return self.request(resource, "post", args, body, headers)
+    def request_post(self, resource, args = None, body = None, headers = {}, extension = None):
+        return self.request(resource, "post", args, body, headers, extension)
+            
+    def request_put(self, resource, args = None, body = None, headers = {}, extension = None):
+        return self.request(resource, "put", args, body, headers, extension)
     
-    def request_put(self, resource, args = None, body = None, headers = {}):
-        return self.request(resource, "put", args, body, headers)
-    
-    def request(self, resource, method = "get", args = None, body = None, headers = {}):
+    def request(self, resource, method = "get", args = None, body = None, headers = {}, extension = None):
         path = resource
         headers['Accept'] = 'application/json'
         http = httplib2.Http(".cache")
-         
+        if extension == "gettext":
+            ext = "?ext=gettext"
+        elif extension == "comment":
+            ext = "?ext=comment"
+        else:
+            ext= ""
+
         if args:
             if method == "put" or method == "post":
                 headers['Content-Type'] = 'application/json'
                 body = args
+        
         try:
-            response, content = http.request("%s%s" % (self.base_url, resource), method.upper(), body, headers=headers)
+            response, content = http.request("%s%s%s" % (self.base_url, resource, ext), method.upper(), body, headers=headers)
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
             print "Error:%s, Maybe the flies sever is down?"%e
