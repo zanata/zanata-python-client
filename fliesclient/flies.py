@@ -444,17 +444,17 @@ class FliesConsole:
             if options['srcdir']:
                 tmlfolder = options['srcdir']
             else:
-                tmlfolder = os.getcwd()+'/pot'
+                tmlfolder = os.getcwd()
 
             if os.path.isdir(tmlfolder):            
                 #check the pot folder to find all the pot file
                 filelist = self._search_folder(tmlfolder, ".pot")
             else:
-                print "[ERROR] Can not find source folder, please specify the source folder by '--srcDir' option"
+                print "[ERROR]Can not find source folder, please specify the source folder by '--srcDir' option"
                 sys.exit()
             if filelist:                
                 for pot in filelist:
-                    print "[INFO] Push the content of %s to Flies server:"%pot
+                    print "\n[INFO]Push the content of %s to Flies server:"%pot
                     
                     try: 
                         body = self._create_resource(pot)
@@ -466,7 +466,7 @@ class FliesConsole:
                     try:
                         result = flies.documents.commit_translation(project_id, iteration_id, body, "gettext")
                         if result:
-                            print "Successfully push %s to the Flies server"%pot    
+                            print "[INFO]Successfully push %s to the Flies server"%pot    
                     except UnAuthorizedException, e:
                         print "%s :%s"%(e.expr, e.msg)
                         break                                            
@@ -474,26 +474,26 @@ class FliesConsole:
                         print "%s :%s"%(e.expr, e.msg)
                         continue
                     except SameNameDocumentException, e:
-                        print "A document with same name already exists."
+                        print "[ERROR]A document with same name already exists."
                         continue
 
                     if options['importpo'] == 'true':
                         for item in list:
-                            print "Push %s translation to Flies server:"%item
+                            print "[INFO]Push %s translation to Flies server:"%item
                             if item in project_config['locale_map']:
                                 lang = project_config['locale_map'][item]
                             else:
                                 lang = item
 
                             upfolder=folder+'/'+item
-                
+                             
                             if not os.path.isdir(upfolder):
-                                print "Can not find translation, please specify path of the translation folder"
+                                print "[ERROR]Can not find translation, please specify path of the translation folder"
                                 continue 
                             
-                            pofilename = pot.split(tmlfolder)[1].replace('pot','po')
+                            pofilename = pot.split(tmlfolder+'/pot')[1].replace('pot','po')
                             po = upfolder+pofilename
-                            
+                             
                             try: 
                                 body, filename = self._create_translation(po)
                             except NoSuchFileException, e:
@@ -501,13 +501,13 @@ class FliesConsole:
                                 continue
 
                             if not body:
-                                print "No content or all the entry is obsolete in %s"%filename
+                                print "[ERROR]No content or all the entry is obsolete in %s"%filename
                                 continue
                         
                             try:
                                 result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body, "gettext")
                                 if result:
-                                    print "Successfully push translation %s to the Flies server"%po 
+                                    print "[INFO]Successfully push translation %s to the Flies server"%po 
                                 else:
                                     print "Something error happens"
                             except UnAuthorizedException, e:
@@ -519,7 +519,7 @@ class FliesConsole:
                     
 
             else:
-                print "Error, The template folder is empty or not exist"
+                print "[ERROR]The template folder is empty or not exist"
         else:
             print "\nPush the content of %s to Flies server:"%args[0]
             try:
@@ -756,7 +756,7 @@ class FliesConsole:
             
         # finally save resulting po to outpath as lang/myfile.po
         po.save()
-        print "Writing po file %s"%(pofile)
+        print "[INFO]Writing po file %s"%(pofile)
     
     def _pull_publican(self, args):
         """
@@ -771,7 +771,7 @@ class FliesConsole:
         elif project_config['locale_map']:
             list = project_config['locale_map'].keys()
         else:
-            print "Please specify the language by '--lang' option or flies.xml"
+            print "[ERROR]Please specify the language by '--lang' option or flies.xml"
             sys.exit()
 
         if options['project_id']:
@@ -785,11 +785,11 @@ class FliesConsole:
             iteration_id = project_config['project_version']
 
         if not project_id:
-            print "Please provide valid project id by flies.xml or by '--project-id' option"
+            print "[ERROR]Please provide valid project id by flies.xml or by '--project-id' option"
             sys.exit()
         
         if not iteration_id:
-            print "Please provide valid iteration id by flies.xml or by '--project-version' option"
+            print "[ERROR]Please provide valid iteration id by flies.xml or by '--project-version' option"
             sys.exit()
 
         flies = FliesResource(self.url)
@@ -801,39 +801,62 @@ class FliesConsole:
                         
             if filelist:
                 for file in filelist:
-                    print "\nFetch the content of %s from Flies server: "%file                    
+                                      
+                    print "\n[INFO]Fetch the content of %s from Flies server: "%file                    
+                    
                     for item in list:
+                        pot = 0
+                        result = 0
                         if item in project_config['locale_map']:
                             lang = project_config['locale_map'][item]
                         else:
                             lang = item
-                                    
+                        
                         try:
-                            pot = flies.documents.retrieve_pot(project_id, iteration_id, args[0], "gettext")                    
-                            result = flies.documents.retrieve_translation(lang, project_id, iteration_id, file)
+                            pot = flies.documents.retrieve_pot(project_id, iteration_id, file, "gettext")                    
+                        except UnAuthorizedException, e:
+                            print "%s :%s"%(e.expr, e.msg)
+                            break
+                        except UnAvaliableResourceException, e:
+                            print "[ERROR]Can't find pot file for %s on Flies server"%file
+                            break
+
+                        try:
+                            result = flies.documents.retrieve_translation(lang, project_id, iteration_id, file, "gettext")
                         except UnAuthorizedException, e:
                             print "%s :%s"%(e.expr, e.msg)                        
                             break
                         except UnAvaliableResourceException, e:
-                            print "There is no %s translation for %s"%(item, file)
-                     
+                            print "[ERROR]There is no %s translation for %s"%(item, file)
+                            
                         self._create_pofile(item, file, result, pot)
         else:
-            print "\nFetch the content of %s from Flies server: "%args[0]
+            print "\n[INFO]Fetch the content of %s from Flies server: "%args[0]
             for item in list:
+                result = 0
+                pot = 0
                 if item in project_config['locale_map']:
                     lang = project_config['locale_map'][item]
                 else:
                     lang = item
 
-                try:            
-                    result = flies.documents.retrieve_translation(lang, project_id, iteration_id, args[0], "gettext")
-                    pot = flies.documents.retrieve_pot(project_id, iteration_id, args[0], "gettext")
+                try:
+                    pot = flies.documents.retrieve_pot(project_id, iteration_id, args[0], "gettext")                    
                 except UnAuthorizedException, e:
                     print "%s :%s"%(e.expr, e.msg)
+                    sys.exit()
                 except UnAvaliableResourceException, e:
-                    print "%s :%s"%(e.expr, e.msg)    
-                
+                    print "[ERROR]Can't find pot file for %s on Flies server"%args[0]
+                    sys.exit()
+
+                try:            
+                    result = flies.documents.retrieve_translation(lang, project_id, iteration_id, args[0], "gettext")
+                except UnAuthorizedException, e:
+                    print "%s :%s"%(e.expr, e.msg)
+                    sys.exit()
+                except UnAvaliableResourceException, e:
+                    print "[ERROR]There is no %s translation for %s"%(item, args[0])
+
                 self._create_pofile(item, args[0], result, pot)                    
 
     def _remove_project(self):
@@ -862,7 +885,7 @@ class FliesConsole:
             sub = args[1:]            
             if sub_command.has_key(command):
                 if sub_command[command]:
-                    if sub[0]:
+                    if sub:
                         if sub[0] in sub_command[command]:
                             command = command+'_'+sub[0]
                             command_args = sub[1:]
