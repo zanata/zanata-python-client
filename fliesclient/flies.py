@@ -719,19 +719,25 @@ class FliesConsole:
         
         potcontent = json.loads(pot)
         textflows = potcontent.get('textFlows')
-        extensions = potcontent.get('extensions')[0]
-        po.header = extensions.get('comment')     
-        for item in extensions.get('entries'):
-            po.metadata[item['key']]=item['value']                    
+        if potcontent.get('extensions'):
+            extensions = potcontent.get('extensions')[0]
+            po.header = extensions.get('comment')     
+            for item in extensions.get('entries'):
+                po.metadata[item['key']]=item['value']                    
+        else:
+            raise InvalidPOTFileException("Error", "the extensions of Resource is empty")
 
         for textflow in textflows:
-            poentry = POEntry()
-            extension = textflow.get('extensions')[0]
-            poentry.comment = extension.get('extractedComment')
-            poentry.occurrences = [tuple(item.split(':')) for item in extension.get('references')]
-            poentry.flags = extension.get('flags')            
-            poentry.msgid = textflow.get('content')
-            po.append(poentry)
+            if textflow.get('extensions'):
+                poentry = POEntry()
+                extension = textflow.get('extensions')[0]
+                poentry.comment = extension.get('extractedComment')
+                poentry.occurrences = [tuple(item.split(':')) for item in extension.get('references')]
+                poentry.flags = extension.get('flags')            
+                poentry.msgid = textflow.get('content')
+                po.append(poentry)
+            else:
+                raise InvalidPOTFileException("Error", "the extensions of TextFlow is empty")
           
         #If the translation is exist, read the content of the po file
         if translations:
@@ -829,7 +835,10 @@ class FliesConsole:
                         except UnAvaliableResourceException, e:
                             print "[ERROR]There is no %s translation for %s"%(item, file)
                             
-                        self._create_pofile(item, file, result, pot)
+                        try:
+                            self._create_pofile(item, file, result, pot)
+                        except InvalidPOTFileException, e:
+                            print "[ERROR]Can't generate po file for %s,"%file+e.msg
         else:
             print "\n[INFO]Fetch the content of %s from Flies server: "%args[0]
             for item in list:
@@ -856,9 +865,12 @@ class FliesConsole:
                     sys.exit()
                 except UnAvaliableResourceException, e:
                     print "[ERROR]There is no %s translation for %s"%(item, args[0])
-
-                self._create_pofile(item, args[0], result, pot)                    
-
+                
+                try:
+                    self._create_pofile(item, args[0], result, pot)                    
+                except InvalidPOTFileException, e:
+                    print "[ERROR]Can't generate po file for %s,"%file+e.msg
+                    
     def _remove_project(self):
         pass
 
