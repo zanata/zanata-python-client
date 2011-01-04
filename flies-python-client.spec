@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name: flies-python-client
-Version: 0.6.0
+Version: 0.6.1
 Release: 1%{?dist}
 Summary: Python Client for Flies Server
 
@@ -43,6 +43,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 
 %changelog
+* Tue Jan 04 2011 James Ni <jni@redhat.com> - 0.6.1-1
+- Add exception handler for empty extensions
+
 * Wed Dec 29 2010 James Ni <jni@redhat.com> - 0.6.0-1
 - Create pot file with content retrieved from server, user could choose keep or delete the content on the flies
   server when pushing publican
