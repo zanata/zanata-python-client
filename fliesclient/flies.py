@@ -65,7 +65,8 @@ options = {
             'version_desc':'',
             'lang':'',
             'email':'',
-            'importpo':''
+            'importpo':'',
+            'copytrans':''
             }
 
 project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}
@@ -132,9 +133,9 @@ class FliesConsole:
             self._projec_info_help()
         elif command == 'project_create':
             self._project_create_help()
-        elif command == 'iteration_info':
+        elif command == 'version_info':
             self._iteration_info_help()
-        elif command == 'iteration_create':
+        elif command == 'version_create':
             self._iteration_create_help()
         elif command == 'publican_push':
             self._publican_push_help()
@@ -143,10 +144,10 @@ class FliesConsole:
                 
 
     def _list_help(self):
-       	print ('flies list [OPTIONS]\n\n'
-               'list all available projects\n\n'
-               'options:\n\n'
-               ' --server url address of the Flies server')
+       	print ('flies list [OPTIONS]\n'
+               'list all available projects\n'
+               'options:\n'
+               ' --url url address of the Flies server')
     
     def _projec_info_help(self):
 	    print ('flies project info [OPTIONS]')
@@ -155,10 +156,10 @@ class FliesConsole:
         print ('flies project create [PROJECT_ID] [OPTIONS]') 
 
     def _iteration_info_help(self):
-	    print ('flies iteration info [OPTIONS]')
+	    print ('flies version info [OPTIONS]')
 
     def _iteration_create_help(self):
-        print ('flies iteration create [ITERATION_ID] [OPTIONS]')
+        print ('flies version create [ITERATION_ID] [OPTIONS]')
 
     def _publican_push_help(self):
         print ('flies publican push [OPTIONS] {document}')
@@ -349,7 +350,7 @@ class FliesConsole:
         extensions = publican.extract_potheader()
         items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en', 'extensions':extensions, 'textFlows':textflows}
          
-        return json.dumps(items)
+        return json.dumps(items), filename
 
     def _create_translation(self, filepath):
         if '/' in filepath:
@@ -424,7 +425,7 @@ class FliesConsole:
         print "[INFO] Project: %s"%project_id
         print "[INFO] Version: %s"%iteration_id
         print "[INFO] Username: %s"%self.user_name
-
+        
         #Check the iteration for exist content 
         filelist = flies.documents.get_file_list(project_id, iteration_id)
 
@@ -457,8 +458,7 @@ class FliesConsole:
                     print "\n[INFO]Push the content of %s to Flies server:"%pot
                     
                     try: 
-                        body = self._create_resource(pot)
-                        
+                        body, filename = self._create_resource(pot)
                     except NoSuchFileException, e:
                         print "%s :%s"%(e.expr, e.msg)
                         continue 
@@ -474,7 +474,11 @@ class FliesConsole:
                         print "%s :%s"%(e.expr, e.msg)
                         continue
                     except SameNameDocumentException, e:
-                        print "[ERROR]A document with same name already exists."
+                        print "A document with same name already exists. Use put methode to update" 
+                        try:
+                            result = flies.documents.update_template(project_id, iteration_id, filename, body, "gettext", options['copytrans'])
+                        except BadRequestBodyException, e:
+                            print "%s :%s"%(e.expr, e.msg)
                         continue
 
                     if options['importpo'] == 'true':
@@ -505,7 +509,8 @@ class FliesConsole:
                                 continue
                         
                             try:
-                                result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body, "gettext")
+                                result = flies.documents.update_translation(project_id, iteration_id,filename,lang,
+                                body, "gettext", options['copytrans'])
                                 if result:
                                     print "[INFO]Successfully push translation %s to the Flies server"%po 
                                 else:
@@ -521,15 +526,16 @@ class FliesConsole:
             else:
                 print "[ERROR]The template folder is empty or not exist"
         else:
-            print "\nPush the content of %s to Flies server:"%args[0]
+            print "\n[INFO]Push the content of %s to Flies server:"%args[0]
             try:
-                body = self._create_resource(args[0])
+                body, filename  = self._create_resource(args[0])
             except NoSuchFileException, e:
                 print "%s :%s"%(e.expr, e.msg)
                 sys.exit()
-                
+             
             try:
-                result = flies.documents.commit_translation(project_id, iteration_id, body, "gettext")                
+                result = flies.documents.commit_translation(project_id, iteration_id, body, "gettext",
+                options['copytrans'])                
                 if result:
                     print "Successfully push %s to the Flies server"%args[0]
             except UnAuthorizedException, e:
@@ -537,7 +543,13 @@ class FliesConsole:
             except BadRequestBodyException, e:
                 print "%s :%s"%(e.expr, e.msg)
             except SameNameDocumentException, e:
-                print "A document with same name already exists." 
+                print "[INFO]A document with same name already exists. Use put methode to update" 
+                try:
+                    result = flies.documents.update_template(project_id, iteration_id, filename, body, "gettext", options['copytrans'])
+                    if result:
+                        print "[INFO]Successfully update template %s on the Flies server"%filename
+                except BadRequestBodyException, e:
+                    print "%s :%s"%(e.expr, e.msg)     
 
             if options['importpo'] == 'true':
                 for item in list:
@@ -887,7 +899,7 @@ class FliesConsole:
         try:
             opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["url=", "project-id=", "project-version=", "project-name=",
             "project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=",
-            "username=", "srcDir=", "dstDir=", "email=", "transDir=", "importPo="])
+            "username=", "srcDir=", "dstDir=", "email=", "transDir=", "importPo", "copyTrans"])
         except getopt.GetoptError, err:
             print str(err)
             sys.exit(2)
@@ -951,7 +963,9 @@ class FliesConsole:
                 elif o in ("--email"):
                     options['email'] = a
                 elif o in ("--importPo"):
-                    options['importpo'] = a
+                    options['importpo'] = "true"
+                elif o in ("--copyTrans"):
+                    options['copytrans'] = "true"
                    
         return command, command_args
  

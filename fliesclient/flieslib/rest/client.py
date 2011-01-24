@@ -42,26 +42,32 @@ class RestClient(object):
     def request_get(self, resource, args = None, body = None, headers = {}, extension = None):        
         return self.request(resource, "get", args, body, headers, extension)
     
-    def request_post(self, resource, args = None, body = None, headers = {}, extension = None):
-        return self.request(resource, "post", args, body, headers, extension)
+    def request_post(self, resource, args = None, body = None, headers = {}, extension = None, copytrans = None):
+        return self.request(resource, "post", args, body, headers, extension, copytrans)
             
-    def request_put(self, resource, args = None, body = None, headers = {}, extension = None):
-        return self.request(resource, "put", args, body, headers, extension)
+    def request_put(self, resource, args = None, body = None, headers = {}, extension = None, copytrans = None):
+        return self.request(resource, "put", args, body, headers, extension, copytrans = copytrans)
 
     def request_delete(self, resource, args = None, body = None, headers = {}, extension = None):
         return self.request(resource, "delete", args, body, headers, extension)
     
-    def request(self, resource, method = "get", args = None, body = None, headers = {}, extension = None):
+    def request(self, resource, method = "get", args = None, body = None, headers = {}, extension = None, copytrans =
+    None):
         path = resource
         headers['Accept'] = 'application/json'
         http = httplib2.Http(".cache")
+        ext = ""
         if extension == "gettext":
             ext = "?ext=gettext"
         elif extension == "comment":
             ext = "?ext=comment"
-        else:
-            ext= ""
-
+       
+        if copytrans == "true":
+            if ext == "":
+                ext="?copyTrans=true"
+            else:
+                ext=ext+"&copyTrans=true"
+        
         if args:
             if method == "put" or method == "post":
                 headers['Content-Type'] = 'application/json'

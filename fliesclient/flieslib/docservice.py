@@ -46,8 +46,31 @@ class DocumentService:
             return filelist
         elif res['status'] == '500':
             raise InternalServerError('Error 500', 'An internal server error happens')
-                     
-    def commit_translation(self, projectid, iterationid, resources, extension):
+    
+    def update_template(self, projectid, iterationid, file, resources, extension, copytrans):
+        if projectid and iterationid:
+            try:
+                self.projects.iterations.get(projectid, iterationid)
+            except NoSuchProjectException,e:
+                print "%s :%s"%(e.expr, e.msg)
+                sys.exit()
+
+        headers = {}
+        headers['X-Auth-User'] = self.projects.username
+        headers['X-Auth-Token'] = self.projects.apikey        
+         
+        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid,iterationid,file), args=resources, headers=headers, extension=extension, copytrans=copytrans)
+         
+        if res['status'] == '201' or res['status'] == '200':
+            return True
+        elif res['status'] == '401':
+            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
+        elif res['status'] == '400':
+            raise BadRequestBodyException('Error 400', 'Unable to read request body.')
+        elif res['status'] == '409':
+            raise SameNameDocumentException('Error 409', 'A document with same name already exists.')
+    
+    def commit_translation(self, projectid, iterationid, resources, extension, copytrans):
         """
         Push the json object to flies server
         @param projectid: id of project
@@ -69,7 +92,7 @@ class DocumentService:
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
         
-        res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers, extension=extension)
+        res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers, extension=extension, copytrans=copytrans)
 
         if res['status'] == '201':
             return True
