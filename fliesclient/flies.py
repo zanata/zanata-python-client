@@ -147,7 +147,7 @@ class FliesConsole:
        	print ('flies list [OPTIONS]\n'
                'list all available projects\n'
                'options:\n'
-               ' --url url address of the Flies server')
+               ' --url address of the Flies server, eg http://example.com/flies')
     
     def _projec_info_help(self):
 	    print ('flies project info [OPTIONS]')
@@ -466,7 +466,7 @@ class FliesConsole:
                     try:
                         result = flies.documents.commit_translation(project_id, iteration_id, body, "gettext")
                         if result:
-                            print "[INFO]Successfully push %s to the Flies server"%pot    
+                            print "[INFO]Successfully pushed %s to the Flies server"%pot    
                     except UnAuthorizedException, e:
                         print "%s :%s"%(e.expr, e.msg)
                         break                                            
@@ -474,9 +474,10 @@ class FliesConsole:
                         print "%s :%s"%(e.expr, e.msg)
                         continue
                     except SameNameDocumentException, e:
-                        print "A document with same name already exists. Use put methode to update" 
                         try:
                             result = flies.documents.update_template(project_id, iteration_id, filename, body, "gettext", options['copytrans'])
+                            if result:
+                                print "[INFO]Successfully updated template %s on the Flies server"%filename
                         except BadRequestBodyException, e:
                             print "%s :%s"%(e.expr, e.msg)
                         continue
@@ -512,7 +513,7 @@ class FliesConsole:
                                 result = flies.documents.update_translation(project_id, iteration_id,filename,lang,
                                 body, "gettext", options['copytrans'])
                                 if result:
-                                    print "[INFO]Successfully push translation %s to the Flies server"%po 
+                                    print "[INFO]Successfully pushed translation %s to the Flies server"%po 
                                 else:
                                     print "Something error happens"
                             except UnAuthorizedException, e:
@@ -537,17 +538,16 @@ class FliesConsole:
                 result = flies.documents.commit_translation(project_id, iteration_id, body, "gettext",
                 options['copytrans'])                
                 if result:
-                    print "Successfully push %s to the Flies server"%args[0]
+                    print "Successfully pushed %s to the Flies server"%args[0]
             except UnAuthorizedException, e:
                 print "%s :%s"%(e.expr, e.msg)    
             except BadRequestBodyException, e:
                 print "%s :%s"%(e.expr, e.msg)
             except SameNameDocumentException, e:
-                print "[INFO]A document with same name already exists. Use put methode to update" 
                 try:
                     result = flies.documents.update_template(project_id, iteration_id, filename, body, "gettext", options['copytrans'])
                     if result:
-                        print "[INFO]Successfully update template %s on the Flies server"%filename
+                        print "[INFO]Successfully updated template %s on the Flies server"%filename
                 except BadRequestBodyException, e:
                     print "%s :%s"%(e.expr, e.msg)     
 
@@ -583,7 +583,7 @@ class FliesConsole:
                     try:
                         result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body, "gettext")
                         if result:
-                            print "Successfully push translation %s to the Flies server"%po 
+                            print "Successfully pushed translation %s to the Flies server"%po 
                         else:
                             print "Something error happens"
                     except UnAuthorizedException, e:
@@ -666,7 +666,7 @@ class FliesConsole:
                         try:
                             result = flies.documents.update_translation(project_id, iteration_id,filename,lang, body, "gettext")
                             if result:
-                                print "Successfully update %s to the Flies server"%po 
+                                print "Successfully updated %s to the Flies server"%po 
                             else:
                                 print "Something Error happens"
                         except UnAuthorizedException, e:
@@ -694,7 +694,7 @@ class FliesConsole:
                 try:
                     result = flies.documents.update_translation(project_id, iteration_id, filename, lang, body, "gettext")
                     if result:
-                        print "Successfully update %s to the Flies server"%args[0]
+                        print "Successfully updated %s to the Flies server"%args[0]
                     else:
                         print "Something Error happens"
                 except UnAuthorizedException, e:
