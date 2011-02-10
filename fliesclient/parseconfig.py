@@ -25,9 +25,12 @@ __all__ = (
 
 import ConfigParser
 import os.path
+from xml.dom import minidom 
+
+project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}
 
 class FliesConfig:
-     def __init__(self, path):
+     def set_userconfig(self, path):
         userconfig = path
         self.configparser = ConfigParser.ConfigParser()
         self._config = self.configparser.read([userconfig, os.path.expanduser(userconfig)])
@@ -63,3 +66,53 @@ class FliesConfig:
      
      def get_config_value(self, name, server):
          return self.get_value(name, 'defaults', server) 
+
+     def read_project_config(self, filename):
+        xmldoc = minidom.parse(filename)
+
+        #Read the project url
+        node = xmldoc.getElementsByTagName("url")[0]
+        rc = ""
+
+        for node in node.childNodes:
+            if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
+                rc = rc + node.data
+        project_config['project_url'] = rc
+
+        #Read the project id
+        node = xmldoc.getElementsByTagName("project")[0]
+        rc = ""
+
+        for node in node.childNodes:
+            if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
+                rc = rc + node.data
+        project_config['project_id'] = rc
+        
+        #Read the project-version
+        node = xmldoc.getElementsByTagName("project-version")[0]
+        rc = ""
+        
+        for node in node.childNodes:
+            if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
+                rc = rc + node.data
+        project_config['project_version'] = rc
+
+        #Read the locale map
+        locales = xmldoc.getElementsByTagName("locales")[0]
+        
+        
+        localelist = locales.getElementsByTagName("locale")
+        for locale in localelist:
+            for node in locale.childNodes:
+                if node.nodeType == node.TEXT_NODE:
+                    if locale.getAttribute("map-from"):
+                        map = {locale.getAttribute("map-from"):node.data}
+                        project_config['locale_map'].update(map)
+                    else:
+                        map = {node.data:node.data}
+                        project_config['locale_map'].update(map)
+        
+        return project_config
+    
+
+

@@ -25,19 +25,10 @@ __all__ = (
         )
 
 import getopt, sys
-try:
-    import json
-except ImportError:
-    import simplejson as json
 import os.path
-import hashlib
-import shutil
-from polib import *
-from parseconfig import FliesConfig
-from publican import Publican
-from xml.dom import minidom 
 from flieslib import *
 from flieslib.error import *
+from parseconfig import FliesConfig
 
 sub_command = {
                 'help':[],
@@ -68,8 +59,6 @@ options = {
             'importpo':'',
             'copytrans':''
             }
-
-project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}
 
 class FliesConsole:
 
@@ -309,74 +298,6 @@ class FliesConsole:
             print "Unauthorized Operation"
         except InvalidOptionException, e:
             print "Options are not valid"
-
-    def _search_folder(self, path, ext):
-        final_file_list = []
-        root_list = os.listdir(path)
-        for item in root_list:
-            if item == '.svn':
-                continue
-            full_path = os.path.join(path,item)    
-            if full_path.endswith(ext):
-                final_file_list.append(full_path)
-            if os.path.isdir(full_path):
-                final_file_list+=self._search_folder(full_path, ext)
-        return final_file_list
-
-
-    def _create_resource(self, filepath):
-        """
-        Parse the pot file and create the request body
-        @param filepath: the path of the pot file
-        """
-        if '/' in filepath:
-            file = filepath.split('/')[-1]
-            path = filepath
-        else:
-            file = filepath
-            path = os.path.join(os.getcwd(), file)
-
-        if '.' in file:
-            # Strip the file name
-            filename = file.split('.')[0]
-        else:
-            filename = file
-        
-        if not os.path.isfile(path):
-            raise NoSuchFileException('Error', 'The file %s does not exist'%file)
-        
-        publican = Publican(path)
-        textflows = publican.covert_txtflow()
-        extensions = publican.extract_potheader()
-        items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en', 'extensions':extensions, 'textFlows':textflows}
-         
-        return json.dumps(items), filename
-
-    def _create_translation(self, filepath):
-        if '/' in filepath:
-            file = filepath.split('/')[-1]
-            path = filepath
-        else:
-            file = filepath
-            path = os.path.join(os.getcwd(), file)
-
-        if '.' in file:
-            # Strip the file name
-            filename = file.split('.')[0]
-        else:
-            filename = file
-     
-        if not os.path.isfile(path):
-            raise NoSuchFileException('Error', 'The file %s does not exist'%file)
-        
-        publican = Publican(path)
-        textflowtargets = publican.covert_txtflowtarget()
-        #this functions have not implemented yet
-        #extensions = publican.extract_potheader()
-
-        items = {'links':[],'extensions':[], 'textFlowTargets':textflowtargets}
-        
-        return json.dumps(items), filename
 
     def _push_publican(self, args):
         """
@@ -702,80 +623,8 @@ class FliesConsole:
                 except BadRequestBodyException, e:
                     print "%s :%s"%(e.expr, e.msg) 
 
-    def _hash_matches(self, message, id):
-        m = hashlib.md5()
-        m.update(message.msgid.encode('utf-8'))
-        if m.hexdigest() == id:
-            return True
-        else:
-            return False     
-
-    def _create_pofile(self, lang, file, translations, pot):
-        """
-        Create PO file based on the POT file in POT folder
-        @param lang: language 
-        @param translations: the json object of the content retrieved from server
-        @param outpath: the po folder for output
-        """
-        if options['dstdir']:
-            outpath = options['dstdir']+'/'+lang
-        else:
-            outpath = os.getcwd()+'/'+lang
-
-        if not os.path.isdir(outpath):
-            os.mkdir(outpath)
-        
-        #Create the po file
-        pofile = outpath+'/'+file+'.po'
-        po = POFile(fpath=pofile)
-        
-        potcontent = json.loads(pot)
-        textflows = potcontent.get('textFlows')
-        if potcontent.get('extensions'):
-            extensions = potcontent.get('extensions')[0]
-            po.header = extensions.get('comment')     
-            for item in extensions.get('entries'):
-                po.metadata[item['key']]=item['value']                    
-        else:
-            raise InvalidPOTFileException("Error", "the extensions of Resource is empty")
-
-        for textflow in textflows:
-            if textflow.get('extensions'):
-                poentry = POEntry()
-                extension = textflow.get('extensions')[0]
-                poentry.comment = extension.get('extractedComment')
-                poentry.occurrences = [tuple(item.split(':')) for item in extension.get('references')]
-                poentry.flags = extension.get('flags')            
-                poentry.msgid = textflow.get('content')
-                po.append(poentry)
-            else:
-                raise InvalidPOTFileException("Error", "the extensions of TextFlow is empty")
-          
-        #If the translation is exist, read the content of the po file
-        if translations:
-            content = json.loads(translations)
-            targets = content.get('textFlowTargets')
-                
-            """
-            "extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
-            """ 
-            # copy any other stuff you need to transfer
-            for message in po:
-                for translation in targets:
-                    extensions=translation.get('extensions')
-                    if extensions:
-                        ext_type = extensions.get('object-type')
-                        comment = extensions.get('comment')
-                        entries = extensions.get('value')
-                    if self._hash_matches(message, translation.get('resId')):
-                        message.msgstr = translation.get('content')
-                    
-              
-            
-        # finally save resulting po to outpath as lang/myfile.po
-        po.save()
-        print "[INFO]Writing po file %s"%(pofile)
     
+
     def _pull_publican(self, args):
         """
         Retrieve the content of documents in a Project iteration from Flies server. If the name of publican
@@ -896,6 +745,7 @@ class FliesConsole:
         """
         Parse the command line to generate command options and sub_command
         """
+        print sys.argv        
         try:
             opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["url=", "project-id=", "project-version=", "project-name=",
             "project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=",
@@ -969,65 +819,21 @@ class FliesConsole:
                    
         return command, command_args
  
-    def _read_project_config(self, filename):
-        xmldoc = minidom.parse(filename)
-
-        #Read the project url
-        node = xmldoc.getElementsByTagName("url")[0]
-        rc = ""
-
-        for node in node.childNodes:
-            if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
-                rc = rc + node.data
-        project_config['project_url'] = rc
-
-        #Read the project id
-        node = xmldoc.getElementsByTagName("project")[0]
-        rc = ""
-
-        for node in node.childNodes:
-            if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
-                rc = rc + node.data
-        project_config['project_id'] = rc
-        
-        #Read the project-version
-        node = xmldoc.getElementsByTagName("project-version")[0]
-        rc = ""
-        
-        for node in node.childNodes:
-            if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
-                rc = rc + node.data
-        project_config['project_version'] = rc
-
-        #Read the locale map
-        locales = xmldoc.getElementsByTagName("locales")[0]
-        
-        
-        localelist = locales.getElementsByTagName("locale")
-        for locale in localelist:
-            for node in locale.childNodes:
-                if node.nodeType == node.TEXT_NODE:
-                    if locale.getAttribute("map-from"):
-                        map = {locale.getAttribute("map-from"):node.data}
-                        project_config['locale_map'].update(map)
-                    else:
-                        map = {node.data:node.data}
-                        project_config['locale_map'].update(map)
-
     def run(self):
         command, command_args = self._process_command_line()        
         
         if command == 'help':
             self._print_help_info(command_args)
         else:
+            config = FliesConfig()
             #Read the project configuration file using --project-config option
             if options['project_config']  and os.path.isfile(options['project_config']):
                 print "[INFO] Read the flies project configuation file flies.xml from %s"%options['project_config']            
-                self._read_project_config(options['project_config'])
+                project_config = config.read_project_config(options['project_config'])
             elif os.path.isfile(os.getcwd()+'/flies.xml'):
                 #If the option is not valid, try to read the project configuration from current path
                 print "[INFO] Read the flies project configuation file flies.xml from %s"%(os.getcwd()+'/flies.xml')
-                self._read_project_config(os.getcwd()+'/flies.xml')            
+                project_config = config.read_project_config(os.getcwd()+'/flies.xml')            
             else:
                 print "[ERROR] Can not find flies.xml, please specify the path of flies.xml"
                 sys.exit()
@@ -1060,7 +866,7 @@ class FliesConsole:
                 sys.exit()
 
             #Read the user-config file    
-            config = FliesConfig(user_config)
+            user_config = config.set_userconfig(user_config)
     	    server = config.get_server(self.url)
             if server:
                 print "[INFO] The server is %s"%server
