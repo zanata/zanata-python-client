@@ -70,7 +70,7 @@ class DocumentService:
         elif res['status'] == '409':
             raise SameNameDocumentException('Error 409', 'A document with same name already exists.')
     
-    def commit_translation(self, projectid, iterationid, resources, extension, copytrans):
+    def commit_template(self, projectid, iterationid, resources, extension, copytrans):
         """
         Push the json object to flies server
         @param projectid: id of project
@@ -103,7 +103,7 @@ class DocumentService:
         elif res['status'] == '409':
             raise SameNameDocumentException('Error 409', 'A document with same name already exists.')
 
-    def delete_pot(self, projectid, iterationid, file, extension):
+    def delete_template(self, projectid, iterationid, file, extension):
         if projectid and iterationid:
             try:
                 self.projects.iterations.get(projectid, iterationid)
@@ -123,7 +123,7 @@ class DocumentService:
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'UnAuthorized Operation') 
     
-    def retrieve_pot(self, projectid, iterationid, file, extension):
+    def retrieve_template(self, projectid, iterationid, file, extension):
         if projectid and iterationid:
             try:
                 self.projects.iterations.get(projectid, iterationid)
@@ -165,7 +165,7 @@ class DocumentService:
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
   
-    def update_translation(self, projectid, iterationid, fileid, localeid, resources, extension):
+    def commit_translation(self, projectid, iterationid, fileid, localeid, resources, extension):
         if projectid and iterationid:
             try:
                 self.projects.iterations.get(projectid, iterationid)

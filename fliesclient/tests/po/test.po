@@ -1,0 +1,27 @@
+# translation of Acls.po to Traditional Chinese
+# translation of Acls.po to
+# Copyright (C) 2003, 2007 Free Software Foundation, Inc.
+#
+# Sarah Wang <sarahs@redhat.com>, 2003.
+# Xi HUANG <xhuang@redhat.com>, 2007.
+# Chester Cheng <ccheng@redhat.com>, 2007.
+msgid ""
+msgstr ""
+"Project-Id-Version: Acls\n"
+"Report-Msgid-Bugs-To: http://bugs.kde.org\n"
+"POT-Creation-Date: 2001-02-09 01:25+0100\n"
+"PO-Revision-Date: 2007-07-11 14:49+1000\n"
+"Last-Translator: Chester Cheng <ccheng@redhat.com>\n"
+"Language-Team: Traditional Chinese <zh_TW@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+
+# EXACT MATCH
+#. Tag: title
+#: Acls.xml:8
+#, no-c-format
+msgid "<title>Access Control Lists</title>"
+msgstr "<title>访问存取控制列表</title>"
+

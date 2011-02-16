@@ -26,6 +26,7 @@ all__ = (
 import unittest
 from fliesclient.parseconfig import FliesConfig
 
+
 class ConfigTest(unittest.TestCase):
     def setUp(self):
         self.config = FliesConfig()

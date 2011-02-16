@@ -68,6 +68,7 @@ class FliesConfig:
          return self.get_value(name, 'defaults', server) 
 
      def read_project_config(self, filename):
+        project_config={'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}
         xmldoc = minidom.parse(filename)
 
         #Read the project url
