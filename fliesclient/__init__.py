@@ -21,5 +21,5 @@
 # Boston, MA  02111-1307  USA
 
 from parseconfig import *
-from gettextutil import *
+from publicanutil import *
 from flies import *

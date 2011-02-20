@@ -21,7 +21,7 @@
 # Boston, MA  02111-1307  USA
 
 __all__ = (
-            "GettextUtility",
+            "PublicanUtility",
           )
 
 import polib
@@ -34,7 +34,7 @@ except ImportError:
 import sys
 from flieslib import *
 
-class GettextUtility:
+class PublicanUtility:
     def get_potheader(self, entry):
         extracted_comment = entry.comment
         
@@ -76,9 +76,7 @@ class GettextUtility:
         """
         obs_list=pofile.obsolete_entries()
         textflowtargets = []
-        """
-        "resId", "state", "translator", "content", "extensions" 
-        """
+        
         for entry in pofile:
             if entry in obs_list:
                 continue
@@ -93,10 +91,12 @@ class GettextUtility:
             #need judge for fuzzy state
             
             #create extensions
+            extensions = [{"object-type":"comment","value":"testcomment","space":"preserve"}]
+            
             # {"resId":"782f49c4e93c32403ba0b51821b38b90","state":"Approved","translator":{"email":"id","name":"name"},"content":"title:
             # ttff","extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]}
-            extensions = [{"object-type":"comment","value":"testcomment","space":"preserve"}]
-            textflowtarget = {'resId': textflowId, 'state': state, "translator":{"email":"admin@example.com", "name":"admin"},'content':entry.msgstr,'extensions':extensions}
+            # Diable the translator to avoid issues on server side
+            textflowtarget = {'resId': textflowId, 'state': state, 'content':entry.msgstr,'extensions':extensions}
             
             #Temporary fill in the admin info for translator to pass the validation, waiting for server side change
             textflowtargets.append(textflowtarget)
@@ -171,7 +171,7 @@ class GettextUtility:
 
     def potfile_to_json(self, filepath):
         """
-        Parse the pot file and create the request body
+        Parse the pot file, create the request body
         @param filepath: the path of the pot file
         """
         filename, path  = self.strip_path(filepath)
@@ -183,6 +183,10 @@ class GettextUtility:
         return json.dumps(items), filename
 
     def pofile_to_json(self, filepath):
+        """
+        Parse the po file, create the request body
+        @param filepath: the path of the po file
+        """
         filename, path  = self.strip_path(filepath)
         pofile = self.create_pofile(path)
         textflowtargets = self.create_txtflowtarget(pofile)
@@ -194,10 +198,11 @@ class GettextUtility:
 
     def save_to_pofile(self, lang, path, translations, pot):
         """
-        Create PO file based on the POT file in POT folder
+        Save PO file to path, based on json objects of pot and translations 
         @param lang: language 
         @param translations: the json object of the content retrieved from server
-        @param outpath: the po folder for output
+        @param path: the po folder for output
+        @param pot: the json object of the pot retrieved from server
         """
         po = polib.POFile(fpath=path)
         
@@ -239,7 +244,7 @@ class GettextUtility:
                         ext_type = extensions.get('object-type')
                         comment = extensions.get('comment')
                         entries = extensions.get('value')
-                    if self.hash_matches(message, translation.get('resId')):
+                    if self.hash_match(message, translation.get('resId')):
                         message.msgstr = translation.get('content')
                    
         # finally save resulting po to outpath as lang/myfile.po

@@ -29,7 +29,7 @@ import os.path
 from flieslib import *
 from flieslib.error import *
 from parseconfig import FliesConfig
-from gettextutil import GettextUtility
+from publicanutil import PublicanUtility
 
 sub_command = {
                 'help':[],
@@ -149,13 +149,26 @@ class FliesConsole:
 	    print ('flies version info [OPTIONS]')
 
     def _iteration_create_help(self):
-        print ('flies version create [ITERATION_ID] [OPTIONS]')
+        print ('flies version create [VERSION_ID] [OPTIONS]')
 
     def _publican_push_help(self):
-        print ('flies publican push [OPTIONS] {document}')
+        print ('flies publican push [OPTIONS] {documents}\n'
+               'push the publican files to flies server\n'
+               'options:\n'
+               '--project-id: id of the project\n'
+               '--version-id: id of the version\n'
+               '--srcDir: the full path of the pot folder\n'
+               '--transDir: the full path of the folder that contain locale folders\n'
+               '--importPo: push the translation at the same time\n'
+               '--copyTrans: enable flies server to copy translation from other versions')
 
     def _publican_pull_help(self):
-        print ('flies publican pull [OPTIONS] {document}')
+        print ('flies publican pull [OPTIONS] {documents} {lang}\n'
+               'retrieve the publican files from flies server\n'
+               'options:\n'
+               '--project-id: id of the project\n'
+               '--version-id: id of the version\n'
+               '--dstDir: the path of the folder for saving the po files')
               
     def _list_projects(self):
         """
@@ -229,7 +242,7 @@ class FliesConsole:
 
     def _create_project(self, args):
         """
-        Create project with the project id
+        Create project with the project id, project name and project description
         @param args: project id
         """
         if self.user_name and self.apikey:
@@ -261,8 +274,8 @@ class FliesConsole:
 
     def _create_iteration(self, args):
         """
-        Create iteration with the iteration id
-        @param args: iteration id
+        Create version with the version id, version name and version description 
+        @param args: version id
         """
         if self.user_name and self.apikey:
             flies = FliesResource(self.url, self.user_name, self.apikey)
@@ -302,7 +315,7 @@ class FliesConsole:
 
     def _push_publican(self, args):
         """
-        Push the content of publican files to a Project iteration on Flies server
+        Push the content of publican files to a Project version on Flies server
         @param args: name of the publican file
         """
         if options['importpo'] == 'true':        
@@ -347,8 +360,8 @@ class FliesConsole:
         print "[INFO] Project: %s"%project_id
         print "[INFO] Version: %s"%iteration_id
         print "[INFO] Username: %s"%self.user_name
-        
-        #Check the iteration for exist content 
+                
+        #Get the file list of this version of project
         filelist = flies.documents.get_file_list(project_id, iteration_id)
 
         if filelist:
@@ -361,7 +374,7 @@ class FliesConsole:
             elif option == "no":
                 print "[INFO]Keep the content on the flies server"
                  
-        gettextutil = GettextUtility()
+        publicanutil = PublicanUtility()
         #if file not specified, push all the files in pot folder to flies server
         if not args:
             if options['srcdir']:
@@ -371,7 +384,7 @@ class FliesConsole:
 
             if os.path.isdir(tmlfolder):            
                 #check the pot folder to find all the pot file
-                filelist = gettextutil.get_file_list(tmlfolder, ".pot")
+                filelist = publicanutil.get_file_list(tmlfolder, ".pot")
             else:
                 print "[ERROR]Can not find source folder, please specify the source folder by '--srcDir' option"
                 sys.exit()
@@ -380,7 +393,7 @@ class FliesConsole:
                     print "\n[INFO]Push the content of %s to Flies server:"%pot
                     
                     try:
-                        body, filename = gettextutil.potfile_to_json(pot)
+                        body, filename = publicanutil.potfile_to_json(pot)
                     except NoSuchFileException, e:
                         print "%s :%s"%(e.expr, e.msg)
                         continue 
@@ -421,7 +434,7 @@ class FliesConsole:
                             po = upfolder+'/'+filename+'.po'
                              
                             try: 
-                                body, filename = gettextutil.pofile_to_json(po)
+                                body, filename = publicanutil.pofile_to_json(po)
                             except NoSuchFileException, e:
                                 print "%s :%s"%(e.expr, e.msg)
                                 continue
@@ -435,7 +448,7 @@ class FliesConsole:
                                 if result:
                                     print "[INFO]Successfully pushed translation %s to the Flies server"%po 
                                 else:
-                                    print "Something error happens"
+                                    print "[ERROR]Commit translation is not successful"
                             except UnAuthorizedException, e:
                                 print "%s :%s"%(e.expr, e.msg)                                            
                                 break
@@ -449,7 +462,7 @@ class FliesConsole:
         else:
             print "\n[INFO]Push the content of %s to Flies server:"%args[0]
             try:
-                body, filename = gettextutil.potfile_to_json(args[0])
+                body, filename = publicanutil.potfile_to_json(args[0])
             except NoSuchFileException, e:
                 print "%s :%s"%(e.expr, e.msg)
                 sys.exit()
@@ -457,7 +470,7 @@ class FliesConsole:
             try:
                 result = flies.documents.commit_template(project_id, iteration_id, body, "gettext", options['copytrans'])                
                 if result:
-                    print "Successfully pushed %s to the Flies server"%args[0]
+                    print "[INFO]Successfully pushed %s to the Flies server"%args[0]
             except UnAuthorizedException, e:
                 print "%s :%s"%(e.expr, e.msg)    
             except BadRequestBodyException, e:
@@ -472,7 +485,7 @@ class FliesConsole:
 
             if options['importpo'] == 'true':
                 for item in list:
-                    print "Push %s translations to Flies server:"%item
+                    print "[INFO]Push %s translations to Flies server:"%item
                     if item in self.project_config['locale_map']:
                         lang = self.project_config['locale_map'][item]
                     else:
@@ -481,27 +494,27 @@ class FliesConsole:
                     upfolder=folder+'/'+item
                 
                     if not os.path.isdir(upfolder):
-                        print "Can not find translation folder, please specify path of the translation folder"
+                        print "[ERROR]Can not find translation folder, please specify path of the translation folder"
                         sys.exit() 
                             
                     po = upfolder+'/'+filename+'.po'                    
                                                 
                     try: 
-                        body, filename = gettextutil.pofile_to_json(po)
+                        body, filename = publicanutil.pofile_to_json(po)
                     except NoSuchFileException, e:
                         print "%s :%s"%(e.expr, e.msg)
                         continue
 
                     if not body:
-                        print "No content or all the entry is obsolete in %s"%filename
+                        print "[ERROR]No content or all the entry is obsolete in %s"%filename
                         continue
                         
                     try:
                         result = flies.documents.commit_translation(project_id, iteration_id,filename,lang, body, "gettext")
                         if result:
-                            print "Successfully pushed translation %s to the Flies server"%po 
+                            print "[INFO]Successfully pushed translation %s to the Flies server"%po 
                         else:
-                            print "Something error happens"
+                            print "[ERROR]Commit translation is not successful"
                     except UnAuthorizedException, e:
                         print "%s :%s"%(e.expr, e.msg)                                            
                         break
@@ -527,7 +540,7 @@ class FliesConsole:
         if self.user_name and self.apikey:
             flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
-            print "Please provide username and apikey in flies.ini or by '--username' and '--apikey' options"
+            print "[ERROR]Please provide username and apikey in flies.ini or by '--username' and '--apikey' options"
             sys.exit()
 
         if options['project_id']:
@@ -541,14 +554,14 @@ class FliesConsole:
             iteration_id = self.project_config['project_version']
 
         if not project_id:
-            print "Please provide valid project id by flies.xml or by '--project' option"
+            print "[ERROR]Please provide valid project id by flies.xml or by '--project' option"
             sys.exit()
         
         if not iteration_id:
-            print "Please provide valid iteration id by flies.xml or by '--project-version' option"
+            print "[ERROR]Please provide valid iteration id by flies.xml or by '--project-version' option"
             sys.exit()
         
-        gettextutil = GettextUtility()
+        publicanutil = PublicanUtility()
         #if file not specified, update all the files in po folder to flies server
         if not args:
             for item in list:
@@ -565,27 +578,27 @@ class FliesConsole:
                 upfolder=folder+'/'+item
 
                 #check the po folder to find all the po file
-                filelist = gettextutil.get_file_list(upfolder, ".po")
+                filelist = publicanutil.get_file_list(upfolder, ".po")
                 if filelist:                
                     for po in filelist:
-                        print "\nUpdate the content of %s to Flies server: "%po
+                        print "\n[INFO]Update the content of %s to Flies server: "%po
                     
                         try: 
-                            body, filename = gettextutil.pofile_to_json(po)
+                            body, filename = publicanutil.pofile_to_json(po)
                         except NoSuchFileException, e:
                             print "%s :%s"%(e.expr, e.msg)
                             continue
 
                         if not body:
-                            print "No content or all the entry is obsolete in %s"%filename
+                            print "[ERROR]No content or all the entry is obsolete in %s"%filename
                             continue
                         
                         try:
                             result = flies.documents.commit_translation(project_id, iteration_id,filename,lang, body, "gettext")
                             if result:
-                                print "Successfully updated %s to the Flies server"%po 
+                                print "[INFO]Successfully updated %s to the Flies server"%po 
                             else:
-                                print "Something Error happens"
+                                print "[ERROR]Commit translation is not successful"
                         except UnAuthorizedException, e:
                             print "%s :%s"%(e.expr, e.msg)                                            
                             break
@@ -593,9 +606,9 @@ class FliesConsole:
                             print "%s :%s"%(e.expr, e.msg)
                             continue
                 else:
-                    print "Error, The update folder is empty or not exist"
+                    print "[ERROR]Error, The update folder is empty or not exist"
         else:
-            print "\nUpdate the content of %s to Flies server:"%args[0]
+            print "\n[INFO]Update the content of %s to Flies server:"%args[0]
             for item in list:
                 if item in self.project_config['locale_map']:
                     lang = self.project_config['locale_map'][item]
@@ -603,7 +616,7 @@ class FliesConsole:
                     lang = item
 
                 try:
-                    body, filename = gettextutil.commit_template(args[0])
+                    body, filename = publicanutil.commit_template(args[0])
                 except NoSuchFileException, e:
                     print "%s :%s"%(e.expr, e.msg)
                     sys.exit()                                            
@@ -611,9 +624,9 @@ class FliesConsole:
                 try:
                     result = flies.documents.commit_translation(project_id, iteration_id, filename, lang, body, "gettext")
                     if result:
-                        print "Successfully updated %s to the Flies server"%args[0]
+                        print "[INFO]Successfully updated %s to the Flies server"%args[0]
                     else:
-                        print "Something Error happens"
+                        print "[ERROR]Commit translation is not successful"
                 except UnAuthorizedException, e:
                     print "%s :%s"%(e.expr, e.msg)
                 except BadRequestBodyException, e:
@@ -623,7 +636,7 @@ class FliesConsole:
 
     def _pull_publican(self, args):
         """
-        Retrieve the content of documents in a Project iteration from Flies server. If the name of publican
+        Retrieve the content of documents in a Project version from Flies server. If the name of publican
         file is specified, the content of that file will be pulled from server. Otherwise, all the document of that
         Project iteration will be pulled from server.
         @param args: the name of publican file
@@ -654,9 +667,9 @@ class FliesConsole:
         if not iteration_id:
             print "[ERROR]Please provide valid iteration id by flies.xml or by '--project-version' option"
             sys.exit()
-
+        
         flies = FliesResource(self.url)
-        gettextutil = GettextUtility()
+        publicanutil = PublicanUtility()
         
         #if file no specified, retrieve all the files of project
         if not args:
@@ -704,7 +717,7 @@ class FliesConsole:
                         pofile = outpath+'/'+file+'.po'
   
                         try:
-                            gettextutil.save_to_pofile(item, pofile, result, pot)
+                            publicanutil.save_to_pofile(item, pofile, result, pot)
                         except InvalidPOTFileException, e:
                             print "[ERROR]Can't generate po file for %s,"%file+e.msg
         else:
@@ -733,11 +746,21 @@ class FliesConsole:
                     sys.exit()
                 except UnAvaliableResourceException, e:
                     print "[ERROR]There is no %s translation for %s"%(item, args[0])
-                
+
+                if options['dstdir']:
+                    outpath = options['dstdir']+'/'+item
+                else:
+                    outpath = os.getcwd()+'/'+item
+
+                if not os.path.isdir(outpath):
+                    os.mkdir(outpath)  
+
+                pofile = outpath+'/'+args[0]+'.po'
+                           
                 try:
-                    gettextutil.save_to_pofile(item, args[0], result, pot)                    
+                    publicanutil.save_to_pofile(item, pofile, result, pot)                    
                 except InvalidPOTFileException, e:
-                    print "[ERROR]Can't generate po file for %s,"%file+e.msg
+                    print "[ERROR]Can't generate po file for %s,"%args[0]+e.msg
                     
     def _remove_project(self):
         pass

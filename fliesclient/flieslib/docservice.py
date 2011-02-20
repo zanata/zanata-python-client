@@ -40,6 +40,7 @@ class DocumentService:
     
     def get_file_list(self, projectid, iterationid):
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid, iterationid))
+        
         if res['status'] == '200' or res['status'] == '304':
             list = json.loads(content)
             filelist = [file.get('name') for file in list]
@@ -178,6 +179,7 @@ class DocumentService:
         headers['X-Auth-Token'] = self.projects.apikey        
         
         res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers, extension=extension)
+        
         if res['status'] == '200':
             return True
         elif res['status'] == '401':
