@@ -1,5 +1,4 @@
 *.pyc
-.project
-.pydevproject
 .cache/*
 .fliesrc
+*~
