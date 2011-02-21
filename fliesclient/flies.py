@@ -899,7 +899,7 @@ class FliesConsole:
             if self.url[-1] == "/":
                 self.url = self.url[:-1]
 
-            print "[INFO] Flies python client version: 0.7.2"            
+            print "[INFO] Flies python client version: 0.7.3"            
             print "[INFO] Flies server: %s"%self.url
 
             #Try to find user-config file

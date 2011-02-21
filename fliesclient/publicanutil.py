@@ -178,7 +178,7 @@ class PublicanUtility:
         pofile = self.create_pofile(path)
         textflows = self.create_txtflow(pofile)
         extensions = self.create_extensions(pofile)
-        items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en', 'extensions':extensions, 'textFlows':textflows}
+        items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en-US', 'extensions':extensions, 'textFlows':textflows}
          
         return json.dumps(items), filename
 
