@@ -94,15 +94,15 @@ class DocumentService:
         headers['X-Auth-Token'] = self.projects.apikey        
         
         res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers, extension=extension, copytrans=copytrans)
-
+        
         if res['status'] == '201':
             return True
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
         elif res['status'] == '400':
-            raise BadRequestBodyException('Error 400', 'Unable to read request body.')
+            raise BadRequestBodyException('Error 400', content)
         elif res['status'] == '409':
-            raise SameNameDocumentException('Error 409', 'A document with same name already exists.')
+            raise SameNameDocumentException('Error 409', content)
 
     def delete_template(self, projectid, iterationid, file, extension):
         if projectid and iterationid:
@@ -179,12 +179,12 @@ class DocumentService:
         headers['X-Auth-Token'] = self.projects.apikey        
         
         res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers, extension=extension)
-        
+
         if res['status'] == '200':
             return True
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
         elif res['status'] == '400':
-            raise BadRequestBodyException('Error 400', 'Unable to read request body.')
+            raise BadRequestBodyException('Error 400', content)
       
 

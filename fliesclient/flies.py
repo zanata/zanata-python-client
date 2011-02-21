@@ -57,8 +57,8 @@ options = {
             'version_desc':'',
             'lang':'',
             'email':'',
-            'importpo':'',
-            'copytrans':''
+            'importpo':'false',
+            'copytrans':'false'
             }
 
 class FliesConsole:
@@ -107,9 +107,6 @@ class FliesConsole:
                         else:
                             print "Can not find such command"
                             sys.exit()
-                    else:
-                        print "Please complete the command!"
-                        sys.exit()
             else:
                 print "Can not find such command"
                 sys.exit()
@@ -127,6 +124,9 @@ class FliesConsole:
             self._iteration_info_help()
         elif command == 'version_create':
             self._iteration_create_help()
+        elif command == 'publican':
+            print ("Command:'flies publican push'\n"
+                   "        'flies publican pull'")
         elif command == 'publican_push':
             self._publican_push_help()
         elif command == 'publican_pull':
@@ -174,18 +174,18 @@ class FliesConsole:
         """
         List the information of all the project on the flies server
         """
-        
+        print ""
         flies = FliesResource(self.url)
         projects = flies.projects.list()
         
         if not projects:
-            print "There is no projects on the server or the server not working"
+            print "[ERROR]ere is no projects on the server or the server not working"
             sys.exit()
         for project in projects:
-            print ("Id:          %s")%project.id
-            print ("Name:        %s")%project.name
-            print ("Type:        %s")%project.type
-            print ("Links:       %s\n")%[{'href':link.href, 'type':link.type, 'rel':link.rel} for link in project.links]
+            print ("Project Id:          %s")%project.id
+            print ("Project Name:        %s")%project.name
+            print ("Project Type:        %s")%project.type
+            print ("Project Links:       %s\n")%[{'href':link.href, 'type':link.type, 'rel':link.rel} for link in project.links]
         
     def _get_project(self):
         """
@@ -194,23 +194,23 @@ class FliesConsole:
         if options['project_id']:
             project_id =  options['project_id'] 
         else:
-            project_id = project_config['project_id']        
+            project_id = self.project_config['project_id']        
         
         if not project_id:
-            print 'Please use flies project info --project-id=project_id or flies.xml to retrieve the project info'
+            print '[ERROR] Please use flies project info --project-id=project_id or flies.xml to specify the project id'
             sys.exit()
-        
+      
         flies = FliesResource(self.url)
         try:
             p = flies.projects.get(project_id)
-            print ("Id:          %s")%p.id 
-            print ("Name:        %s")%p.name 
-            print ("Type:        %s")%p.type
-            print ("Description: %s")%p.description
+            print ("Project Id:          %s")%p.id 
+            print ("Project Name:        %s")%p.name 
+            print ("Project Type:        %s")%p.type
+            print ("Project Description: %s")%p.description
         except NoSuchProjectException, e:
-            print "No Such Project on the server"
+            print "[ERROR] There is no Such Project on the server"
         except InvalidOptionException, e:
-            print "Options are not valid"
+            print "[ERROR] Options are not valid"
                
     def _get_iteration(self):
         """
@@ -219,26 +219,26 @@ class FliesConsole:
         if options['project_id']:
             project_id =  options['project_id'] 
         else:
-            project_id = project_config['project_id']
+            project_id = self.project_config['project_id']
         
         if options['project_version']:
             iteration_id = options['project_version'] 
         else:
-            iteration_id = project_config['project_version']
+            iteration_id = self.project_config['project_version']
 
         if not iteration_id or not project_id:
-            print 'Please use flies iteration info --project-id=project_id --project-version=project_version to retrieve the iteration'
+            print '[ERROR] Please use flies iteration info --project-id=project_id --project-version=project_version to retrieve the iteration'
             sys.exit()
         
         flies = FliesResource(self.url)
         try:
             project = flies.projects.get(project_id)
             iteration = project.get_iteration(iteration_id)
-            print ("Id:          %s")%iteration.id
-            print ("Name:        %s")%iteration.name
-            print ("Description: %s")%iteration.description
+            print ("Version Id:          %s")%iteration.id
+            print ("Version Name:        %s")%iteration.name
+            print ("Version Description: %s")%iteration.description
         except NoSuchProjectException, e:
-            print "No Such Project on the server"
+            print "[ERROR]There is no such project or version on the server"
 
     def _create_project(self, args):
         """
@@ -250,13 +250,14 @@ class FliesConsole:
         else:
             print "Please provide username and apikey in flies.ini"
             sys.exit()
+        print "[INFO] Username: %s"%self.user_name
 
         if not args:
-            print "Please provide PROJECT_ID for creating project"
+            print "[ERROR] Please provide PROJECT_ID for creating project"
             sys.exit()
 
         if not options['project_name']:
-            print "Please provide Project name by '--project-name' option"
+            print "[ERROR] Please provide Project name by '--project-name' option"
             sys.exit()
        
         try:
@@ -264,13 +265,13 @@ class FliesConsole:
             p = Project(item)
             result = flies.projects.create(p)
             if result == "Success":
-                print "Success create the project"
+                print "[INFO] Success create the project"
         except NoSuchProjectException, e:
-            print "No Such Project on the server" 
+            print "[ERROR] No Such Project on the server" 
         except UnAuthorizedException, e:
-            print "Unauthorized Operation"
+            print "[ERROR] Unauthorized Operation"
         except ProjectExistException, e:
-            print "The project is alreasy exist on the server"
+            print "[ERROR] The project is alreasy exist on the server"
 
     def _create_iteration(self, args):
         """
@@ -280,22 +281,23 @@ class FliesConsole:
         if self.user_name and self.apikey:
             flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
-            print "Please provide username and apikey in flies.ini or by --username and --apikey options"
+            print "[ERROR] Please provide username and apikey in flies.ini or by --username and --apikey options"
             sys.exit()
+        print "[INFO] Username: %s"%self.user_name
         
         if options['project_id']:
             project_id =  options['project_id'] 
         elif project_config['project_id']:
-            project_id = project_config['project_id']
+            project_id = self.project_config['project_id']
         else:
-            print "Please provide PROJECT_ID by --project-id option or using flies.xml"
-        
+            print "[ERROR] Please provide PROJECT_ID by --project-id option or using flies.xml"
+        print "[INFO] Project id:%s"%project_id
         if not args:
-            print "Please provide ITERATION_ID for creating iteration"
+            print "[ERROR] Please provide ITERATION_ID for creating iteration"
             sys.exit()
 
         if not options['version_name']:
-            print "Please provide Iteration name by '--version-name' option"
+            print "[ERROR] Please provide Iteration name by '--version-name' option"
             sys.exit()
          
         try:
@@ -303,40 +305,25 @@ class FliesConsole:
             iteration = Iteration(item)
             result = flies.projects.iterations.create(project_id, iteration)
             if result == "Success":
-                print "Success create the itearion"
+                print "[INFO] Success create the version %s"%args[0]
         except ProjectExistException, e:
-            print "The iteration is already exist on the server"
+            print "[ERROR] The version is already exist on the server"
         except NoSuchProjectException, e:
-            print "No Such Project on the server"
+            print "[ERROR] There is no such Project on the server"
         except UnAuthorizedException, e:
-            print "Unauthorized Operation"
+            print "[ERROR] Unauthorized Operation"
         except InvalidOptionException, e:
-            print "Options are not valid"
+            print "[ERROR] Options are not valid"
 
     def _push_publican(self, args):
         """
         Push the content of publican files to a Project version on Flies server
         @param args: name of the publican file
         """
-        if options['importpo'] == 'true':        
-            list = []
-            if options['lang']:
-                list = options['lang'].split(',')
-            elif self.project_config['locale_map']:
-                list = self.project_config['locale_map'].keys()
-            else:
-                print "Please specify the language by '--lang' option or flies.xml"
-                sys.exit()
-
-            if options['transdir']:
-                folder = options['transdir']
-            else:
-                folder = os.getcwd()
-
         if self.user_name and self.apikey:
             flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
-            print "Please provide username and apikey in flies.ini or by '--username' and '--apikey' options"
+            print "[ERROR] Please provide username and apikey in flies.ini or by '--username' and '--apikey' options"
             sys.exit()
 
         if options['project_id']:
@@ -350,29 +337,56 @@ class FliesConsole:
             iteration_id = self.project_config['project_version']
 
         if not project_id:
-            print "Please provide valid project id by flies.xml or by '--project' option"
+            print "[ERROR] Please provide valid project id by flies.xml or by '--project' option"
             sys.exit()
         
         if not iteration_id:
-            print "Please provide valid version id by flies.xml or by '--project-version' option"
+            print "[ERROR] Please provide valid version id by flies.xml or by '--project-version' option"
             sys.exit()
 
         print "[INFO] Project: %s"%project_id
         print "[INFO] Version: %s"%iteration_id
         print "[INFO] Username: %s"%self.user_name
+        print "[INFO] Source language: en-US"
+        print "[INFO] Copy previous translations:%s"%options['copytrans']
+        
+        if options['importpo'] == 'true':        
+            print "[INFO] Importing translation"            
+            list = []
+            if options['lang']:
+                list = options['lang'].split(',')
+            elif self.project_config['locale_map']:
+                list = self.project_config['locale_map'].keys()
+            else:
+                print "[ERROR] Please specify the language by '--lang' option or flies.xml"
+                sys.exit()
+            
+            if options['transdir']:
+                folder = options['transdir']
+            else:
+                folder = os.getcwd()
+            print "[INFO] Read locale folders from %s"%folder
+        else:
+            print "[INFO] Importing source documents only"
                 
         #Get the file list of this version of project
         filelist = flies.documents.get_file_list(project_id, iteration_id)
 
         if filelist:
             #Give an option to user for keep or delete the content
-            option = raw_input("[INFO]Do you want to delete the content on the flies server:")
-            if option == "yes":
-                for file in filelist:
-                    print "[INFO]Delete the %s"%file
-                    flies.documents.delete_template(project_id, iteration_id, file, "gettext")
-            elif option == "no":
-                print "[INFO]Keep the content on the flies server"
+            print "This will overwrite/delete any existing documents on the server."
+            while True:
+                option = raw_input("Are you sure (y/n)?")
+                if option.lower() == "yes" or option.lower() == "y":
+                    for file in filelist:
+                        print "[INFO] Delete the %s"%file
+                        flies.documents.delete_template(project_id, iteration_id, file, "gettext")
+                    break
+                elif option.lower() == "no" or option.lower() == "n":
+                    print "[INFO] Keep the content on the flies server"
+                    break
+                else:
+                    print "[ERROR] Please enter a yes(y) or no(n)"
                  
         publicanutil = PublicanUtility()
         #if file not specified, push all the files in pot folder to flies server
@@ -381,16 +395,17 @@ class FliesConsole:
                 tmlfolder = options['srcdir']
             else:
                 tmlfolder = os.getcwd()
+            print "[INFO] POT directory (originals):%s"%tmlfolder
 
             if os.path.isdir(tmlfolder):            
                 #check the pot folder to find all the pot file
                 filelist = publicanutil.get_file_list(tmlfolder, ".pot")
             else:
-                print "[ERROR]Can not find source folder, please specify the source folder by '--srcDir' option"
+                print "[ERROR] Can not find source folder, please specify the source folder by '--srcDir' option"
                 sys.exit()
             if filelist:                
                 for pot in filelist:
-                    print "\n[INFO]Push the content of %s to Flies server:"%pot
+                    print "\n[INFO] Push the content of %s to Flies server:"%pot
                     
                     try:
                         body, filename = publicanutil.potfile_to_json(pot)
@@ -401,25 +416,25 @@ class FliesConsole:
                     try:
                         result = flies.documents.commit_template(project_id, iteration_id, body, "gettext", options['copytrans'])
                         if result:
-                            print "[INFO]Successfully pushed %s to the Flies server"%pot    
+                            print "[INFO] Successfully pushed %s to the Flies server"%pot    
                     except UnAuthorizedException, e:
-                        print "%s :%s"%(e.expr, e.msg)
+                        print "[ERROR] %s"%(e.msg)
                         break                                            
                     except BadRequestBodyException, e:
-                        print "%s :%s"%(e.expr, e.msg)
+                        print "[ERROR] %s"%(e.msg)
                         continue
                     except SameNameDocumentException, e:
                         try:
                             result = flies.documents.update_template(project_id, iteration_id, filename, body, "gettext", options['copytrans'])
                             if result:
-                                print "[INFO]Successfully updated template %s on the Flies server"%filename
+                                print "[INFO] Successfully updated template %s on the Flies server"%filename
                         except BadRequestBodyException, e:
-                            print "%s :%s"%(e.expr, e.msg)
-                        continue
+                            print "[ERROR] %s"%(e.msg)
+                        
 
                     if options['importpo'] == 'true':
                         for item in list:
-                            print "[INFO]Push %s translation to Flies server:"%item
+                            print "[INFO] Push %s translation to Flies server:"%item
                             if item in self.project_config['locale_map']:
                                 lang = self.project_config['locale_map'][item]
                             else:
@@ -428,7 +443,7 @@ class FliesConsole:
                             upfolder=folder+'/'+item
                              
                             if not os.path.isdir(upfolder):
-                                print "[ERROR]Can not find translation, please specify path of the translation folder"
+                                print "[ERROR] Can not find translation, please specify path of the translation folder"
                                 continue 
                             
                             po = upfolder+'/'+filename+'.po'
@@ -436,41 +451,40 @@ class FliesConsole:
                             try: 
                                 body, filename = publicanutil.pofile_to_json(po)
                             except NoSuchFileException, e:
-                                print "%s :%s"%(e.expr, e.msg)
+                                print "[ERROR] %s"%(e.msg)
                                 continue
 
                             if not body:
-                                print "[ERROR]No content or all the entry is obsolete in %s"%filename
+                                print "[ERROR] No content or all the entry is obsolete in %s"%filename
                                 continue
                         
                             try:
                                 result = flies.documents.commit_translation(project_id, iteration_id,filename,lang, body, "gettext")
                                 if result:
-                                    print "[INFO]Successfully pushed translation %s to the Flies server"%po 
+                                    print "[INFO] Successfully pushed translation %s to the Flies server"%po 
                                 else:
-                                    print "[ERROR]Commit translation is not successful"
+                                    print "[ERROR] Commit translation is not successful"
                             except UnAuthorizedException, e:
-                                print "%s :%s"%(e.expr, e.msg)                                            
+                                print "[ERROR] %s"%(e.msg)                                            
                                 break
                             except BadRequestBodyException, e:
-                                print "%s :%s"%(e.expr, e.msg)
+                                print "[ERROR] %s"%(e.msg)
                                 continue
-                    
-
+            
             else:
-                print "[ERROR]The template folder is empty or not exist"
+                print "[ERROR] The template folder is empty or not exist"
         else:
-            print "\n[INFO]Push the content of %s to Flies server:"%args[0]
+            print "\n[INFO] Push the content of %s to Flies server:"%args[0]
             try:
                 body, filename = publicanutil.potfile_to_json(args[0])
             except NoSuchFileException, e:
-                print "%s :%s"%(e.expr, e.msg)
+                print "[ERROR] %s"%(e.expr, e.msg)
                 sys.exit()
              
             try:
                 result = flies.documents.commit_template(project_id, iteration_id, body, "gettext", options['copytrans'])                
                 if result:
-                    print "[INFO]Successfully pushed %s to the Flies server"%args[0]
+                    print "[INFO] Successfully pushed %s to the Flies server"%args[0]
             except UnAuthorizedException, e:
                 print "%s :%s"%(e.expr, e.msg)    
             except BadRequestBodyException, e:
@@ -479,13 +493,13 @@ class FliesConsole:
                 try:
                     result = flies.documents.update_template(project_id, iteration_id, filename, body, "gettext", options['copytrans'])
                     if result:
-                        print "[INFO]Successfully updated template %s on the Flies server"%filename
+                        print "[INFO] Successfully updated template %s on the Flies server"%filename
                 except BadRequestBodyException, e:
                     print "%s :%s"%(e.expr, e.msg)     
 
             if options['importpo'] == 'true':
                 for item in list:
-                    print "[INFO]Push %s translations to Flies server:"%item
+                    print "[INFO] Push %s translations to Flies server:"%item
                     if item in self.project_config['locale_map']:
                         lang = self.project_config['locale_map'][item]
                     else:
@@ -494,7 +508,7 @@ class FliesConsole:
                     upfolder=folder+'/'+item
                 
                     if not os.path.isdir(upfolder):
-                        print "[ERROR]Can not find translation folder, please specify path of the translation folder"
+                        print "[ERROR] Can not find translation folder, please specify path of the translation folder"
                         sys.exit() 
                             
                     po = upfolder+'/'+filename+'.po'                    
@@ -502,19 +516,19 @@ class FliesConsole:
                     try: 
                         body, filename = publicanutil.pofile_to_json(po)
                     except NoSuchFileException, e:
-                        print "%s :%s"%(e.expr, e.msg)
+                        print "[ERROR] %s"%(e.msg)
                         continue
 
                     if not body:
-                        print "[ERROR]No content or all the entry is obsolete in %s"%filename
+                        print "[ERROR] No content or all the entry is obsolete in %s"%filename
                         continue
                         
                     try:
                         result = flies.documents.commit_translation(project_id, iteration_id,filename,lang, body, "gettext")
                         if result:
-                            print "[INFO]Successfully pushed translation %s to the Flies server"%po 
+                            print "[INFO] Successfully pushed translation %s to the Flies server"%po 
                         else:
-                            print "[ERROR]Commit translation is not successful"
+                            print "[ERROR] Commit translation is not successful"
                     except UnAuthorizedException, e:
                         print "%s :%s"%(e.expr, e.msg)                                            
                         break
@@ -534,13 +548,13 @@ class FliesConsole:
         elif project_config['locale_map']:
             list = self.project_config['locale_map'].keys()
         else:
-            print "Please specify the language by '--lang' option or flies.xml"
+            print "[ERROR] Please specify the language by '--lang' option or flies.xml"
             sys.exit()
 
         if self.user_name and self.apikey:
             flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
-            print "[ERROR]Please provide username and apikey in flies.ini or by '--username' and '--apikey' options"
+            print "[ERROR] Please provide username and apikey in flies.ini or by '--username' and '--apikey' options"
             sys.exit()
 
         if options['project_id']:
@@ -554,11 +568,11 @@ class FliesConsole:
             iteration_id = self.project_config['project_version']
 
         if not project_id:
-            print "[ERROR]Please provide valid project id by flies.xml or by '--project' option"
+            print "[ERROR] Please provide valid project id by flies.xml or by '--project' option"
             sys.exit()
         
         if not iteration_id:
-            print "[ERROR]Please provide valid iteration id by flies.xml or by '--project-version' option"
+            print "[ERROR] Please provide valid iteration id by flies.xml or by '--project-version' option"
             sys.exit()
         
         publicanutil = PublicanUtility()
@@ -581,7 +595,7 @@ class FliesConsole:
                 filelist = publicanutil.get_file_list(upfolder, ".po")
                 if filelist:                
                     for po in filelist:
-                        print "\n[INFO]Update the content of %s to Flies server: "%po
+                        print "\n[INFO] Update the content of %s to Flies server: "%po
                     
                         try: 
                             body, filename = publicanutil.pofile_to_json(po)
@@ -590,15 +604,15 @@ class FliesConsole:
                             continue
 
                         if not body:
-                            print "[ERROR]No content or all the entry is obsolete in %s"%filename
+                            print "[ERROR] No content or all the entry is obsolete in %s"%filename
                             continue
                         
                         try:
                             result = flies.documents.commit_translation(project_id, iteration_id,filename,lang, body, "gettext")
                             if result:
-                                print "[INFO]Successfully updated %s to the Flies server"%po 
+                                print "[INFO] Successfully updated %s to the Flies server"%po 
                             else:
-                                print "[ERROR]Commit translation is not successful"
+                                print "[ERROR] Commit translation is not successful"
                         except UnAuthorizedException, e:
                             print "%s :%s"%(e.expr, e.msg)                                            
                             break
@@ -606,9 +620,9 @@ class FliesConsole:
                             print "%s :%s"%(e.expr, e.msg)
                             continue
                 else:
-                    print "[ERROR]Error, The update folder is empty or not exist"
+                    print "[ERROR] Error, The update folder is empty or not exist"
         else:
-            print "\n[INFO]Update the content of %s to Flies server:"%args[0]
+            print "\n[INFO] Update the content of %s to Flies server:"%args[0]
             for item in list:
                 if item in self.project_config['locale_map']:
                     lang = self.project_config['locale_map'][item]
@@ -668,6 +682,9 @@ class FliesConsole:
             print "[ERROR]Please provide valid iteration id by flies.xml or by '--project-version' option"
             sys.exit()
         
+        print "[INFO] Project: %s"%project_id
+        print "[INFO] Version: %s"%iteration_id
+        print "[INFO] Username: %s"%self.user_name
         flies = FliesResource(self.url)
         publicanutil = PublicanUtility()
         
@@ -679,7 +696,7 @@ class FliesConsole:
             if filelist:
                 for file in filelist:
                                       
-                    print "\n[INFO]Fetch the content of %s from Flies server: "%file                    
+                    print "\n[INFO] Fetch the content of %s from Flies server: "%file                    
                     
                     for item in list:
                         pot = 0
@@ -695,7 +712,7 @@ class FliesConsole:
                             print "%s :%s"%(e.expr, e.msg)
                             break
                         except UnAvaliableResourceException, e:
-                            print "[ERROR]Can't find pot file for %s on Flies server"%file
+                            print "[ERROR] Can't find pot file for %s on Flies server"%file
                             break
 
                         try:
@@ -704,7 +721,7 @@ class FliesConsole:
                             print "%s :%s"%(e.expr, e.msg)                        
                             break
                         except UnAvaliableResourceException, e:
-                            print "[ERROR]There is no %s translation for %s"%(item, file)
+                            print "[ERROR] There is no %s translation for %s"%(item, file)
                         
                         if options['dstdir']:
                             outpath = options['dstdir']+'/'+item
@@ -719,9 +736,9 @@ class FliesConsole:
                         try:
                             publicanutil.save_to_pofile(item, pofile, result, pot)
                         except InvalidPOTFileException, e:
-                            print "[ERROR]Can't generate po file for %s,"%file+e.msg
+                            print "[ERROR] Can't generate po file for %s,"%file+e.msg
         else:
-            print "\n[INFO]Fetch the content of %s from Flies server: "%args[0]
+            print "\n[INFO] Fetch the content of %s from Flies server: "%args[0]
             for item in list:
                 result = 0
                 pot = 0
@@ -736,7 +753,7 @@ class FliesConsole:
                     print "%s :%s"%(e.expr, e.msg)
                     sys.exit()
                 except UnAvaliableResourceException, e:
-                    print "[ERROR]Can't find pot file for %s on Flies server"%args[0]
+                    print "[ERROR] Can't find pot file for %s on Flies server"%args[0]
                     sys.exit()
 
                 try:            
@@ -745,7 +762,7 @@ class FliesConsole:
                     print "%s :%s"%(e.expr, e.msg)
                     sys.exit()
                 except UnAvaliableResourceException, e:
-                    print "[ERROR]There is no %s translation for %s"%(item, args[0])
+                    print "[ERROR] There is no %s translation for %s"%(item, args[0])
 
                 if options['dstdir']:
                     outpath = options['dstdir']+'/'+item
@@ -760,7 +777,7 @@ class FliesConsole:
                 try:
                     publicanutil.save_to_pofile(item, pofile, result, pot)                    
                 except InvalidPOTFileException, e:
-                    print "[ERROR]Can't generate po file for %s,"%args[0]+e.msg
+                    print "[ERROR] Can't generate po file for %s,"%args[0]+e.msg
                     
     def _remove_project(self):
         pass
@@ -857,11 +874,11 @@ class FliesConsole:
             config = FliesConfig()
             #Read the project configuration file using --project-config option
             if options['project_config']  and os.path.isfile(options['project_config']):
-                print "[INFO] Read the flies project configuation file flies.xml from %s"%options['project_config']            
+                print "[INFO] Loading flies project config from %s"%options['project_config']            
                 self.project_config = config.read_project_config(options['project_config'])
             elif os.path.isfile(os.getcwd()+'/flies.xml'):
                 #If the option is not valid, try to read the project configuration from current path
-                print "[INFO] Read the flies project configuation file flies.xml from %s"%(os.getcwd()+'/flies.xml')
+                print "[INFO] Loading flies project config from from %s"%(os.getcwd()+'/flies.xml')
                 self.project_config = config.read_project_config(os.getcwd()+'/flies.xml')            
             else:
                 print "[ERROR] Can not find flies.xml, please specify the path of flies.xml"
@@ -882,10 +899,10 @@ class FliesConsole:
             if self.url[-1] == "/":
                 self.url = self.url[:-1]
 
+            print "[INFO] Flies python client version: 0.7.2"            
             print "[INFO] Flies server: %s"%self.url
 
             #Try to find user-config file
-            print "[INFO] Read the user-config file flies.ini"
             if options['user_config'] and os.path.isfile(options['user_config']):  
                 user_config = options['user_config']
             elif os.path.isfile(os.path.expanduser("~")+'/.config/flies.ini'):
@@ -893,19 +910,17 @@ class FliesConsole:
             else:    
                 print "[ERROR] Can not find user-config file in home folder or in 'user-config' option"
                 sys.exit()
+            print "[INFO] Loading flies user config from %s"%user_config
 
             #Read the user-config file    
             config.set_userconfig(user_config)
     	    server = config.get_server(self.url)
             if server:
-                print "[INFO] The server is %s"%server
-                print "[INFO] Read user name and api key from user-config file"
                 self.user_name = config.get_config_value("username", server)
     	        self.apikey = config.get_config_value("key", server)
             else:
                 print "[INFO] Can not find the definition of server from user-config file"
             
-            print "[INFO] Read user name and api key from command line options"
             if options['user_name']:
                 self.user_name = options['user_name']
 
