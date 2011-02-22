@@ -157,10 +157,10 @@ class FliesConsole:
                'options:\n'
                '--project-id: id of the project\n'
                '--version-id: id of the version\n'
-               '--srcDir: the full path of the pot folder\n'
-               '--transDir: the full path of the folder that contain locale folders\n'
-               '--importPo: push the translation at the same time\n'
-               '--copyTrans: enable flies server to copy translation from other versions')
+               '--srcdir: the full path of the pot folder\n'
+               '--transdir: the full path of the folder that contain locale folders\n'
+               '--import-Po: push the translation at the same time\n'
+               '--copytrans: enable flies server to copy translation from other versions')
 
     def _publican_pull_help(self):
         print ('flies publican pull [OPTIONS] {documents} {lang}\n'
@@ -168,7 +168,7 @@ class FliesConsole:
                'options:\n'
                '--project-id: id of the project\n'
                '--version-id: id of the version\n'
-               '--dstDir: the path of the folder for saving the po files')
+               '--dstdir: the path of the folder for saving the po files')
               
     def _list_projects(self):
         """
