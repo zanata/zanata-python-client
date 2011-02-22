@@ -27,12 +27,15 @@ __all__ = (
         "UnAuthorizedException", "BadRequestException",
         "ProjectExistException", "UnAvaliableResourceException",
         "UnAvaliablePOTException", "BadRequestBodyException",
-        "SameNameDocumentException"
+        "SameNameDocumentException","InternalServerError"
 )
 class FliesException(Exception):
     def __init__(self, expr, msg):
         self.expr = expr
         self.msg = msg
+
+class InternalServerError(FliesException):
+    pass
 
 class NoSuchProjectException(FliesException):
     pass
