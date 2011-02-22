@@ -61,7 +61,7 @@ class RestClient(object):
         elif extension == "comment":
             ext = "?ext=comment"
        
-        if copytrans == "true":
+        if copytrans:
             if ext == "":
                 ext="?copyTrans=true"
             else:

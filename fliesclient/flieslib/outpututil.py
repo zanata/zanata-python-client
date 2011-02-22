@@ -1,5 +1,5 @@
 #vim:set et sts=4 sw=4: 
-#  
+# 
 # Flies Python Client
 #
 # Copyright (c) 2010 Jian Ni <jni@redhat.com>
@@ -20,11 +20,22 @@
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 # Boston, MA  02111-1307  USA
 
-from client import *
-from docservice import *
-from error import *
-from projectservice import *
-from project import *
-from versionservice import *
-from outpututil import *
+class OutputUtil():
+    def __init__(self):
+        self.enable_infoprefix = False
+        self.enable_errprefix = True
+        self.error_prefix = 'error: '
+        self.info_prefix = '[INFO] '
 
+    def info(self, message):
+        if self.enable_infoprefix:
+            print self.info_prefix+message
+        else:
+            print message
+
+    def error(self, message):
+        if self.enable_errprefix:
+            print self.error_prefix+message
+        else:
+            print message
+    

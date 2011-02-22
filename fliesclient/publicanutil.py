@@ -35,9 +35,12 @@ import sys
 from flieslib import *
 
 class PublicanUtility:
+    def __init__(self):
+        self.output = OutputUtil()
+
     def get_potheader(self, entry):
         extracted_comment = entry.comment
-        
+       
     def create_txtflow(self, pofile):
         """
         Convert the content of the pot file to a list of text flow.
@@ -124,7 +127,7 @@ class PublicanUtility:
         try:
             po = polib.pofile(path)
         except Exception:
-            print "[ERROR] Can not processing the po file"
+            self.output.error("Can not processing the po file")
             sys.exit()
 
         return po
@@ -253,6 +256,6 @@ class PublicanUtility:
                    
         # finally save resulting po to outpath as lang/myfile.po
         po.save()
-        print "[INFO] Writing po file to %s"%(path)
+        self.output.info("Writing po file to %s"%(path))
 
         

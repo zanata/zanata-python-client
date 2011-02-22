@@ -33,10 +33,12 @@ except ImportError:
 import sys
 from rest.client import RestClient
 from error import *
+from outpututil import OutputUtil
 
 class DocumentService:    
     def __init__(self, projects):
         self.projects = projects
+        self.output = OutputUtil()
     
     def get_file_list(self, projectid, iterationid):
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid, iterationid))
@@ -49,13 +51,6 @@ class DocumentService:
             raise InternalServerError('Error 500', 'An internal server error happens')
     
     def update_template(self, projectid, iterationid, file, resources, extension, copytrans):
-        if projectid and iterationid:
-            try:
-                self.projects.iterations.get(projectid, iterationid)
-            except NoSuchProjectException,e:
-                print "[ERROR] %s"%(e.msg)
-                sys.exit()
-
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
@@ -82,13 +77,6 @@ class DocumentService:
         @raise BadRequestBodyException:
         @raise SameNameDocumentException:
         """
-        if projectid and iterationid:
-            try:
-                self.projects.iterations.get(projectid, iterationid)
-            except NoSuchProjectException,e:
-                print "[ERROR] %s"%(e.msg)
-                sys.exit()
-
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
@@ -105,13 +93,6 @@ class DocumentService:
             raise SameNameDocumentException('Error 409', content)
 
     def delete_template(self, projectid, iterationid, file, extension):
-        if projectid and iterationid:
-            try:
-                self.projects.iterations.get(projectid, iterationid)
-            except NoSuchProjectException, e:
-                print "[ERROR] %s"%(e.msg)
-                sys.exit()
-        
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey    
@@ -126,13 +107,6 @@ class DocumentService:
             raise UnAuthorizedException('Error 401', 'UnAuthorized Operation') 
     
     def retrieve_template(self, projectid, iterationid, file, extension):
-        if projectid and iterationid:
-            try:
-                self.projects.iterations.get(projectid, iterationid)
-            except NoSuchProjectException, e:
-                print "[ERROR] %s"%(e.msg)
-                sys.exit()
-        
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file), extension=extension)
                 
         if res['status'] == '200' or res['status'] == '304':
@@ -153,12 +127,6 @@ class DocumentService:
         @raise UnAvaliableResourceException:
         @raise UnAuthorizedException: 
         """
-        if projectid and iterationid:
-            try:
-                self.projects.iterations.get(projectid, iterationid)
-            except NoSuchProjectException, e:
-                print "[ERROR] %s"%(e.msg)
-        
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file, lang), extension=extension)
         
         if res['status'] == '200' or res['status'] == '304':
@@ -167,15 +135,10 @@ class DocumentService:
             raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
+        elif res['status'] == '400':
+            raise BadRequestBodyException('Error 400', content)
   
     def commit_translation(self, projectid, iterationid, fileid, localeid, resources, extension):
-        if projectid and iterationid:
-            try:
-                self.projects.iterations.get(projectid, iterationid)
-            except NoSuchProjectException, e:
-                print "[ERROR] %s"%(e.msg)
-                sys.exit()
-
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
