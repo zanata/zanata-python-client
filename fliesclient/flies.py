@@ -383,11 +383,12 @@ class FliesConsole:
                         flies.documents.delete_template(project_id, iteration_id, file, "gettext")
                     break
                 elif option.lower() == "no" or option.lower() == "n":
-                    print "[INFO] Keep the content on the flies server"
-                    break
+                    print "[INFO] Stop processing, keep the content on the flies server"
+                    sys.exit()
                 else:
                     print "[ERROR] Please enter a yes(y) or no(n)"
-                 
+        
+        
         publicanutil = PublicanUtility()
         #if file not specified, push all the files in pot folder to flies server
         if not args:
