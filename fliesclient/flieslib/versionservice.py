@@ -1,5 +1,5 @@
 #vim:set et sts=4 sw=4: 
-#  
+# 
 # Flies Python Client
 #
 # Copyright (c) 2010 Jian Ni <jni@redhat.com>
@@ -20,10 +20,29 @@
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 # Boston, MA  02111-1307  USA
 
-from client import *
-from docservice import *
-from error import *
-from projectservice import *
-from project import *
-from versionservice import *
 
+__all__ = (
+        "VersionService",
+   )
+
+import os
+try:
+    import json
+except ImportError:
+    import simplejson as json
+import sys
+from rest.client import RestClient
+from error import *
+
+class VersionService:
+    def __init__(self, base_url):
+        self.restclient = RestClient(base_url)
+        
+    def get_server_version(self):
+        res, content = self.restclient.request_version('/seam/resource/restv1/version')
+        
+        if res['status'] == '200' or res['status'] == '304':
+            version = json.loads(content)
+            return version
+        elif res['status'] == '404':
+            raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')

@@ -56,7 +56,7 @@ $ flies publican push --project-id={project_id} --project-version={iteration_id}
 
 Without indicate the documentName, 'publican push' command will push all the template files under the template folder to Flies server. You can specify the path of template folder by command line option, if you don't provide such info, the command will try to locate template folder in current path
 
-$ flies publican push --project-id={project_id} --project-version={iteration_id} --srcDir={template_folder}
+$ flies publican push --project-id={project_id} --project-version={iteration_id} --srcdir={template_folder}
 
 $ flies publican push --project-id={project_id} --project-version={iteration_id} 
 
@@ -64,13 +64,13 @@ Or you can simply running below command in a folder contain template folder with
 
 $ flies publican push 
 
-You can enable 'importPo' option, then related translation (po files) will be pushed to flies server at the same time. you need to specify the parent folder that contain all the translation by 'transDir' command line option. By default, command will read the language info from project configuration file 'flies.xml', or you can specify the language that you want to push to the flies server by 'lang' option
+You can enable 'import-po' option, then related translation (po files) will be pushed to flies server at the same time. you need to specify the parent folder that contain all the translation by 'transDir' command line option. By default, command will read the language info from project configuration file 'flies.xml', or you can specify the language that you want to push to the flies server by 'lang' option
 
-$ flies publican push --importPo --tranDir={path of parent folder contains locale folders} --lang=lang1,lang2,..
+$ flies publican push --import-po --trandir={path of parent folder contains locale folders} --lang=lang1,lang2,..
 
-You could also enable 'copyTrans' option, then the server will try to find closest equivalent translation from oter versions in the same project and copy to version you specified.
+You could also enable 'copytrans' option, then the server will try to find closest equivalent translation from oter versions in the same project and copy to version you specified.
 
-$ flies publican push --copyTrans
+$ flies publican push --copytrans
 
 Retrieving translated Documents from Flies
 
@@ -80,7 +80,7 @@ $ flies publican pull --project-id={project_id} --project-version={iteration_id}
 
 Without indicate the documentName, this command will pull all the documents of a project version on Flies server to a local output folder. Command will read the language info from project configuration file 'flies.xml', or you can specify the language that you want to pull from the flies server by 'lang' option
 
-$ flies publican pull --project-id={project_id} --project-version={iteration_id} --lang=lang1,lang2,.. --dstDir={output_folder} 
+$ flies publican pull --project-id={project_id} --project-version={iteration_id} --lang=lang1,lang2,.. --dstdir={output_folder} 
 
 $ flies publican pull --project-id={project_id} --project-version={iteration_id} --lang=lang1,lang2,..
 

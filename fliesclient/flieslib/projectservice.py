@@ -72,7 +72,7 @@ class ProjectService:
             project.set_iteration(self.iterations)
             return project
         elif res['status'] == '404':
-            raise NoSuchProjectException('Error 404', 'No Such project') 
+            raise NoSuchProjectException('Error 404', content) 
 
     def create(self, project):
         """
@@ -100,13 +100,13 @@ class ProjectService:
         if res['status'] == '201':
             return "Success"
         elif res['status'] == '200':
-            raise ProjectExistException('Status 200', 'The project is already exist')
+            raise ProjectExistException('Status 200', content)
         elif res['status'] == '404':
-            raise NoSuchProjectException('Error 404', 'No Such project')
+            raise NoSuchProjectException('Error 404', content)
         elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 'Un Authorized Operation')
+            raise UnAuthorizedException('Error 401', content)
         elif res['status'] == '400':
-            raise BadRequestException('Error 400', 'Bad Request')
+            raise BadRequestException('Error 400', content)
                     
     def delete(self):
         pass
@@ -133,11 +133,12 @@ class IterationService:
         """
         
         res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
+                
         if res['status'] == '200' or res['status'] == '304':
             return Iteration(json.loads(content))
         elif res['status'] == '404':
-            raise NoSuchProjectException('Error 404', 'No Such project')
-   
+            raise NoSuchProjectException('Error 404', content)
+  
     def create(self, projectid, iteration):
         """
         Create a Iteration Resource on Flies Server
@@ -158,11 +159,11 @@ class IterationService:
         if res['status'] == '201':
             return "Success"
         elif res['status'] == '200':
-            raise ProjectExistException('Status 200', 'The project is already exist')
+            raise ProjectExistException('Status 200', content)
         elif res['status'] == '404':
-            raise NoSuchProjectException('Error 404', 'No Such project')
+            raise NoSuchProjectException('Error 404', content)
         elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
+            raise UnAuthorizedException('Error 401', content)
             
     def delete(self):
         pass

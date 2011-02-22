@@ -124,7 +124,7 @@ class PublicanUtility:
         try:
             po = polib.pofile(path)
         except Exception:
-            print "Can not processing the po file"
+            print "[ERROR] Can not processing the po file"
             sys.exit()
 
         return po

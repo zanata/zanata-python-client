@@ -53,7 +53,7 @@ class DocumentService:
             try:
                 self.projects.iterations.get(projectid, iterationid)
             except NoSuchProjectException,e:
-                print "%s :%s"%(e.expr, e.msg)
+                print "[ERROR] %s"%(e.msg)
                 sys.exit()
 
         headers = {}
@@ -86,7 +86,7 @@ class DocumentService:
             try:
                 self.projects.iterations.get(projectid, iterationid)
             except NoSuchProjectException,e:
-                print "%s :%s"%(e.expr, e.msg)
+                print "[ERROR] %s"%(e.msg)
                 sys.exit()
 
         headers = {}
@@ -109,7 +109,8 @@ class DocumentService:
             try:
                 self.projects.iterations.get(projectid, iterationid)
             except NoSuchProjectException, e:
-                print "%s :%s"%(e.expr, e.msg)
+                print "[ERROR] %s"%(e.msg)
+                sys.exit()
         
         headers = {}
         headers['X-Auth-User'] = self.projects.username
@@ -129,7 +130,8 @@ class DocumentService:
             try:
                 self.projects.iterations.get(projectid, iterationid)
             except NoSuchProjectException, e:
-                print "%s :%s"%(e.expr, e.msg)
+                print "[ERROR] %s"%(e.msg)
+                sys.exit()
         
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file), extension=extension)
                 
@@ -155,7 +157,7 @@ class DocumentService:
             try:
                 self.projects.iterations.get(projectid, iterationid)
             except NoSuchProjectException, e:
-                print "%s :%s"%(e.expr, e.msg)
+                print "[ERROR] %s"%(e.msg)
         
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file, lang), extension=extension)
         
@@ -171,7 +173,7 @@ class DocumentService:
             try:
                 self.projects.iterations.get(projectid, iterationid)
             except NoSuchProjectException, e:
-                print "%s :%s"%(e.expr, e.msg)
+                print "[ERROR] %s"%(e.msg)
                 sys.exit()
 
         headers = {}

@@ -53,7 +53,6 @@ class RestClient(object):
     
     def request(self, resource, method = "get", args = None, body = None, headers = {}, extension = None, copytrans =
     None):
-        path = resource
         headers['Accept'] = 'application/json'
         http = httplib2.Http(".cache")
         ext = ""
@@ -75,6 +74,21 @@ class RestClient(object):
         
         try:
             response, content = http.request("%s%s%s" % (self.base_url, resource, ext), method.upper(), body, headers=headers)
+            return (response, content.decode("UTF-8"))
+        except httplib2.ServerNotFoundError, e:
+            print "[Error] %s, Maybe the flies sever is down?"%e
+            sys.exit(2)
+        except httplib2.HttpLib2Error, e:
+            print "[Error] %s"%e
+            sys.exit(2)
+        except Exception, e:
+            print "[Error] %s"%e
+            sys.exit(2)
+
+    def request_version(self, resource):
+        http = httplib2.Http(".cache")
+        try:
+            response, content = http.request("%s%s" % (self.base_url, resource), "GET")
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
             print "[Error] %s, Maybe the flies sever is down?"%e

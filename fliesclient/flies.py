@@ -411,7 +411,7 @@ class FliesConsole:
                     try:
                         body, filename = publicanutil.potfile_to_json(pot)
                     except NoSuchFileException, e:
-                        print "%s :%s"%(e.expr, e.msg)
+                        print "[ERROR] %s"%(e.msg)
                         continue 
                                           
                     try:
@@ -479,7 +479,7 @@ class FliesConsole:
             try:
                 body, filename = publicanutil.potfile_to_json(args[0])
             except NoSuchFileException, e:
-                print "[ERROR] %s"%(e.expr, e.msg)
+                print "[ERROR] %s"%(e.msg)
                 sys.exit()
              
             try:
@@ -487,16 +487,16 @@ class FliesConsole:
                 if result:
                     print "[INFO] Successfully pushed %s to the Flies server"%args[0]
             except UnAuthorizedException, e:
-                print "%s :%s"%(e.expr, e.msg)    
+                print "[ERROR] %s"%(e.msg)    
             except BadRequestBodyException, e:
-                print "%s :%s"%(e.expr, e.msg)
+                print "[ERROR] %s"%(e.msg)
             except SameNameDocumentException, e:
                 try:
                     result = flies.documents.update_template(project_id, iteration_id, filename, body, "gettext", options['copytrans'])
                     if result:
                         print "[INFO] Successfully updated template %s on the Flies server"%filename
                 except BadRequestBodyException, e:
-                    print "%s :%s"%(e.expr, e.msg)     
+                    print "[ERROR] %s"%(e.msg)     
 
             if options['importpo'] == 'true':
                 for item in list:
@@ -531,10 +531,10 @@ class FliesConsole:
                         else:
                             print "[ERROR] Commit translation is not successful"
                     except UnAuthorizedException, e:
-                        print "%s :%s"%(e.expr, e.msg)                                            
+                        print "[ERROR] %s"%(e.msg)                                            
                         break
                     except BadRequestBodyException, e:
-                        print "%s :%s"%(e.expr, e.msg)
+                        print "[ERROR] %s"%(e.msg)
                         continue
 
     def _update_publican(self, args):
@@ -710,7 +710,7 @@ class FliesConsole:
                         try:
                             pot = flies.documents.retrieve_template(project_id, iteration_id, file, "gettext")                    
                         except UnAuthorizedException, e:
-                            print "%s :%s"%(e.expr, e.msg)
+                            print "[ERROR] %s"%(e.msg)
                             break
                         except UnAvaliableResourceException, e:
                             print "[ERROR] Can't find pot file for %s on Flies server"%file
@@ -719,7 +719,7 @@ class FliesConsole:
                         try:
                             result = flies.documents.retrieve_translation(lang, project_id, iteration_id, file, "gettext")
                         except UnAuthorizedException, e:
-                            print "%s :%s"%(e.expr, e.msg)                        
+                            print "[ERROR] %s"%(e.msg)                        
                             break
                         except UnAvaliableResourceException, e:
                             print "[ERROR] There is no %s translation for %s"%(item, file)
@@ -796,7 +796,7 @@ class FliesConsole:
         try:
             opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["url=", "project-id=", "project-version=", "project-name=",
             "project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=",
-            "username=", "srcDir=", "dstDir=", "email=", "transDir=", "importPo", "copyTrans"])
+            "username=", "srcdir=", "dstdir=", "email=", "transdir=", "import-po", "copytrans"])
         except getopt.GetoptError, err:
             print str(err)
             sys.exit(2)
@@ -851,17 +851,17 @@ class FliesConsole:
                     options['project_config'] = a
                 elif o in ("--project-version"): 
                     options['project_version'] = a
-                elif o in ("--srcDir"):
+                elif o in ("--srcdir"):
                     options['srcdir'] = a
-                elif o in ("--dstDir"):
+                elif o in ("--dstdir"):
                     options['dstdir'] = a
-                elif o in ("--transDir"):
+                elif o in ("--transdir"):
                     options['transdir'] = a
                 elif o in ("--email"):
                     options['email'] = a
-                elif o in ("--importPo"):
+                elif o in ("--import-po"):
                     options['importpo'] = "true"
-                elif o in ("--copyTrans"):
+                elif o in ("--copytrans"):
                     options['copytrans'] = "true"
                    
         return command, command_args
@@ -895,13 +895,19 @@ class FliesConsole:
             if not self.url or self.url.isspace():
                 print "[ERROR] Please provide valid server url in flies.xml or by '--url' option"
                 sys.exit()
-            
+
             #process the url of server
             if self.url[-1] == "/":
                 self.url = self.url[:-1]
-
-            print "[INFO] Flies python client version: 0.7.3"            
-            print "[INFO] Flies server: %s"%self.url
+             
+            version = VersionService(self.url)
+            try:            
+                content = version.get_server_version()
+                print "[INFO] Flies python client version: 0.7.3, Flies server API version: %s"%content['versionNo']  
+                print "[INFO] Flies server: %s"%self.url 
+            except UnAvaliableResourceException, e:
+                print "[INFO] Flies python client version: 0.7.3"
+                print "[ERROR] Can not retrieve the server version, server may not support the version service"
 
             #Try to find user-config file
             if options['user_config'] and os.path.isfile(options['user_config']):  
