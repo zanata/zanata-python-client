@@ -117,10 +117,16 @@ class FliesConsole:
     def _command_help(self, command):      
         if command == 'list':
             self._list_help()
+        elif command == 'project':
+            print ("Command:'flies project info'\n"
+                   "        'flies project create'")
         elif command == 'project_info':
             self._projec_info_help()
         elif command == 'project_create':
             self._project_create_help()
+        elif command == 'version':
+            print ("Command:'flies version info'\n"
+                   "        'flies version create'")
         elif command == 'version_info':
             self._iteration_info_help()
         elif command == 'version_create':
