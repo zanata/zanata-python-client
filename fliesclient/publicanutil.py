@@ -65,7 +65,7 @@ class PublicanUtility:
             #extensions_pot_entry_header = [{"object-type":"pot-entry-header","context":"context","references":["fff"],"extractedComment":"extractedComment","flags":["java-format"]}]
 
             extensions=[{"object-type":"pot-entry-header","context":"","references":reflist,"extractedComment":extracted_comment,"flags":flags}]
-            textflow = {'id': textflowId, 'lang':'en', 'content':entry.msgid, 'extensions':extensions, 'revision':1}
+            textflow = {'id': textflowId, 'lang':'en-US', 'content':entry.msgid, 'extensions':extensions, 'revision':1}
             textflows.append(textflow)
         return textflows
     
@@ -178,7 +178,7 @@ class PublicanUtility:
         pofile = self.create_pofile(path)
         textflows = self.create_txtflow(pofile)
         extensions = self.create_extensions(pofile)
-        items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en', 'extensions':extensions, 'textFlows':textflows}
+        items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en-US', 'extensions':extensions, 'textFlows':textflows}
          
         return json.dumps(items), filename
 
@@ -218,10 +218,14 @@ class PublicanUtility:
 
         for textflow in textflows:
             if textflow.get('extensions'):
-                poentry = polib.POEntry()
+                poentry = polib.POEntry(occurrences=None)
                 extension = textflow.get('extensions')[0]
                 poentry.comment = extension.get('extractedComment')
-                poentry.occurrences = [tuple(item.split(':')) for item in extension.get('references')]
+                #Check the references is not empty 
+                if extension.get('references')!=[u'']:
+                    poentry.occurrences = [tuple(item.split(':')) for item in extension.get('references')]
+                else:
+                    poentry.occurrences = None
                 poentry.flags = extension.get('flags')            
                 poentry.msgid = textflow.get('content')
                 po.append(poentry)
@@ -249,6 +253,6 @@ class PublicanUtility:
                    
         # finally save resulting po to outpath as lang/myfile.po
         po.save()
-        print "[INFO]Writing po file to %s"%(path)
+        print "[INFO] Writing po file to %s"%(path)
 
         

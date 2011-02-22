@@ -5,7 +5,7 @@ Build script for flies-python-client
 from setuptools import setup, find_packages
 
 setup (name = "flies-python-client",
-    version = '0.7.2',
+    version = '0.7.3',
     packages = find_packages(),
     install_requires=[
         'polib' ,

@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name: flies-python-client
-Version: 0.7.2
+Version: 0.7.3
 Release: 1%{?dist}
 Summary: Python Client for Flies Server
 
@@ -43,6 +43,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 
 %changelog
+* Mon Feb 21 2011 James Ni <jni@redhat.com> - 0.7.3-1
+- Fix issue 244, issue 245, issue 247 and issue 30, add command list for 'flies publican', rewrite the README
+
 * Fri Feb 18 2011 James Ni <jni@redhat.com> - 0.7.2-1
 - Rename the gettextutil to publicanutil, Remove the translator from textFlowTarget, Add more help info
 
