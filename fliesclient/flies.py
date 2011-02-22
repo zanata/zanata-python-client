@@ -909,10 +909,10 @@ class FliesConsole:
             version = VersionService(self.url)
             try:            
                 content = version.get_server_version()
-                print "[INFO] Flies python client version: 0.7.3, Flies server API version: %s"%content['versionNo']  
+                print "[INFO] Flies python client version: 0.7.4, Flies server API version: %s"%content['versionNo']  
                 print "[INFO] Flies server: %s"%self.url 
             except UnAvaliableResourceException, e:
-                print "[INFO] Flies python client version: 0.7.3"
+                print "[INFO] Flies python client version: 0.7.4"
                 print "[ERROR] Can not retrieve the server version, server may not support the version service"
 
             #Try to find user-config file
