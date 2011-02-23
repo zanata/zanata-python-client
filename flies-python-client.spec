@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name: flies-python-client
-Version: 0.7.4
+Version: 0.7.6
 Release: 1%{?dist}
 Summary: Python Client for Flies Server
 
@@ -43,6 +43,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 
 %changelog
+* Wed Feb 23 2011 James Ni <jni@redhat.com> - 0.7.6-1
+- Rename the command line option, add a Logger class for better output, set copytrans default value to true, make the
+  extensions to a list of gettext and comment. 
+
 * Tue Feb 22 2011 James Ni <jni@redhat.com> - 0.7.4-1
 - Fix issue 245:stop processing when type 'n', Add version service, rename the command line option and help info, add
   InternalServerError

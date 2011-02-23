@@ -33,12 +33,12 @@ except ImportError:
 import sys
 from rest.client import RestClient
 from error import *
-from outpututil import OutputUtil
+from outpututil import Logger
 
 class DocumentService:    
     def __init__(self, projects):
         self.projects = projects
-        self.output = OutputUtil()
+        self.output = Logger()
     
     def get_file_list(self, projectid, iterationid):
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid, iterationid))
@@ -50,12 +50,12 @@ class DocumentService:
         elif res['status'] == '500':
             raise InternalServerError('Error 500', 'An internal server error happens')
     
-    def update_template(self, projectid, iterationid, file, resources, extension, copytrans):
+    def update_template(self, projectid, iterationid, file, resources, copytrans):
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
          
-        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid,iterationid,file), args=resources, headers=headers, extension=extension, copytrans=copytrans)
+        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid,iterationid,file), args=resources, headers=headers, copytrans=copytrans)
          
         if res['status'] == '201' or res['status'] == '200':
             return True
@@ -66,7 +66,7 @@ class DocumentService:
         elif res['status'] == '409':
             raise SameNameDocumentException('Error 409', 'A document with same name already exists.')
     
-    def commit_template(self, projectid, iterationid, resources, extension, copytrans):
+    def commit_template(self, projectid, iterationid, resources, copytrans):
         """
         Push the json object to flies server
         @param projectid: id of project
@@ -81,7 +81,7 @@ class DocumentService:
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
         
-        res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers, extension=extension, copytrans=copytrans)
+        res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers, copytrans=copytrans)
         
         if res['status'] == '201':
             return True
@@ -92,12 +92,12 @@ class DocumentService:
         elif res['status'] == '409':
             raise SameNameDocumentException('Error 409', content)
 
-    def delete_template(self, projectid, iterationid, file, extension):
+    def delete_template(self, projectid, iterationid, file):
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey    
         
-        res, content = self.projects.restclient.request_delete('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file), headers=headers, extension=extension)
+        res, content = self.projects.restclient.request_delete('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file), headers=headers)
         
         if res['status'] == '200' or res['status'] == '304':
             return content
@@ -106,8 +106,8 @@ class DocumentService:
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'UnAuthorized Operation') 
     
-    def retrieve_template(self, projectid, iterationid, file, extension):
-        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file), extension=extension)
+    def retrieve_template(self, projectid, iterationid, file):
+        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file))
                 
         if res['status'] == '200' or res['status'] == '304':
             return content
@@ -116,7 +116,7 @@ class DocumentService:
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')        
 
-    def retrieve_translation(self, lang, projectid, iterationid, file, extension):
+    def retrieve_translation(self, lang, projectid, iterationid, file):
         """
         Get translation content of file from Flies server
         @param lang: language
@@ -127,8 +127,8 @@ class DocumentService:
         @raise UnAvaliableResourceException:
         @raise UnAuthorizedException: 
         """
-        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file, lang), extension=extension)
-        
+        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file, lang))
+                
         if res['status'] == '200' or res['status'] == '304':
             return content
         elif res['status'] == '404':
@@ -138,12 +138,12 @@ class DocumentService:
         elif res['status'] == '400':
             raise BadRequestBodyException('Error 400', content)
   
-    def commit_translation(self, projectid, iterationid, fileid, localeid, resources, extension):
+    def commit_translation(self, projectid, iterationid, fileid, localeid, resources):
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
         
-        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers, extension=extension)
+        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers)
 
         if res['status'] == '200':
             return True

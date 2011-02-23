@@ -36,7 +36,7 @@ from flieslib import *
 
 class PublicanUtility:
     def __init__(self):
-        self.output = OutputUtil()
+        self.output = Logger()
 
     def get_potheader(self, entry):
         extracted_comment = entry.comment
@@ -193,9 +193,8 @@ class PublicanUtility:
         filename, path  = self.strip_path(filepath)
         pofile = self.create_pofile(path)
         textflowtargets = self.create_txtflowtarget(pofile)
-        #this functions have not implemented yet
-        #extensions = publican.extract_potheader()
-
+        #the function for extensions have not implemented yet
+        
         items = {'links':[],'extensions':[], 'textFlowTargets':textflowtargets}
         return json.dumps(items), filename
 
@@ -211,6 +210,7 @@ class PublicanUtility:
         
         potcontent = json.loads(pot)
         textflows = potcontent.get('textFlows')
+        
         if potcontent.get('extensions'):
             extensions = potcontent.get('extensions')[0]
             po.header = extensions.get('comment')     

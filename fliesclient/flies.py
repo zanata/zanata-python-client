@@ -69,7 +69,7 @@ class FliesConsole:
         self.apikey = ''
         self.user_config = ''
         self.project_config = ''
-        self.output = OutputUtil()
+        self.output = Logger()
         
     def _print_usage(self):
         print ('\nClient for talking to a Flies Server\n\n'
@@ -391,7 +391,7 @@ class FliesConsole:
                 continue
                         
             try:
-                result = flies.documents.commit_translation(project_id, iteration_id, filename, lang, body, "gettext")
+                result = flies.documents.commit_translation(project_id, iteration_id, filename, lang, body)
                 if result:
                     self.output.info("Successfully pushed translation %s to the Flies server"%po) 
                 else:
@@ -405,7 +405,7 @@ class FliesConsole:
 
     def update_template(self, project_id, iteration_id, filename, body):
         try:
-            result = flies.documents.update_template(project_id, iteration_id, filename, body, "gettext", options['copytrans'])
+            result = flies.documents.update_template(project_id, iteration_id, filename, body, options['copytrans'])
             if result:
                 self.output.info("Successfully updated template %s on the Flies server"%filename)
         except BadRequestBodyException, e:
@@ -449,7 +449,7 @@ class FliesConsole:
                 if option.lower() == "yes" or option.lower() == "y":
                     for file in filelist:
                         self.output.info("Delete the %s"%file)
-                        flies.documents.delete_template(project_id, iteration_id, file, "gettext")
+                        flies.documents.delete_template(project_id, iteration_id, file)
                     break
                 elif option.lower() == "no" or option.lower() == "n":
                     self.output.info("Stop processing, keep the content on the flies server")
@@ -486,7 +486,7 @@ class FliesConsole:
                         continue 
                                           
                     try:
-                        result = flies.documents.commit_template(project_id, iteration_id, body, "gettext", options['copytrans'])
+                        result = flies.documents.commit_template(project_id, iteration_id, body, options['copytrans'])
                         if result:
                             self.output.info("Successfully pushed %s to the Flies server"%pot)    
                     except UnAuthorizedException, e:
@@ -512,7 +512,7 @@ class FliesConsole:
                 sys.exit()
              
             try:
-                result = flies.documents.commit_template(project_id, iteration_id, body, "gettext", options['copytrans'])                
+                result = flies.documents.commit_template(project_id, iteration_id, body, options['copytrans'])                
                 if result:
                     self.output.info("Successfully pushed %s to the Flies server"%args[0])
             except UnAuthorizedException, e:
@@ -580,7 +580,7 @@ class FliesConsole:
                             continue
                         
                         try:
-                            result = flies.documents.commit_translation(project_id, iteration_id,filename,lang, body, "gettext")
+                            result = flies.documents.commit_translation(project_id, iteration_id,filename,lang, body)
                             if result:
                                 self.output.info("Successfully updated %s to the Flies server"%po) 
                             else:
@@ -610,7 +610,7 @@ class FliesConsole:
                     sys.exit()                                            
                 
                 try:
-                    result = flies.documents.commit_translation(project_id, iteration_id, filename, lang, body, "gettext")
+                    result = flies.documents.commit_translation(project_id, iteration_id, filename, lang, body)
                     if result:
                         self.output.info("Successfully updated %s to the Flies server"%args[0])
                     else:
@@ -667,7 +667,7 @@ class FliesConsole:
                         self.output.info("Retrieve %s translation from Flies server:"%item)
 
                         try:
-                            pot = flies.documents.retrieve_template(project_id, iteration_id, file, "gettext")                    
+                            pot = flies.documents.retrieve_template(project_id, iteration_id, file)                    
                         except UnAuthorizedException, e:
                             self.output.error(e.msg)
                             break
@@ -676,12 +676,12 @@ class FliesConsole:
                             break
                 
                         try:
-                            result = flies.documents.retrieve_translation(lang, project_id, iteration_id, file, "gettext")
+                            result = flies.documents.retrieve_translation(lang, project_id, iteration_id, file)
                         except UnAuthorizedException, e:
                             self.output.error(e.msg)                        
                             break
                         except UnAvaliableResourceException, e:
-                            self.output.error("There is no %s translation for %s"%(item, file))
+                            self.output.info("There is no %s translation for %s"%(item, file))
                         except BadRequestBodyException, e:
                             self.output.error(e.msg)
                             continue 
@@ -714,7 +714,7 @@ class FliesConsole:
                 self.output.info("Retrieve %s translation from Flies server:"%item)
 
                 try:
-                    pot = flies.documents.retrieve_template(project_id, iteration_id, args[0], "gettext")                    
+                    pot = flies.documents.retrieve_template(project_id, iteration_id, args[0])                    
                 except UnAuthorizedException, e:
                     self.output.error(e.msg)
                     sys.exit()
@@ -723,7 +723,7 @@ class FliesConsole:
                     sys.exit()
 
                 try:            
-                    result = flies.documents.retrieve_translation(lang, project_id, iteration_id, args[0], "gettext")
+                    result = flies.documents.retrieve_translation(lang, project_id, iteration_id, args[0])
                 except UnAuthorizedException, e:
                     self.output.error(e.expr, e.msg)
                     sys.exit()
@@ -871,10 +871,10 @@ class FliesConsole:
             version = VersionService(self.url)
             try:            
                 content = version.get_server_version()
-                self.output.info("Flies python client version: 0.7.4, Flies server API version: %s"%content['versionNo'])  
+                self.output.info("Flies python client version: 0.7.6, Flies server API version: %s"%content['versionNo'])  
                 self.output.info("Flies server: %s"%self.url) 
             except UnAvaliableResourceException, e:
-                self.output.info("Flies python client version: 0.7.4")
+                self.output.info("Flies python client version: 0.7.6")
                 self.output.error("Can not retrieve the server version, server may not support the version service")
 
             #Try to find user-config file

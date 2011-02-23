@@ -20,7 +20,7 @@
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 # Boston, MA  02111-1307  USA
 
-class OutputUtil():
+class Logger():
     def __init__(self):
         self.enable_infoprefix = False
         self.enable_errprefix = True

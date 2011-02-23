@@ -55,12 +55,8 @@ class RestClient(object):
     None):
         headers['Accept'] = 'application/json'
         http = httplib2.Http(".cache")
-        ext = ""
-        if extension == "gettext":
-            ext = "?ext=gettext"
-        elif extension == "comment":
-            ext = "?ext=comment"
-       
+        ext = "?ext=gettext&ext=comment"
+                
         if copytrans:
             if ext == "":
                 ext="?copyTrans=true"
@@ -76,13 +72,13 @@ class RestClient(object):
             response, content = http.request("%s%s%s" % (self.base_url, resource, ext), method.upper(), body, headers=headers)
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
-            print "[Error] %s, Maybe the flies sever is down?"%e
+            print "error: %s, Maybe the flies sever is down?"%e
             sys.exit(2)
         except httplib2.HttpLib2Error, e:
-            print "[Error] %s"%e
+            print "error: %s"%e
             sys.exit(2)
         except Exception, e:
-            print "[Error] %s"%e
+            print "error: %s"%e
             sys.exit(2)
 
     def request_version(self, resource):
@@ -91,12 +87,12 @@ class RestClient(object):
             response, content = http.request("%s%s" % (self.base_url, resource), "GET")
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
-            print "[Error] %s, Maybe the flies sever is down?"%e
+            print "error: %s, Maybe the flies sever is down?"%e
             sys.exit(2)
         except httplib2.HttpLib2Error, e:
-            print "[Error] %s"%e
+            print "error: %s"%e
             sys.exit(2)
         except Exception, e:
-            print "[Error] %s"%e
+            print "error: %s"%e
             sys.exit(2)
  
