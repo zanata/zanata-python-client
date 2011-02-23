@@ -37,7 +37,7 @@ sub_command = {
                 'status':[],
                 'project':['info','create', 'remove'],
                 'version':['info', 'create', 'remove'],
-                'publican':['push', 'pull', 'update']
+                'publican':['push', 'pull']
                 }
 
 options = {
@@ -64,6 +64,7 @@ options = {
 class FliesConsole:
 
     def __init__(self):
+        self.client_version = "0.7.6"        
         self.url = ''
         self.user_name = ''
         self.apikey = ''
@@ -95,8 +96,7 @@ class FliesConsole:
                   ' project create      Create a project\n'
                   ' version create    Create a iteration of a project\n'   
                   ' publican pull       Pull the content of publican file\n'
-                  ' publican push       Push the content of publican file to Flies Server\n'
-                  ' publican update     Update the translation of publican file to Flies Server\n')
+                  ' publican push       Push the content of publican file to Flies Server\n')
         else:
             command = args[0]
             sub = args[1:]
@@ -138,7 +138,6 @@ class FliesConsole:
             self._publican_push_help()
         elif command == 'publican_pull':
             self._publican_pull_help()
-                
 
     def _list_help(self):
        	print ('flies list [OPTIONS]\n'
@@ -525,101 +524,6 @@ class FliesConsole:
             if options['importpo']:
                 self.import_po(publicanutil, trans_folder, flies, project_id, iteration_id, filename)
 
-    def _update_publican(self, args):
-        """
-        Update the content of publican files to a Project iteration on Flies server
-        @param args: name of the publican file
-        """
-        if self.user_name and self.apikey:
-            flies = FliesResource(self.url, self.user_name, self.apikey)
-        else:
-            self.output.error("Please provide username and apikey in flies.ini or by '--username' and '--apikey' options")
-            sys.exit()        
-
-        list = []
-        if options['lang']:
-            list = options['lang'].split(',')
-        elif self.project_config['locale_map']:
-            list = self.project_config['locale_map'].keys()
-        else:
-            self.output.error("Please specify the language by '--lang' option or flies.xml")
-            sys.exit()
-
-        project_id, iteration_id = self.check_project(flies)        
-        
-        publicanutil = PublicanUtility()
-        #if file not specified, update all the files in po folder to flies server
-        if not args:
-            for item in list:
-                if item in self.project_config['locale_map']:
-                    lang = self.project_config['locale_map'][item]
-                else:
-                    lang = item
-
-                if options['transdir']:
-                    folder = options['transdir']
-                else:
-                    folder = os.getcwd()
-
-                upfolder=folder+'/'+item
-
-                #check the po folder to find all the po file
-                filelist = publicanutil.get_file_list(upfolder, ".po")
-                if filelist:                
-                    for po in filelist:
-                        self.output.info("Update the content of %s to Flies server: "%po)
-                        
-                        try: 
-                            body, filename = publicanutil.pofile_to_json(po)
-                        except NoSuchFileException, e:
-                            self.output.error(e.expr, e.msg)
-                            continue
-
-                        if not body:
-                            self.output.error("No content or all the entry is obsolete in %s"%filename)
-                            continue
-                        
-                        try:
-                            result = flies.documents.commit_translation(project_id, iteration_id,filename,lang, body)
-                            if result:
-                                self.output.info("Successfully updated %s to the Flies server"%po) 
-                            else:
-                                self.output.error("Commit translation is not successful")
-                        except UnAuthorizedException, e:
-                            self.output.error(e.msg)                                            
-                            break
-                        except BadRequestBodyException, e:
-                            self.output.error(e.msg)
-                            continue
-                        
-                else:
-                    self.output.error("Error, The update folder is empty or not exist")
-        else:
-            print ""
-            self.output.info("Update the content of %s to Flies server:"%args[0])
-            for item in list:
-                if item in self.project_config['locale_map']:
-                    lang = self.project_config['locale_map'][item]
-                else:
-                    lang = item
-
-                try:
-                    body, filename = publicanutil.commit_template(args[0])
-                except NoSuchFileException, e:
-                    self.output.error(e.msg)
-                    sys.exit()                                            
-                
-                try:
-                    result = flies.documents.commit_translation(project_id, iteration_id, filename, lang, body)
-                    if result:
-                        self.output.info("Successfully updated %s to the Flies server"%args[0])
-                    else:
-                        self.output.error("ERROR]Commit translation is not successful")
-                except UnAuthorizedException, e:
-                    self.output.error(e.msg)
-                except BadRequestBodyException, e:
-                    self.output.error(e.msg) 
-
     def _pull_publican(self, args):
         """
         Retrieve the content of documents in a Project version from Flies server. If the name of publican
@@ -871,10 +775,10 @@ class FliesConsole:
             version = VersionService(self.url)
             try:            
                 content = version.get_server_version()
-                self.output.info("Flies python client version: 0.7.6, Flies server API version: %s"%content['versionNo'])  
+                self.output.info("Flies python client version: %s, Flies server API version: %s"%(self.client_version, content['versionNo']))  
                 self.output.info("Flies server: %s"%self.url) 
             except UnAvaliableResourceException, e:
-                self.output.info("Flies python client version: 0.7.6")
+                self.output.info("Flies python client version: %s"%self.client_version)
                 self.output.error("Can not retrieve the server version, server may not support the version service")
 
             #Try to find user-config file
@@ -925,8 +829,6 @@ class FliesConsole:
                     self._push_publican(command_args)
                 elif command == 'publican_pull':
                     self._pull_publican(command_args)
-                elif command == 'publican_update':
-                    self._update_publican(command_args)
 
 def main():
     client = FliesConsole()
