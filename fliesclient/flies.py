@@ -433,9 +433,20 @@ class FliesConsole:
                 trans_folder = options['transdir']
             else:
                 trans_folder = os.getcwd()
-                self.output.info("Read locale folders from %s"%trans_folder)            
+            self.output.info("Read locale folders from %s"%trans_folder)            
         else:
             self.output.info("Importing source documents only")
+        
+        if options['srcdir']:
+            tmlfolder = options['srcdir']
+        else:
+            tmlfolder = os.getcwd()
+        
+        if not os.path.isdir(tmlfolder):
+            self.output.error("Can not find source folder, please specify the source folder by '--srcdir' option")
+            sys.exit()
+
+        self.output.info("POT directory (originals):%s"%tmlfolder)
                 
         #Get the file list of this version of project
         filelist = flies.documents.get_file_list(project_id, iteration_id)
@@ -460,23 +471,12 @@ class FliesConsole:
         publicanutil = PublicanUtility()
         #if file not specified, push all the files in pot folder to flies server
         if not args:
-            if options['srcdir']:
-                tmlfolder = options['srcdir']
-            else:
-                tmlfolder = os.getcwd()
-            self.output.info("POT directory (originals):%s"%tmlfolder)
-
-            if os.path.isdir(tmlfolder):            
-                #check the pot folder to find all the pot file
-                filelist = publicanutil.get_file_list(tmlfolder, ".pot")
-            else:
-                self.output.error("Can not find source folder, please specify the source folder by '--srcdir' option")
-                sys.exit()
-
+            #get all the pot files from the template folder 
+            pot_list = publicanutil.get_file_list(tmlfolder, ".pot")
+            
             if filelist:                
-                for pot in filelist:
-                    print ""
-                    self.output.info("Push the content of %s to Flies server:"%pot)
+                for pot in pot_list:
+                    self.output.info("\nPush the content of %s to Flies server:"%pot)
                     
                     try:
                         body, filename = publicanutil.potfile_to_json(pot)
@@ -500,10 +500,9 @@ class FliesConsole:
                     if options['importpo']:
                         self.import_po(publicanutil, trans_folder, flies, project_id, iteration_id, filename)
             else:
-                self.output.error("The template folder is empty or not exist")
+                self.output.error("The template folder is empty")
         else:
-            print ""
-            self.output.info("Push the content of %s to Flies server:"%args[0])
+            self.output.info("\nPush the content of %s to Flies server:"%args[0])
             try:
                 body, filename = publicanutil.potfile_to_json(args[0])
             except NoSuchFileException, e:
@@ -757,9 +756,10 @@ class FliesConsole:
                 self.output.error("Can not find flies.xml, please specify the path of flies.xml")
                 sys.exit()
 
+            #process the url of server
             self.url = self.project_config['project_url']
             
-            #The value in options will overwrite the value in user-config file 
+            #The value in options will overwrite the value in project-config file 
             if options['url']:
                 self.output.info("Overwrite the url of server with command line options") 
                 self.url = options['url']
@@ -768,19 +768,9 @@ class FliesConsole:
                 self.output.error("Please provide valid server url in flies.xml or by '--url' option")
                 sys.exit()
 
-            #process the url of server
             if self.url[-1] == "/":
                 self.url = self.url[:-1]
-             
-            version = VersionService(self.url)
-            try:            
-                content = version.get_server_version()
-                self.output.info("Flies python client version: %s, Flies server API version: %s"%(self.client_version, content['versionNo']))  
-                self.output.info("Flies server: %s"%self.url) 
-            except UnAvaliableResourceException, e:
-                self.output.info("Flies python client version: %s"%self.client_version)
-                self.output.error("Can not retrieve the server version, server may not support the version service")
-
+           
             #Try to find user-config file
             if options['user_config'] and os.path.isfile(options['user_config']):  
                 user_config = options['user_config']
@@ -791,10 +781,12 @@ class FliesConsole:
                 sys.exit()
 
             self.output.info("Loading flies user config from %s"%user_config)
+            self.output.info("Flies server: %s"%self.url) 
 
             #Read the user-config file    
             config.set_userconfig(user_config)
     	    server = config.get_server(self.url)
+            
             if server:
                 self.user_name = config.get_config_value("username", server)
     	        self.apikey = config.get_config_value("key", server)
@@ -802,12 +794,23 @@ class FliesConsole:
                 self.output.error("Can not find the definition of server from user-config file")
                 sys.exit()
             
+            #The value in commandline options will overwrite the value in user-config file          
             if options['user_name']:
                 self.user_name = options['user_name']
 
             if options['key']:
                 self.apikey = options['key']
-                        
+            
+            #Retrieve the version of the Flies server 
+            version = VersionService(self.url)
+            
+            try:            
+                content = version.get_server_version()
+                self.output.info("Flies python client version: %s, Flies server API version: %s"%(self.client_version, content['versionNo']))  
+            except UnAvaliableResourceException, e:
+                self.output.info("Flies python client version: %s"%self.client_version)
+                self.output.error("Can not retrieve the server version, server may not support the version service")
+
             if command == 'list':
                 self._list_projects()
             else:
