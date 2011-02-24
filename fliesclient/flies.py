@@ -70,6 +70,7 @@ class FliesConsole:
         self.apikey = ''
         self.user_config = ''
         self.project_config = ''
+        self.force = False
         self.output = Logger()
         
     def _print_usage(self):
@@ -454,19 +455,24 @@ class FliesConsole:
         if filelist:
             #Give an option to user for keep or delete the content
             self.output.info("This will overwrite/delete any existing documents on the server.")
-            while True:
-                option = raw_input("Are you sure (y/n)?")
-                if option.lower() == "yes" or option.lower() == "y":
-                    for file in filelist:
-                        self.output.info("Delete the %s"%file)
-                        flies.documents.delete_template(project_id, iteration_id, file)
-                    break
-                elif option.lower() == "no" or option.lower() == "n":
-                    self.output.info("Stop processing, keep the content on the flies server")
-                    sys.exit()
-                else:
-                    self.output.error("Please enter yes(y) or no(n)")
-        
+            
+            if self.force:
+                for file in filelist:
+                    self.output.info("Delete the %s"%file)
+                    flies.documents.delete_template(project_id, iteration_id, file)
+            else:        
+                while True:
+                    option = raw_input("Are you sure (y/n)?")
+                    if option.lower() == "yes" or option.lower() == "y":
+                        for file in filelist:
+                            self.output.info("Delete the %s"%file)
+                            flies.documents.delete_template(project_id, iteration_id, file)
+                        break
+                    elif option.lower() == "no" or option.lower() == "n":
+                        self.output.info("Stop processing, keep the content on the flies server")
+                        sys.exit()
+                    else:
+                        self.output.error("Please enter yes(y) or no(n)")
         
         publicanutil = PublicanUtility()
         #if file not specified, push all the files in pot folder to flies server
@@ -629,7 +635,7 @@ class FliesConsole:
                     self.output.error(e.expr, e.msg)
                     sys.exit()
                 except UnAvaliableResourceException, e:
-                    self.output.error("There is no %s translation for %s"%(item, args[0]))
+                    self.output.info("There is no %s translation for %s"%(item, args[0]))
                 except BadRequestBodyException, e:
                     self.output.error(e.msg)
                     continue 
@@ -663,7 +669,7 @@ class FliesConsole:
         Parse the command line to generate command options and sub_command
         """
         try:
-            opts, args = getopt.gnu_getopt(sys.argv[1:], "v", ["url=", "project-id=", "project-version=", "project-name=",
+            opts, args = getopt.gnu_getopt(sys.argv[1:], "vf", ["url=", "project-id=", "project-version=", "project-name=",
             "project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=",
             "username=", "srcdir=", "dstdir=", "email=", "transdir=", "import-po", "no-copytrans"])
         except getopt.GetoptError, err:
@@ -696,6 +702,8 @@ class FliesConsole:
         
         if opts:
             for o, a in opts:
+                if o =="-f":
+                    self.force = True
                 if o in ("--user-config"):
                     options['user_config'] = a                     
                 elif o in ("--url"):

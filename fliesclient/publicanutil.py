@@ -67,7 +67,8 @@ class PublicanUtility:
             #extensions_single_comment = [{'object-type':'comment','value':'test','space':'preserve'}]
             #extensions_pot_entry_header = [{"object-type":"pot-entry-header","context":"context","references":["fff"],"extractedComment":"extractedComment","flags":["java-format"]}]
 
-            extensions=[{"object-type":"pot-entry-header","context":"","references":reflist,"extractedComment":extracted_comment,"flags":flags}]
+            extensions=[{'object-type':'comment','value':extracted_comment,'space':'preserve'}, {"object-type":"pot-entry-header","context":"","references":reflist,"extractedComment":'',"flags":flags}]
+
             textflow = {'id': textflowId, 'lang':'en-US', 'content':entry.msgid, 'extensions':extensions, 'revision':1}
             textflows.append(textflow)
         return textflows
@@ -212,7 +213,7 @@ class PublicanUtility:
         
         potcontent = json.loads(pot)
         textflows = potcontent.get('textFlows')
-        
+                
         if potcontent.get('extensions'):
             extensions = potcontent.get('extensions')[0]
             po.header = extensions.get('comment')     
@@ -224,14 +225,22 @@ class PublicanUtility:
         for textflow in textflows:
             if textflow.get('extensions'):
                 poentry = polib.POEntry(occurrences=None)
-                extension = textflow.get('extensions')[0]
-                poentry.comment = extension.get('extractedComment')
-                #Check the references is not empty 
-                if extension.get('references')!=[u'']:
-                    poentry.occurrences = [tuple(item.split(':')) for item in extension.get('references')]
-                else:
-                    poentry.occurrences = None
-                poentry.flags = extension.get('flags')            
+                entry_list = textflow.get('extensions')
+                for entry in entry_list:
+                    if entry.get('object-type') == 'pot-entry-header':
+                        #PotEntryHeader
+                        #Check the references is not empty 
+                        if entry.get('references')!=[u'']:
+                            poentry.occurrences = [tuple(item.split(':')) for item in entry.get('references')]
+                        else:
+                            poentry.occurrences = None
+                        #print poentry.occurrences
+                        poentry.flags = entry.get('flags')  
+                    
+                    if entry.get('object-type') == 'comment':
+                        #SimpleComment
+                        poentry.comment = entry.get('value')
+                         
                 poentry.msgid = textflow.get('content')
                 po.append(poentry)
             else:
@@ -241,7 +250,7 @@ class PublicanUtility:
         if translations:
             content = json.loads(translations)
             targets = content.get('textFlowTargets')
-                
+                            
             """
             "extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
             """ 
@@ -257,6 +266,7 @@ class PublicanUtility:
                         message.msgstr = translation.get('content')
                    
         # finally save resulting po to outpath as lang/myfile.po
+       
         po.save()
         self.output.info("Writing po file to %s"%(path))
 
