@@ -90,13 +90,13 @@ class FliesConsole:
                   'list of commands:\n'
                   ' help                Display this help and exit\n'
                   ' list                List all available projects\n'
-                  ' project info         Retrieve a project\n'
-                  ' version info       Retrieve a iteration\n'
+                  ' project info        Show information about a project\n'
+                  ' version info        Show information about a version\n'
                   ' project create      Create a project\n'
-                  ' version create    Create a iteration of a project\n'   
+                  ' version create      Create a version within a project\n'
                   ' publican pull       Pull the content of publican file\n'
-                  ' publican push       Push the content of publican file to Flies Server\n'
-                  ' publican update     Update the translation of publican file to Flies Server\n')
+                  ' publican push       Push the content of publican file to Flies server\n'
+                  ' publican update     Update the translation of publican file to Flies server\n')
         else:
             command = args[0]
             sub = args[1:]
