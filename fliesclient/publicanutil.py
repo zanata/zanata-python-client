@@ -246,7 +246,7 @@ class PublicanUtility:
             # copy any other stuff you need to transfer
             for message in po:
                 for translation in targets:
-                    extensions=translation.get('extensions')
+                    extensions=translation.get('extensions')[0]
                     if extensions:
                         ext_type = extensions.get('object-type')
                         comment = extensions.get('comment')
