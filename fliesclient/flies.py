@@ -370,14 +370,14 @@ class FliesConsole:
                 lang = self.project_config['locale_map'][item]
             else:
                 lang = item
-            
-            locale_folder=trans_folder+'/'+item
+
+            locale_folder = os.path.join(trans_folder, item)
                              
             if not os.path.isdir(locale_folder):
                 self.output.error("Can not find translation, please specify path of the translation folder")
                 continue 
                             
-            po = locale_folder+'/'+filename+'.po'
+            po = os.path.join(locale_folder, filename+'.po')
                              
             try: 
                 body, filename = publicanutil.pofile_to_json(po)
@@ -558,8 +558,7 @@ class FliesConsole:
                 for file in filelist:
                     pot = ''
                     result = ''
-                    print ""                  
-                    self.output.info("Fetch the content of %s from Flies server: "%file)                    
+                    self.output.info("\nFetch the content of %s from Flies server: "%file)                    
                     
                     for item in list:
                         if item in self.project_config['locale_map']:
@@ -590,22 +589,21 @@ class FliesConsole:
                             continue 
                         
                         if options['dstdir']:
-                            outpath = options['dstdir']+'/'+item
+                            outpath = os.path.join(options['dstdir'], item)
                         else:
-                            outpath = os.getcwd()+'/'+item
+                            outpath = os.path.join(os.getcwd(), item)
 
                         if not os.path.isdir(outpath):
                             os.mkdir(outpath)  
 
-                        pofile = outpath+'/'+file+'.po'
+                        pofile = os.path.join(outpath, file+'.po')
   
                         try:
                             publicanutil.save_to_pofile(item, pofile, result, pot)
                         except InvalidPOTFileException, e:
                             self.output.error("Can't generate po file for %s,"%file+e.msg)
         else:
-            print ""
-            self.output.info("Fetch the content of %s from Flies server: "%args[0])
+            self.output.info("\nFetch the content of %s from Flies server: "%args[0])
             for item in list:
                 result = ''
                 pot = ''
@@ -635,16 +633,16 @@ class FliesConsole:
                 except BadRequestBodyException, e:
                     self.output.error(e.msg)
                     continue 
-
+                        
                 if options['dstdir']:
-                    outpath = options['dstdir']+'/'+item
+                    outpath = os.path.join(options['dstdir'], item)
                 else:
-                    outpath = os.getcwd()+'/'+item
+                    outpath = os.path.join(os.getcwd(), item)
 
                 if not os.path.isdir(outpath):
                     os.mkdir(outpath)  
 
-                pofile = outpath+'/'+args[0]+'.po'
+                pofile = os.path.join(outpath, args[0]+'.po')
                            
                 try:
                     publicanutil.save_to_pofile(item, pofile, result, pot)                    
