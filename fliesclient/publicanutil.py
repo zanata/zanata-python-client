@@ -86,6 +86,7 @@ class PublicanUtility:
             m = hashlib.md5()
             m.update(entry.msgid.encode('utf-8'))
             textflowId = m.hexdigest()
+            comment = entry.comment
             
             if entry.msgstr:
                 state = "Approved"
@@ -94,7 +95,7 @@ class PublicanUtility:
             #need judge for fuzzy state
             
             #create extensions
-            extensions = [{"object-type":"comment","value":"testcomment","space":"preserve"}]
+            extensions = [{"object-type":"comment","value":comment,"space":"preserve"}]
             
             # {"resId":"782f49c4e93c32403ba0b51821b38b90","state":"Approved","translator":{"email":"id","name":"name"},"content":"title:
             # ttff","extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]}
@@ -106,9 +107,10 @@ class PublicanUtility:
         
         return textflowtargets
 
-    def create_extensions(self, pofile):
+    def create_extensions(self, pofile, type):
         """
         "extensions":[{"object-type":"po-header","comment":"comment_value", "entries":[{"key":"h1","value":"v1"}]}]
+        "extensions":[{"object-type":"po-target-header", "comment":"comment_value", "entries":[{"key":"ht","value":"vt1"}]}]
         """
         entries = []
         list = pofile.ordered_metadata()
@@ -116,7 +118,7 @@ class PublicanUtility:
             entry = {"key":item[0], "value":item[1]}
             entries.append(entry)
        
-        extensions = [{"object-type":"po-header","comment":pofile.header, "entries":entries}]
+        extensions = [{"object-type":type,"comment":pofile.header, "entries":entries}]
         return extensions
 
     def create_pofile(self, path):
@@ -180,7 +182,7 @@ class PublicanUtility:
         filename, path  = self.strip_path(filepath)
         pofile = self.create_pofile(path)
         textflows = self.create_txtflow(pofile)
-        extensions = self.create_extensions(pofile)
+        extensions = self.create_extensions(pofile, "po-header")
         items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en-US', 'extensions':extensions, 'textFlows':textflows}
          
         return json.dumps(items), filename
@@ -194,8 +196,8 @@ class PublicanUtility:
         pofile = self.create_pofile(path)
         textflowtargets = self.create_txtflowtarget(pofile)
         #the function for extensions have not implemented yet
-        
-        items = {'links':[],'extensions':[], 'textFlowTargets':textflowtargets}
+        extensions = self.create_extensions(pofile, "po-target-header")
+        items = {'links':[],'extensions':extensions, 'textFlowTargets':textflowtargets}
         return json.dumps(items), filename
 
     def save_to_pofile(self, lang, path, translations, pot):
@@ -246,7 +248,7 @@ class PublicanUtility:
             # copy any other stuff you need to transfer
             for message in po:
                 for translation in targets:
-                    extensions=translation.get('extensions')
+                    extensions=translation.get('extensions')[0]
                     if extensions:
                         ext_type = extensions.get('object-type')
                         comment = extensions.get('comment')
