@@ -147,21 +147,43 @@ class FliesConsole:
                ' --url address of the Flies server, eg http://example.com/flies')
     
     def _projec_info_help(self):
-	    print ('flies project info [OPTIONS]')
+	    print ('flies project info [OPTIONS]\n'
+               'show infomation about a project\n'
+               'options:\n'
+               '--project-id: project id')
 
     def _project_create_help(self):
-        print ('flies project create [PROJECT_ID] [OPTIONS]') 
+        print ('flies project create [PROJECT_ID] [OPTIONS]\n'
+               'create a project\n'
+               'options:\n'
+               '--username: user name\n'
+               '--apikey: api key of user\n'
+               '--project-name: project name\n'
+               '--project-desc: project description')
 
     def _iteration_info_help(self):
-	    print ('flies version info [OPTIONS]')
+	    print ('flies version info [OPTIONS]\n'
+               'show infomation about a version\n'
+               'options:\n'
+               '--project-id: project id\n'
+               '--project-version: id of project version')
 
     def _iteration_create_help(self):
-        print ('flies version create [VERSION_ID] [OPTIONS]')
+        print ('flies version create [VERSION_ID] [OPTIONS]\n'
+               'create a version\n'
+               'options:\n'
+               '--username: user name\n'
+               '--apikey: api key of user\n'
+               '--project-id: id of the project\n'
+               '--version-name: version name\n'
+               '--version-desc: version description')
 
     def _publican_push_help(self):
         print ('flies publican push [OPTIONS] {documents}\n'
                'push the publican files to flies server\n'
                'options:\n'
+               '--username: user name\n'
+               '--apikey: api key of user\n'
                '--project-id: id of the project\n'
                '--version-id: id of the version\n'
                '--srcdir: the full path of the pot folder\n'
@@ -173,9 +195,12 @@ class FliesConsole:
         print ('flies publican pull [OPTIONS] {documents} {lang}\n'
                'retrieve the publican files from flies server\n'
                'options:\n'
+               '--username: user name\n'
+               '--apikey: api key of user\n'
                '--project-id: id of the project\n'
                '--version-id: id of the version\n'
-               '--dstdir: the path of the folder for saving the po files')
+               '--dstdir: the path of the folder for saving the po files\n'
+               '--lang: language list')
               
     def _list_projects(self):
         """
@@ -272,7 +297,7 @@ class FliesConsole:
             p = Project(item)
             result = flies.projects.create(p)
             if result == "Success":
-                print "[INFO] Success create the project"
+                self.log.info("Success create the project: %s"%args[0])
         except NoSuchProjectException, e:
             self.log.error(e.msg) 
         except UnAuthorizedException, e:
@@ -295,7 +320,7 @@ class FliesConsole:
         
         if options['project_id']:
             project_id =  options['project_id'] 
-        elif project_config['project_id']:
+        elif self.project_config['project_id']:
             project_id = self.project_config['project_id']
         else:
             self.log.error("Please provide PROJECT_ID by --project-id option or using flies.xml")
