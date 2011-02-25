@@ -36,7 +36,7 @@ from flieslib import *
 
 class PublicanUtility:
     def __init__(self):
-        self.output = Logger()
+        self.log = Logger()
 
     def get_potheader(self, entry):
         extracted_comment = entry.comment
@@ -130,7 +130,7 @@ class PublicanUtility:
         try:
             po = polib.pofile(path)
         except Exception:
-            self.output.error("Can not processing the po file")
+            self.log.error("Can not processing the po file")
             sys.exit()
 
         return po
@@ -268,6 +268,6 @@ class PublicanUtility:
         # finally save resulting po to outpath as lang/myfile.po
        
         po.save()
-        self.output.info("Writing po file to %s"%(path))
+        self.log.info("Writing po file to %s"%(path))
 
         

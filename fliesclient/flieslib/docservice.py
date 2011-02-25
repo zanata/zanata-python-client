@@ -33,12 +33,10 @@ except ImportError:
 import sys
 from rest.client import RestClient
 from error import *
-from outpututil import Logger
 
 class DocumentService:    
     def __init__(self, projects):
         self.projects = projects
-        self.output = Logger()
     
     def get_file_list(self, projectid, iterationid):
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid, iterationid))
