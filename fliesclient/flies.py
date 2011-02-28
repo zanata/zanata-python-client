@@ -475,7 +475,11 @@ class FliesConsole:
         self.log.info("POT directory (originals):%s"%tmlfolder)
                 
         #Get the file list of this version of project
-        filelist = flies.documents.get_file_list(project_id, iteration_id)
+        try:
+            filelist = flies.documents.get_file_list(project_id, iteration_id)
+        except Exception, e:
+            self.log.error(e.msg)
+            sys.exit()
 
         if filelist:
             #Give an option to user for keep or delete the content
@@ -494,8 +498,12 @@ class FliesConsole:
 
         for file in filelist:
             self.log.info("Delete the %s"%file)
-            flies.documents.delete_template(project_id, iteration_id, file)
-                
+            try:
+                flies.documents.delete_template(project_id, iteration_id, file)
+            except Exception, e:
+                self.log.error(e.msg)
+                sys.exit()
+
         publicanutil = PublicanUtility()
         #if file not specified, push all the files in pot folder to flies server
         if not args:

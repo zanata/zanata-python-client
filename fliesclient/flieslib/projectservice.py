@@ -104,7 +104,7 @@ class ProjectService:
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', content)
         elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', content)
+            raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
             raise BadRequestException('Error 400', content)
                     
@@ -163,7 +163,7 @@ class IterationService:
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', content)
         elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', content)
+            raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
             
     def delete(self):
         pass

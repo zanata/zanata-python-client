@@ -58,7 +58,7 @@ class DocumentService:
         if res['status'] == '201' or res['status'] == '200':
             return True
         elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
+            raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
             raise BadRequestBodyException('Error 400', 'Unable to read request body.')
         elif res['status'] == '409':
@@ -84,7 +84,7 @@ class DocumentService:
         if res['status'] == '201':
             return True
         elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
+            raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
             raise BadRequestBodyException('Error 400', content)
         elif res['status'] == '409':
@@ -96,13 +96,13 @@ class DocumentService:
         headers['X-Auth-Token'] = self.projects.apikey    
         
         res, content = self.projects.restclient.request_delete('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file), headers=headers)
-        
+         
         if res['status'] == '200' or res['status'] == '304':
             return content
         elif res['status'] == '404':
             raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')
         elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation') 
+            raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey') 
     
     def retrieve_template(self, projectid, iterationid, file):
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file))
@@ -112,7 +112,7 @@ class DocumentService:
         elif res['status'] == '404':
             raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')
         elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')        
+            raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')       
 
     def retrieve_translation(self, lang, projectid, iterationid, file):
         """
@@ -132,7 +132,7 @@ class DocumentService:
         elif res['status'] == '404':
             raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')
         elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
+            raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
             raise BadRequestBodyException('Error 400', content)
   
@@ -146,7 +146,7 @@ class DocumentService:
         if res['status'] == '200':
             return True
         elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 'UnAuthorized Operation')
+            raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
             raise BadRequestBodyException('Error 400', content)
       
