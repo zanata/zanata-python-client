@@ -185,7 +185,7 @@ class FliesConsole:
                '--username: user name\n'
                '--apikey: api key of user\n'
                '--project-id: id of the project\n'
-               '--version-id: id of the version\n'
+               '--project-version: id of the version\n'
                '--srcdir: the full path of the pot folder\n'
                '--transdir: the full path of the folder that contain locale folders\n'
                '--import-po: push the translation at the same time\n'
@@ -198,7 +198,7 @@ class FliesConsole:
                '--username: user name\n'
                '--apikey: api key of user\n'
                '--project-id: id of the project\n'
-               '--version-id: id of the version\n'
+               '--project-version: id of the version\n'
                '--dstdir: the path of the folder for saving the po files\n'
                '--lang: language list')
               
@@ -372,6 +372,12 @@ class FliesConsole:
         self.log.info("Project: %s"%project_id)
         self.log.info("Version: %s"%iteration_id)
         self.log.info("Username: %s"%self.user_name)
+
+        try:
+            fliesclient.projects.get(project_id)
+        except NoSuchProjectException, e:
+            self.log.error(e.msg)
+            sys.exit()
    
         try:
             fliesclient.projects.iterations.get(project_id, iteration_id)
@@ -380,7 +386,14 @@ class FliesConsole:
             self.log.error(e.msg)
             sys.exit()
 
+    def search_file(self, path, filename):
+        for root, dirs, names in os.walk(path):
+            if filename in names:
+                return os.path.join(root, filename)
+        raise NoSuchFileException('Error 404', 'File %s not found'%filename)
+
     def import_po(self, publicanutil, trans_folder, flies, project_id, iteration_id, filename):
+        
         if options['lang']:
             lang_list = options['lang'].split(',')
         elif self.project_config['locale_map']:
@@ -401,24 +414,32 @@ class FliesConsole:
                              
             if not os.path.isdir(locale_folder):
                 self.log.error("Can not find translation, please specify path of the translation folder")
-                continue 
-                            
-            po = os.path.join(locale_folder, filename+'.po')
-                             
-            try: 
-                body, filename = publicanutil.pofile_to_json(po)
+                continue
+
+            if '/' not in filename:
+                pofile_name = filename+'.po'
+                request_name = filename
+            else:
+                name = filename.split('/')[1]
+                pofile_name = name+'.po'
+                request_name = filename.replace('/', ',')
+
+            try:
+                pofile_full_path = self.search_file(locale_folder, pofile_name)
             except NoSuchFileException, e:
                 self.log.error(e.msg)
                 continue
+             
+            body = publicanutil.pofile_to_json(pofile_full_path)
 
             if not body:
-                self.log.error("No content or all the entry is obsolete in %s"%filename)
+                self.log.error("No content or all the entry is obsolete in %s"%pofile_name)
                 continue
-                        
+         
             try:
-                result = flies.documents.commit_translation(project_id, iteration_id, filename, lang, body)
+                result = flies.documents.commit_translation(project_id, iteration_id, request_name, lang, body)
                 if result:
-                    self.log.info("Successfully pushed translation %s to the Flies server"%po) 
+                    self.log.info("Successfully pushed translation %s to the Flies server"%pofile_full_path) 
                 else:
                     self.log.error("Commit translation is not successful")
             except UnAuthorizedException, e:
@@ -428,9 +449,14 @@ class FliesConsole:
                 self.log.error(e.msg)
                 continue
 
-    def update_template(self, project_id, iteration_id, filename, body):
+    def update_template(self, flies, project_id, iteration_id, filename, body):
+        if '/' in filename:
+            request_name = filename.replace('/', ',')
+        else:
+            request_name = filename
+        
         try:
-            result = flies.documents.update_template(project_id, iteration_id, filename, body, options['copytrans'])
+            result = flies.documents.update_template(project_id, iteration_id, request_name, body, options['copytrans'])
             if result:
                 self.log.info("Successfully updated template %s on the Flies server"%filename)
         except BadRequestBodyException, e:
@@ -466,7 +492,7 @@ class FliesConsole:
         if options['srcdir']:
             tmlfolder = options['srcdir']
         else:
-            tmlfolder = os.getcwd()
+            tmlfolder = os.path.join(os.getcwd(), 'pot')
         
         if not os.path.isdir(tmlfolder):
             self.log.error("Can not find source folder, please specify the source folder by '--srcdir' option")
@@ -485,31 +511,39 @@ class FliesConsole:
             #Give an option to user for keep or delete the content
             self.log.info("This will overwrite/delete any existing documents on the server.")
             
-        if not self.force:
-            while True:
-                option = raw_input("Are you sure (y/n)?")
-                if option.lower() == "yes" or option.lower() == "y":
-                    break    
-                elif option.lower() == "no" or option.lower() == "n":
-                    self.log.info("Stop processing, keep the content on the flies server")
-                    sys.exit()
-                else:
-                    self.log.error("Please enter yes(y) or no(n)")
+            if not self.force:
+                while True:
+                    option = raw_input("Are you sure (y/n)?")
+                    if option.lower() == "yes" or option.lower() == "y":
+                        break    
+                    elif option.lower() == "no" or option.lower() == "n":
+                        self.log.info("Stop processing, keep the content on the flies server")
+                        sys.exit()
+                    else:
+                        self.log.error("Please enter yes(y) or no(n)")
 
-        for file in filelist:
-            self.log.info("Delete the %s"%file)
-            try:
-                flies.documents.delete_template(project_id, iteration_id, file)
-            except Exception, e:
-                self.log.error(e.msg)
-                sys.exit()
+            for file in filelist:
+                if ',' in file: 
+                    folder, name = file.split(',')
+                    filename = folder+'\,'+name
+                elif '/' in file:
+                    folder, name = file.split('/')
+                    filename = folder+'\/'+name
+                
+                self.log.info("Delete the %s"%file)
+                
+                try:
+                    flies.documents.delete_template(project_id, iteration_id, filename)
+                except Exception, e:
+                    self.log.error(e)
+                    sys.exit()
 
         publicanutil = PublicanUtility()
         #if file not specified, push all the files in pot folder to flies server
         if not args:
             #get all the pot files from the template folder 
             pot_list = publicanutil.get_file_list(tmlfolder, ".pot")
-            
+
             if not pot_list:
                 self.log.error("The template folder is empty")
                 sys.exit()
@@ -517,11 +551,7 @@ class FliesConsole:
             for pot in pot_list:
                 self.log.info("\nPush the content of %s to Flies server:"%pot)
                     
-                try:
-                    body, filename = publicanutil.potfile_to_json(pot)
-                except NoSuchFileException, e:
-                    self.log.error(e.msg)
-                    continue 
+                body, filename = publicanutil.potfile_to_json(pot, tmlfolder)
                                           
                 try:
                     result = flies.documents.commit_template(project_id, iteration_id, body, options['copytrans'])
@@ -534,19 +564,22 @@ class FliesConsole:
                     self.log.error(e.msg)
                     continue
                 except SameNameDocumentException, e:
-                    self.update_template(project_id, iteration_id, filename, body)
+                    self.update_template(flies, project_id, iteration_id, filename, body)
 
                 if options['importpo']:
-                        self.import_po(publicanutil, trans_folder, flies, project_id, iteration_id, filename)
+                    self.import_po(publicanutil, trans_folder, flies, project_id, iteration_id, filename)
             
         else:
             self.log.info("\nPush the content of %s to Flies server:"%args[0])
+
             try:
-                body, filename = publicanutil.potfile_to_json(args[0])
+                full_path = self.search_file(tmlfolder, args[0])
             except NoSuchFileException, e:
                 self.log.error(e.msg)
                 sys.exit()
-             
+                        
+            body, filename = publicanutil.potfile_to_json(full_path, tmlfolder)
+            
             try:
                 result = flies.documents.commit_template(project_id, iteration_id, body, options['copytrans'])                
                 if result:
@@ -585,18 +618,29 @@ class FliesConsole:
 
         project_id, iteration_id = self.check_project(flies)
         
+        #list the files in project
+        try:
+            filelist = flies.documents.get_file_list(project_id, iteration_id)
+        except Exception, e:
+            self.log.error(e.msg)
+            sys.exit()
+
         publicanutil = PublicanUtility()
         
         #if file no specified, retrieve all the files of project
         if not args:
-            #list the files in project
-            filelist = flies.documents.get_file_list(project_id, iteration_id)
-                        
             if filelist:
                 for file in filelist:
                     pot = ''
                     result = ''
-                    self.log.info("\nFetch the content of %s from Flies server: "%file)                    
+                    folder = ''
+
+                    if '/' in file: 
+                        folder, name = file.split('/')
+                    else:
+                        name = file
+
+                    self.log.info("\nFetch the content of %s from Flies server: "%name)                    
                     
                     for item in list:
                         if item in self.project_config['locale_map']:
@@ -604,56 +648,94 @@ class FliesConsole:
                         else:
                             lang = item
                         
-                        self.log.info("Retrieve %s translation from Flies server:"%item)
-
-                        try:
-                            pot = flies.documents.retrieve_template(project_id, iteration_id, file)                    
-                        except UnAuthorizedException, e:
-                            self.log.error(e.msg)
-                            break
-                        except UnAvaliableResourceException, e:
-                            self.log.error("Can't find pot file for %s on Flies server"%file)
-                            break
-                
-                        try:
-                            result = flies.documents.retrieve_translation(lang, project_id, iteration_id, file)
-                        except UnAuthorizedException, e:
-                            self.log.error(e.msg)                        
-                            break
-                        except UnAvaliableResourceException, e:
-                            self.log.info("There is no %s translation for %s"%(item, file))
-                        except BadRequestBodyException, e:
-                            self.log.error(e.msg)
-                            continue 
-                        
                         if options['dstdir']:
                             outpath = os.path.join(options['dstdir'], item)
                         else:
                             outpath = os.path.join(os.getcwd(), item)
-
+                        
                         if not os.path.isdir(outpath):
-                            os.mkdir(outpath)  
+                            os.mkdir(outpath)                        
 
-                        pofile = os.path.join(outpath, file+'.po')
+                        self.log.info("Retrieve %s translation from Flies server:"%item)
+
+                        request_name = file.replace('/', ',')
+
+                        try:
+                            pot = flies.documents.retrieve_template(project_id, iteration_id, request_name)                    
+                        except UnAuthorizedException, e:
+                            self.log.error(e.msg)
+                            break
+                        except UnAvaliableResourceException, e:
+                            self.log.error("Can't find pot file for %s on Flies server"%name)
+                            break
+                
+                        try:
+                            result = flies.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
+                        except UnAuthorizedException, e:
+                            self.log.error(e.msg)                        
+                            break
+                        except UnAvaliableResourceException, e:
+                            self.log.info("There is no %s translation for %s"%(item, name))
+                        except BadRequestBodyException, e:
+                            self.log.error(e.msg)
+                            continue 
+                        
+                        if folder:
+                            subdirectory = os.path.join(outpath, folder)
+                            if not os.path.isdir(subdirectory):
+                                os.mkdir(subdirectory)
+                            pofile = os.path.join(subdirectory, name+'.po') 
+                        else:
+                            pofile = os.path.join(outpath, name+'.po')
   
                         try:
-                            publicanutil.save_to_pofile(item, pofile, result, pot)
+                            publicanutil.save_to_pofile(pofile, result, pot)
                         except InvalidPOTFileException, e:
-                            self.log.error("Can't generate po file for %s,"%file+e.msg)
+                            self.log.error("Can't generate po file for %s,"%name+e.msg)
         else:
             self.log.info("\nFetch the content of %s from Flies server: "%args[0])
             for item in list:
                 result = ''
                 pot = ''
+                folder = ''
+
                 if item in self.project_config['locale_map']:
                     lang = self.project_config['locale_map'][item]
                 else:
                     lang = item
+                
+                if options['dstdir']:
+                    outpath = os.path.join(options['dstdir'], item)
+                else:
+                    outpath = os.path.join(os.getcwd(), item)
+
+                if not os.path.isdir(outpath):
+                    os.mkdir(outpath)
 
                 self.log.info("Retrieve %s translation from Flies server:"%item)
 
+                for file in filelist:
+                    if '/' in file: 
+                        folder, name = file.split('/')
+                        if args[0] == name:
+                            request_name = file.replace('/', ',')
+                            outpath = os.path.join(outpath, folder)   
+                            if not os.path.isdir(outpath):
+                                os.mkdir(outpath)
+                            break
+                    else:
+                        if args[0] == file:
+                            request_name = file
+                            break
+                
+                if not request_name:
+                    self.log.error("Can't find pot file for %s on Flies server"%args[0])
+                    sys.exit()
+
+                pofile = os.path.join(outpath, args[0]+'.po')
+                                          
                 try:
-                    pot = flies.documents.retrieve_template(project_id, iteration_id, args[0])                    
+                    pot = flies.documents.retrieve_template(project_id, iteration_id, request_name)                    
                 except UnAuthorizedException, e:
                     self.log.error(e.msg)
                     sys.exit()
@@ -662,7 +744,7 @@ class FliesConsole:
                     sys.exit()
 
                 try:            
-                    result = flies.documents.retrieve_translation(lang, project_id, iteration_id, args[0])
+                    result = flies.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
                 except UnAuthorizedException, e:
                     self.log.error(e.expr, e.msg)
                     sys.exit()
@@ -671,19 +753,9 @@ class FliesConsole:
                 except BadRequestBodyException, e:
                     self.log.error(e.msg)
                     continue 
-                        
-                if options['dstdir']:
-                    outpath = os.path.join(options['dstdir'], item)
-                else:
-                    outpath = os.path.join(os.getcwd(), item)
-
-                if not os.path.isdir(outpath):
-                    os.mkdir(outpath)  
-
-                pofile = os.path.join(outpath, args[0]+'.po')
-                           
+      
                 try:
-                    publicanutil.save_to_pofile(item, pofile, result, pot)                    
+                    publicanutil.save_to_pofile(pofile, result, pot)                    
                 except InvalidPOTFileException, e:
                     self.log.error("Can't generate po file for %s,"%args[0]+e.msg)
                     

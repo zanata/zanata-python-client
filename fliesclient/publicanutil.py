@@ -156,36 +156,29 @@ class PublicanUtility:
         else:
             return False 
 
-    def strip_path(self, filepath):
-        if '/' in filepath:
-            file = filepath.split('/')[-1]
-            path = filepath
-        else:
-            file = filepath
-            path = os.path.join(os.getcwd(), file)
+    def strip_path(self, full_path, root_path):
+        if root_path[-1] != "/":
+            root_path = root_path+'/'
 
-        if '.' in file:
+        filename = full_path.split(root_path)[1]
+
+        if '.' in filename:
             # Strip the file name
-            filename = file.split('.')[0]
-        else:
-            filename = file
-        
-        if not os.path.isfile(path):
-            raise NoSuchFileException('Error', 'The file %s does not exist'%file)
+            filename = filename.split('.')[0]
 
-        return filename, path
+        return filename
 
-    def potfile_to_json(self, filepath):
+    def potfile_to_json(self, filepath, root_path):
         """
         Parse the pot file, create the request body
         @param filepath: the path of the pot file
         """
-        filename, path  = self.strip_path(filepath)
-        pofile = self.create_pofile(path)
+        filename = self.strip_path(filepath, root_path)
+        pofile = self.create_pofile(filepath)
         textflows = self.create_txtflow(pofile)
         extensions = self.create_extensions(pofile, "po-header")
         items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en-US', 'extensions':extensions, 'textFlows':textflows}
-         
+        
         return json.dumps(items), filename
 
     def pofile_to_json(self, filepath):
@@ -193,18 +186,17 @@ class PublicanUtility:
         Parse the po file, create the request body
         @param filepath: the path of the po file
         """
-        filename, path  = self.strip_path(filepath)
-        pofile = self.create_pofile(path)
+        pofile = self.create_pofile(filepath)
         textflowtargets = self.create_txtflowtarget(pofile)
         #the function for extensions have not implemented yet
         extensions = self.create_extensions(pofile, "po-target-header")
         items = {'links':[],'extensions':extensions, 'textFlowTargets':textflowtargets}
-        return json.dumps(items), filename
+        
+        return json.dumps(items)
 
-    def save_to_pofile(self, lang, path, translations, pot):
+    def save_to_pofile(self, path, translations, pot):
         """
         Save PO file to path, based on json objects of pot and translations 
-        @param lang: language 
         @param translations: the json object of the content retrieved from server
         @param path: the po folder for output
         @param pot: the json object of the pot retrieved from server
