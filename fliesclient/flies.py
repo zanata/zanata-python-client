@@ -75,10 +75,15 @@ class FliesConsole:
         
     def _print_usage(self):
         print ('\nClient for talking to a Flies Server\n\n'
-               'basic commands:\n\n'
-               'list             List all available projects\n'
-               'project info      Retrieve a project\n'
-               'version info    Retrieve a iteration\n\n'
+               'Usage: flies <command> [COMMANDOPTION]...\n\n'
+               'list of commands:\n'
+               ' list                List all available projects\n'
+               ' project info        Show information about a project\n'
+               ' version info        Show information about a version\n'
+               ' project create      Create a project\n'
+               ' version create      Create a version within a project\n'
+               ' publican pull       Pull the content of publican file\n'
+               ' publican push       Push the content of publican file to Flies server\n'
                "Use 'flies help' for the full list of commands")
 
     def _print_help_info(self, args):
@@ -862,12 +867,13 @@ class FliesConsole:
                 #If the option is not valid, try to read the project configuration from current path
                 self.log.info("Loading flies project config from from %s"%(os.getcwd()+'/flies.xml'))
                 self.project_config = config.read_project_config(os.getcwd()+'/flies.xml')            
-            else:
+            elif command != 'list':                
                 self.log.error("Can not find flies.xml, please specify the path of flies.xml")
                 sys.exit()
 
             #process the url of server
-            self.url = self.project_config['project_url']
+            if self.project_config:
+                self.url = self.project_config['project_url']
             
             #The value in options will overwrite the value in project-config file 
             if options['url']:
