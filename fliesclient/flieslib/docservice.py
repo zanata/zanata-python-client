@@ -94,7 +94,7 @@ class DocumentService:
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey    
-        
+       
         res, content = self.projects.restclient.request_delete('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file), headers=headers)
          
         if res['status'] == '200' or res['status'] == '304':

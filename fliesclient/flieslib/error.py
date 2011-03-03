@@ -34,6 +34,9 @@ class FliesException(Exception):
         self.expr = expr
         self.msg = msg
 
+    def __str__ (self):
+        return self.msg
+
 class InternalServerError(FliesException):
     pass
 

@@ -509,7 +509,7 @@ class FliesConsole:
         try:
             filelist = flies.documents.get_file_list(project_id, iteration_id)
         except Exception, e:
-            self.log.error(e.msg)
+            self.log.error(str(e))
             sys.exit()
 
         if filelist:
@@ -534,13 +534,15 @@ class FliesConsole:
                 elif '/' in file:
                     folder, name = file.split('/')
                     filename = folder+'\/'+name
-                
+                else:
+                    filename = file
+
                 self.log.info("Delete the %s"%file)
-                
+                 
                 try:
                     flies.documents.delete_template(project_id, iteration_id, filename)
                 except Exception, e:
-                    self.log.error(e)
+                    self.log.error(str(e))
                     sys.exit()
 
         publicanutil = PublicanUtility()
@@ -627,7 +629,7 @@ class FliesConsole:
         try:
             filelist = flies.documents.get_file_list(project_id, iteration_id)
         except Exception, e:
-            self.log.error(e.msg)
+            self.log.error(str(e))
             sys.exit()
 
         publicanutil = PublicanUtility()
@@ -751,7 +753,7 @@ class FliesConsole:
                 try:            
                     result = flies.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
                 except UnAuthorizedException, e:
-                    self.log.error(e.expr, e.msg)
+                    self.log.error(e.msg)
                     sys.exit()
                 except UnAvaliableResourceException, e:
                     self.log.info("There is no %s translation for %s"%(item, args[0]))
