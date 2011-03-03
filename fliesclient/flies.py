@@ -915,10 +915,10 @@ class FliesConsole:
             #The value in commandline options will overwrite the value in user-config file          
             if options['user_name']:
                 self.user_name = options['user_name']
-
+            
             if options['key']:
                 self.apikey = options['key']
-            
+           
             #Retrieve the version of the Flies server 
             version = VersionService(self.url)
             

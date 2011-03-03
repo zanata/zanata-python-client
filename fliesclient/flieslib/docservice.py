@@ -106,6 +106,9 @@ class DocumentService:
     
     def retrieve_template(self, projectid, iterationid, file):
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file))
+        headers = {}
+        headers['X-Auth-User'] = self.projects.username
+        headers['X-Auth-Token'] = self.projects.apikey 
         
         if res['status'] == '200' or res['status'] == '304':
             return content
@@ -125,6 +128,10 @@ class DocumentService:
         @raise UnAvaliableResourceException:
         @raise UnAuthorizedException: 
         """
+        headers = {}
+        headers['X-Auth-User'] = self.projects.username
+        headers['X-Auth-Token'] = self.projects.apikey 
+
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file, lang))
                 
         if res['status'] == '200' or res['status'] == '304':
