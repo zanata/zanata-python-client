@@ -100,7 +100,7 @@ class ProjectService:
         if res['status'] == '201':
             return "Success"
         elif res['status'] == '200':
-            raise ProjectExistException('Status 200', content)
+            raise ProjectExistException('Status 200', "The project is already exist on server")
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', content)
         elif res['status'] == '401':
@@ -159,7 +159,7 @@ class IterationService:
         if res['status'] == '201':
             return "Success"
         elif res['status'] == '200':
-            raise ProjectExistException('Status 200', content)
+            raise ProjectExistException('Status 200', "The version is already exist on server")
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', content)
         elif res['status'] == '401':

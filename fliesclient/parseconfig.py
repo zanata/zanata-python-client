@@ -31,10 +31,9 @@ project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'loca
 
 class FliesConfig:
      def set_userconfig(self, path):
-        userconfig = path
         self.configparser = ConfigParser.ConfigParser()
-        self._config = self.configparser.read([userconfig, os.path.expanduser(userconfig)])
-     
+        self._config = self.configparser.read(['flies.ini', path])
+
      def get_server(self, url):
         if self._config:
             try:
@@ -50,22 +49,19 @@ class FliesConfig:
                         server = item[0][:-4]
                 return server
             except ConfigParser.NoOptionError, NoSectionError:
-                return None
+                raise
         else:
             return None       
              
-     def get_value(self, name, section, server):
+     def get_config_value(self, name, section, server):
         if self._config:
             try:
-                value = self.configparser.get('servers', server+'.'+name)
+                value = self.configparser.get(section, server+'.'+name)
                 return value
             except ConfigParser.NoOptionError, NoSectionError:
-                return None
+                raise
         else:
             return None
-     
-     def get_config_value(self, name, server):
-         return self.get_value(name, 'defaults', server) 
 
      def read_project_config(self, filename):
         project_config={'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}

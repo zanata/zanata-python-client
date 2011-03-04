@@ -889,28 +889,31 @@ class FliesConsole:
             if self.url[-1] == "/":
                 self.url = self.url[:-1]
            
-            #Try to find user-config file
+            
+            #Try to read user-config file
+            user_config = ''
             if options['user_config'] and os.path.isfile(options['user_config']):  
                 user_config = options['user_config']
             elif os.path.isfile(os.path.expanduser("~")+'/.config/flies.ini'):
                 user_config = os.path.expanduser("~")+'/.config/flies.ini'
-            else:    
-                self.log.error("Can not find user-config file in home folder or in 'user-config' option")
-                sys.exit()
-
-            self.log.info("Loading flies user config from %s"%user_config)
-            self.log.info("Flies server: %s"%self.url) 
-
-            #Read the user-config file    
-            config.set_userconfig(user_config)
-    	    server = config.get_server(self.url)
             
-            if server:
-                self.user_name = config.get_config_value("username", server)
-    	        self.apikey = config.get_config_value("key", server)
-            else:
-                self.log.error("Can not find the definition of server from user-config file")
-                sys.exit()
+            if user_config:
+                self.log.info("Loading flies user config from %s"%user_config)
+                
+                #Read the user-config file    
+                config.set_userconfig(user_config)
+
+                try:
+                    server = config.get_server(self.url)
+                    if server:
+                        self.user_name = config.get_config_value("username", "servers", server)
+    	                self.apikey = config.get_config_value("key", "servers", server)
+                except Exception, e:
+                    self.log.info("Processing user-config file:%s"%str(e))
+            else:    
+                self.log.info("Can not find user-config file in home folder or in 'user-config' option")
+            
+            self.log.info("Flies server: %s"%self.url) 
             
             #The value in commandline options will overwrite the value in user-config file          
             if options['user_name']:
