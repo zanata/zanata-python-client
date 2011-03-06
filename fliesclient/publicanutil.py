@@ -221,9 +221,19 @@ class PublicanUtility:
                 for entry in entry_list:
                     if entry.get('object-type') == 'pot-entry-header':
                         #PotEntryHeader
-                        #Check the references is not empty 
+                        #Check the references is not empty
                         if entry.get('references')!=[u'']:
-                            poentry.occurrences = [tuple(item.split(':')) for item in entry.get('references')]
+                            for item in entry.get('references'):
+                                #in some cases, entry contains more than one reference
+                                if ' ' in item:
+                                    list = item.split(' ')
+                                    ref_list = []
+                                    for i in list:
+                                        ref = tuple(i.split(':'))
+                                        ref_list.append(ref)
+                                    poentry.occurrences= ref_list 
+                                else:
+                                    poentry.occurrences = [tuple(item.split(':'))]
                         else:
                             poentry.occurrences = None
                         #print poentry.occurrences

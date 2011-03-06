@@ -25,6 +25,7 @@ __all__ = (
 
 import ConfigParser
 import os.path
+from flieslib.outpututil import Logger
 from xml.dom import minidom 
 
 project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}
@@ -33,7 +34,7 @@ class FliesConfig:
      def set_userconfig(self, path):
         self.configparser = ConfigParser.ConfigParser()
         self._config = self.configparser.read(['flies.ini', path])
-
+        
      def get_server(self, url):
         if self._config:
             try:
@@ -64,7 +65,12 @@ class FliesConfig:
             return None
 
      def read_project_config(self, filename):
+        log = Logger()
         project_config={'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}
+        if os.path.getsize(filename) == 0:
+            log.info('The project xml: flies.xml is empty, need command line options')
+            return project_config
+
         xmldoc = minidom.parse(filename)
 
         #Read the project url

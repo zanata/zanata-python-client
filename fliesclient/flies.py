@@ -367,7 +367,7 @@ class FliesConsole:
             iteration_id = self.project_config['project_version']
 
         if not project_id:
-            self.log.error("Please provide valid project id by flies.xml or by '--project' option")
+            self.log.error("Please provide valid project id by flies.xml or by '--project-id' option")
             sys.exit()
         
         if not iteration_id:
@@ -911,7 +911,7 @@ class FliesConsole:
                 except Exception, e:
                     self.log.info("Processing user-config file:%s"%str(e))
             else:    
-                self.log.info("Can not find user-config file in home folder or in 'user-config' option")
+                self.log.info("Can not find user-config file in home folder, current path or path in 'user-config' option")
             
             self.log.info("Flies server: %s"%self.url) 
             
