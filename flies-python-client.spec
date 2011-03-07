@@ -43,6 +43,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 
 %changelog
+* Mon Mar 07 2011 James Ni <jni@redhat.com> - 0.8.0
+- Stable release
+
 * Wed Feb 23 2011 James Ni <jni@redhat.com> - 0.7.6-1
 - Rename the command line option, add a Logger class for better output, set copytrans default value to true, make the
   extensions to a list of gettext and comment. 
