@@ -69,7 +69,7 @@ class FliesConsole:
         self.user_name = ''
         self.apikey = ''
         self.user_config = ''
-        self.project_config = ''
+        self.project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}
         self.force = False
         self.log = Logger()
         
@@ -112,11 +112,11 @@ class FliesConsole:
                         if sub[0] in sub_command[command]:
                             command = command+'_'+sub[0]
                         else:
-                            print "Can not find such command"
-                            sys.exit()
+                            self.log.error("Can not find such command")
+                            sys.exit(1)
             else:
-                print "Can not find such command"
-                sys.exit()
+                self.log.error("Can not find such command")
+                sys.exit(1)
 
             self._command_help(command)
 
@@ -211,15 +211,14 @@ class FliesConsole:
         """
         List the information of all the project on the flies server
         """
-        print ""
         flies = FliesResource(self.url)
         projects = flies.projects.list()
         
         if not projects:
             self.log.error("There is no projects on the server or the server not working")
-            sys.exit()
+            sys.exit(1)
         for project in projects:
-            print ("Project Id:          %s")%project.id
+            print ("\nProject Id:          %s")%project.id
             print ("Project Name:        %s")%project.name
             print ("Project Type:        %s")%project.type
             print ("Project Links:       %s\n")%[{'href':link.href, 'type':link.type, 'rel':link.rel} for link in project.links]
@@ -235,7 +234,7 @@ class FliesConsole:
         
         if not project_id:
             self.log.error('Please use flies project info --project-id=project_id or flies.xml to specify the project id')
-            sys.exit()
+            sys.exit(1)
       
         flies = FliesResource(self.url)
         try:
@@ -264,8 +263,8 @@ class FliesConsole:
             iteration_id = self.project_config['project_version']
 
         if not iteration_id or not project_id:
-            print '[ERROR] Please use flies iteration info --project-id=project_id --project-version=project_version to retrieve the iteration'
-            sys.exit()
+            self.log.error("Please use flies version info --project-id=project_id --project-version=project_version to retrieve the version")
+            sys.exit(1)
         
         flies = FliesResource(self.url)
         try:
@@ -285,17 +284,17 @@ class FliesConsole:
         if self.user_name and self.apikey:
             flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
-            print "Please provide username and apikey in flies.ini"
-            sys.exit()
+            self.log.error("Please provide username and apikey in flies.ini or by command line options --username and --apikey")
+            sys.exit(1)
         self.log.info("Username: %s"%self.user_name)
 
         if not args:
             self.log.error("Please provide PROJECT_ID for creating project")
-            sys.exit()
+            sys.exit(1)
 
         if not options['project_name']:
             self.log.error("Please provide Project name by '--project-name' option")
-            sys.exit()
+            sys.exit(1)
        
         try:
             item = {'id':args[0], 'name':options['project_name'], 'desc':options['project_desc']}
@@ -319,7 +318,7 @@ class FliesConsole:
             flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
             self.log.error("Please provide username and apikey in flies.ini or by --username and --apikey options")
-            sys.exit()
+            sys.exit(1)
 
         self.log.info("Username: %s"%self.user_name)
         
@@ -334,11 +333,11 @@ class FliesConsole:
         
         if not args:
             self.log.error("Please provide ITERATION_ID for creating iteration")
-            sys.exit()
+            sys.exit(1)
 
         if not options['version_name']:
             self.log.error("Please provide Iteration name by '--version-name' option")
-            sys.exit()
+            sys.exit(1)
          
         try:
             item = {'id':args[0], 'name':options['version_name'], 'desc':options['version_desc']}
@@ -368,11 +367,11 @@ class FliesConsole:
 
         if not project_id:
             self.log.error("Please provide valid project id by flies.xml or by '--project-id' option")
-            sys.exit()
+            sys.exit(1)
         
         if not iteration_id:
             self.log.error("Please provide valid version id by flies.xml or by '--project-version' option")
-            sys.exit()
+            sys.exit(1)
         
         self.log.info("Project: %s"%project_id)
         self.log.info("Version: %s"%iteration_id)
@@ -382,14 +381,14 @@ class FliesConsole:
             fliesclient.projects.get(project_id)
         except NoSuchProjectException, e:
             self.log.error(e.msg)
-            sys.exit()
+            sys.exit(1)
    
         try:
             fliesclient.projects.iterations.get(project_id, iteration_id)
             return project_id, iteration_id
         except NoSuchProjectException, e:
             self.log.error(e.msg)
-            sys.exit()
+            sys.exit(1)
 
     def search_file(self, path, filename):
         for root, dirs, names in os.walk(path):
@@ -405,7 +404,7 @@ class FliesConsole:
             lang_list = self.project_config['locale_map'].keys()
         else:
             self.log.error("Please specify the language by '--lang' option or flies.xml")
-            sys.exit()
+            sys.exit(1)
 
         for item in lang_list:
             self.log.info("Push %s translation to Flies server:"%item)
@@ -477,7 +476,7 @@ class FliesConsole:
             flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
             self.log.error("Please provide username and apikey in flies.ini or by '--username' and '--apikey' options")
-            sys.exit()
+            sys.exit(1)
 
         project_id, iteration_id = self.check_project(flies)
         
@@ -501,7 +500,7 @@ class FliesConsole:
         
         if not os.path.isdir(tmlfolder):
             self.log.error("Can not find source folder, please specify the source folder by '--srcdir' option")
-            sys.exit()
+            sys.exit(1)
 
         self.log.info("POT directory (originals):%s"%tmlfolder)
                 
@@ -510,7 +509,7 @@ class FliesConsole:
             filelist = flies.documents.get_file_list(project_id, iteration_id)
         except Exception, e:
             self.log.error(str(e))
-            sys.exit()
+            sys.exit(1)
 
         if filelist:
             #Give an option to user for keep or delete the content
@@ -523,7 +522,7 @@ class FliesConsole:
                         break    
                     elif option.lower() == "no" or option.lower() == "n":
                         self.log.info("Stop processing, keep the content on the flies server")
-                        sys.exit()
+                        sys.exit(1)
                     else:
                         self.log.error("Please enter yes(y) or no(n)")
 
@@ -543,7 +542,7 @@ class FliesConsole:
                     flies.documents.delete_template(project_id, iteration_id, filename)
                 except Exception, e:
                     self.log.error(str(e))
-                    sys.exit()
+                    sys.exit(1)
 
         publicanutil = PublicanUtility()
         #if file not specified, push all the files in pot folder to flies server
@@ -553,7 +552,7 @@ class FliesConsole:
 
             if not pot_list:
                 self.log.error("The template folder is empty")
-                sys.exit()
+                sys.exit(1)
 
             for pot in pot_list:
                 self.log.info("\nPush the content of %s to Flies server:"%pot)
@@ -583,7 +582,7 @@ class FliesConsole:
                 full_path = self.search_file(tmlfolder, args[0])
             except NoSuchFileException, e:
                 self.log.error(e.msg)
-                sys.exit()
+                sys.exit(1)
                         
             body, filename = publicanutil.potfile_to_json(full_path, tmlfolder)
             
@@ -612,7 +611,7 @@ class FliesConsole:
             flies = FliesResource(self.url, self.user_name, self.apikey)
         else:
             self.log.error("Please provide username and apikey in flies.ini or by '--username' and '--apikey' options")
-            sys.exit()
+            sys.exit(1)
 
         list = []
         if options['lang']:
@@ -621,7 +620,7 @@ class FliesConsole:
             list = self.project_config['locale_map'].keys()
         else:
             self.log.error("Please specify the language by '--lang' option or flies.xml")
-            sys.exit()
+            sys.exit(1)
 
         project_id, iteration_id = self.check_project(flies)
         
@@ -630,7 +629,7 @@ class FliesConsole:
             filelist = flies.documents.get_file_list(project_id, iteration_id)
         except Exception, e:
             self.log.error(str(e))
-            sys.exit()
+            sys.exit(1)
 
         publicanutil = PublicanUtility()
         
@@ -737,7 +736,7 @@ class FliesConsole:
                 
                 if not request_name:
                     self.log.error("Can't find pot file for %s on Flies server"%args[0])
-                    sys.exit()
+                    sys.exit(1)
 
                 pofile = os.path.join(outpath, args[0]+'.po')
                                           
@@ -745,16 +744,16 @@ class FliesConsole:
                     pot = flies.documents.retrieve_template(project_id, iteration_id, request_name)                    
                 except UnAuthorizedException, e:
                     self.log.error(e.msg)
-                    sys.exit()
+                    sys.exit(1)
                 except UnAvaliableResourceException, e:
                     self.log.error("Can't find pot file for %s on Flies server"%args[0])
-                    sys.exit()
+                    sys.exit(1)
 
                 try:            
                     result = flies.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
                 except UnAuthorizedException, e:
                     self.log.error(e.msg)
-                    sys.exit()
+                    sys.exit(1)
                 except UnAvaliableResourceException, e:
                     self.log.info("There is no %s translation for %s"%(item, args[0]))
                 except BadRequestBodyException, e:
@@ -784,7 +783,7 @@ class FliesConsole:
             "project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=",
             "username=", "srcdir=", "dstdir=", "email=", "transdir=", "import-po", "no-copytrans"])
         except getopt.GetoptError, err:
-            print str(err)
+            self.log.error(str(err))
             sys.exit(2)
 
         if args:
@@ -797,19 +796,19 @@ class FliesConsole:
                             command = command+'_'+sub[0]
                             command_args = sub[1:]
                         else:
-                            print "Can not find such command"
-                            sys.exit()
+                            self.log.error("Can not find such command")
+                            sys.exit(1)
                     else:
-                        print "Please complete the command!"
-                        sys.exit()
+                        self.log.error("Please complete the command!")
+                        sys.exit(1)
                 else: 
                     command_args = sub
             else:
-                print "Can not find such command"
-                sys.exit()
+                self.log.error("Can not find such command")
+                sys.exit(1)
         else:
             self._print_usage()
-            sys.exit()
+            sys.exit(1)
         
         if opts:
             for o, a in opts:
@@ -870,9 +869,8 @@ class FliesConsole:
                 self.log.info("Loading flies project config from from %s"%(os.getcwd()+'/flies.xml'))
                 self.project_config = config.read_project_config(os.getcwd()+'/flies.xml')            
             elif command != 'list':                
-                self.log.error("Can not find flies.xml, please specify the path of flies.xml")
-                sys.exit()
-
+                self.log.info("Can not find flies.xml, please specify the path of flies.xml")
+                
             #process the url of server
             if self.project_config:
                 self.url = self.project_config['project_url']
@@ -884,12 +882,11 @@ class FliesConsole:
 
             if not self.url or self.url.isspace():
                 self.log.error("Please provide valid server url in flies.xml or by '--url' option")
-                sys.exit()
+                sys.exit(1)
 
             if self.url[-1] == "/":
                 self.url = self.url[:-1]
-           
-            
+                       
             #Try to read user-config file
             user_config = ''
             if options['user_config'] and os.path.isfile(options['user_config']):  

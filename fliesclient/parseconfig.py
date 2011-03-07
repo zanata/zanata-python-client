@@ -74,46 +74,48 @@ class FliesConfig:
         xmldoc = minidom.parse(filename)
 
         #Read the project url
-        node = xmldoc.getElementsByTagName("url")[0]
-        rc = ""
+        if xmldoc.getElementsByTagName("url"):
+            node = xmldoc.getElementsByTagName("url")[0]
+            rc = ""
 
-        for node in node.childNodes:
-            if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
-                rc = rc + node.data
-        project_config['project_url'] = rc
+            for node in node.childNodes:
+                if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
+                    rc = rc + node.data
+            project_config['project_url'] = rc
 
         #Read the project id
-        node = xmldoc.getElementsByTagName("project")[0]
-        rc = ""
+        if xmldoc.getElementsByTagName("project"):
+            node = xmldoc.getElementsByTagName("project")[0]
+            rc = ""
 
-        for node in node.childNodes:
-            if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
-                rc = rc + node.data
-        project_config['project_id'] = rc
+            for node in node.childNodes:
+                if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
+                    rc = rc + node.data
+            project_config['project_id'] = rc
         
         #Read the project-version
-        node = xmldoc.getElementsByTagName("project-version")[0]
-        rc = ""
+        if xmldoc.getElementsByTagName("project-version"):
+            node = xmldoc.getElementsByTagName("project-version")[0]
+            rc = ""
         
-        for node in node.childNodes:
-            if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
-                rc = rc + node.data
-        project_config['project_version'] = rc
+            for node in node.childNodes:
+                if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
+                    rc = rc + node.data
+            project_config['project_version'] = rc
 
         #Read the locale map
-        locales = xmldoc.getElementsByTagName("locales")[0]
-        
-        
-        localelist = locales.getElementsByTagName("locale")
-        for locale in localelist:
-            for node in locale.childNodes:
-                if node.nodeType == node.TEXT_NODE:
-                    if locale.getAttribute("map-from"):
-                        map = {locale.getAttribute("map-from"):node.data}
-                        project_config['locale_map'].update(map)
-                    else:
-                        map = {node.data:node.data}
-                        project_config['locale_map'].update(map)
+        if xmldoc.getElementsByTagName("locales"):
+            locales = xmldoc.getElementsByTagName("locales")[0]
+            localelist = locales.getElementsByTagName("locale")
+            for locale in localelist:
+                for node in locale.childNodes:
+                    if node.nodeType == node.TEXT_NODE:
+                        if locale.getAttribute("map-from"):
+                            map = {locale.getAttribute("map-from"):node.data}
+                            project_config['locale_map'].update(map)
+                        else:
+                            map = {node.data:node.data}
+                            project_config['locale_map'].update(map)
         
         return project_config
     
