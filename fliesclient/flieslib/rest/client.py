@@ -54,7 +54,7 @@ class RestClient(object):
     def request(self, resource, method = "get", args = None, body = None, headers = {}, extension = None, copytrans =
     None):
         headers['Accept'] = 'application/json'
-        http = httplib2.Http(".cache")
+        http = httplib2.Http()
         ext = "?ext=gettext&ext=comment"
                 
         if copytrans:

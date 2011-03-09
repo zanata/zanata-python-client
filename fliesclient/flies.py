@@ -655,7 +655,11 @@ class FliesConsole:
                             lang = item
                         
                         if options['dstdir']:
-                            outpath = os.path.join(options['dstdir'], item)
+                            if os.path.isdir(options['dstdir']):
+                                outpath = os.path.join(options['dstdir'], item)
+                            else:
+                                self.log.error("The Destination folder is not exist, please create it")
+                                sys.exit(1)
                         else:
                             outpath = os.path.join(os.getcwd(), item)
                         
@@ -711,7 +715,11 @@ class FliesConsole:
                     lang = item
                 
                 if options['dstdir']:
-                    outpath = os.path.join(options['dstdir'], item)
+                    if os.path.isdir(options['dstdir']):
+                        outpath = os.path.join(options['dstdir'], item)
+                    else:
+                        self.log.error("The Destination folder is not exist, please create it")
+                        sys.exit(1)
                 else:
                     outpath = os.path.join(os.getcwd(), item)
 
