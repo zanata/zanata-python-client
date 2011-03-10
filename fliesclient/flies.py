@@ -64,7 +64,7 @@ options = {
 class FliesConsole:
 
     def __init__(self):
-        self.client_version = "0.8.0"        
+        self.client_version = "0.8.1"        
         self.url = ''
         self.user_name = ''
         self.apikey = ''

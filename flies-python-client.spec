@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name: flies-python-client
-Version: 0.8.0
+Version: 0.8.1
 Release: 1%{?dist}
 Summary: Python Client for Flies Server
 
@@ -43,6 +43,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 
 %changelog
+* Thu Mar 10 2011 James Ni <jni@redhat.com> - 0.8.1
+- Fix bugs(issue 272, issue 274) of retrieve the translation
+
 * Mon Mar 07 2011 James Ni <jni@redhat.com> - 0.8.0
 - Stable release
 
