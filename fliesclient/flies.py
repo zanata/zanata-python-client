@@ -528,11 +528,9 @@ class FliesConsole:
 
             for file in filelist:
                 if ',' in file: 
-                    folder, name = file.split(',')
-                    filename = folder+'\,'+name
+                    filename = file.replace(',', '\,')
                 elif '/' in file:
-                    folder, name = file.split('/')
-                    filename = folder+'\/'+name
+                    filename = file.replace('/', ',')
                 else:
                     filename = file
 
