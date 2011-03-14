@@ -640,7 +640,8 @@ class FliesConsole:
                     folder = ''
 
                     if '/' in file: 
-                        folder, name = file.split('/')
+                        name = file.split('/')[-1]
+                        folder = file.split(name)[0]
                     else:
                         name = file
 
@@ -691,7 +692,7 @@ class FliesConsole:
                         if folder:
                             subdirectory = os.path.join(outpath, folder)
                             if not os.path.isdir(subdirectory):
-                                os.mkdir(subdirectory)
+                                os.makedirs(subdirectory)
                             pofile = os.path.join(subdirectory, name+'.po') 
                         else:
                             pofile = os.path.join(outpath, name+'.po')
@@ -728,12 +729,13 @@ class FliesConsole:
 
                 for file in filelist:
                     if '/' in file: 
-                        folder, name = file.split('/')
+                        name = file.split('/')[-1]
+                        folder = file.split(name)[0]
                         if args[0] == name:
                             request_name = file.replace('/', ',')
                             outpath = os.path.join(outpath, folder)   
                             if not os.path.isdir(outpath):
-                                os.mkdir(outpath)
+                                os.makedirs(outpath)
                             break
                     else:
                         if args[0] == file:
