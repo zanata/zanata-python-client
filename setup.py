@@ -3,9 +3,15 @@
 Build script for flies-python-client
 """
 from setuptools import setup, find_packages
+import os
+
+file = open('./VERSION-FILE', 'rb')
+version = file.read()
+file.close()
+number = version[:-1].strip('version: ')
 
 setup (name = "flies-python-client",
-    version = '0.8.1',
+    version = number,
     packages = find_packages(),
     install_requires=[
         'polib' ,
