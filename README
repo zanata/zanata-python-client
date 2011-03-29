@@ -1,91 +1,91 @@
 Introduction:
-Flies Python client is a client that communicate with Flies server for creating project or iteration, retrieving info of projects, single project or single iteration.
-It also provide publican support for pull or push the content with Flies server.
+Zanata Python client is a client that communicate with Zanata server for creating project or iteration, retrieving info of projects, single project or single iteration.
+It also provide publican support for pull or push the content with Zanata server.
 
 You can find more infomation on:
-http://code.google.com/p/flies/wiki/FliesPythonClient
+http://code.google.com/p/flies/wiki/zanataPythonClient
 
 and you can raise a issue in google issue tracker for flies project:
 http://code.google.com/p/flies/issues/list
 
 Install:
-You can install the flies-python-client by yum install, or you can download the rpm package from http://jamesni.fedorapeople.org/flies-python-client/ and install by youself.
+You can install the zanata-python-client by yum install, or you can download the rpm package from http://jamesni.fedorapeople.org/Zanata-python-client/ and install by youself.
 
-Currently, the external dependency for the flies-python-client is python library named python-polib. You need to install the dependency before running the flies-python-client.
+Currently, the external dependency for the zanata-python-client is python library named python-polib. You need to install the dependency before running the zanata-python-client.
 
 Configuration:
-After you install the flies-python-client, you need to create a global configuration file $USER_HOME/.config/flies.ini that contain user-specific configuration. python-client use the same configuration file as maven client, you could take a reference from http://code.google.com/p/flies/wiki/ClientConfiguration. You can manually specify the location of user configuration file by command line option '--user-config',
+After you install the zanata-python-client, you need to create a global configuration file $USER_HOME/.config/zanata.ini that contain user-specific configuration. python-client use the same configuration file as maven client, you could take a reference from http://code.google.com/p/flies/wiki/ClientConfiguration. You can manually specify the location of user configuration file by command line option '--user-config',
 
-For each project, you also have to write a project-specific configuration file named flies.xml, which is also as same as flies.xml used by maven client, you could also take a reference from http://code.google.com/p/flies/wiki/ClientConfiguration. You can set the path of project configuration file by command line option '--project-config'.
+For each project, you also have to write a project-specific configuration file named zanata.xml, which is also as same as zanata.xml used by maven client, you could also take a reference from http://code.google.com/p/flies/wiki/ClientConfiguration. You can set the path of project configuration file by command line option '--project-config'.
 
 You can also point the URL of server by command line opition '--url'. There is also command line option '--username' for user name and command line option '--apikey' for api key of user. 
 
 Command List:
 
-Name: /usr/bin/flies
+Name: /usr/bin/zanata
 
-Type "flies" in the shell, it will give you basic information of command for working with Flies server. You can use "flies --help" to get more information about the commands of flies
+Type "zanata" in the shell, it will give you basic information of command for working with Zanata server. You can use "zanata --help" to get more information about the commands of zanata
 
-Basic Usage: flies COMMAND [ARGS] [COMMAND_OPTIONS]
+Basic Usage: zanata COMMAND [ARGS] [COMMAND_OPTIONS]
 
 Listing / Querying for Projects
 
-$ flies list
+$ zanata list
 
 Creating a project
 
-$ flies project create {project_id} --project-name={projec_name} --project-desc={project_description}
+$ zanata project create {project_id} --project-name={projec_name} --project-desc={project_description}
 
 Create a Project Version
 
-$ flies version create {version_id} --project-id={project_id} --version-name={version_name} --version-desc={version_description}
+$ zanata version create {version_id} --project-id={project_id} --version-name={version_name} --version-desc={version_description}
 
 Query for information of a project
 
-$ flies project info --project-id={project_id} 
+$ zanata project info --project-id={project_id} 
 
 Query for information of a project iteration
 
-$ flies version info --project-id={project_id} --project-version={version_id} 
+$ zanata version info --project-id={project_id} --project-version={version_id} 
 
-Publishing Templates to Flies
+Publishing Templates to Zanata
 
-If you want to push only one template file to flies server, you can use command below:
+If you want to push only one template file to zanata server, you can use command below:
 
-$ flies publican push --project-id={project_id} --project-version={iteration_id} [documentName..]
+$ zanata publican push --project-id={project_id} --project-version={iteration_id} [documentName..]
 
-Without indicate the documentName, 'publican push' command will push all the template files under the template folder to Flies server. You can specify the path of template folder by command line option, if you don't provide such info, the command will try to locate template folder in current path
+Without indicate the documentName, 'publican push' command will push all the template files under the template folder to zanata server. You can specify the path of template folder by command line option, if you don't provide such info, the command will try to locate template folder in current path
 
-$ flies publican push --project-id={project_id} --project-version={iteration_id} --srcdir={template_folder}
+$ zanata publican push --project-id={project_id} --project-version={iteration_id} --srcdir={template_folder}
 
-$ flies publican push --project-id={project_id} --project-version={iteration_id} 
+$ zanata publican push --project-id={project_id} --project-version={iteration_id} 
 
-Or you can simply running below command in a folder contain template folder with flies.xml, command will load all the info from configuration file:
+Or you can simply running below command in a folder contain template folder with zanata.xml, command will load all the info from configuration file:
 
-$ flies publican push 
+$ zanata publican push 
 
-You can enable 'import-po' option, then related translation (po files) will be pushed to flies server at the same time. you need to specify the parent folder that contain all the translation by 'transDir' command line option. By default, command will read the language info from project configuration file 'flies.xml', or you can specify the language that you want to push to the flies server by 'lang' option
+You can enable 'import-po' option, then related translation (po files) will be pushed to zanata server at the same time. you need to specify the parent folder that contain all the translation by 'transDir' command line option. By default, command will read the language info from project configuration file 'zanata.xml', or you can specify the language that you want to push to the zanata server by 'lang' option
 
-$ flies publican push --import-po --trandir={path of parent folder contains locale folders} --lang=lang1,lang2,..
+$ zanata publican push --import-po --trandir={path of parent folder contains locale folders} --lang=lang1,lang2,..
 
 You could also enable 'copytrans' option, then the server will try to find closest equivalent translation from oter versions in the same project and copy to version you specified.
 
-$ flies publican push --copytrans
+$ zanata publican push --copytrans
 
-Retrieving translated Documents from Flies
+Retrieving translated Documents from zanata
 
-If you want to retrieve only one file from flies server, you can use command below:
+If you want to retrieve only one file from zanata server, you can use command below:
 
-$ flies publican pull --project-id={project_id} --project-version={iteration_id} [documentName..]
+$ zanata publican pull --project-id={project_id} --project-version={iteration_id} [documentName..]
 
-Without indicate the documentName, this command will pull all the documents of a project version on Flies server to a local output folder. Command will read the language info from project configuration file 'flies.xml', or you can specify the language that you want to pull from the flies server by 'lang' option
+Without indicate the documentName, this command will pull all the documents of a project version on zanata server to a local output folder. Command will read the language info from project configuration file 'zanata.xml', or you can specify the language that you want to pull from the zanata server by 'lang' option
 
-$ flies publican pull --project-id={project_id} --project-version={iteration_id} --lang=lang1,lang2,.. --dstdir={output_folder} 
+$ zanata publican pull --project-id={project_id} --project-version={iteration_id} --lang=lang1,lang2,.. --dstdir={output_folder} 
 
-$ flies publican pull --project-id={project_id} --project-version={iteration_id} --lang=lang1,lang2,..
+$ zanata publican pull --project-id={project_id} --project-version={iteration_id} --lang=lang1,lang2,..
 
-you can also simply running below command in a folder contain flies.xml, command will load all the info from configuration file:
+you can also simply running below command in a folder contain zanata.xml, command will load all the info from configuration file:
 
-$ flies publican pull
+$ zanata publican pull
 
 
