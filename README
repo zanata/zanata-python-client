@@ -1,15 +1,9 @@
 Introduction:
 Zanata Python client is a client that communicate with Zanata server for creating project or iteration, retrieving info of projects, single project or single iteration.
-It also provide publican support for pull or push the content with Zanata server.
-
-You can find more infomation on:
-http://code.google.com/p/flies/wiki/zanataPythonClient
-
-and you can raise a issue in google issue tracker for flies project:
-http://code.google.com/p/flies/issues/list
+It also provide publican support and software project support for pull or push the content with Zanata server.
 
 Install:
-You can install the zanata-python-client by yum install, or you can download the rpm package from http://jamesni.fedorapeople.org/Zanata-python-client/ and install by youself.
+You can install the zanata-python-client by yum install, or you can download the rpm package from http://jamesni.fedorapeople.org/zanata-python-client/ and install by youself.
 
 Currently, the external dependency for the zanata-python-client is python library named python-polib. You need to install the dependency before running the zanata-python-client.
 
@@ -68,9 +62,9 @@ You can enable 'import-po' option, then related translation (po files) will be p
 
 $ zanata publican push --import-po --trandir={path of parent folder contains locale folders} --lang=lang1,lang2,..
 
-You could also enable 'copytrans' option, then the server will try to find closest equivalent translation from oter versions in the same project and copy to version you specified.
+By default, the server will try to find closest equivalent translation from oter versions in the same project and copy to version you specified. You can set no-copytrans to disable that function
 
-$ zanata publican push --copytrans
+$ zanata publican push --no-copytrans
 
 Retrieving translated Documents from zanata
 
@@ -87,5 +81,47 @@ $ zanata publican pull --project-id={project_id} --project-version={iteration_id
 you can also simply running below command in a folder contain zanata.xml, command will load all the info from configuration file:
 
 $ zanata publican pull
+
+Push and pull software project with Zanata
+
+If you want to push only software project file to zanata server, you can use command below:
+
+$ zanata po push --project-id={project_id} --project-version={iteration_id} [documentName..]
+
+Without indicate the documentName, 'po push' command will push all source file of software under the po folder to zanata server. You can specify the path of po folder by command line option, if you don't provide such info, the command will try to locate po folder in current path
+
+$ zanata po push --project-id={project_id} --project-version={iteration_id} --srcdir={po_folder}
+
+$ zanata po push --project-id={project_id} --project-version={iteration_id} 
+
+Or you can simply running below command in a folder contain po folder with zanata.xml, command will load all the info from configuration file:
+
+$ zanata po push 
+
+You can enable 'import-po' option, then related translation will be pushed to zanata server at the same time. you can specify the parent folder that contain all the translation by 'transdir' command line option, or the client will use the path of po folder as the 'transdir'.  By default, command will read the language info from project configuration file 'zanata.xml', or you can specify the language that you want to push to the zanata server by 'lang' option
+
+$ zanata po push --import-po --trandir={path of parent folder contains translation files, such as zh-CN.po} --lang=lang1,lang2,..
+
+By default the server will try to find closest equivalent translation from oter versions in the same project and copy to version you specified. you can set --no-copytrans option to disable that function.
+
+$ zanata po push --no-copytrans
+
+Retrieving Software project translation from zanata
+
+If you want to retrieve software translation from zanata server, you can use command below:
+
+$ zanata po pull --project-id={project_id} --project-version={iteration_id} [softwareName..]
+
+Without indicate the software name, this command will pull all the translations of a project version on zanata server to a local output folder. Command will read the language info from project configuration file 'zanata.xml', or you can specify the language that you want to pull from the zanata server by 'lang' option
+
+$ zanata po pull --project-id={project_id} --project-version={iteration_id} --lang=lang1,lang2,.. --dstdir={output_folder} 
+
+$ zanata po pull --project-id={project_id} --project-version={iteration_id} --lang=lang1,lang2,..
+
+you can also simply running below command in a folder contain zanata.xml, command will load all the info from configuration file:
+
+$ zanata po pull
+
+
 
 
