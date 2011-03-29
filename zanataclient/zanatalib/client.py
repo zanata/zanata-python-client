@@ -1,9 +1,9 @@
 #vim:set et sts=4 sw=4: 
-#  
-# Flies Python Client
+# 
+# Zanata Python Client
 #
-# Copyright (c) 2010 Jian Ni <jni@redhat.com>
-# Copyright (c) 2010 Red Hat, Inc.
+# Copyright (c) 2011 Jian Ni <jni@redhat.com>
+# Copyright (c) 2011 Red Hat, Inc.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,17 @@
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 # Boston, MA  02111-1307  USA
 
-from parseconfig import *
-from publicanutil import *
-from flies import *
+
+__all__ = (
+        "ZanataResource", 
+   )
+
+from docservice import DocumentService
+from projectservice import ProjectService
+
+class ZanataResource:
+    def __init__(self, base_url, username = None, apikey = None):
+        self.base_url = base_url
+        self.projects = ProjectService(base_url, username, apikey)
+        self.documents = DocumentService(self.projects)
+

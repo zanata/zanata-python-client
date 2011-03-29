@@ -1,9 +1,9 @@
 #vim:set et sts=4 sw=4: 
 # 
-# Flies Python Client
+# Zanata Python Client
 #
-# Copyright (c) 2010 Jian Ni <jni@redhat.com>
-# Copyright (c) 2010 Red Hat, Inc.
+# Copyright (c) 2011 Jian Ni <jni@redhat.com>
+# Copyright (c) 2011 Red Hat, Inc.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,7 @@ __all__ = (
         "UnAvaliablePOTException", "BadRequestBodyException",
         "SameNameDocumentException","InternalServerError"
 )
-class FliesException(Exception):
+class ZanataException(Exception):
     def __init__(self, expr, msg):
         self.expr = expr
         self.msg = msg
@@ -37,39 +37,39 @@ class FliesException(Exception):
     def __str__ (self):
         return self.msg
 
-class InternalServerError(FliesException):
+class InternalServerError(ZanataException):
     pass
 
-class NoSuchProjectException(FliesException):
+class NoSuchProjectException(ZanataException):
     pass
 
-class InvalidOptionException(FliesException):
+class InvalidOptionException(ZanataException):
     pass 
 
-class NoSuchFileException(FliesException):
+class NoSuchFileException(ZanataException):
     pass 
 
-class InvalidPOTFileException(FliesException):
+class InvalidPOTFileException(ZanataException):
     pass 
 
-class UnAuthorizedException(FliesException):
+class UnAuthorizedException(ZanataException):
     pass 
 
-class UnAvaliablePOTException(FliesException):
+class UnAvaliablePOTException(ZanataException):
     pass 
 
-class UnAvaliableResourceException(FliesException):
+class UnAvaliableResourceException(ZanataException):
     pass
 
-class BadRequestException(FliesException):
+class BadRequestException(ZanataException):
     pass
 
-class ProjectExistException(FliesException):
+class ProjectExistException(ZanataException):
     pass
 
-class BadRequestBodyException(FliesException):
+class BadRequestBodyException(ZanataException):
     pass
 
-class SameNameDocumentException(FliesException):
+class SameNameDocumentException(ZanataException):
     pass
 

@@ -24,18 +24,17 @@ all__ = (
         )
 
 import unittest
-from fliesclient.parseconfig import FliesConfig
-
+from zanataclient.parseconfig import ZanataConfig
 
 class ConfigTest(unittest.TestCase):
     def setUp(self):
-        self.config = FliesConfig()
+        self.config = ZanataConfig()
 
     def test_user_config(self):
         self.config.set_userconfig("./flies.ini")
     	server = self.config.get_server("http://localhost:8080/flies")
-        user_name = self.config.get_config_value("username", server)
-    	apikey = self.config.get_config_value("key", server)
+        user_name = self.config.get_config_value("username", 'servers', server)
+    	apikey = self.config.get_config_value("key", 'servers',server)
         self.assertEqual(server, "local") 
         self.assertEqual(user_name, "username")
         self.assertEqual(apikey, "key")

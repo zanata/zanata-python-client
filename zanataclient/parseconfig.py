@@ -1,8 +1,8 @@
 # 
-# Flies Python Client
+# Zanata Python Client
 #
-# Copyright (c) 2010 Jian Ni <jni@redhat.com>
-# Copyright (c) 2010 Red Hat, Inc.
+# Copyright (c) 2011 Jian Ni <jni@redhat.com>
+# Copyright (c) 2011 Red Hat, Inc.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -20,17 +20,17 @@
 # Boston, MA  02111-1307  USA
 
 __all__ = (
-        "FliesConfig",
+        "ZanataConfig",
     )
 
 import ConfigParser
 import os.path
-from flieslib.outpututil import Logger
+from zanatalib.outpututil import Logger
 from xml.dom import minidom 
 
 project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}
 
-class FliesConfig:
+class ZanataConfig:
      def set_userconfig(self, path):
         self.configparser = ConfigParser.ConfigParser()
         self._config = self.configparser.read(['flies.ini', path])

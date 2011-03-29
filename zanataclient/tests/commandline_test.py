@@ -25,34 +25,34 @@ all__ = (
 
 import unittest
 import sys
-from fliesclient.flies import options
-from fliesclient.flies import FliesConsole
+from zanataclient.zanata import options
+from zanataclient.zanata import ZanataConsole
 
 class CommandlineTest(unittest.TestCase):
     def setUp(self):
-        self.console = FliesConsole()
+        self.console = ZanataConsole()
         
     def test_helpcommandoption(self):
-        sys.argv = ["flies", "help"]        
+        sys.argv = ["zanata", "help"]        
         command, command_args = self.console._process_command_line()
         self.assertEqual(command, "help")
     
     #"url=", "project-id=", "project-version=", "project-name=",
     #"project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=",
-    #"username=", "srcDir=", "dstDir=", "email=", "transDir=", "importPo", "copyTrans"
+    #"username=", "srcdir=", "dstdir=", "email=", "transdir=", "import-po", "copytrans"
 
     def test_listcommandoption(self):
-        sys.argv = ["flies", "list", "--url", "http://example.com/flies"]        
+        sys.argv = ["zanata", "list", "--url", "http://example.com/flies"]        
         command, command_args = self.console._process_command_line()
         self.assertEqual(command, "list")
         self.assertEqual(options['url'], "http://example.com/flies")
 
     def test_projectcommandoption(self):
-        sys.argv = ["flies", "project", "info", "--project-id", "test-project"]        
+        sys.argv = ["zanata", "project", "info", "--project-id", "test-project"]        
         command, command_args = self.console._process_command_line()
         self.assertEqual(options['project_id'], "test-project")
 
-        sys.argv = ["flies", "project", "create", "test-project", "--project-name", "test project", "--project-desc", "This is test project"]        
+        sys.argv = ["zanata", "project", "create", "test-project", "--project-name", "test project", "--project-desc", "This is test project"]        
         command, command_args = self.console._process_command_line()
         self.assertEqual(command, "project_create")
         self.assertEqual(command_args, ['test-project'])
@@ -60,13 +60,13 @@ class CommandlineTest(unittest.TestCase):
         self.assertEqual(options['project_desc'], "This is test project")
 
     def test_versioncommandoption(self):
-        sys.argv = ["flies", "version", "info", "--project-id", "test-project", "--project-version", "1.0"]        
+        sys.argv = ["zanata", "version", "info", "--project-id", "test-project", "--project-version", "1.0"]        
         command, command_args = self.console._process_command_line()
         self.assertEqual(command, "version_info")
         self.assertEqual(options['project_id'], "test-project")
         self.assertEqual(options['project_version'], "1.0")
 
-        sys.argv = ["flies", "version", "create", "1.0", "--project-id", "test-project", "--version-name", "Version 1.0", "--version-desc", "This is Version 1.0"]        
+        sys.argv = ["zanata", "version", "create", "1.0", "--project-id", "test-project", "--version-name", "Version 1.0", "--version-desc", "This is Version 1.0"]        
         command, command_args = self.console._process_command_line()
         self.assertEqual(command, "version_create")
         self.assertEqual(command_args, ['1.0'])
@@ -75,17 +75,17 @@ class CommandlineTest(unittest.TestCase):
         self.assertEqual(options['version_desc'], "This is Version 1.0")
 
     def test_publicancommandoption(self):
-        sys.argv = ["flies", "publican", "push", "--project-id", "test-project", "--project-version", "1.0", "--srcDir",
-        "/home/fc12/pot", "--copyTrans", "--importPo"]        
+        sys.argv = ["zanata", "publican", "push", "--project-id", "test-project", "--project-version", "1.0", "--srcdir",
+        "/home/fc12/pot", "--no-copytrans", "--import-po"]        
         command, command_args = self.console._process_command_line()
         self.assertEqual(command, "publican_push")
         self.assertEqual(options['project_id'], "test-project")
         self.assertEqual(options['project_version'], "1.0")
         self.assertEqual(options['srcdir'], "/home/fc12/pot")
-        self.assertTrue(options['copytrans'])
+        self.assertFalse(options['copytrans'])
         self.assertTrue(options['importpo'])
 
-        sys.argv = ["flies", "publican", "pull"]        
+        sys.argv = ["zanata", "publican", "pull"]        
         command, command_args = self.console._process_command_line()
         self.assertEqual(command, "publican_pull")
 

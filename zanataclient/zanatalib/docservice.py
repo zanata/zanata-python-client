@@ -1,9 +1,9 @@
 #vim:set et sts=4 sw=4: 
 # 
-# Flies Python Client
+# Zanata Python Client
 #
-# Copyright (c) 2010 Jian Ni <jni@redhat.com>
-# Copyright (c) 2010 Red Hat, Inc.
+# Copyright (c) 2011 Jian Ni <jni@redhat.com>
+# Copyright (c) 2011 Red Hat, Inc.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -66,10 +66,10 @@ class DocumentService:
     
     def commit_template(self, projectid, iterationid, resources, copytrans):
         """
-        Push the json object to flies server
+        Push the json object to Zanata server
         @param projectid: id of project
         @param iterationid: id of iteration
-        @param resources: json object of the content that want to commit to flies server
+        @param resources: json object of the content that want to commit to Zanata server
         @return: True
         @raise UnAuthorizedException:
         @raise BadRequestBodyException:

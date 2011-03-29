@@ -10,23 +10,23 @@ version = file.read()
 file.close()
 number = version[:-1].strip('version: ')
 
-setup (name = "flies-python-client",
+setup (name = "zanata-python-client",
     version = number,
     packages = find_packages(),
     install_requires=[
         'polib' ,
         'httplib2'
     ],
-    description = "Flies Python Client.",
+    description = "Zanata Python Client.",
     author = 'Jian Ni',
     author_email = 'jni@redhat.com',
     license = 'LGPLv2+',
     platforms=["Linux"],
-    scripts = ["flies"],
+    scripts = ["zanata"],
     
     #entry_points = {
 	#'console_scripts': [
-	#	'flies = fliesclient.flies:main',
+	#	'zanata = zanataclient.zanata:main',
 	#]
     #},
 

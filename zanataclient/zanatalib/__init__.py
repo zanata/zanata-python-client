@@ -1,9 +1,9 @@
 #vim:set et sts=4 sw=4: 
-# 
-# Flies Python Client
+#  
+# Zanata Python Client
 #
-# Copyright (c) 2010 Jian Ni <jni@redhat.com>
-# Copyright (c) 2010 Red Hat, Inc.
+# Copyright (c) 2011 Jian Ni <jni@redhat.com>
+# Copyright (c) 2011 Red Hat, Inc.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -19,26 +19,12 @@
 # License along with this program; if not, write to the
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 # Boston, MA  02111-1307  USA
-__all__ = (
-    "Logger",
-)
 
-class Logger:
-    def __init__(self):
-        self.enable_infoprefix = False
-        self.enable_errprefix = True
-        self.error_prefix = 'error: '
-        self.info_prefix = '[INFO] '
+from client import *
+from docservice import *
+from error import *
+from projectservice import *
+from project import *
+from versionservice import *
+from outpututil import *
 
-    def info(self, message):
-        if self.enable_infoprefix:
-            print self.info_prefix+message
-        else:
-            print message
-
-    def error(self, message):
-        if self.enable_errprefix:
-            print self.error_prefix+message
-        else:
-            print message
-    

@@ -1,9 +1,9 @@
 #vim:set et sts=4 sw=4:
 #
-# Flies Python Client
+# Zanata Python Client
 #
-# Copyright (c) 2010 Jian Ni <jni@redhat.com>
-# Copyright (c) 2010 Red Hat, Inc.
+# Copyright (c) 2011 Jian Ni <jni@redhat.com>
+# Copyright (c) 2011 Red Hat, Inc.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -21,14 +21,14 @@
 # Boston, MA  02111-1307  USA
 
 __all__ = (
-            "FliesConsole",
+            "ZanataConsole",
         )
 
 import getopt, sys
 import os.path
-from flieslib import *
-from flieslib.error import *
-from parseconfig import FliesConfig
+from zanatalib import *
+from zanatalib.error import *
+from parseconfig import ZanataConfig
 from publicanutil import PublicanUtility
 
 sub_command = {
@@ -62,10 +62,9 @@ options = {
             'copytrans':True
             }
 
-class FliesConsole:
+class ZanataConsole:
 
     def __init__(self):
-        self.client_version = "0.8.1"        
         self.url = ''
         self.user_name = ''
         self.apikey = ''
@@ -75,8 +74,8 @@ class FliesConsole:
         self.log = Logger()
         
     def _print_usage(self):
-        print ('\nClient for talking to a Flies Server\n\n'
-               'Usage: flies <command> [COMMANDOPTION]...\n\n'
+        print ('\nClient for talking to a Zanata/Flies Server\n\n'
+               'Usage: zanata <command> [COMMANDOPTION]...\n\n'
                'list of commands:\n'
                ' list                List all available projects\n'
                ' project info        Show information about a project\n'
@@ -84,8 +83,10 @@ class FliesConsole:
                ' project create      Create a project\n'
                ' version create      Create a version within a project\n'
                ' publican pull       Pull the content of publican file\n'
-               ' publican push       Push the content of publican file to Flies server\n'
-               "Use 'flies help' for the full list of commands")
+               ' publican push       Push the content of publican file to Zanata/Flies server\n'
+               ' po pull       Pull the content of software project file\n'
+               ' po push       Push the content of software project file to Zanata/Flies server\n'
+               "Use 'zanata help' for the full list of commands")
 
     def _print_help_info(self, args):
         """
@@ -93,8 +94,8 @@ class FliesConsole:
         @param args: the name of command and sub command
         """
         if not args:
-            print ('Client for talking to a Flies Server:\n\n'
-                  'Usage: flies <command> [COMMANDOPTION]...\n\n'
+            print ('Client for talking to a Zanata/Flies Server:\n\n'
+                  'Usage: zanata <command> [COMMANDOPTION]...\n\n'
                   'list of commands:\n'
                   ' help                Display this help and exit\n'
                   ' list                List all available projects\n'
@@ -103,7 +104,9 @@ class FliesConsole:
                   ' project create      Create a project\n'
                   ' version create      Create a version within a project\n'
                   ' publican pull       Pull the content of publican file\n'
-                  ' publican push       Push the content of publican file to Flies server\n')
+                  ' publican push       Push the content of publican file to Zanata/Flies server\n'
+                  ' po pull       Pull the content of software project file\n'
+                  ' po push       Push the content of software project file to Zanata/Flies server\n')
         else:
             command = args[0]
             sub = args[1:]
@@ -125,48 +128,48 @@ class FliesConsole:
         if command == 'list':
             self._list_help()
         elif command == 'project':
-            print ("Command:'flies project info'\n"
-                   "        'flies project create'")
+            print ("Command:'zanata project info'\n"
+                   "        'zanata project create'")
         elif command == 'project_info':
             self._projec_info_help()
         elif command == 'project_create':
             self._project_create_help()
         elif command == 'version':
-            print ("Command:'flies version info'\n"
-                   "        'flies version create'")
+            print ("Command:'zanata version info'\n"
+                   "        'zanata version create'")
         elif command == 'version_info':
             self._iteration_info_help()
         elif command == 'version_create':
             self._iteration_create_help()
         elif command == 'publican':
-            print ("Command:'flies publican push'\n"
-                   "        'flies publican pull'")
+            print ("Command:'zanata publican push'\n"
+                   "        'zanata publican pull'")
         elif command == 'publican_push':
             self._publican_push_help()
         elif command == 'publican_pull':
             self._publican_pull_help()
         elif command == 'po':
-            print ("Command:'flies po push'\n"
-                   "        'flies po pull'")
+            print ("Command:'zanata po push'\n"
+                   "        'zanata po pull'")
         elif command == 'po_push':
             self._pofile_push_help()
         elif command == 'po_pull':
             self._pofile_pull_help()
 
     def _list_help(self):
-       	print ('flies list [OPTIONS]\n'
+       	print ('zanata list [OPTIONS]\n'
                'list all available projects\n'
                'options:\n'
-               ' --url address of the Flies server, eg http://example.com/flies')
+               ' --url address of the Zanata/Flies server, eg http://example.com/zanata')
     
     def _projec_info_help(self):
-	    print ('flies project info [OPTIONS]\n'
+	    print ('zanata project info [OPTIONS]\n'
                'show infomation about a project\n'
                'options:\n'
                '--project-id: project id')
 
     def _project_create_help(self):
-        print ('flies project create [PROJECT_ID] [OPTIONS]\n'
+        print ('zanata project create [PROJECT_ID] [OPTIONS]\n'
                'create a project\n'
                'options:\n'
                '--username: user name\n'
@@ -175,14 +178,14 @@ class FliesConsole:
                '--project-desc: project description')
 
     def _iteration_info_help(self):
-	    print ('flies version info [OPTIONS]\n'
+	    print ('zanata version info [OPTIONS]\n'
                'show infomation about a version\n'
                'options:\n'
                '--project-id: project id\n'
                '--project-version: id of project version')
 
     def _iteration_create_help(self):
-        print ('flies version create [VERSION_ID] [OPTIONS]\n'
+        print ('zanata version create [VERSION_ID] [OPTIONS]\n'
                'create a version\n'
                'options:\n'
                '--username: user name\n'
@@ -192,8 +195,8 @@ class FliesConsole:
                '--version-desc: version description')
 
     def _publican_push_help(self):
-        print ('flies publican push [OPTIONS] {documents}\n'
-               'push the publican files to flies server\n'
+        print ('zanata publican push [OPTIONS] {documents}\n'
+               'push the publican files to Zanata/Flies server\n'
                'options:\n'
                '-f: force to remove content on server side\n'
                '--username: user name\n'
@@ -203,11 +206,11 @@ class FliesConsole:
                '--srcdir: the full path of the pot folder\n'
                '--transdir: the full path of the folder that contain locale folders\n'
                '--import-po: push the translation at the same time\n'
-               '--no-copytrans: disable flies server to copy translation from other versions')
+               '--no-copytrans: disable Zanata/Flies server to copy translation from other versions')
 
     def _publican_pull_help(self):
-        print ('flies publican pull [OPTIONS] {documents} {lang}\n'
-               'retrieve the publican files from flies server\n'
+        print ('zanata publican pull [OPTIONS] {documents} {lang}\n'
+               'retrieve the publican files from Zanata/Flies server\n'
                'options:\n'
                '--username: user name\n'
                '--apikey: api key of user\n'
@@ -217,8 +220,8 @@ class FliesConsole:
                '--lang: language list')
     
     def _pofile_push_help(self):
-        print ('flies po push [OPTIONS] {documents}\n'
-               'push the software project source and translation files to flies server\n'
+        print ('zanata po push [OPTIONS] {documents}\n'
+               'push the software project source and translation files to Zanata/Flies server\n'
                'options:\n'
                '-f: force to remove content on server side\n'
                '--username: user name\n'
@@ -228,11 +231,11 @@ class FliesConsole:
                '--srcdir: the full path of the pot folder\n'
                '--transdir: the full path of the folder that contain locale folders\n'
                '--import-po: push the translation at the same time\n'
-               '--no-copytrans: disable flies server to copy translation from other versions')
+               '--no-copytrans: disable Zanata/Flies server to copy translation from other versions')
 
     def _pofile_pull_help(self):
-        print ('flies po pull [OPTIONS] {documents} {lang}\n'
-               'retrieve the software project translation files from flies server\n'
+        print ('zanata po pull [OPTIONS] {documents} {lang}\n'
+               'retrieve the software project translation files from Zanata/Flies server\n'
                'options:\n'
                '--username: user name\n'
                '--apikey: api key of user\n'
@@ -243,10 +246,10 @@ class FliesConsole:
               
     def _list_projects(self):
         """
-        List the information of all the project on the flies server
+        List the information of all the project on the zanata server
         """
-        flies = FliesResource(self.url)
-        projects = flies.projects.list()
+        zanata = ZanataResource(self.url)
+        projects = zanata.projects.list()
         
         if not projects:
             self.log.error("There is no projects on the server or the server not working")
@@ -267,12 +270,12 @@ class FliesConsole:
             project_id = self.project_config['project_id']        
         
         if not project_id:
-            self.log.error('Please use flies project info --project-id=project_id or flies.xml to specify the project id')
+            self.log.error('Please use zanata project info --project-id=project_id or zanata.xml/flies.xml to specify the project id')
             sys.exit(1)
       
-        flies = FliesResource(self.url)
+        zanata = ZanataResource(self.url)
         try:
-            p = flies.projects.get(project_id)
+            p = zanata.projects.get(project_id)
             print ("Project Id:          %s")%p.id 
             print ("Project Name:        %s")%p.name 
             print ("Project Type:        %s")%p.type
@@ -297,12 +300,12 @@ class FliesConsole:
             iteration_id = self.project_config['project_version']
 
         if not iteration_id or not project_id:
-            self.log.error("Please use flies version info --project-id=project_id --project-version=project_version to retrieve the version")
+            self.log.error("Please use zanata version info --project-id=project_id --project-version=project_version to retrieve the version")
             sys.exit(1)
         
-        flies = FliesResource(self.url)
+        zanata = ZanataResource(self.url)
         try:
-            project = flies.projects.get(project_id)
+            project = zanata.projects.get(project_id)
             iteration = project.get_iteration(iteration_id)
             print ("Version Id:          %s")%iteration.id
             print ("Version Name:        %s")%iteration.name
@@ -316,9 +319,9 @@ class FliesConsole:
         @param args: project id
         """
         if self.user_name and self.apikey:
-            flies = FliesResource(self.url, self.user_name, self.apikey)
+            zanata = ZanataResource(self.url, self.user_name, self.apikey)
         else:
-            self.log.error("Please provide username and apikey in flies.ini or by command line options --username and --apikey")
+            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or by command line options --username and --apikey")
             sys.exit(1)
         self.log.info("Username: %s"%self.user_name)
 
@@ -333,7 +336,7 @@ class FliesConsole:
         try:
             item = {'id':args[0], 'name':options['project_name'], 'desc':options['project_desc']}
             p = Project(item)
-            result = flies.projects.create(p)
+            result = zanata.projects.create(p)
             if result == "Success":
                 self.log.info("Success create the project: %s"%args[0])
         except NoSuchProjectException, e:
@@ -349,9 +352,9 @@ class FliesConsole:
         @param args: version id
         """
         if self.user_name and self.apikey:
-            flies = FliesResource(self.url, self.user_name, self.apikey)
+            zanata = ZanataResource(self.url, self.user_name, self.apikey)
         else:
-            self.log.error("Please provide username and apikey in flies.ini or by --username and --apikey options")
+            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or by --username and --apikey options")
             sys.exit(1)
 
         self.log.info("Username: %s"%self.user_name)
@@ -361,7 +364,7 @@ class FliesConsole:
         elif self.project_config['project_id']:
             project_id = self.project_config['project_id']
         else:
-            self.log.error("Please provide PROJECT_ID by --project-id option or using flies.xml")
+            self.log.error("Please provide PROJECT_ID by --project-id option or using zanata.xml")
         
         self.log.info("Project id:%s"%project_id)
         
@@ -376,7 +379,7 @@ class FliesConsole:
         try:
             item = {'id':args[0], 'name':options['version_name'], 'desc':options['version_desc']}
             iteration = Iteration(item)
-            result = flies.projects.iterations.create(project_id, iteration)
+            result = zanata.projects.iterations.create(project_id, iteration)
             if result == "Success":
                 self.log.info("Success create the version %s"%args[0])
         except ProjectExistException, e:
@@ -388,7 +391,7 @@ class FliesConsole:
         except InvalidOptionException, e:
             self.log.error(e.msg)
 
-    def check_project(self, fliesclient):
+    def check_project(self, zanataclient):
         if options['project_id']:
             project_id =  options['project_id'] 
         else:
@@ -400,11 +403,11 @@ class FliesConsole:
             iteration_id = self.project_config['project_version']
 
         if not project_id:
-            self.log.error("Please provide valid project id by flies.xml or by '--project-id' option")
+            self.log.error("Please provide valid project id by zanata.xml/flies.xml or by '--project-id' option")
             sys.exit(1)
         
         if not iteration_id:
-            self.log.error("Please provide valid version id by flies.xml or by '--project-version' option")
+            self.log.error("Please provide valid version id by zanata.xml/flies.xml or by '--project-version' option")
             sys.exit(1)
         
         self.log.info("Project: %s"%project_id)
@@ -412,13 +415,13 @@ class FliesConsole:
         self.log.info("Username: %s"%self.user_name)
 
         try:
-            fliesclient.projects.get(project_id)
+            zanataclient.projects.get(project_id)
         except NoSuchProjectException, e:
             self.log.error(e.msg)
             sys.exit(1)
    
         try:
-            fliesclient.projects.iterations.get(project_id, iteration_id)
+            zanataclient.projects.iterations.get(project_id, iteration_id)
             return project_id, iteration_id
         except NoSuchProjectException, e:
             self.log.error(e.msg)
@@ -430,18 +433,18 @@ class FliesConsole:
                 return os.path.join(root, filename)
         raise NoSuchFileException('Error 404', 'File %s not found'%filename)
 
-    def import_po(self, publicanutil, trans_folder, flies, project_id, iteration_id, filename):
+    def import_po(self, publicanutil, trans_folder, zanata, project_id, iteration_id, filename):
         
         if options['lang']:
             lang_list = options['lang'].split(',')
         elif self.project_config['locale_map']:
             lang_list = self.project_config['locale_map'].keys()
         else:
-            self.log.error("Please specify the language by '--lang' option or flies.xml")
+            self.log.error("Please specify the language by '--lang' option or zanata.xml")
             sys.exit(1)
 
         for item in lang_list:
-            self.log.info("Push %s translation to Flies server:"%item)
+            self.log.info("Push %s translation to Zanata/Flies server:"%item)
             
             if item in self.project_config['locale_map']:
                 lang = self.project_config['locale_map'][item]
@@ -475,9 +478,9 @@ class FliesConsole:
                 continue
          
             try:
-                result = flies.documents.commit_translation(project_id, iteration_id, request_name, lang, body)
+                result = zanata.documents.commit_translation(project_id, iteration_id, request_name, lang, body)
                 if result:
-                    self.log.info("Successfully pushed translation %s to the Flies server"%pofile_full_path) 
+                    self.log.info("Successfully pushed translation %s to the Zanata/Flies server"%pofile_full_path) 
                 else:
                     self.log.error("Commit translation is not successful")
             except UnAuthorizedException, e:
@@ -487,27 +490,27 @@ class FliesConsole:
                 self.log.error(e.msg)
                 continue
 
-    def update_template(self, flies, project_id, iteration_id, filename, body):
+    def update_template(self, zanata, project_id, iteration_id, filename, body):
         if '/' in filename:
             request_name = filename.replace('/', ',')
         else:
             request_name = filename
         
         try:
-            result = flies.documents.update_template(project_id, iteration_id, request_name, body, options['copytrans'])
+            result = zanata.documents.update_template(project_id, iteration_id, request_name, body, options['copytrans'])
             if result:
-                self.log.info("Successfully updated template %s on the Flies server"%filename)
+                self.log.info("Successfully updated template %s on the Zanata/Flies server"%filename)
         except BadRequestBodyException, e:
             self.log.error(e.msg) 
     
     def _push_pofile(self, args):
         if self.user_name and self.apikey:
-            flies = FliesResource(self.url, self.user_name, self.apikey)
+            zanata = ZanataResource(self.url, self.user_name, self.apikey)
         else:
-            self.log.error("Please provide username and apikey in flies.ini or by '--username' and '--apikey' options")
+            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or by '--username' and '--apikey' options")
             sys.exit(1)
 
-        project_id, iteration_id = self.check_project(flies)
+        project_id, iteration_id = self.check_project(zanata)
         
         self.log.info("Source language: en-US")
         self.log.info("Copy previous translations:%s"%options['copytrans'])
@@ -535,7 +538,7 @@ class FliesConsole:
                 
         #Get the file list of this version of project
         try:
-            filelist = flies.documents.get_file_list(project_id, iteration_id)
+            filelist = zanata.documents.get_file_list(project_id, iteration_id)
         except Exception, e:
             self.log.error(str(e))
             sys.exit(1)
@@ -550,7 +553,7 @@ class FliesConsole:
                     if option.lower() == "yes" or option.lower() == "y":
                         break    
                     elif option.lower() == "no" or option.lower() == "n":
-                        self.log.info("Stop processing, keep the content on the flies server")
+                        self.log.info("Stop processing, keep the content on the zanata server")
                         sys.exit(1)
                     else:
                         self.log.error("Please enter yes(y) or no(n)")
@@ -566,14 +569,14 @@ class FliesConsole:
                 self.log.info("Delete the %s"%file)
                  
                 try:
-                    flies.documents.delete_template(project_id, iteration_id, filename)
+                    zanata.documents.delete_template(project_id, iteration_id, filename)
                 except Exception, e:
                     self.log.error(str(e))
                     sys.exit(1)
 
         publicanutil = PublicanUtility()
 
-        #if file not specified, push all the files in pot folder to flies server
+        #if file not specified, push all the files in pot folder to zanata server
         if not args:
             #get all the pot files from the template folder 
             pot_list = publicanutil.get_file_list(tmlfolder, ".pot")
@@ -583,14 +586,14 @@ class FliesConsole:
                 sys.exit(1)
 
             for pot in pot_list:
-                self.log.info("\nPush the content of %s to Flies server:"%pot)
+                self.log.info("\nPush the content of %s to Zanata/Flies server:"%pot)
                     
                 body, filename = publicanutil.potfile_to_json(pot, tmlfolder)
                                                           
                 try:
-                    result = flies.documents.commit_template(project_id, iteration_id, body, options['copytrans'])
+                    result = zanata.documents.commit_template(project_id, iteration_id, body, options['copytrans'])
                     if result:
-                        self.log.info("Successfully pushed %s to the Flies server"%pot)    
+                        self.log.info("Successfully pushed %s to the Zanata/Flies server"%pot)    
                 except UnAuthorizedException, e:
                     self.log.error(e.msg)
                     break                                            
@@ -598,7 +601,7 @@ class FliesConsole:
                     self.log.error(e.msg)
                     continue
                 except SameNameDocumentException, e:
-                    self.update_template(flies, project_id, iteration_id, filename, body)
+                    self.update_template(zanata, project_id, iteration_id, filename, body)
 
                 if options['importpo']:
                     if options['lang']:
@@ -606,11 +609,11 @@ class FliesConsole:
                     elif self.project_config['locale_map']:
                         lang_list = self.project_config['locale_map'].keys()
                     else:
-                        self.log.error("Please specify the language by '--lang' option or flies.xml")
+                        self.log.error("Please specify the language by '--lang' option or zanata.xml/flies.xml")
                         sys.exit(1)
 
                     for item in lang_list:
-                        self.log.info("Push %s translation to Flies server:"%item)
+                        self.log.info("Push %s translation to Zanata/Flies server:"%item)
             
                         if item in self.project_config['locale_map']:
                             lang = self.project_config['locale_map'][item]
@@ -644,9 +647,9 @@ class FliesConsole:
                             continue
          
                         try:
-                            result = flies.documents.commit_translation(project_id, iteration_id, request_name, lang, body)
+                            result = zanata.documents.commit_translation(project_id, iteration_id, request_name, lang, body)
                             if result:
-                                self.log.info("Successfully pushed translation %s to the Flies server"%pofile_full_path) 
+                                self.log.info("Successfully pushed translation %s to the Zanata/Flies server"%pofile_full_path) 
                             else:
                                 self.log.error("Commit translation is not successful")
                         except UnAuthorizedException, e:
@@ -657,7 +660,7 @@ class FliesConsole:
                             continue
             
         else:
-            self.log.info("\nPush the content of %s to Flies server:"%args[0])
+            self.log.info("\nPush the content of %s to Zanata/Flies server:"%args[0])
 
             try:
                 full_path = self.search_file(tmlfolder, args[0])
@@ -668,9 +671,9 @@ class FliesConsole:
             body, filename = publicanutil.potfile_to_json(full_path, tmlfolder)
             
             try:
-                result = flies.documents.commit_template(project_id, iteration_id, body, options['copytrans'])                
+                result = zanata.documents.commit_template(project_id, iteration_id, body, options['copytrans'])                
                 if result:
-                    self.log.info("Successfully pushed %s to the Flies server"%args[0])
+                    self.log.info("Successfully pushed %s to the Zanata/Flies server"%args[0])
             except UnAuthorizedException, e:
                 self.log.error(e.msg)    
             except BadRequestBodyException, e:
@@ -684,11 +687,11 @@ class FliesConsole:
                 elif self.project_config['locale_map']:
                     lang_list = self.project_config['locale_map'].keys()
                 else:
-                    self.log.error("Please specify the language by '--lang' option or flies.xml")
+                    self.log.error("Please specify the language by '--lang' option or zanata.xml")
                     sys.exit(1)
 
                 for item in lang_list:
-                    self.log.info("Push %s translation to Flies server:"%item)
+                    self.log.info("Push %s translation to zanata server:"%item)
             
                     if item in self.project_config['locale_map']:
                         lang = self.project_config['locale_map'][item]
@@ -714,9 +717,9 @@ class FliesConsole:
                         continue
          
                     try:
-                        result = flies.documents.commit_translation(project_id, iteration_id, args[0].rstrip('.pot'), lang, body)
+                        result = zanata.documents.commit_translation(project_id, iteration_id, args[0].rstrip('.pot'), lang, body)
                         if result:
-                            self.log.info("Successfully pushed translation %s to the Flies server"%pofile_full_path) 
+                            self.log.info("Successfully pushed translation %s to the Zanata/Flies server"%pofile_full_path) 
                         else:
                             self.log.error("Commit translation is not successful")
                     except UnAuthorizedException, e:
@@ -728,9 +731,9 @@ class FliesConsole:
     
     def _pull_pofile(self, args):
         if self.user_name and self.apikey:
-            flies = FliesResource(self.url, self.user_name, self.apikey)
+            zanata = ZanataResource(self.url, self.user_name, self.apikey)
         else:
-            self.log.error("Please provide username and apikey in flies.ini or by '--username' and '--apikey' options")
+            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or by '--username' and '--apikey' options")
             sys.exit(1)
 
         list = []
@@ -739,14 +742,14 @@ class FliesConsole:
         elif self.project_config['locale_map']:
             list = self.project_config['locale_map'].keys()
         else:
-            self.log.error("Please specify the language by '--lang' option or flies.xml")
+            self.log.error("Please specify the language by '--lang' option or zanata.xml/flies.xml")
             sys.exit(1)
 
-        project_id, iteration_id = self.check_project(flies)
+        project_id, iteration_id = self.check_project(zanata)
         
         #list the files in project
         try:
-            filelist = flies.documents.get_file_list(project_id, iteration_id)
+            filelist = zanata.documents.get_file_list(project_id, iteration_id)
         except Exception, e:
             self.log.error(str(e))
             sys.exit(1)
@@ -769,7 +772,7 @@ class FliesConsole:
                         name = file
                         request_name = file
 
-                    self.log.info("\nFetch the content of %s from Flies server: "%name)                    
+                    self.log.info("\nFetch the content of %s from Zanata/Flies server: "%name)                    
                     
                     for item in list:
                         if item in self.project_config['locale_map']:
@@ -786,19 +789,19 @@ class FliesConsole:
                             if not os.path.isdir(outpath):
                                 os.mkdir(outpath)                        
 
-                        self.log.info("Retrieve %s translation from Flies server:"%item)
+                        self.log.info("Retrieve %s translation from Zanata/Flies server:"%item)
 
                         try:
-                            pot = flies.documents.retrieve_template(project_id, iteration_id, request_name)                    
+                            pot = zanata.documents.retrieve_template(project_id, iteration_id, request_name)                    
                         except UnAuthorizedException, e:
                             self.log.error(e.msg)
                             break
                         except UnAvaliableResourceException, e:
-                            self.log.error("Can't find pot file for %s on Flies server"%name)
+                            self.log.error("Can't find pot file for %s on Zanata/Flies server"%name)
                             break
                 
                         try:
-                            result = flies.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
+                            result = zanata.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
                         except UnAuthorizedException, e:
                             self.log.error(e.msg)                        
                             break
@@ -821,7 +824,7 @@ class FliesConsole:
                         except InvalidPOTFileException, e:
                             self.log.error("Can't generate po file for %s,"%name+e.msg)
         else:
-            self.log.info("\nFetch the content of %s from Flies server: "%args[0])
+            self.log.info("\nFetch the content of %s from Zanata/Flies server: "%args[0])
             for item in list:
                 result = ''
                 pot = ''
@@ -841,7 +844,7 @@ class FliesConsole:
                     if not os.path.isdir(outpath):
                         os.mkdir(outpath)
 
-                self.log.info("Retrieve %s translation from Flies server:"%item)
+                self.log.info("Retrieve %s translation from Zanata/Flies server:"%item)
 
                 for file in filelist:
                     if '/' in file: 
@@ -859,22 +862,22 @@ class FliesConsole:
                             break
                 
                 if not request_name:
-                    self.log.error("Can't find pot file for %s on Flies server"%args[0])
+                    self.log.error("Can't find pot file for %s on Zanata/Flies server"%args[0])
                     sys.exit(1)
 
                 pofile = os.path.join(outpath, item+'.po')
                                           
                 try:
-                    pot = flies.documents.retrieve_template(project_id, iteration_id, request_name)                    
+                    pot = zanata.documents.retrieve_template(project_id, iteration_id, request_name)                    
                 except UnAuthorizedException, e:
                     self.log.error(e.msg)
                     sys.exit(1)
                 except UnAvaliableResourceException, e:
-                    self.log.error("Can't find pot file for %s on Flies server"%args[0])
+                    self.log.error("Can't find pot file for %s on Zanata/Flies server"%args[0])
                     sys.exit(1)
 
                 try:            
-                    result = flies.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
+                    result = zanata.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
                 except UnAuthorizedException, e:
                     self.log.error(e.msg)
                     sys.exit(1)
@@ -891,16 +894,16 @@ class FliesConsole:
 
     def _push_publican(self, args):
         """
-        Push the content of publican files to a Project version on Flies server
+        Push the content of publican files to a Project version on Zanata/Flies server
         @param args: name of the publican file
         """
         if self.user_name and self.apikey:
-            flies = FliesResource(self.url, self.user_name, self.apikey)
+            zanata = ZanataResource(self.url, self.user_name, self.apikey)
         else:
-            self.log.error("Please provide username and apikey in flies.ini or by '--username' and '--apikey' options")
+            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or by '--username' and '--apikey' options")
             sys.exit(1)
 
-        project_id, iteration_id = self.check_project(flies)
+        project_id, iteration_id = self.check_project(zanata)
         
         self.log.info("Source language: en-US")
         self.log.info("Copy previous translations:%s"%options['copytrans'])
@@ -928,7 +931,7 @@ class FliesConsole:
                 
         #Get the file list of this version of project
         try:
-            filelist = flies.documents.get_file_list(project_id, iteration_id)
+            filelist = zanata.documents.get_file_list(project_id, iteration_id)
         except Exception, e:
             self.log.error(str(e))
             sys.exit(1)
@@ -943,7 +946,7 @@ class FliesConsole:
                     if option.lower() == "yes" or option.lower() == "y":
                         break    
                     elif option.lower() == "no" or option.lower() == "n":
-                        self.log.info("Stop processing, keep the content on the flies server")
+                        self.log.info("Stop processing, keep the content on the zanata server")
                         sys.exit(1)
                     else:
                         self.log.error("Please enter yes(y) or no(n)")
@@ -959,13 +962,13 @@ class FliesConsole:
                 self.log.info("Delete the %s"%file)
                  
                 try:
-                    flies.documents.delete_template(project_id, iteration_id, filename)
+                    zanata.documents.delete_template(project_id, iteration_id, filename)
                 except Exception, e:
                     self.log.error(str(e))
                     sys.exit(1)
 
         publicanutil = PublicanUtility()
-        #if file not specified, push all the files in pot folder to flies server
+        #if file not specified, push all the files in pot folder to zanata server
         if not args:
             #get all the pot files from the template folder 
             pot_list = publicanutil.get_file_list(tmlfolder, ".pot")
@@ -975,14 +978,14 @@ class FliesConsole:
                 sys.exit(1)
 
             for pot in pot_list:
-                self.log.info("\nPush the content of %s to Flies server:"%pot)
+                self.log.info("\nPush the content of %s to Zanata/Flies server:"%pot)
                     
                 body, filename = publicanutil.potfile_to_json(pot, tmlfolder)
                                           
                 try:
-                    result = flies.documents.commit_template(project_id, iteration_id, body, options['copytrans'])
+                    result = zanata.documents.commit_template(project_id, iteration_id, body, options['copytrans'])
                     if result:
-                        self.log.info("Successfully pushed %s to the Flies server"%pot)    
+                        self.log.info("Successfully pushed %s to the Zanata/Flies server"%pot)    
                 except UnAuthorizedException, e:
                     self.log.error(e.msg)
                     break                                            
@@ -990,13 +993,13 @@ class FliesConsole:
                     self.log.error(e.msg)
                     continue
                 except SameNameDocumentException, e:
-                    self.update_template(flies, project_id, iteration_id, filename, body)
+                    self.update_template(zanata, project_id, iteration_id, filename, body)
 
                 if options['importpo']:
-                    self.import_po(publicanutil, trans_folder, flies, project_id, iteration_id, filename)
+                    self.import_po(publicanutil, trans_folder, zanata, project_id, iteration_id, filename)
             
         else:
-            self.log.info("\nPush the content of %s to Flies server:"%args[0])
+            self.log.info("\nPush the content of %s to Zanata/Flies server:"%args[0])
 
             try:
                 full_path = self.search_file(tmlfolder, args[0])
@@ -1007,9 +1010,9 @@ class FliesConsole:
             body, filename = publicanutil.potfile_to_json(full_path, tmlfolder)
             
             try:
-                result = flies.documents.commit_template(project_id, iteration_id, body, options['copytrans'])                
+                result = zanata.documents.commit_template(project_id, iteration_id, body, options['copytrans'])                
                 if result:
-                    self.log.info("Successfully pushed %s to the Flies server"%args[0])
+                    self.log.info("Successfully pushed %s to the Zanata/Flies server"%args[0])
             except UnAuthorizedException, e:
                 self.log.error(e.msg)    
             except BadRequestBodyException, e:
@@ -1018,19 +1021,19 @@ class FliesConsole:
                 self.update_template(project_id, iteration_id, filename, body)   
 
             if options['importpo']:
-                self.import_po(publicanutil, trans_folder, flies, project_id, iteration_id, filename)
+                self.import_po(publicanutil, trans_folder, zanata, project_id, iteration_id, filename)
 
     def _pull_publican(self, args):
         """
-        Retrieve the content of documents in a Project version from Flies server. If the name of publican
+        Retrieve the content of documents in a Project version from Zanata/Flies server. If the name of publican
         file is specified, the content of that file will be pulled from server. Otherwise, all the document of that
         Project iteration will be pulled from server.
         @param args: the name of publican file
         """
         if self.user_name and self.apikey:
-            flies = FliesResource(self.url, self.user_name, self.apikey)
+            zanata = ZanataResource(self.url, self.user_name, self.apikey)
         else:
-            self.log.error("Please provide username and apikey in flies.ini or by '--username' and '--apikey' options")
+            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or by '--username' and '--apikey' options")
             sys.exit(1)
 
         list = []
@@ -1039,14 +1042,14 @@ class FliesConsole:
         elif self.project_config['locale_map']:
             list = self.project_config['locale_map'].keys()
         else:
-            self.log.error("Please specify the language by '--lang' option or flies.xml")
+            self.log.error("Please specify the language by '--lang' option or zanata.xml")
             sys.exit(1)
 
-        project_id, iteration_id = self.check_project(flies)
+        project_id, iteration_id = self.check_project(zanata)
         
         #list the files in project
         try:
-            filelist = flies.documents.get_file_list(project_id, iteration_id)
+            filelist = zanata.documents.get_file_list(project_id, iteration_id)
         except Exception, e:
             self.log.error(str(e))
             sys.exit(1)
@@ -1069,7 +1072,7 @@ class FliesConsole:
                         name = file
                         request_name = file
 
-                    self.log.info("\nFetch the content of %s from Flies server: "%name)                    
+                    self.log.info("\nFetch the content of %s from Zanata/Flies server: "%name)                    
                     
                     for item in list:
                         if item in self.project_config['locale_map']:
@@ -1089,19 +1092,19 @@ class FliesConsole:
                         if not os.path.isdir(outpath):
                             os.mkdir(outpath)                        
 
-                        self.log.info("Retrieve %s translation from Flies server:"%item)
+                        self.log.info("Retrieve %s translation from Zanata/Flies server:"%item)
 
                         try:
-                            pot = flies.documents.retrieve_template(project_id, iteration_id, request_name)                    
+                            pot = zanata.documents.retrieve_template(project_id, iteration_id, request_name)                    
                         except UnAuthorizedException, e:
                             self.log.error(e.msg)
                             break
                         except UnAvaliableResourceException, e:
-                            self.log.error("Can't find pot file for %s on Flies server"%name)
+                            self.log.error("Can't find pot file for %s on Zanata/Flies server"%name)
                             break
                 
                         try:
-                            result = flies.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
+                            result = zanata.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
                         except UnAuthorizedException, e:
                             self.log.error(e.msg)                        
                             break
@@ -1124,7 +1127,7 @@ class FliesConsole:
                         except InvalidPOTFileException, e:
                             self.log.error("Can't generate po file for %s,"%name+e.msg)
         else:
-            self.log.info("\nFetch the content of %s from Flies server: "%args[0])
+            self.log.info("\nFetch the content of %s from Zanata/Flies server: "%args[0])
             for item in list:
                 result = ''
                 pot = ''
@@ -1147,7 +1150,7 @@ class FliesConsole:
                 if not os.path.isdir(outpath):
                     os.mkdir(outpath)
 
-                self.log.info("Retrieve %s translation from Flies server:"%item)
+                self.log.info("Retrieve %s translation from Zanata/Flies server:"%item)
 
                 for file in filelist:
                     if '/' in file: 
@@ -1165,22 +1168,22 @@ class FliesConsole:
                             break
                 
                 if not request_name:
-                    self.log.error("Can't find pot file for %s on Flies server"%args[0])
+                    self.log.error("Can't find pot file for %s on Zanata/Flies server"%args[0])
                     sys.exit(1)
 
                 pofile = os.path.join(outpath, args[0]+'.po')
                                           
                 try:
-                    pot = flies.documents.retrieve_template(project_id, iteration_id, request_name)                    
+                    pot = zanata.documents.retrieve_template(project_id, iteration_id, request_name)                    
                 except UnAuthorizedException, e:
                     self.log.error(e.msg)
                     sys.exit(1)
                 except UnAvaliableResourceException, e:
-                    self.log.error("Can't find pot file for %s on Flies server"%args[0])
+                    self.log.error("Can't find pot file for %s on Zanata/Flies server"%args[0])
                     sys.exit(1)
 
                 try:            
-                    result = flies.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
+                    result = zanata.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
                 except UnAuthorizedException, e:
                     self.log.error(e.msg)
                     sys.exit(1)
@@ -1289,17 +1292,21 @@ class FliesConsole:
         if command == 'help':
             self._print_help_info(command_args)
         else:
-            config = FliesConfig()
+            config = ZanataConfig()
             #Read the project configuration file using --project-config option
             if options['project_config']  and os.path.isfile(options['project_config']):
-                self.log.info("Loading flies project config from %s"%options['project_config'])            
+                self.log.info("Loading zanata project config from %s"%options['project_config'])            
                 self.project_config = config.read_project_config(options['project_config'])
+            elif os.path.isfile(os.getcwd()+'/zanata.xml'):
+                #If the option is not valid, try to read the project configuration from current path
+                self.log.info("Loading zanata/flies project config from from %s"%(os.getcwd()+'/zanata.xml'))
+                self.project_config = config.read_project_config(os.getcwd()+'/zanata.xml') 
             elif os.path.isfile(os.getcwd()+'/flies.xml'):
                 #If the option is not valid, try to read the project configuration from current path
-                self.log.info("Loading flies project config from from %s"%(os.getcwd()+'/flies.xml'))
+                self.log.info("Loading zanata/flies project config from from %s"%(os.getcwd()+'/flies.xml'))
                 self.project_config = config.read_project_config(os.getcwd()+'/flies.xml')            
             elif command != 'list':                
-                self.log.info("Can not find flies.xml, please specify the path of flies.xml")
+                self.log.info("Can not find zanata.xml/flies.xml, please specify the path of zanata.xml")
                 
             #process the url of server
             if self.project_config:
@@ -1311,7 +1318,7 @@ class FliesConsole:
                 self.url = options['url']
 
             if not self.url or self.url.isspace():
-                self.log.error("Please provide valid server url in flies.xml or by '--url' option")
+                self.log.error("Please provide valid server url in zanata.xml/flies.xml or by '--url' option")
                 sys.exit(1)
 
             if self.url[-1] == "/":
@@ -1321,11 +1328,13 @@ class FliesConsole:
             user_config = ''
             if options['user_config'] and os.path.isfile(options['user_config']):  
                 user_config = options['user_config']
+            elif os.path.isfile(os.path.expanduser("~")+'/.config/zanata.ini'):
+                user_config = os.path.expanduser("~")+'/.config/zanata.ini'
             elif os.path.isfile(os.path.expanduser("~")+'/.config/flies.ini'):
                 user_config = os.path.expanduser("~")+'/.config/flies.ini'
             
             if user_config:
-                self.log.info("Loading flies user config from %s"%user_config)
+                self.log.info("Loading zanata/flies user config from %s"%user_config)
                 
                 #Read the user-config file    
                 config.set_userconfig(user_config)
@@ -1340,7 +1349,7 @@ class FliesConsole:
             else:    
                 self.log.info("Can not find user-config file in home folder, current path or path in 'user-config' option")
             
-            self.log.info("Flies server: %s"%self.url) 
+            self.log.info("zanata/flies server: %s"%self.url) 
             
             #The value in commandline options will overwrite the value in user-config file          
             if options['user_name']:
@@ -1349,7 +1358,7 @@ class FliesConsole:
             if options['key']:
                 self.apikey = options['key']
            
-            #Retrieve the version of the Flies server 
+            #Retrieve the version of the zanata server 
             version = VersionService(self.url)
 
             #Retrieve the version of client
@@ -1360,9 +1369,9 @@ class FliesConsole:
 
             try:            
                 content = version.get_server_version()
-                self.log.info("Flies python client version: %s, Flies server API version: %s"%(version_number, content['versionNo']))  
+                self.log.info("zanata python client version: %s, zanata/flies server API version: %s"%(version_number, content['versionNo']))  
             except UnAvaliableResourceException, e:
-                self.log.info("Flies python client version: %s"%self.client_version)
+                self.log.info("zanata python client version: %s"%version_number)
                 self.log.error("Can not retrieve the server version, server may not support the version service")
 
             if command == 'list':
@@ -1392,7 +1401,7 @@ class FliesConsole:
                     self._pull_pofile(command_args)
 
 def main():
-    client = FliesConsole()
+    client = zanataConsole()
     client.run()
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 # 
-# Flies Python Client
+# Zanata Python Client
 #
-# Copyright (c) 2010 Jian Ni <jni@redhat.com>
-# Copyright (c) 2010 Red Hat, Inc.
+# Copyright (c) 2011 Jian Ni <jni@redhat.com>
+# Copyright (c) 2011 Red Hat, Inc.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -87,7 +87,7 @@ class RestClient(object):
             response, content = http.request("%s%s" % (self.base_url, resource), "GET")
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
-            print "error: %s, Maybe the flies sever is down?"%e
+            print "error: %s, Maybe the Zanata/Flies sever is down?"%e
             sys.exit(2)
         except httplib2.HttpLib2Error, e:
             print "error: %s"%e

@@ -1,5 +1,5 @@
 include COPYING
 include COPYING.LESSER
-include flies.xml
-include flies.ini
-include flies
+include zanata.xml
+include zanata.ini
+include zanata
