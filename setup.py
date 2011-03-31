@@ -4,11 +4,22 @@ Build script for flies-python-client
 """
 from setuptools import setup, find_packages
 import os
+import subprocess
 
-file = open('./VERSION-FILE', 'rb')
-version = file.read()
-file.close()
-number = version[:-1].strip('version: ')
+p = subprocess.Popen('./VERSION-GEN', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+output = p.stdout.readline()
+number = output[:-1].strip('version: ')
+
+subprocess.Popen("""
+cat << EOF > MANIFEST.in
+include COPYING
+include COPYING.LESSER
+include zanata.xml
+include zanata.ini
+include zanata
+include VERSION-FILE
+EOF
+""", shell=True)
 
 setup (name = "zanata-python-client",
     version = number,
@@ -22,7 +33,7 @@ setup (name = "zanata-python-client",
     author_email = 'jni@redhat.com',
     license = 'LGPLv2+',
     platforms=["Linux"],
-    scripts = ["zanata"],
+    scripts = ["zanata","flies"],
     
     #entry_points = {
 	#'console_scripts': [
