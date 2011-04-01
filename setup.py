@@ -18,6 +18,7 @@ include zanata.xml
 include zanata.ini
 include zanata
 include VERSION-FILE
+include VERSION-GEN
 EOF
 """, shell=True)
 
