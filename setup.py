@@ -23,6 +23,7 @@ include COPYING.LESSER
 include zanata.xml
 include zanata.ini
 include zanata
+include Makefile
 include VERSION-FILE
 include VERSION-GEN
 EOF
