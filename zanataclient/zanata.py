@@ -1151,7 +1151,8 @@ class ZanataConsole:
                     os.mkdir(outpath)
 
                 self.log.info("Retrieve %s translation from Zanata/Flies server:"%item)
-
+                
+                request_name = ''
                 for file in filelist:
                     if '/' in file: 
                         name = file.split('/')[-1]

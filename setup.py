@@ -6,9 +6,15 @@ from setuptools import setup, find_packages
 import os
 import subprocess
 
-p = subprocess.Popen('./VERSION-GEN', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
-output = p.stdout.readline()
-number = output[:-1].strip('version: ')
+if not os.path.exists('./VERSION-FILE'):
+    p = subprocess.Popen('./VERSION-GEN', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  close_fds=True)
+    output = p.stdout.readline()
+    number = output[:-1].strip('version: ')
+else:
+    file = open('./VERSION-FILE', 'rb')
+    client_version = file.read()
+    file.close()
+    number = client_version[:-1].strip('version: ')
 
 subprocess.Popen("""
 cat << EOF > MANIFEST.in
