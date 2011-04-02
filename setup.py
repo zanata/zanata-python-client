@@ -20,6 +20,12 @@ else:
     file.close()
     number = client_version[:-1].strip('version: ')
 
+subprocess.Popen("""
+cat << EOF > MANIFEST.in
+include zanataclient/VERSION-FILE
+EOF
+""", shell=True)
+
 setup (name = "zanata-python-client",
     version = number,
     packages = find_packages(),
