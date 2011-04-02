@@ -1,6 +1,4 @@
 # Makefile for python client
-VERSION_GEN = $(shell ./VERSION-GEN)
 
-all: setup.py VERSION-GEN
-	$(VERSION_GEN)
+all: setup.py 
 	python setup.py sdist

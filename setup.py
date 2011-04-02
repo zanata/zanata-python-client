@@ -6,28 +6,19 @@ from setuptools import setup, find_packages
 import os
 import subprocess
 
-if not os.path.exists('./VERSION-FILE'):
-    p = subprocess.Popen('./VERSION-GEN', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  close_fds=True)
+path = os.path.dirname(os.path.realpath(__file__))
+version_file = os.path.join(path, 'VERSION-FILE')
+version_gen = os.path.join(path, 'VERSION-GEN')
+
+if not os.path.exists(version_file):
+    p = subprocess.Popen(version_gen, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  close_fds=True)
     output = p.stdout.readline()
     number = output[:-1].strip('version: ')
 else:
-    file = open('./VERSION-FILE', 'rb')
+    file = open(version_file, 'rb')
     client_version = file.read()
     file.close()
     number = client_version[:-1].strip('version: ')
-
-subprocess.Popen("""
-cat << EOF > MANIFEST.in
-include COPYING
-include COPYING.LESSER
-include zanata.xml
-include zanata.ini
-include zanata
-include Makefile
-include VERSION-FILE
-include VERSION-GEN
-EOF
-""", shell=True)
 
 setup (name = "zanata-python-client",
     version = number,

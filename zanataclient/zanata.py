@@ -1363,7 +1363,9 @@ class ZanataConsole:
             version = VersionService(self.url)
 
             #Retrieve the version of client
-            file = open('./VERSION-FILE', 'rb')
+            path = os.path.dirname(os.path.realpath(__file__))
+            version_file = os.path.join(path, 'VERSION-FILE')
+            file = open(version_file, 'rb')
             client_version = file.read()
             file.close()
             version_number = client_version[:-1].strip('version: ')
