@@ -251,6 +251,17 @@ class PublicanUtility:
         #If the translation is exist, read the content of the po file
         if translations:
             content = json.loads(translations)
+            """            
+            "extensions":[{"object-type":"po-target-header", "comment":"comment_value", "entries":[{"key":"ht","value":"vt1"}]}]
+            """
+            if content.get('extensions'):
+                ext = content.get('extensions')[0]
+                header_comment = ext.get('comment')
+                if header_comment:
+                    po.header = header_comment
+                for item in ext.get('entries'):
+                    po.metadata[item['key']]=item['value']  
+            
             targets = content.get('textFlowTargets')
                             
             """
