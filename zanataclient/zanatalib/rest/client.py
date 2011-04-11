@@ -70,6 +70,8 @@ class RestClient(object):
         
         try:
             response, content = http.request("%s%s%s" % (self.base_url, resource, ext), method.upper(), body, headers=headers)
+            if response.previous.status == 301 or response.previous.status == 302:
+                print "warnning: Please update the URL of the server"
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
             print "error: %s, Maybe the flies sever is down?"%e
@@ -85,6 +87,8 @@ class RestClient(object):
         http = httplib2.Http(".cache")
         try:
             response, content = http.request("%s%s" % (self.base_url, resource), "GET")
+            if response.previous.status == 301 or response.previous.status == 302:
+                print "warnning: Please update the URL of the server"
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
             print "error: %s, Maybe the Zanata/Flies sever is down?"%e
