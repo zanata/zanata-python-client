@@ -29,6 +29,7 @@ import base64
 import warnings 
 import socket
 import sys
+import platform
 import exceptions
 import warnings
 warnings.simplefilter("ignore",DeprecationWarning)
@@ -71,7 +72,7 @@ class RestClient(object):
         try:
             response, content = http.request("%s%s%s" % (self.base_url, resource, ext), method.upper(), body, headers=headers)
             if response.previous.status == 301 or response.previous.status == 302:
-                print "warnning: Please update the URL of the server"
+                print "HTTP redirect: please update the server URL"
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
             print "error: %s, Maybe the flies sever is down?"%e
@@ -80,15 +81,22 @@ class RestClient(object):
             print "error: %s"%e
             sys.exit(2)
         except Exception, e:
-            print "error: %s"%e
-            sys.exit(2)
+            value = str(e).rstrip()
+            if value == 'a float is required':
+                print "error: Error happens when processing https"
+                if sys.version_info[:2] == (2, 6):
+                    print "If version of python-httplib2 < 0.4.0, please use the patch in http://code.google.com/p/httplib2/issues/detail?id=39"
+                sys.exit(2)
+            else:            
+                print "error: %s"%e
+                sys.exit(2)
 
     def request_version(self, resource):
         http = httplib2.Http(".cache")
         try:
             response, content = http.request("%s%s" % (self.base_url, resource), "GET")
             if response.previous.status == 301 or response.previous.status == 302:
-                print "warnning: Please update the URL of the server"
+                print "HTTP redirect: please update the server URL"
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
             print "error: %s, Maybe the Zanata/Flies sever is down?"%e
@@ -97,6 +105,13 @@ class RestClient(object):
             print "error: %s"%e
             sys.exit(2)
         except Exception, e:
-            print "error: %s"%e
-            sys.exit(2)
+            value = str(e).rstrip()
+            if value == 'a float is required':
+                print "error: Error happens when processing https"
+                if sys.version_info[:2] == (2, 6):
+                    print "If version of python-httplib2 < 0.4.0, please use the patch in http://code.google.com/p/httplib2/issues/detail?id=39"
+                sys.exit(2)
+            else:            
+                print "error: %s"%e
+                sys.exit(2)
  
