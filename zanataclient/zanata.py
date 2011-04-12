@@ -372,10 +372,12 @@ class ZanataConsole:
             self.log.error("Please provide ITERATION_ID for creating iteration")
             sys.exit(1)
 
+        """
         if not options['version_name']:
             self.log.error("Please provide Iteration name by '--version-name' option")
             sys.exit(1)
-         
+        """
+
         try:
             item = {'id':args[0], 'name':options['version_name'], 'desc':options['version_desc']}
             iteration = Iteration(item)
@@ -1344,7 +1346,7 @@ class ZanataConsole:
                     server = config.get_server(self.url)
                     if server:
                         self.user_name = config.get_config_value("username", "servers", server)
-    	                self.apikey = config.get_config_value("key", "servers", server)
+                        self.apikey = config.get_config_value("key", "servers", server)
                 except Exception, e:
                     self.log.info("Processing user-config file:%s"%str(e))
             else:    
@@ -1361,7 +1363,7 @@ class ZanataConsole:
            
             #Retrieve the version of the zanata server 
             version = VersionService(self.url)
-
+            
             #Retrieve the version of client
             path = os.path.dirname(os.path.realpath(__file__))
             version_file = os.path.join(path, 'VERSION-FILE')
