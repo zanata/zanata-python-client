@@ -143,12 +143,12 @@ class DocumentService:
         elif res['status'] == '400':
             raise BadRequestBodyException('Error 400', content)
   
-    def commit_translation(self, projectid, iterationid, fileid, localeid, resources):
+    def commit_translation(self, projectid, iterationid, fileid, localeid, resources, merge):
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
         
-        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers)
+        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers, merge=merge)
 
         if res['status'] == '200':
             return True

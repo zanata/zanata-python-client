@@ -43,17 +43,17 @@ class RestClient(object):
     def request_get(self, resource, args = None, body = None, headers = {}, extension = None):        
         return self.request(resource, "get", args, body, headers, extension)
     
-    def request_post(self, resource, args = None, body = None, headers = {}, extension = None, copytrans = None):
-        return self.request(resource, "post", args, body, headers, extension, copytrans)
+    def request_post(self, resource, args = None, body = None, headers = {}, extension = None, copytrans = None, merge = None):
+        return self.request(resource, "post", args, body, headers, extension, copytrans, merge)
             
-    def request_put(self, resource, args = None, body = None, headers = {}, extension = None, copytrans = None):
-        return self.request(resource, "put", args, body, headers, extension, copytrans = copytrans)
+    def request_put(self, resource, args = None, body = None, headers = {}, extension = None, copytrans = None, merge = None):
+        return self.request(resource, "put", args, body, headers, extension, copytrans, merge)
 
     def request_delete(self, resource, args = None, body = None, headers = {}, extension = None):
         return self.request(resource, "delete", args, body, headers, extension)
     
     def request(self, resource, method = "get", args = None, body = None, headers = {}, extension = None, copytrans =
-    None):
+    None, merge = None):
         headers['Accept'] = 'application/json'
         http = httplib2.Http()
         ext = "?ext=gettext&ext=comment"
@@ -63,6 +63,12 @@ class RestClient(object):
                 ext="?copyTrans=true"
             else:
                 ext=ext+"&copyTrans=true"
+
+        if merge:
+            if ext == "":
+                ext="?merge=%s"%merge
+            else:
+                ext=ext+"&merge=%s"%merge
         
         if args:
             if method == "put" or method == "post":
@@ -70,7 +76,7 @@ class RestClient(object):
                 body = args
         
         try:
-            response, content = http.request("%s%s%s" % (self.base_url, resource, ext), method.upper(), body, headers=headers)
+            response, content = http.request("%s%s%s"%(self.base_url, resource, ext), method.upper(), body, headers=headers)
             if response.previous is not None:
                 if response.previous.status == 301 or response.previous.status == 302:
                     new_url= response.previous['-x-permanent-redirect-url'].split(resource)[0]

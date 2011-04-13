@@ -58,6 +58,7 @@ options = {
             'version_desc':'',
             'lang':'',
             'email':'',
+            'merge':'auto',
             'importpo':False,
             'copytrans':True
             }
@@ -206,6 +207,7 @@ class ZanataConsole:
                '--srcdir: the full path of the pot folder\n'
                '--transdir: the full path of the folder that contain locale folders\n'
                '--import-po: push the translation at the same time\n'
+               '--merge: choose the merge algorithm: auto, import, default value is auto\n'
                '--no-copytrans: disable Zanata/Flies server to copy translation from other versions')
 
     def _publican_pull_help(self):
@@ -231,6 +233,7 @@ class ZanataConsole:
                '--srcdir: the full path of the pot folder\n'
                '--transdir: the full path of the folder that contain locale folders\n'
                '--import-po: push the translation at the same time\n'
+               '--merge: choose the merge algorithm: auto, import, default value is auto\n'
                '--no-copytrans: disable Zanata/Flies server to copy translation from other versions')
 
     def _pofile_pull_help(self):
@@ -436,7 +439,6 @@ class ZanataConsole:
         raise NoSuchFileException('Error 404', 'File %s not found'%filename)
 
     def import_po(self, publicanutil, trans_folder, zanata, project_id, iteration_id, filename):
-        
         if options['lang']:
             lang_list = options['lang'].split(',')
         elif self.project_config['locale_map']:
@@ -444,6 +446,14 @@ class ZanataConsole:
         else:
             self.log.error("Please specify the language by '--lang' option or zanata.xml")
             sys.exit(1)
+
+        if options['merge']:
+            if options['merge'] == 'auto' or options['merge'] == 'import':
+                merge = options['merge']
+                self.log.info("merge option set to value %s"%merge)
+            else:
+                self.log.info("merge option %s is not acceptable, change to default value 'auto'"%options['merge'])
+                merge = 'auto'
 
         for item in lang_list:
             self.log.info("Push %s translation to Zanata/Flies server:"%item)
@@ -480,7 +490,7 @@ class ZanataConsole:
                 continue
          
             try:
-                result = zanata.documents.commit_translation(project_id, iteration_id, request_name, lang, body)
+                result = zanata.documents.commit_translation(project_id, iteration_id, request_name, lang, body, merge)
                 if result:
                     self.log.info("Successfully pushed translation %s to the Zanata/Flies server"%pofile_full_path) 
                 else:
@@ -613,6 +623,14 @@ class ZanataConsole:
                     else:
                         self.log.error("Please specify the language by '--lang' option or zanata.xml/flies.xml")
                         sys.exit(1)
+                    
+                    if options['merge']:
+                        if options['merge'] == 'auto' or options['merge'] == 'import':
+                            merge = options['merge']
+                            self.log.info("merge option set to value %s"%merge)
+                        else:
+                            self.log.info("merge option %s is not acceptable, change to default value 'auto'"%options['merge'])
+                            merge = 'auto'
 
                     for item in lang_list:
                         self.log.info("Push %s translation to Zanata/Flies server:"%item)
@@ -649,7 +667,8 @@ class ZanataConsole:
                             continue
          
                         try:
-                            result = zanata.documents.commit_translation(project_id, iteration_id, request_name, lang, body)
+                            result = zanata.documents.commit_translation(project_id, iteration_id, request_name,
+                            lang, body, merge)
                             if result:
                                 self.log.info("Successfully pushed translation %s to the Zanata/Flies server"%pofile_full_path) 
                             else:
@@ -692,6 +711,14 @@ class ZanataConsole:
                     self.log.error("Please specify the language by '--lang' option or zanata.xml")
                     sys.exit(1)
 
+                if options['merge']:
+                    if options['merge'] == 'auto' or options['merge'] == 'import':
+                        merge = options['merge']
+                        self.log.info("merge option set to value %s"%merge)
+                    else:
+                        self.log.info("merge option %s is not acceptable, change to default value 'auto'"%options['merge'])
+                        merge = 'auto'
+                
                 for item in lang_list:
                     self.log.info("Push %s translation to zanata server:"%item)
             
@@ -719,7 +746,8 @@ class ZanataConsole:
                         continue
          
                     try:
-                        result = zanata.documents.commit_translation(project_id, iteration_id, args[0].rstrip('.pot'), lang, body)
+                        result = zanata.documents.commit_translation(project_id, iteration_id, args[0].rstrip('.pot'),
+                        lang, body, merge)
                         if result:
                             self.log.info("Successfully pushed translation %s to the Zanata/Flies server"%pofile_full_path) 
                         else:
@@ -1217,7 +1245,7 @@ class ZanataConsole:
         try:
             opts, args = getopt.gnu_getopt(sys.argv[1:], "vf", ["url=", "project-id=", "project-version=", "project-name=",
             "project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=",
-            "username=", "srcdir=", "dstdir=", "email=", "transdir=", "import-po", "no-copytrans"])
+            "username=", "srcdir=", "dstdir=", "email=", "transdir=", "merge=", "import-po", "no-copytrans"])
         except getopt.GetoptError, err:
             self.log.error(str(err))
             sys.exit(2)
@@ -1282,6 +1310,8 @@ class ZanataConsole:
                     options['transdir'] = a
                 elif o in ("--email"):
                     options['email'] = a
+                elif o in ("--merge"):
+                    options['merge'] = a
                 elif o in ("--import-po"):
                     options['importpo'] = True
                 elif o in ("--no-copytrans"):
