@@ -73,7 +73,8 @@ class RestClient(object):
             response, content = http.request("%s%s%s" % (self.base_url, resource, ext), method.upper(), body, headers=headers)
             if response.previous is not None:
                 if response.previous.status == 301 or response.previous.status == 302:
-                    print "HTTP redirect: please update the server URL"
+                    new_url= response.previous['-x-permanent-redirect-url'].split(resource)[0]
+                    print "HTTP redirect: redirect to %s, please update the server URL to new URL"%new_url
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
             print "error: %s, Maybe the flies sever is down?"%e
@@ -98,7 +99,8 @@ class RestClient(object):
             response, content = http.request("%s%s" % (self.base_url, resource), "GET")
             if response.previous is not None:
                 if response.previous.status == 301 or response.previous.status == 302:
-                    print "HTTP redirect: please update the server URL"
+                    new_url= response.previous['-x-permanent-redirect-url'].split(resource)[0]
+                    print "HTTP redirect: redirect to %s, please update the server URL to new URL"%new_url
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
             print "error: %s, Maybe the Zanata/Flies sever is down?"%e
