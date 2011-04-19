@@ -117,10 +117,10 @@ class ZanataConsole:
                         if sub[0] in sub_command[command]:
                             command = command+'_'+sub[0]
                         else:
-                            self.log.error("Can not find such command")
+                            self.log.error("Unknown command")
                             sys.exit(1)
             else:
-                self.log.error("Can not find such command")
+                self.log.error("Unknown command")
                 sys.exit(1)
 
             self._command_help(command)
@@ -197,7 +197,7 @@ class ZanataConsole:
 
     def _publican_push_help(self):
         print ('zanata publican push [OPTIONS] {documents}\n'
-               'push the publican files to Zanata/Flies server\n'
+               'push publican content to server for translation\n'
                'options:\n'
                '-f: force to remove content on server side\n'
                '--username: user name\n'
@@ -206,24 +206,24 @@ class ZanataConsole:
                '--project-version: id of the version\n'
                '--srcdir: the full path of the pot folder\n'
                '--transdir: the full path of the folder that contain locale folders\n'
-               '--import-po: push the translation at the same time\n'
-               '--merge: choose the merge algorithm: auto, import, default value is auto\n'
-               '--no-copytrans: disable Zanata/Flies server to copy translation from other versions')
+               '--import-po: push local translations to server\n'
+               '--merge: override merge algorithm: auto (default) or import\n'
+               '--no-copytrans: prevent server from copying translations from other versions')
 
     def _publican_pull_help(self):
         print ('zanata publican pull [OPTIONS] {documents} {lang}\n'
-               'retrieve the publican files from Zanata/Flies server\n'
+               'retrieve translated publican content files from server\n'
                'options:\n'
                '--username: user name\n'
                '--apikey: api key of user\n'
                '--project-id: id of the project\n'
                '--project-version: id of the version\n'
-               '--dstdir: the path of the folder for saving the po files\n'
+               '--dstdir: output folder for po files\n'
                '--lang: language list')
     
     def _pofile_push_help(self):
         print ('zanata po push [OPTIONS] {documents}\n'
-               'push the software project source and translation files to Zanata/Flies server\n'
+               'push software project source and translation files to server\n'
                'options:\n'
                '-f: force to remove content on server side\n'
                '--username: user name\n'
@@ -232,19 +232,19 @@ class ZanataConsole:
                '--project-version: id of the version\n'
                '--srcdir: the full path of the pot folder\n'
                '--transdir: the full path of the folder that contain locale folders\n'
-               '--import-po: push the translation at the same time\n'
-               '--merge: choose the merge algorithm: auto, import, default value is auto\n'
-               '--no-copytrans: disable Zanata/Flies server to copy translation from other versions')
+               '--import-po: push local translations to server\n'
+               '--merge: override merge algorithm: auto (default) or import\n'
+               '--no-copytrans: prevent server from copying translations from other versions')
 
     def _pofile_pull_help(self):
         print ('zanata po pull [OPTIONS] {documents} {lang}\n'
-               'retrieve the software project translation files from Zanata/Flies server\n'
+               'retrieve software project translation files from server\n'
                'options:\n'
                '--username: user name\n'
                '--apikey: api key of user\n'
                '--project-id: id of the project\n'
                '--project-version: id of the version\n'
-               '--dstdir: the path of the folder for saving the po files\n'
+               '--dstdir: output folder for po files\n'
                '--lang: language list')
               
     def _list_projects(self):
@@ -258,7 +258,7 @@ class ZanataConsole:
             self.log.error("There is no projects on the server or the server not working")
             sys.exit(1)
         for project in projects:
-            print ("\nProject Id:          %s")%project.id
+            print ("\nProject ID:          %s")%project.id
             print ("Project Name:        %s")%project.name
             print ("Project Type:        %s")%project.type
             print ("Project Links:       %s\n")%[{'href':link.href, 'type':link.type, 'rel':link.rel} for link in project.links]
@@ -279,7 +279,7 @@ class ZanataConsole:
         zanata = ZanataResource(self.url)
         try:
             p = zanata.projects.get(project_id)
-            print ("Project Id:          %s")%p.id 
+            print ("Project ID:          %s")%p.id
             print ("Project Name:        %s")%p.name 
             print ("Project Type:        %s")%p.type
             print ("Project Description: %s")%p.description
@@ -310,7 +310,7 @@ class ZanataConsole:
         try:
             project = zanata.projects.get(project_id)
             iteration = project.get_iteration(iteration_id)
-            print ("Version Id:          %s")%iteration.id
+            print ("Version ID:          %s")%iteration.id
             print ("Version Name:        %s")%iteration.name
             print ("Version Description: %s")%iteration.description
         except NoSuchProjectException, e:
@@ -333,7 +333,7 @@ class ZanataConsole:
             sys.exit(1)
 
         if not options['project_name']:
-            self.log.error("Please provide Project name by '--project-name' option")
+            self.log.error("Please specify project name with '--project-name' option")
             sys.exit(1)
        
         try:
@@ -341,7 +341,7 @@ class ZanataConsole:
             p = Project(item)
             result = zanata.projects.create(p)
             if result == "Success":
-                self.log.info("Success create the project: %s"%args[0])
+                self.log.info("Successfully created project: %s"%args[0])
         except NoSuchProjectException, e:
             self.log.error(e.msg) 
         except UnAuthorizedException, e:
@@ -367,7 +367,7 @@ class ZanataConsole:
         elif self.project_config['project_id']:
             project_id = self.project_config['project_id']
         else:
-            self.log.error("Please provide PROJECT_ID by --project-id option or using zanata.xml")
+            self.log.error("Please specify PROJECT_ID with --project-id option or using zanata.xml")
         
         self.log.info("Project id:%s"%project_id)
         
@@ -386,7 +386,7 @@ class ZanataConsole:
             iteration = Iteration(item)
             result = zanata.projects.iterations.create(project_id, iteration)
             if result == "Success":
-                self.log.info("Success create the version %s"%args[0])
+                self.log.info("Successfully created version: %s"%args[0])
         except ProjectExistException, e:
             self.log.error(e.msg)
         except NoSuchProjectException, e:
@@ -408,11 +408,11 @@ class ZanataConsole:
             iteration_id = self.project_config['project_version']
 
         if not project_id:
-            self.log.error("Please provide valid project id by zanata.xml/flies.xml or by '--project-id' option")
+            self.log.error("Please specify a valid project id in zanata.xml/flies.xml or with '--project-id' option")
             sys.exit(1)
         
         if not iteration_id:
-            self.log.error("Please provide valid version id by zanata.xml/flies.xml or by '--project-version' option")
+            self.log.error("Please specify a valid version id in zanata.xml/flies.xml or with '--project-version' option")
             sys.exit(1)
         
         self.log.info("Project: %s"%project_id)
@@ -444,7 +444,7 @@ class ZanataConsole:
         elif self.project_config['locale_map']:
             lang_list = self.project_config['locale_map'].keys()
         else:
-            self.log.error("Please specify the language by '--lang' option or zanata.xml")
+            self.log.error("Please specify the language with '--lang' option or in zanata.xml")
             sys.exit(1)
 
         if options['merge']:
@@ -456,7 +456,7 @@ class ZanataConsole:
                 merge = 'auto'
 
         for item in lang_list:
-            self.log.info("Push %s translation to Zanata/Flies server:"%item)
+            self.log.info("Pushing translation for %s to server:"%item)
             
             if item in self.project_config['locale_map']:
                 lang = self.project_config['locale_map'][item]
@@ -486,15 +486,15 @@ class ZanataConsole:
             body = publicanutil.pofile_to_json(pofile_full_path)
 
             if not body:
-                self.log.error("No content or all the entry is obsolete in %s"%pofile_name)
+                self.log.error("No content or all entries are obsolete in %s"%pofile_name)
                 continue
          
             try:
                 result = zanata.documents.commit_translation(project_id, iteration_id, request_name, lang, body, merge)
                 if result:
-                    self.log.info("Successfully pushed translation %s to the Zanata/Flies server"%pofile_full_path) 
+                    self.log.info("Successfully pushed translation %s to the server"%pofile_full_path) 
                 else:
-                    self.log.error("Commit translation is not successful")
+                    self.log.error("Failed to push translation")
             except UnAuthorizedException, e:
                 self.log.error(e.msg)                                            
                 break
@@ -511,7 +511,7 @@ class ZanataConsole:
         try:
             result = zanata.documents.update_template(project_id, iteration_id, request_name, body, options['copytrans'])
             if result:
-                self.log.info("Successfully updated template %s on the Zanata/Flies server"%filename)
+                self.log.info("Successfully updated template %s on the server"%filename)
         except BadRequestBodyException, e:
             self.log.error(e.msg) 
     
@@ -519,7 +519,7 @@ class ZanataConsole:
         if self.user_name and self.apikey:
             zanata = ZanataResource(self.url, self.user_name, self.apikey)
         else:
-            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or by '--username' and '--apikey' options")
+            self.log.error("Please specify username and apikey in zanata.ini/flies.ini or with '--username' and '--apikey' options")
             sys.exit(1)
 
         project_id, iteration_id = self.check_project(zanata)
@@ -533,7 +533,7 @@ class ZanataConsole:
             tmlfolder = os.path.join(os.getcwd(), 'po')
         
         if not os.path.isdir(tmlfolder):
-            self.log.error("Can not find source folder, please specify the source folder by '--srcdir' option")
+            self.log.error("Can not find source folder, please specify the source folder with '--srcdir' option")
             sys.exit(1)
 
         if options['importpo']:        
@@ -565,7 +565,7 @@ class ZanataConsole:
                     if option.lower() == "yes" or option.lower() == "y":
                         break    
                     elif option.lower() == "no" or option.lower() == "n":
-                        self.log.info("Stop processing, keep the content on the zanata server")
+                        self.log.info("Processing stopped, keeping existing content on the server")
                         sys.exit(1)
                     else:
                         self.log.error("Please enter yes(y) or no(n)")
@@ -598,14 +598,14 @@ class ZanataConsole:
                 sys.exit(1)
 
             for pot in pot_list:
-                self.log.info("\nPush the content of %s to Zanata/Flies server:"%pot)
+                self.log.info("\nPushing the content of %s to server:"%pot)
                     
                 body, filename = publicanutil.potfile_to_json(pot, tmlfolder)
                                                           
                 try:
                     result = zanata.documents.commit_template(project_id, iteration_id, body, options['copytrans'])
                     if result:
-                        self.log.info("Successfully pushed %s to the Zanata/Flies server"%pot)    
+                        self.log.info("Successfully pushed %s to the server"%pot)
                 except UnAuthorizedException, e:
                     self.log.error(e.msg)
                     break                                            
@@ -621,7 +621,7 @@ class ZanataConsole:
                     elif self.project_config['locale_map']:
                         lang_list = self.project_config['locale_map'].keys()
                     else:
-                        self.log.error("Please specify the language by '--lang' option or zanata.xml/flies.xml")
+                        self.log.error("Please specify the language with '--lang' option or zanata.xml/flies.xml")
                         sys.exit(1)
                     
                     if options['merge']:
@@ -633,7 +633,7 @@ class ZanataConsole:
                             merge = 'auto'
 
                     for item in lang_list:
-                        self.log.info("Push %s translation to Zanata/Flies server:"%item)
+                        self.log.info("Pushing translation for %s to Zanata/Flies server:"%item)
             
                         if item in self.project_config['locale_map']:
                             lang = self.project_config['locale_map'][item]
@@ -663,16 +663,16 @@ class ZanataConsole:
                         body = publicanutil.pofile_to_json(pofile_full_path)
                 
                         if not body:
-                            self.log.error("No content or all the entry is obsolete in %s"%pofile_name)
+                            self.log.error("No content or all entries are obsolete in %s"%pofile_name)
                             continue
          
                         try:
                             result = zanata.documents.commit_translation(project_id, iteration_id, request_name,
                             lang, body, merge)
                             if result:
-                                self.log.info("Successfully pushed translation %s to the Zanata/Flies server"%pofile_full_path) 
+                                self.log.info("Successfully pushed translation %s to the server"%pofile_full_path) 
                             else:
-                                self.log.error("Commit translation is not successful")
+                                self.log.error("Failed to push translation")
                         except UnAuthorizedException, e:
                             self.log.error(e.msg)                                            
                             break
@@ -681,7 +681,7 @@ class ZanataConsole:
                             continue
             
         else:
-            self.log.info("\nPush the content of %s to Zanata/Flies server:"%args[0])
+            self.log.info("\nPushing the content of %s to server:"%args[0])
 
             try:
                 full_path = self.search_file(tmlfolder, args[0])
@@ -694,7 +694,7 @@ class ZanataConsole:
             try:
                 result = zanata.documents.commit_template(project_id, iteration_id, body, options['copytrans'])                
                 if result:
-                    self.log.info("Successfully pushed %s to the Zanata/Flies server"%args[0])
+                    self.log.info("Successfully pushed %s to the server"%args[0])
             except UnAuthorizedException, e:
                 self.log.error(e.msg)    
             except BadRequestBodyException, e:
@@ -708,7 +708,7 @@ class ZanataConsole:
                 elif self.project_config['locale_map']:
                     lang_list = self.project_config['locale_map'].keys()
                 else:
-                    self.log.error("Please specify the language by '--lang' option or zanata.xml")
+                    self.log.error("Please specify the language with '--lang' option or in zanata.xml")
                     sys.exit(1)
 
                 if options['merge']:
@@ -720,7 +720,7 @@ class ZanataConsole:
                         merge = 'auto'
                 
                 for item in lang_list:
-                    self.log.info("Push %s translation to zanata server:"%item)
+                    self.log.info("Pushing translation for %s to server:"%item)
             
                     if item in self.project_config['locale_map']:
                         lang = self.project_config['locale_map'][item]
@@ -742,7 +742,7 @@ class ZanataConsole:
                     body = publicanutil.pofile_to_json(pofile_full_path)
                 
                     if not body:
-                        self.log.error("No content or all the entry is obsolete in %s"%pofile_name)
+                        self.log.error("No content or all entries are obsolete in %s"%pofile_name)
                         continue
          
                     try:
@@ -751,7 +751,7 @@ class ZanataConsole:
                         if result:
                             self.log.info("Successfully pushed translation %s to the Zanata/Flies server"%pofile_full_path) 
                         else:
-                            self.log.error("Commit translation is not successful")
+                            self.log.error("Failed to push translation")
                     except UnAuthorizedException, e:
                         self.log.error(e.msg)                                            
                         break
@@ -763,7 +763,7 @@ class ZanataConsole:
         if self.user_name and self.apikey:
             zanata = ZanataResource(self.url, self.user_name, self.apikey)
         else:
-            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or by '--username' and '--apikey' options")
+            self.log.error("Please specify username and apikey in zanata.ini/flies.ini or with '--username' and '--apikey' options")
             sys.exit(1)
 
         list = []
@@ -772,7 +772,7 @@ class ZanataConsole:
         elif self.project_config['locale_map']:
             list = self.project_config['locale_map'].keys()
         else:
-            self.log.error("Please specify the language by '--lang' option or zanata.xml/flies.xml")
+            self.log.error("Please specify the language with '--lang' option or in zanata.xml/flies.xml")
             sys.exit(1)
 
         project_id, iteration_id = self.check_project(zanata)
@@ -802,7 +802,7 @@ class ZanataConsole:
                         name = file
                         request_name = file
 
-                    self.log.info("\nFetch the content of %s from Zanata/Flies server: "%name)                    
+                    self.log.info("\nFetching the content of %s from server: "%name)
                     
                     for item in list:
                         if item in self.project_config['locale_map']:
@@ -811,10 +811,15 @@ class ZanataConsole:
                             lang = item
                         
                         if options['dstdir']:
+<<<<<<< HEAD
                             if os.path.isdir(options['dstdir']):
                                 outpath = os.path.join(options['dstdir'], 'po')
                             else:
                                 self.log.error("The Destination folder is not exist, please create it")
+=======
+                            if not os.path.isdir(options['dstdir']):
+                                self.log.error("The destination folder does not exist, please create it")
+>>>>>>> 09213490e8b393490bb1acb32495850701be321a
                                 sys.exit(1)
                         else:
                             outpath = os.path.join(os.getcwd(), 'po')
@@ -822,7 +827,7 @@ class ZanataConsole:
                         if not os.path.isdir(outpath):
                             os.mkdir(outpath)                        
 
-                        self.log.info("Retrieve %s translation from Zanata/Flies server:"%item)
+                        self.log.info("Retrieving translation for %s from server:"%item)
 
                         try:
                             pot = zanata.documents.retrieve_template(project_id, iteration_id, request_name)                    
@@ -830,7 +835,7 @@ class ZanataConsole:
                             self.log.error(e.msg)
                             break
                         except UnAvaliableResourceException, e:
-                            self.log.error("Can't find pot file for %s on Zanata/Flies server"%name)
+                            self.log.error("Can't find pot file for %s on the server"%name)
                             break
                 
                         try:
@@ -857,7 +862,7 @@ class ZanataConsole:
                         except InvalidPOTFileException, e:
                             self.log.error("Can't generate po file for %s,"%name+e.msg)
         else:
-            self.log.info("\nFetch the content of %s from Zanata/Flies server: "%args[0])
+            self.log.info("\nFetching the content of %s from server: "%args[0])
             for item in list:
                 result = ''
                 pot = ''
@@ -869,10 +874,15 @@ class ZanataConsole:
                     lang = item
                 
                 if options['dstdir']:
+<<<<<<< HEAD
                     if os.path.isdir(options['dstdir']):
                         outpath = os.path.join(options['dstdir'], 'po')
                     else:
                         self.log.error("The Destination folder is not exist, please create it")
+=======
+                    if not os.path.isdir(options['dstdir']):
+                        self.log.error("The destination folder does not exist, please create it")
+>>>>>>> 09213490e8b393490bb1acb32495850701be321a
                         sys.exit(1)
                 else:
                     outpath = os.path.join(os.getcwd(), item)
@@ -880,7 +890,7 @@ class ZanataConsole:
                 if not os.path.isdir(outpath):
                     os.mkdir(outpath)
 
-                self.log.info("Retrieve %s translation from Zanata/Flies server:"%item)
+                self.log.info("Retrieving %s translation from server:"%item)
 
                 for file in filelist:
                     if '/' in file: 
@@ -898,7 +908,7 @@ class ZanataConsole:
                             break
                 
                 if not request_name:
-                    self.log.error("Can't find pot file for %s on Zanata/Flies server"%args[0])
+                    self.log.error("Can't find pot file for %s on the server"%args[0])
                     sys.exit(1)
 
                 pofile = os.path.join(outpath, item+'.po')
@@ -909,7 +919,7 @@ class ZanataConsole:
                     self.log.error(e.msg)
                     sys.exit(1)
                 except UnAvaliableResourceException, e:
-                    self.log.error("Can't find pot file for %s on Zanata/Flies server"%args[0])
+                    self.log.error("Can't find pot file for %s on the server"%args[0])
                     sys.exit(1)
 
                 try:            
@@ -936,7 +946,7 @@ class ZanataConsole:
         if self.user_name and self.apikey:
             zanata = ZanataResource(self.url, self.user_name, self.apikey)
         else:
-            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or by '--username' and '--apikey' options")
+            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or with '--username' and '--apikey' options")
             sys.exit(1)
 
         project_id, iteration_id = self.check_project(zanata)
@@ -950,7 +960,7 @@ class ZanataConsole:
                 trans_folder = options['transdir']
             else:
                 trans_folder = os.getcwd()
-            self.log.info("Read locale folders from %s"%trans_folder)            
+            self.log.info("Reading locale folders from %s"%trans_folder)
         else:
             self.log.info("Importing source documents only")
         
@@ -960,7 +970,7 @@ class ZanataConsole:
             tmlfolder = os.path.join(os.getcwd(), 'pot')
         
         if not os.path.isdir(tmlfolder):
-            self.log.error("Can not find source folder, please specify the source folder by '--srcdir' option")
+            self.log.error("Can not find source folder, please specify the source folder with '--srcdir' option")
             sys.exit(1)
 
         self.log.info("POT directory (originals):%s"%tmlfolder)
@@ -982,7 +992,7 @@ class ZanataConsole:
                     if option.lower() == "yes" or option.lower() == "y":
                         break    
                     elif option.lower() == "no" or option.lower() == "n":
-                        self.log.info("Stop processing, keep the content on the zanata server")
+                        self.log.info("Processing stopped, keeping the content on the zanata server")
                         sys.exit(1)
                     else:
                         self.log.error("Please enter yes(y) or no(n)")
@@ -1014,14 +1024,14 @@ class ZanataConsole:
                 sys.exit(1)
 
             for pot in pot_list:
-                self.log.info("\nPush the content of %s to Zanata/Flies server:"%pot)
+                self.log.info("\nPushing the content of %s to server:"%pot)
                     
                 body, filename = publicanutil.potfile_to_json(pot, tmlfolder)
                                           
                 try:
                     result = zanata.documents.commit_template(project_id, iteration_id, body, options['copytrans'])
                     if result:
-                        self.log.info("Successfully pushed %s to the Zanata/Flies server"%pot)    
+                        self.log.info("Successfully pushed %s to the server"%pot)
                 except UnAuthorizedException, e:
                     self.log.error(e.msg)
                     break                                            
@@ -1035,7 +1045,7 @@ class ZanataConsole:
                     self.import_po(publicanutil, trans_folder, zanata, project_id, iteration_id, filename)
             
         else:
-            self.log.info("\nPush the content of %s to Zanata/Flies server:"%args[0])
+            self.log.info("\nPushing the content of %s to server:"%args[0])
 
             try:
                 full_path = self.search_file(tmlfolder, args[0])
@@ -1048,7 +1058,7 @@ class ZanataConsole:
             try:
                 result = zanata.documents.commit_template(project_id, iteration_id, body, options['copytrans'])                
                 if result:
-                    self.log.info("Successfully pushed %s to the Zanata/Flies server"%args[0])
+                    self.log.info("Successfully pushed %s to the server"%args[0])
             except UnAuthorizedException, e:
                 self.log.error(e.msg)    
             except BadRequestBodyException, e:
@@ -1069,7 +1079,7 @@ class ZanataConsole:
         if self.user_name and self.apikey:
             zanata = ZanataResource(self.url, self.user_name, self.apikey)
         else:
-            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or by '--username' and '--apikey' options")
+            self.log.error("Please specify username and apikey in zanata.ini/flies.ini or with '--username' and '--apikey' options")
             sys.exit(1)
 
         list = []
@@ -1078,7 +1088,7 @@ class ZanataConsole:
         elif self.project_config['locale_map']:
             list = self.project_config['locale_map'].keys()
         else:
-            self.log.error("Please specify the language by '--lang' option or zanata.xml")
+            self.log.error("Please specify the language with '--lang' option or in zanata.xml")
             sys.exit(1)
 
         project_id, iteration_id = self.check_project(zanata)
@@ -1108,7 +1118,7 @@ class ZanataConsole:
                         name = file
                         request_name = file
 
-                    self.log.info("\nFetch the content of %s from Zanata/Flies server: "%name)                    
+                    self.log.info("\nFetching the content of %s from Zanata/Flies server: "%name)                    
                     
                     for item in list:
                         if item in self.project_config['locale_map']:
@@ -1120,7 +1130,7 @@ class ZanataConsole:
                             if os.path.isdir(options['dstdir']):
                                 outpath = os.path.join(options['dstdir'], item)
                             else:
-                                self.log.error("The Destination folder is not exist, please create it")
+                                self.log.error("The destination folder does not exist, please create it")
                                 sys.exit(1)
                         else:
                             outpath = os.path.join(os.getcwd(), item)
@@ -1128,7 +1138,7 @@ class ZanataConsole:
                         if not os.path.isdir(outpath):
                             os.mkdir(outpath)                        
 
-                        self.log.info("Retrieve %s translation from Zanata/Flies server:"%item)
+                        self.log.info("Retrieving %s translation from server:"%item)
 
                         try:
                             pot = zanata.documents.retrieve_template(project_id, iteration_id, request_name)                    
@@ -1136,7 +1146,7 @@ class ZanataConsole:
                             self.log.error(e.msg)
                             break
                         except UnAvaliableResourceException, e:
-                            self.log.error("Can't find pot file for %s on Zanata/Flies server"%name)
+                            self.log.error("Can't find pot file for %s on server"%name)
                             break
                 
                         try:
@@ -1163,7 +1173,7 @@ class ZanataConsole:
                         except InvalidPOTFileException, e:
                             self.log.error("Can't generate po file for %s,"%name+e.msg)
         else:
-            self.log.info("\nFetch the content of %s from Zanata/Flies server: "%args[0])
+            self.log.info("\nFetching the content of %s from server: "%args[0])
             for item in list:
                 result = ''
                 pot = ''
@@ -1178,7 +1188,7 @@ class ZanataConsole:
                     if os.path.isdir(options['dstdir']):
                         outpath = os.path.join(options['dstdir'], item)
                     else:
-                        self.log.error("The Destination folder is not exist, please create it")
+                        self.log.error("The destination folder does not exist, please create it")
                         sys.exit(1)
                 else:
                     outpath = os.path.join(os.getcwd(), item)
@@ -1186,7 +1196,7 @@ class ZanataConsole:
                 if not os.path.isdir(outpath):
                     os.mkdir(outpath)
 
-                self.log.info("Retrieve %s translation from Zanata/Flies server:"%item)
+                self.log.info("Retrieve %s translation from server:"%item)
                 
                 request_name = ''
                 for file in filelist:
@@ -1205,7 +1215,7 @@ class ZanataConsole:
                             break
                 
                 if not request_name:
-                    self.log.error("Can't find pot file for %s on Zanata/Flies server"%args[0])
+                    self.log.error("Can't find pot file for %s on server"%args[0])
                     sys.exit(1)
 
                 pofile = os.path.join(outpath, args[0]+'.po')
@@ -1216,7 +1226,7 @@ class ZanataConsole:
                     self.log.error(e.msg)
                     sys.exit(1)
                 except UnAvaliableResourceException, e:
-                    self.log.error("Can't find pot file for %s on Zanata/Flies server"%args[0])
+                    self.log.error("Can't find pot file for %s on server"%args[0])
                     sys.exit(1)
 
                 try:            
@@ -1266,7 +1276,7 @@ class ZanataConsole:
                             command = command+'_'+sub[0]
                             command_args = sub[1:]
                         else:
-                            self.log.error("Can not find such command")
+                            self.log.error("Unknown command")
                             sys.exit(1)
                     else:
                         self.log.error("Please complete the command!")
@@ -1274,7 +1284,7 @@ class ZanataConsole:
                 else: 
                     command_args = sub
             else:
-                self.log.error("Can not find such command")
+                self.log.error("Unknown command")
                 sys.exit(1)
         else:
             self._print_usage()
@@ -1351,13 +1361,13 @@ class ZanataConsole:
             if self.project_config:
                 self.url = self.project_config['project_url']
             
-            #The value in options will overwrite the value in project-config file 
+            #The value in options will override the value in project-config file
             if options['url']:
-                self.log.info("Overwrite the url of server with command line options") 
+                self.log.info("Overriding url of server with command line option")
                 self.url = options['url']
 
             if not self.url or self.url.isspace():
-                self.log.error("Please provide valid server url in zanata.xml/flies.xml or by '--url' option")
+                self.log.error("Please specify valid server url in zanata.xml/flies.xml or with '--url' option")
                 sys.exit(1)
 
             if self.url[-1] == "/":
