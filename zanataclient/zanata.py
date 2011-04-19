@@ -811,15 +811,10 @@ class ZanataConsole:
                             lang = item
                         
                         if options['dstdir']:
-<<<<<<< HEAD
                             if os.path.isdir(options['dstdir']):
                                 outpath = os.path.join(options['dstdir'], 'po')
                             else:
-                                self.log.error("The Destination folder is not exist, please create it")
-=======
-                            if not os.path.isdir(options['dstdir']):
                                 self.log.error("The destination folder does not exist, please create it")
->>>>>>> 09213490e8b393490bb1acb32495850701be321a
                                 sys.exit(1)
                         else:
                             outpath = os.path.join(os.getcwd(), 'po')
@@ -874,15 +869,10 @@ class ZanataConsole:
                     lang = item
                 
                 if options['dstdir']:
-<<<<<<< HEAD
                     if os.path.isdir(options['dstdir']):
                         outpath = os.path.join(options['dstdir'], 'po')
                     else:
-                        self.log.error("The Destination folder is not exist, please create it")
-=======
-                    if not os.path.isdir(options['dstdir']):
                         self.log.error("The destination folder does not exist, please create it")
->>>>>>> 09213490e8b393490bb1acb32495850701be321a
                         sys.exit(1)
                 else:
                     outpath = os.path.join(os.getcwd(), item)
