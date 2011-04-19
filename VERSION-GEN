@@ -3,7 +3,7 @@
 # Tag revisions like this:
 # $ git tag -a -m "Version 0.2" v0.2 HEAD
 
-VF=VERSION-FILE
+VF=zanataclient/VERSION-FILE
 DEFAULT_VERSION=UKNOWN
 
 LF='

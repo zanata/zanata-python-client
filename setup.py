@@ -7,7 +7,7 @@ import os
 import subprocess
 
 path = os.path.dirname(os.path.realpath(__file__))
-version_file = os.path.join(path, 'VERSION-FILE')
+version_file = os.path.join(path, 'zanataclient/VERSION-FILE')
 version_gen = os.path.join(path, 'VERSION-GEN')
 
 if not os.path.exists(version_file):

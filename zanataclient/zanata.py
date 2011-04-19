@@ -811,13 +811,16 @@ class ZanataConsole:
                             lang = item
                         
                         if options['dstdir']:
-                            if not os.path.isdir(options['dstdir']):
+                            if os.path.isdir(options['dstdir']):
+                                outpath = os.path.join(options['dstdir'], 'po')
+                            else:
                                 self.log.error("The Destination folder is not exist, please create it")
                                 sys.exit(1)
                         else:
                             outpath = os.path.join(os.getcwd(), 'po')
-                            if not os.path.isdir(outpath):
-                                os.mkdir(outpath)                        
+                            
+                        if not os.path.isdir(outpath):
+                            os.mkdir(outpath)                        
 
                         self.log.info("Retrieve %s translation from Zanata/Flies server:"%item)
 
@@ -866,13 +869,16 @@ class ZanataConsole:
                     lang = item
                 
                 if options['dstdir']:
-                    if not os.path.isdir(options['dstdir']):
+                    if os.path.isdir(options['dstdir']):
+                        outpath = os.path.join(options['dstdir'], 'po')
+                    else:
                         self.log.error("The Destination folder is not exist, please create it")
                         sys.exit(1)
                 else:
                     outpath = os.path.join(os.getcwd(), item)
-                    if not os.path.isdir(outpath):
-                        os.mkdir(outpath)
+                
+                if not os.path.isdir(outpath):
+                    os.mkdir(outpath)
 
                 self.log.info("Retrieve %s translation from Zanata/Flies server:"%item)
 
