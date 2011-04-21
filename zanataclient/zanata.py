@@ -51,6 +51,7 @@ options = {
             'project_id':'',
             'project_version':'',
             'srcdir':'',
+            'srcfile':'',
             'dstdir':'',
             'transdir':'',
             'project_name':'',
@@ -524,6 +525,7 @@ class ZanataConsole:
             self.log.error(e.msg) 
     
     def _push_pofile(self, args):
+        import_file = ''
         if self.user_name and self.apikey:
             zanata = ZanataResource(self.url, self.user_name, self.apikey)
         else:
@@ -540,9 +542,16 @@ class ZanataConsole:
         else:
             tmlfolder = os.path.join(os.getcwd(), 'po')
         
-        if not os.path.isdir(tmlfolder):
+        if not os.path.isdir(tmlfolder) and not options['srcfile']:
             self.log.error("Can not find source folder, please specify the source folder with '--srcdir' option")
             sys.exit(1)
+
+        if options['srcfile']:
+            import_file = options['srcfile'].split('/')[-1]
+            tmlfolder = options['srcfile'].split(import_file)[0]
+        
+        if args:
+           import_file = args[0] 
 
         if options['importpo']:        
             self.log.info("Importing translation")
@@ -597,7 +606,7 @@ class ZanataConsole:
         publicanutil = PublicanUtility()
 
         #if file not specified, push all the files in pot folder to zanata server
-        if not args:
+        if not import_file:
             #get all the pot files from the template folder 
             pot_list = publicanutil.get_file_list(tmlfolder, ".pot")
 
@@ -689,10 +698,10 @@ class ZanataConsole:
                             continue
             
         else:
-            self.log.info("\nPushing the content of %s to server:"%args[0])
+            self.log.info("\nPushing the content of %s to server:"%import_file)
 
             try:
-                full_path = self.search_file(tmlfolder, args[0])
+                full_path = self.search_file(tmlfolder, import_file)
             except NoSuchFileException, e:
                 self.log.error(e.msg)
                 sys.exit(1)
@@ -702,7 +711,7 @@ class ZanataConsole:
             try:
                 result = zanata.documents.commit_template(project_id, iteration_id, body, options['copytrans'])                
                 if result:
-                    self.log.info("Successfully pushed %s to the server"%args[0])
+                    self.log.info("Successfully pushed %s to the server"%import_file)
             except UnAuthorizedException, e:
                 self.log.error(e.msg)    
             except BadRequestBodyException, e:
@@ -752,10 +761,14 @@ class ZanataConsole:
                     if not body:
                         self.log.error("No content or all entries are obsolete in %s"%pofile_name)
                         continue
-         
+       
+                    if '.' in import_file:
+                        request_name = import_file.split('.')[0]
+                    else:
+                        request_name = import_file
+
                     try:
-                        result = zanata.documents.commit_translation(project_id, iteration_id, args[0].rstrip('.pot'),
-                        lang, body, merge)
+                        result = zanata.documents.commit_translation(project_id, iteration_id, request_name, lang, body, merge)
                         if result:
                             self.log.info("Successfully pushed translation %s to the Zanata/Flies server"%pofile_full_path) 
                         else:
@@ -1259,7 +1272,7 @@ class ZanataConsole:
         try:
             opts, args = getopt.gnu_getopt(sys.argv[1:], "vf", ["url=", "project-id=", "project-version=", "project-name=",
             "project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=",
-            "username=", "srcdir=", "dstdir=", "email=", "transdir=", "merge=", "import-po", "no-copytrans"])
+            "username=", "srcdir=", "srcfile=", "dstdir=", "email=", "transdir=", "merge=", "import-po", "no-copytrans"])
         except getopt.GetoptError, err:
             self.log.error(str(err))
             sys.exit(2)
@@ -1318,6 +1331,8 @@ class ZanataConsole:
                     options['project_version'] = a
                 elif o in ("--srcdir"):
                     options['srcdir'] = a
+                elif o in ("--srcfile"):
+                    options['srcfile'] = a
                 elif o in ("--dstdir"):
                     options['dstdir'] = a
                 elif o in ("--transdir"):
