@@ -153,9 +153,10 @@ class IterationService:
         headers = {}
         headers['X-Auth-User'] = self.username
         headers['X-Auth-Token'] = self.apikey
-        
+         
         body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iteration.name, iteration.id, iteration.desc)
         res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iteration.id), args=body, headers=headers)
+         
         if res['status'] == '201':
             return "Success"
         elif res['status'] == '200':
@@ -164,6 +165,8 @@ class IterationService:
             raise NoSuchProjectException('Error 404', content)
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
-            
+        elif res['status'] == '405':
+            raise NotAllowedException('Error 405', 'The requested method is not allowed')
+
     def delete(self):
         pass

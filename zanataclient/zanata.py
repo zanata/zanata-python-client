@@ -26,6 +26,7 @@ __all__ = (
 
 import getopt, sys
 import os.path
+import string
 from zanatalib import *
 from zanatalib.error import *
 from parseconfig import ZanataConfig
@@ -70,6 +71,7 @@ class ZanataConsole:
         self.user_name = ''
         self.apikey = ''
         self.user_config = ''
+        self.server_version = ''
         self.project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}
         self.force = False
         self.log = Logger()
@@ -374,13 +376,17 @@ class ZanataConsole:
         if not args:
             self.log.error("Please provide ITERATION_ID for creating iteration")
             sys.exit(1)
-
-        """
-        if not options['version_name']:
-            self.log.error("Please provide Iteration name by '--version-name' option")
-            sys.exit(1)
-        """
-
+       
+        if self.server_version:
+            version =  str(self.server_version.split('-')[0])
+            version_number = string.atof(version)
+        
+            if version_number <= 1.2 and not options['version_name']:
+                options['version_name'] = args[0]
+        else:
+            if not options['version_name']:
+                options['version_name'] = args[0]
+               
         try:
             item = {'id':args[0], 'name':options['version_name'], 'desc':options['version_desc']}
             iteration = Iteration(item)
@@ -394,6 +400,8 @@ class ZanataConsole:
         except UnAuthorizedException, e:
             self.log.error(e.msg)
         except InvalidOptionException, e:
+            self.log.error(e.msg)
+        except NotAllowedException, e:
             self.log.error(e.msg)
 
     def check_project(self, zanataclient):
@@ -1410,6 +1418,7 @@ class ZanataConsole:
 
             try:            
                 content = version.get_server_version()
+                self.server_version = content['versionNo']
                 self.log.info("zanata python client version: %s, zanata/flies server API version: %s"%(version_number, content['versionNo']))  
             except UnAvaliableResourceException, e:
                 self.log.info("zanata python client version: %s"%version_number)

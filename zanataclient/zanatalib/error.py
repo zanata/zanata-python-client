@@ -27,7 +27,8 @@ __all__ = (
         "UnAuthorizedException", "BadRequestException",
         "ProjectExistException", "UnAvaliableResourceException",
         "UnAvaliablePOTException", "BadRequestBodyException",
-        "SameNameDocumentException","InternalServerError"
+        "SameNameDocumentException","InternalServerError",
+        "NotAllowedException"
 )
 class ZanataException(Exception):
     def __init__(self, expr, msg):
@@ -73,3 +74,5 @@ class BadRequestBodyException(ZanataException):
 class SameNameDocumentException(ZanataException):
     pass
 
+class NotAllowedException(ZanataException):
+    pass
