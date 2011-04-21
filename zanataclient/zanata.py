@@ -234,6 +234,7 @@ class ZanataConsole:
                '--project-id: id of the project\n'
                '--project-version: id of the version\n'
                '--srcdir: the full path of the pot folder\n'
+               '--srcfile: the full path of the source file\n'
                '--transdir: the full path of the folder that contain locale folders\n'
                '--import-po: push local translations to server\n'
                '--merge: override merge algorithm: auto (default) or import\n'
