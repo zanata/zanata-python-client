@@ -50,6 +50,7 @@ options = {
             'project_config':'',
             'project_id':'',
             'project_version':'',
+            'dir':'',
             'srcdir':'',
             'srcfile':'',
             'dstdir':'',
@@ -207,6 +208,7 @@ class ZanataConsole:
                '--apikey: api key of user\n'
                '--project-id: id of the project\n'
                '--project-version: id of the version\n'
+               '--dir: the full path of the folder that contain pot folder and locale folders\n'
                '--srcdir: the full path of the pot folder\n'
                '--transdir: the full path of the folder that contain locale folders\n'
                '--import-po: push local translations to server\n'
@@ -221,6 +223,7 @@ class ZanataConsole:
                '--apikey: api key of user\n'
                '--project-id: id of the project\n'
                '--project-version: id of the version\n'
+               '--dir: output folder\n'
                '--dstdir: output folder for po files\n'
                '--lang: language list')
     
@@ -968,7 +971,9 @@ class ZanataConsole:
         
         if options['importpo']:        
             self.log.info("Importing translation")
-            if options['transdir']:
+            if options['dir']:
+                trans_folder = options['dir']
+            elif options['transdir']:
                 trans_folder = options['transdir']
             else:
                 trans_folder = os.getcwd()
@@ -976,13 +981,15 @@ class ZanataConsole:
         else:
             self.log.info("Importing source documents only")
         
-        if options['srcdir']:
+        if options['dir']:
+            tmlfolder = os.path.join(options['dir'], 'pot')
+        elif options['srcdir']:
             tmlfolder = options['srcdir']
         else:
             tmlfolder = os.path.join(os.getcwd(), 'pot')
         
         if not os.path.isdir(tmlfolder):
-            self.log.error("Can not find source folder, please specify the source folder with '--srcdir' option")
+            self.log.error("Can not find source folder, please specify the source folder with '--srcdir' or '--dir' option")
             sys.exit(1)
 
         self.log.info("POT directory (originals):%s"%tmlfolder)
@@ -1138,7 +1145,13 @@ class ZanataConsole:
                         else:
                             lang = item
                         
-                        if options['dstdir']:
+                        if options['dir']:
+                            if os.path.isdir(options['dir']):
+                                outpath = os.path.join(options['dir'], item)
+                            else:
+                                self.log.error("The destination folder does not exist, please create it")
+                                sys.exit(1)
+                        elif options['dstdir']:
                             if os.path.isdir(options['dstdir']):
                                 outpath = os.path.join(options['dstdir'], item)
                             else:
@@ -1195,8 +1208,13 @@ class ZanataConsole:
                     lang = self.project_config['locale_map'][item]
                 else:
                     lang = item
-                
-                if options['dstdir']:
+                        
+                if options['dir']:
+                    if os.path.isdir(options['dir']):
+                        outpath = os.path.join(options['dir'], item)
+                    else:
+                        self.log.error("The destination folder does not exist, please create it")
+                elif options['dstdir']:
                     if os.path.isdir(options['dstdir']):
                         outpath = os.path.join(options['dstdir'], item)
                     else:
@@ -1273,7 +1291,7 @@ class ZanataConsole:
         try:
             opts, args = getopt.gnu_getopt(sys.argv[1:], "vf", ["url=", "project-id=", "project-version=", "project-name=",
             "project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=",
-            "username=", "srcdir=", "srcfile=", "dstdir=", "email=", "transdir=", "merge=", "import-po", "no-copytrans"])
+            "username=", "dir=", "srcdir=", "srcfile=", "dstdir=", "email=", "transdir=", "merge=", "import-po", "no-copytrans"])
         except getopt.GetoptError, err:
             self.log.error(str(err))
             sys.exit(2)
@@ -1332,6 +1350,8 @@ class ZanataConsole:
                     options['project_version'] = a
                 elif o in ("--srcdir"):
                     options['srcdir'] = a
+                elif o in ("--dir"):
+                    options['dir'] = a
                 elif o in ("--srcfile"):
                     options['srcfile'] = a
                 elif o in ("--dstdir"):
