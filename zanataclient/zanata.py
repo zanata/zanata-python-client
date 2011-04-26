@@ -1024,13 +1024,19 @@ class ZanataConsole:
                 else:
                     filename = file
 
-                self.log.info("Delete the %s"%file)
+                if ".pot" in file:
+                    filepath = os.path.join(tmlfolder, file)
+                else:
+                    filepath = os.path.join(tmlfolder, file+".pot")
+                
+                if not os.path.isfile(filepath):
+                    self.log.info("Delete the %s"%file)
                  
-                try:
-                    zanata.documents.delete_template(project_id, iteration_id, filename)
-                except Exception, e:
-                    self.log.error(str(e))
-                    sys.exit(1)
+                    try:
+                        zanata.documents.delete_template(project_id, iteration_id, filename)
+                    except Exception, e:
+                        self.log.error(str(e))
+                        sys.exit(1)
 
         publicanutil = PublicanUtility()
         #if file not specified, push all the files in pot folder to zanata server
