@@ -530,6 +530,7 @@ class ZanataConsole:
     
     def _push_pofile(self, args):
         import_file = ''
+        pot_list = ''
         if self.user_name and self.apikey:
             zanata = ZanataResource(self.url, self.user_name, self.apikey)
         else:
@@ -568,7 +569,16 @@ class ZanataConsole:
             self.log.info("Importing source documents only")
 
         self.log.info("PO directory (originals):%s"%tmlfolder)
-                
+
+        publicanutil = PublicanUtility()
+
+        if not import_file:
+            #get all the pot files from the template folder 
+            pot_list = publicanutil.get_file_list(tmlfolder, ".pot")
+            if not pot_list:
+                self.log.error("The template folder is empty")
+                sys.exit(1)
+                       
         #Get the file list of this version of project
         try:
             filelist = zanata.documents.get_file_list(project_id, iteration_id)
@@ -599,25 +609,30 @@ class ZanataConsole:
                 else:
                     filename = file
 
-                self.log.info("Delete the %s"%file)
-                 
-                try:
-                    zanata.documents.delete_template(project_id, iteration_id, filename)
-                except Exception, e:
-                    self.log.error(str(e))
-                    sys.exit(1)
-
-        publicanutil = PublicanUtility()
+                if ".pot" in file:
+                    name = os.path.join(tmlfolder, file)
+                else:
+                    name = os.path.join(tmlfolder, file+".pot")
+                
+                if pot_list and name not in pot_list:
+                    self.log.info("Delete the %s"%file)
+                     
+                    try:
+                        zanata.documents.delete_template(project_id, iteration_id, filename)
+                    except Exception, e:
+                        self.log.error(str(e))
+                        sys.exit(1)
+                elif import_file and name != os.path.join(tmlfolder, import_file):
+                    self.log.info("Delete the %s"%file)
+                    
+                    try:
+                        zanata.documents.delete_template(project_id, iteration_id, filename)
+                    except Exception, e:
+                        self.log.error(str(e))
+                        sys.exit(1)
 
         #if file not specified, push all the files in pot folder to zanata server
         if not import_file:
-            #get all the pot files from the template folder 
-            pot_list = publicanutil.get_file_list(tmlfolder, ".pot")
-
-            if not pot_list:
-                self.log.error("The template folder is empty")
-                sys.exit(1)
-
             for pot in pot_list:
                 self.log.info("\nPushing the content of %s to server:"%pot)
                     
@@ -721,7 +736,7 @@ class ZanataConsole:
             except BadRequestBodyException, e:
                 self.log.error(e.msg)
             except SameNameDocumentException, e:
-                self.update_template(project_id, iteration_id, filename, body)   
+                self.update_template(zanata, project_id, iteration_id, filename, body)   
 
             if options['importpo']:
                 if options['lang']:
