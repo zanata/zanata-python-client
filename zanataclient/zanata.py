@@ -318,8 +318,10 @@ class ZanataConsole:
             project = zanata.projects.get(project_id)
             iteration = project.get_iteration(iteration_id)
             print ("Version ID:          %s")%iteration.id
-            print ("Version Name:        %s")%iteration.name
-            print ("Version Description: %s")%iteration.description
+            if hasattr(iteration, 'name'):
+                print ("Version Name:        %s")%iteration.name
+            if hasattr(iteration, 'description'):
+                print ("Version Description: %s")%iteration.description
         except NoSuchProjectException, e:
             self.log.error("There is no such project or version on the server")
 
