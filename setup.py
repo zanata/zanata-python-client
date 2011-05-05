@@ -14,7 +14,7 @@ p = subprocess.Popen(version_gen, shell=True, stdin=subprocess.PIPE, stdout=subp
 output = p.stdout.readline()
 number = output[:-1].strip('version: ')
 
-if not number and os.path.exists(version_file):
+if number=='UNKNOWN' and os.path.exists(version_file):
     file = open(version_file, 'rb')
     client_version = file.read()
     file.close()
