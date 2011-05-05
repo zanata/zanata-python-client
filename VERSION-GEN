@@ -40,9 +40,10 @@ else
     VC=unset
 fi
 
-# If version has changed, update VERSION-FILE
-test "$VN" = "$VC" && "$VN" != "$DEFAULT_VERSION"|| {
+# If version has changed and not "UNKNOWN", update VERSION-FILE
+test "$VN" = "$VC" || test "$VN" = "$DEFAULT_VERSION" ||{
     echo "version: $VN" >$VF
     echo >&2 "($VF updated)"
 }
+
 
