@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Build script for flies-python-client
+Build script for zanata-python-client
 """
 from setuptools import setup, find_packages
 import os
@@ -10,16 +10,15 @@ path = os.path.dirname(os.path.realpath(__file__))
 version_file = os.path.join(path, 'zanataclient/VERSION-FILE')
 version_gen = os.path.join(path, 'VERSION-GEN')
 
-if not os.path.exists(version_file):
-    p = subprocess.Popen(version_gen, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  close_fds=True)
-    output = p.stdout.readline()
-    number = output[:-1].strip('version: ')
-else:
+p = subprocess.Popen(version_gen, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  close_fds=True)
+output = p.stdout.readline()
+number = output[:-1].strip('version: ')
+"""
     file = open(version_file, 'rb')
     client_version = file.read()
     file.close()
     number = client_version[:-1].strip('version: ')
-
+"""
 subprocess.Popen("""
 cat << EOF > MANIFEST.in
 include zanataclient/VERSION-FILE
