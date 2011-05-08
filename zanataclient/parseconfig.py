@@ -33,7 +33,7 @@ project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'loca
 class ZanataConfig:
      def set_userconfig(self, path):
         self.configparser = ConfigParser.ConfigParser()
-        self._config = self.configparser.read(['flies.ini', path])
+        self._config = self.configparser.read(['zanata.ini', path])
         
      def get_server(self, url):
         if self._config:
