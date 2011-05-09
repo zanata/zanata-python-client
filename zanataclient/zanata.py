@@ -1138,9 +1138,9 @@ class ZanataConsole:
         Parse the command line to generate command options and sub_command
         """
         try:
-            opts, args = getopt.gnu_getopt(sys.argv[1:], "vf", ["url=", "project-id=", "project-version=", "project-name=",
+            opts, args = getopt.gnu_getopt(sys.argv[1:], "vfh", ["url=", "project-id=", "project-version=", "project-name=",
             "project-desc=", "version-name=", "version-desc=", "lang=",  "user-config=", "project-config=", "apikey=",
-            "username=", "dir=", "srcdir=", "srcfile=", "dstdir=", "email=", "transdir=", "merge=", "import-po", "no-copytrans"])
+            "username=", "dir=", "srcdir=", "srcfile=", "dstdir=", "email=", "transdir=", "merge=", "import-po", "no-copytrans", "help"])
         except getopt.GetoptError, err:
             self.log.error(str(err))
             sys.exit(2)
@@ -1215,6 +1215,9 @@ class ZanataConsole:
                     options['importpo'] = True
                 elif o in ("--no-copytrans"):
                     options['copytrans'] = False
+                elif o in ("--help") or o == "-h":
+                    self.help.print_command_help(command)
+                    sys.exit()
                    
         return command, command_args
  
@@ -1222,7 +1225,7 @@ class ZanataConsole:
         command, command_args = self._process_command_line()        
         
         if command == 'help':
-            self.help.print_help_info(command_args)
+            self.help.print_usage()
         else:
             config = ZanataConfig()
             #Read the project configuration file using --project-config option
