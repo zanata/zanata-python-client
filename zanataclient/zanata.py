@@ -24,6 +24,8 @@ __all__ = (
             "ZanataConsole",
         )
 
+import signal
+import sys
 import getopt, sys
 import os.path
 import string
@@ -79,7 +81,7 @@ class ZanataConsole:
         self.force = False
         self.log = Logger()
         self.help = HelpInfo()
-            
+       
     def _list_projects(self):
         """
         List the information of all the project on the zanata server
@@ -1220,8 +1222,13 @@ class ZanataConsole:
                     sys.exit()
                    
         return command, command_args
+    
+    def signal_handler(self, signal, frame):
+        print '\nPressed Ctrl+C! Stop processing!'
+        sys.exit(0)
  
     def run(self):
+        signal.signal(signal.SIGINT, self.signal_handler)
         command, command_args = self._process_command_line()        
         
         if command == 'help':
