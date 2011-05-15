@@ -81,6 +81,15 @@ class ZanataConsole:
         self.force = False
         self.log = Logger()
         self.help = HelpInfo()
+
+    def _generate_zanataresource(self):
+        if self.user_name and self.apikey:
+            return ZanataResource(self.url, self.user_name, self.apikey)
+        else:
+            self.log.error("Please specify username and apikey in zanata.ini/flies.ini or with '--username' and '--apikey' options")
+            sys.exit(1)
+
+        self.log.info("Username: %s"%self.user_name)
        
     def _list_projects(self):
         """
@@ -158,12 +167,7 @@ class ZanataConsole:
         Create project with the project id, project name and project description
         @param args: project id
         """
-        if self.user_name and self.apikey:
-            zanata = ZanataResource(self.url, self.user_name, self.apikey)
-        else:
-            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or by command line options --username and --apikey")
-            sys.exit(1)
-        self.log.info("Username: %s"%self.user_name)
+        zanata = self._generate_zanataresource()
 
         if not args:
             self.log.error("Please provide PROJECT_ID for creating project")
@@ -191,13 +195,7 @@ class ZanataConsole:
         Create version with the version id, version name and version description 
         @param args: version id
         """
-        if self.user_name and self.apikey:
-            zanata = ZanataResource(self.url, self.user_name, self.apikey)
-        else:
-            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or by --username and --apikey options")
-            sys.exit(1)
-
-        self.log.info("Username: %s"%self.user_name)
+        zanata = self._generate_zanataresource()
         
         if options['project_id']:
             project_id =  options['project_id'] 
@@ -361,11 +359,8 @@ class ZanataConsole:
     def _push_pofile(self, args):
         import_file = ''
         pot_list = ''
-        if self.user_name and self.apikey:
-            zanata = ZanataResource(self.url, self.user_name, self.apikey)
-        else:
-            self.log.error("Please specify username and apikey in zanata.ini/flies.ini or with '--username' and '--apikey' options")
-            sys.exit(1)
+        
+        zanata = self._generate_zanataresource()
 
         project_id, iteration_id = self.check_project(zanata)
         
@@ -397,6 +392,13 @@ class ZanataConsole:
             self.log.info("Importing translation from %s"%trans_folder)            
         else:
             self.log.info("Importing source documents only")
+
+        if options['dir']:
+            tmlfolder = os.path.join(options['dir'], 'po')
+        elif options['srcdir']:
+            tmlfolder = options['srcdir']
+        else:
+            tmlfolder = os.path.join(os.getcwd(), 'po')
 
         self.log.info("PO directory (originals):%s"%tmlfolder)
 
@@ -629,21 +631,36 @@ class ZanataConsole:
                         self.log.error(e.msg)
                         continue
     
-    def _pull_pofile(self, args):
-        if self.user_name and self.apikey:
-            zanata = ZanataResource(self.url, self.user_name, self.apikey)
-        else:
-            self.log.error("Please specify username and apikey in zanata.ini/flies.ini or with '--username' and '--apikey' options")
-            sys.exit(1)
-
+    def get_lang_list(self):
         list = []
         if options['lang']:
             list = options['lang'].split(',')
         elif self.project_config['locale_map']:
             list = self.project_config['locale_map'].keys()
         else:
-            self.log.error("Please specify the language with '--lang' option or in zanata.xml/flies.xml")
+            self.log.error("Please specify the language with '--lang' option or in zanata.xml")
             sys.exit(1)
+        return list
+
+    def _create_outpath(self):
+        if options['dstdir']:
+            if os.path.isdir(options['dstdir']):
+                outpath = os.path.join(options['dstdir'], 'po')
+            else:
+                self.log.error("The destination folder does not exist, please create it")
+                sys.exit(1)
+        else:
+            outpath = os.path.join(os.getcwd(), 'po')
+                
+        if not os.path.isdir(outpath):
+            os.mkdir(outpath)
+
+        return outpath
+
+    def _pull_pofile(self, args):
+        zanata = self._generate_zanataresource()
+
+        lang_list = self.get_lang_list()
 
         project_id, iteration_id = self.check_project(zanata)
         
@@ -674,23 +691,13 @@ class ZanataConsole:
 
                     self.log.info("\nFetching the content of %s from server: "%name)
                     
-                    for item in list:
+                    for item in lang_list:
                         if item in self.project_config['locale_map']:
                             lang = self.project_config['locale_map'][item]
                         else:
                             lang = item
                         
-                        if options['dstdir']:
-                            if os.path.isdir(options['dstdir']):
-                                outpath = os.path.join(options['dstdir'], 'po')
-                            else:
-                                self.log.error("The destination folder does not exist, please create it")
-                                sys.exit(1)
-                        else:
-                            outpath = os.path.join(os.getcwd(), 'po')
-                            
-                        if not os.path.isdir(outpath):
-                            os.mkdir(outpath)                        
+                        outpath = self._create_outpath()                    
 
                         self.log.info("Retrieving translation for %s from server:"%item)
 
@@ -728,7 +735,7 @@ class ZanataConsole:
                             self.log.error("Can't generate po file for %s,"%name+e.msg)
         else:
             self.log.info("\nFetching the content of %s from server: "%args[0])
-            for item in list:
+            for item in lang_list:
                 result = ''
                 pot = ''
                 folder = ''
@@ -737,18 +744,8 @@ class ZanataConsole:
                     lang = self.project_config['locale_map'][item]
                 else:
                     lang = item
-                
-                if options['dstdir']:
-                    if os.path.isdir(options['dstdir']):
-                        outpath = os.path.join(options['dstdir'], 'po')
-                    else:
-                        self.log.error("The destination folder does not exist, please create it")
-                        sys.exit(1)
-                else:
-                    outpath = os.path.join(os.getcwd(), item)
-                
-                if not os.path.isdir(outpath):
-                    os.mkdir(outpath)
+
+                outpath = self._create_outpath() 
 
                 self.log.info("Retrieving %s translation from server:"%item)
 
@@ -803,11 +800,7 @@ class ZanataConsole:
         Push the content of publican files to a Project version on Zanata/Flies server
         @param args: name of the publican file
         """
-        if self.user_name and self.apikey:
-            zanata = ZanataResource(self.url, self.user_name, self.apikey)
-        else:
-            self.log.error("Please provide username and apikey in zanata.ini/flies.ini or with '--username' and '--apikey' options")
-            sys.exit(1)
+        zanata = self._generate_zanataresource()
 
         project_id, iteration_id = self.check_project(zanata)
         
@@ -946,22 +939,11 @@ class ZanataConsole:
         Project iteration will be pulled from server.
         @param args: the name of publican file
         """
-        if self.user_name and self.apikey:
-            zanata = ZanataResource(self.url, self.user_name, self.apikey)
-        else:
-            self.log.error("Please specify username and apikey in zanata.ini/flies.ini or with '--username' and '--apikey' options")
-            sys.exit(1)
-
-        list = []
-        if options['lang']:
-            list = options['lang'].split(',')
-        elif self.project_config['locale_map']:
-            list = self.project_config['locale_map'].keys()
-        else:
-            self.log.error("Please specify the language with '--lang' option or in zanata.xml")
-            sys.exit(1)
+        zanata = self._generate_zanataresource()
 
         project_id, iteration_id = self.check_project(zanata)
+
+        lang_list = self.get_lang_list()
         
         #list the files in project
         try:
@@ -990,7 +972,7 @@ class ZanataConsole:
 
                     self.log.info("\nFetching the content of %s from Zanata/Flies server: "%name)                    
                     
-                    for item in list:
+                    for item in lang_list:
                         if item in self.project_config['locale_map']:
                             lang = self.project_config['locale_map'][item]
                         else:
@@ -1050,7 +1032,7 @@ class ZanataConsole:
                             self.log.error("Can't generate po file for %s,"%name+e.msg)
         else:
             self.log.info("\nFetching the content of %s from server: "%args[0])
-            for item in list:
+            for item in lang_list:
                 result = ''
                 pot = ''
                 folder = ''
@@ -1236,17 +1218,13 @@ class ZanataConsole:
         else:
             config = ZanataConfig()
             #Read the project configuration file using --project-config option
-            if options['project_config']  and os.path.isfile(options['project_config']):
-                self.log.info("Loading zanata project config from %s"%options['project_config'])            
-                self.project_config = config.read_project_config(options['project_config'])
-            elif os.path.isfile(os.getcwd()+'/zanata.xml'):
-                #If the option is not valid, try to read the project configuration from current path
-                self.log.info("Loading zanata/flies project config from from %s"%(os.getcwd()+'/zanata.xml'))
-                self.project_config = config.read_project_config(os.getcwd()+'/zanata.xml') 
-            elif os.path.isfile(os.getcwd()+'/flies.xml'):
-                #If the option is not valid, try to read the project configuration from current path
-                self.log.info("Loading zanata/flies project config from from %s"%(os.getcwd()+'/flies.xml'))
-                self.project_config = config.read_project_config(os.getcwd()+'/flies.xml')            
+            config_file = [os.path.join(os.getcwd(), filename) for filename in ['zanata.xml', 'flies.xml']]
+            if options['project_config']:
+                config_file.append(options['project_config'])
+
+            if [os.path.exists(path) for path in config_file]:
+                self.log.info("Loading zanata project config from %s"%path)            
+                self.project_config = config.read_project_config(path)
             elif command != 'list':                
                 self.log.info("Can not find zanata.xml/flies.xml, please specify the path of zanata.xml")
                 
@@ -1267,20 +1245,17 @@ class ZanataConsole:
                 self.url = self.url[:-1]
                        
             #Try to read user-config file
-            user_config = ''
-            if options['user_config'] and os.path.isfile(options['user_config']):  
-                user_config = options['user_config']
-            elif os.path.isfile(os.path.expanduser("~")+'/.config/zanata.ini'):
-                user_config = os.path.expanduser("~")+'/.config/zanata.ini'
-            elif os.path.isfile(os.path.expanduser("~")+'/.config/flies.ini'):
-                user_config = os.path.expanduser("~")+'/.config/flies.ini'
-            
-            if user_config:
-                self.log.info("Loading zanata/flies user config from %s"%user_config)
+            user_config = [os.path.join(os.path.expanduser("~")+'/.config', filename) for filename in ['zanata.ini', 'flies.ini']]
+
+            if options['user_config']:  
+                user_config.append(options['user_config'])
+
+            if [os.path.exists(path) for path in user_config]:
+                self.log.info("Loading zanata/flies user config from %s"%path)
                 
                 #Read the user-config file    
-                config.set_userconfig(user_config)
-
+                config.set_userconfig(path)
+                
                 try:
                     server = config.get_server(self.url)
                     if server:
@@ -1346,7 +1321,7 @@ class ZanataConsole:
                     self._pull_pofile(command_args)
 
 def main():
-    client = zanataConsole()
+    client = ZanataConsole()
     client.run()
 
 if __name__ == "__main__":
