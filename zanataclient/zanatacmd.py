@@ -32,12 +32,6 @@ class ZanataCommand:
     def __init__(self):
         self.log = Logger()
 
-    def _search_file(self, path, filename):
-        for root, dirs, names in os.walk(path):
-            if filename in names:
-                return os.path.join(root, filename)
-        raise NoSuchFileException('Error 404', 'File %s not found'%filename)
-    
     ##############################################
     ##
     ## Commands for interaction with zanata server 
@@ -283,7 +277,7 @@ class ZanataCommand:
             
             self.commit_translation(zanata, project_id, iteration_id, request_name, pofile, lang, body, merge)
 
-    def push_command(self, zanata, file_list, srcfolder, project_id, iteration_id, copytrans, project_type, import_param = None):
+    def push_command(self, zanata, file_list, srcfolder, project_id, iteration_id, copytrans, import_param = None):
         """
         Push the content of publican files to a Project version on Zanata/Flies server
         @param args: name of the publican file

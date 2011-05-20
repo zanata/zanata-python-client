@@ -204,6 +204,7 @@ class PublicanUtility:
         po = polib.POFile(fpath=path)
         
         potcontent = json.loads(pot)
+        # pylint: disable-msg=E1103
         textflows = potcontent.get('textFlows')
                 
         if potcontent.get('extensions'):
@@ -282,6 +283,7 @@ class PublicanUtility:
         # finally save resulting po to outpath as lang/myfile.po
        
         po.save()
+        # pylint: disable-msg=E1103
         self.log.info("Writing po file to %s"%(path))
-
+        
         

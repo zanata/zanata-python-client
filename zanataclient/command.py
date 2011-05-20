@@ -202,7 +202,7 @@ def _parse_command_line(option_sets, subcmds=None, sys_args=None):
                         command = orig_command+'_'+sub[0]
                         args = sub[1:]
                     else:
-                        print error("Unknown command")
+                        print "Unknown command"
                         sys.exit(1)
                 else:
                     print "Please complete the command!"
@@ -309,11 +309,4 @@ def handle_program(
 
         # Now handle the command options and arguments
         command = command_handler_factories[command]()
-        command(option_sets, command_options, args)
-
-def makeHandler(handler):
-    def make(state=None):
-        return handler
-    return make
-
-
+        command(command_options, args)

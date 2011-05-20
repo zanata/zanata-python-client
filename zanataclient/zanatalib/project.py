@@ -51,8 +51,9 @@ class Project(object):
     def set_iteration(self, iterations):
         self.__iterations = iterations
 
-    def get_iteration(self, id):
-        return self.__iterations.get(self.id, id)
+    def get_iteration(self, version_id):
+        project_id = getattr(self, 'id')
+        return self.__iterations.get(project_id, version_id)
 
 
 
