@@ -25,14 +25,16 @@ __all__ = (
         "DocumentService",
    )
 
-import os
 try:
     import json
 except ImportError:
     import simplejson as json
-import sys
-from rest.client import RestClient
-from error import *
+from error import InternalServerError
+from error import UnAuthorizedException
+from error import BadRequestBodyException
+from error import SameNameDocumentException
+from error import UnAvaliableResourceException
+
 
 class DocumentService:    
     def __init__(self, projects):
@@ -42,18 +44,18 @@ class DocumentService:
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid, iterationid))
         
         if res['status'] == '200' or res['status'] == '304':
-            list = json.loads(content)
-            filelist = [file.get('name') for file in list]
+            files = json.loads(content)
+            filelist = [item.get('name') for item in files]
             return filelist
         elif res['status'] == '500':
             raise InternalServerError('Error 500', 'An internal server error happens')
     
-    def update_template(self, projectid, iterationid, file, resources, copytrans):
+    def update_template(self, projectid, iterationid, file_id, resources, copytrans):
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
          
-        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid,iterationid,file), args=resources, headers=headers, copytrans=copytrans)
+        res = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid,iterationid,file_id), args=resources, headers=headers, copytrans=copytrans)
          
         if res['status'] == '201' or res['status'] == '200':
             return True
@@ -90,12 +92,12 @@ class DocumentService:
         elif res['status'] == '409':
             raise SameNameDocumentException('Error 409', content)
 
-    def delete_template(self, projectid, iterationid, file):
+    def delete_template(self, projectid, iterationid, file_id):
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey    
        
-        res, content = self.projects.restclient.request_delete('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file), headers=headers)
+        res, content = self.projects.restclient.request_delete('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file_id), headers=headers)
          
         if res['status'] == '200' or res['status'] == '304':
             return content
@@ -104,8 +106,8 @@ class DocumentService:
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey') 
     
-    def retrieve_template(self, projectid, iterationid, file):
-        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file))
+    def retrieve_template(self, projectid, iterationid, file_id):
+        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file_id))
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey 
@@ -117,7 +119,7 @@ class DocumentService:
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')       
 
-    def retrieve_translation(self, lang, projectid, iterationid, file):
+    def retrieve_translation(self, lang, projectid, iterationid, file_id):
         """
         Get translation content of file from Flies server
         @param lang: language
@@ -132,7 +134,7 @@ class DocumentService:
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey 
 
-        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file, lang))
+        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file_id, lang))
                 
         if res['status'] == '200' or res['status'] == '304':
             return content

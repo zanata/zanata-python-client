@@ -30,12 +30,17 @@ from xml.dom import minidom
 
 project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}
 
+
 class ZanataConfig:
-     def set_userconfig(self, path):
+    def __init__(self):
+        self.configparser = ""
+        self._config = ""
+        
+    def set_userconfig(self, path):
         self.configparser = ConfigParser.ConfigParser()
         self._config = self.configparser.read(['zanata.ini', path])
         
-     def get_server(self, url):
+    def get_server(self, url):
         if self._config:
             try:
                 item_list = self.configparser.items('servers')
@@ -49,24 +54,24 @@ class ZanataConfig:
                     if url == address:
                         server = item[0][:-4]
                 return server
-            except ConfigParser.NoOptionError, NoSectionError:
+            except ConfigParser.NoOptionError, ConfigParser.NoSectionError:
                 raise
         else:
             return None       
              
-     def get_config_value(self, name, section, server):
+    def get_config_value(self, name, section, server):
         if self._config:
             try:
                 value = self.configparser.get(section, server+'.'+name)
                 return value
-            except ConfigParser.NoOptionError, NoSectionError:
+            except ConfigParser.NoOptionError, ConfigParser.NoSectionError:
                 raise
         else:
             return None
 
-     def read_project_config(self, filename):
+    def read_project_config(self, filename):
         log = Logger()
-        project_config={'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}
+
         if os.path.getsize(filename) == 0:
             log.info('The project xml: flies.xml is empty, need command line options')
             return project_config
@@ -111,11 +116,11 @@ class ZanataConfig:
                 for node in locale.childNodes:
                     if node.nodeType == node.TEXT_NODE:
                         if locale.getAttribute("map-from"):
-                            map = {locale.getAttribute("map-from"):node.data}
-                            project_config['locale_map'].update(map)
+                            locale_map = {locale.getAttribute("map-from"):node.data}
+                            project_config['locale_map'].update(locale_map)
                         else:
-                            map = {node.data:node.data}
-                            project_config['locale_map'].update(map)
+                            locale_map = {node.data:node.data}
+                            project_config['locale_map'].update(locale_map)
         
         return project_config
     

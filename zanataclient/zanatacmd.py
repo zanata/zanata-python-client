@@ -23,10 +23,19 @@
 import sys
 import os
 
-from zanatalib import *
-from zanatalib.error import *
-from parseconfig import ZanataConfig
 from publicanutil import PublicanUtility
+from zanatalib.project import Project
+from zanatalib.project import Iteration
+from zanatalib.outpututil import Logger 
+from zanatalib.error import NoSuchProjectException
+from zanatalib.error import UnAuthorizedException
+from zanatalib.error import UnAvaliableResourceException
+from zanatalib.error import BadRequestBodyException
+from zanatalib.error import InvalidPOTFileException
+from zanatalib.error import SameNameDocumentException
+from zanatalib.error import InvalidOptionException
+from zanatalib.error import NotAllowedException
+from zanatalib.error import ProjectExistException
 
 class ZanataCommand:
     def __init__(self):
@@ -119,8 +128,6 @@ class ZanataCommand:
                     else:
                         self.log.error("Please enter yes(y) or no(n)")
 
-            
-
             for name in filelist:
                 if ',' in name: 
                     request = name.replace(',', '\,')
@@ -158,6 +165,8 @@ class ZanataCommand:
             print ("Project Name:        %s")%project.name
             print ("Project Type:        %s")%project.type
             print ("Project Links:       %s\n")%[{'href':link.href, 'type':link.type, 'rel':link.rel} for link in project.links]
+
+        return projects
         
     def project_info(self, zanata, project_id):
         """
@@ -169,9 +178,9 @@ class ZanataCommand:
             print ("Project Name:        %s")%p.name 
             print ("Project Type:        %s")%p.type
             print ("Project Description: %s")%p.description
-        except NoSuchProjectException, e:
+        except NoSuchProjectException:
             self.log.error("There is no Such Project on the server")
-        except InvalidOptionException, e:
+        except InvalidOptionException:
             self.log.error("Options are not valid")
                
     def version_info(self, zanata, project_id, iteration_id):
@@ -186,7 +195,7 @@ class ZanataCommand:
                 print ("Version Name:        %s")%iteration.name
             if hasattr(iteration, 'description'):
                 print ("Version Description: %s")%iteration.description
-        except NoSuchProjectException, e:
+        except NoSuchProjectException:
             self.log.error("There is no such project or version on the server")
 
     def create_project(self, zanata, project_id, project_name, project_desc):
@@ -319,18 +328,18 @@ class ZanataCommand:
         """
         publicanutil = PublicanUtility()
         #if file no specified, retrieve all the files of project
-        for file in filelist:
+        for file_item in filelist:
             pot = ""
             result = ""
             folder = ""
 
-            if '/' in file: 
-                name = file.split('/')[-1]
-                folder = file.split('/')[0]
-                request_name = file.replace('/', ',')
+            if '/' in file_item: 
+                name = file_item.split('/')[-1]
+                folder = file_item.split('/')[0]
+                request_name = file_item.replace('/', ',')
             else:
-                name = file
-                request_name = file
+                name = file_item
+                request_name = file_item
 
             self.log.info("\nFetching the content of %s from Zanata/Flies server: "%name)                    
                     

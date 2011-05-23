@@ -24,7 +24,6 @@ __all__ = (
         "ProjectService", 
    )
 
-import sys
 try:
     import json
 except ImportError:
@@ -32,7 +31,12 @@ except ImportError:
 from rest.client import RestClient
 from project import Project
 from project import Iteration
-from error import *
+from error import ProjectExistException
+from error import NoSuchProjectException
+from error import UnAuthorizedException
+from error import BadRequestException
+from error import NotAllowedException
+
 
 class ProjectService:
     """
@@ -84,15 +88,13 @@ class ProjectService:
         @raise UnAuthorizedException:
         @raise BadRequestException:
         """
-        exist = False
         headers = {}
         headers['X-Auth-User'] = self.username
         headers['X-Auth-Token'] = self.apikey
         try:
             self.get(project.id)
+        except ProjectExistException:
             raise ProjectExistException('Status 200', 'The project is already exist')
-        except NoSuchProjectException:
-            exist = False
 
         body ='''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(project.name,project.id,project.desc)
         res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s'%project.id, args=body, headers=headers)

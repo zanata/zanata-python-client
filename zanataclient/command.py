@@ -26,9 +26,7 @@
 
 import getopt
 import sys
-import logging
-import os
-import inspect
+
 
 class OptionConfigurationError(Exception):
     pass

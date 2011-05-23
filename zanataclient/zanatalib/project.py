@@ -24,10 +24,6 @@
 __all__ = (
         "Project","Iteration" 
    )
-try:
-    import json
-except ImportError:
-    import simplejson as json
 
 
 class Link(object):

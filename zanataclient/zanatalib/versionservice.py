@@ -25,14 +25,13 @@ __all__ = (
         "VersionService",
    )
 
-import os
 try:
     import json
 except ImportError:
     import simplejson as json
-import sys
 from rest.client import RestClient
-from error import *
+from error import UnAvaliableResourceException
+
 
 class VersionService:
     def __init__(self, base_url):

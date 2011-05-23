@@ -446,6 +446,12 @@ def search_file(path, filename):
 
     raise NoSuchFileException('Error 404', 'File %s not found' % filename)
 
+def convert_serverversion(server_version):
+    version = str(server_version.split('-')[0])
+    main_ver = version[:3]
+    version_number = string.atof(main_ver)
+    return version_number
+
 #################################
 #
 # Command Handler
@@ -525,7 +531,7 @@ def version_info(command_options, args):
         iteration_id = project_config['project_version']
 
     url = process_url(project_config, command_options)
-    username, apikey = read_user_config(url, command_options)
+
     get_version(url)
 
     if command_options.has_key('project_id'):
@@ -633,14 +639,14 @@ def create_version(command_options, args):
         version_desc = command_options['version_desc'][0]['value']
 
     if server_version:
-        version = str(server_version.split('-')[0])
-        server_version_number = string.atof(version)
+        version_number = convert_serverversion(server_version)
 
-        if server_version_number <= 1.2 and not version_name:
+        if version_number <= 1.2 and not version_name:
             version_name = args[0]
     else:
         if not version_name:
             version_name = args[0]
+
 
     zanata = generate_zanataresource(url, username, apikey)
     zanatacmd = ZanataCommand()
