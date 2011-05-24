@@ -6,7 +6,8 @@ import signal
 
 from zanatalib.versionservice import VersionService
 from zanatalib.client import ZanataResource
-from zanatalib.error import *
+from zanatalib.error import UnAvaliableResourceException
+from zanatalib.error import NoSuchFileException
 from zanatalib.outpututil import Logger
 from zanatacmd import ZanataCommand
 from parseconfig import ZanataConfig
@@ -334,7 +335,7 @@ def get_version(url):
             server_version = content['versionNo']
             log.info("zanata python client version: %s, zanata/flies server API version: %s" % (version_number, content['versionNo']))
             return server_version
-    except UnAvaliableResourceException, e:
+    except UnAvaliableResourceException:
         log.info("zanata python client version: %s" % version_number)
         log.error("Can not retrieve the server version, server may not support the version service")
 

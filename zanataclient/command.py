@@ -63,7 +63,7 @@ def strip_docstring(docstring, tabstop=4):
                 else:
                     break
             if chars < min:
-               min = chars
+                min = chars
     # Now we know the amount of whitespace for the line with the least 
     # we can regenerate the final docstring whitespace
     final = []

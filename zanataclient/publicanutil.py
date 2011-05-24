@@ -27,12 +27,15 @@ __all__ = (
 import polib
 import hashlib
 import os
+
 try:
     import json
 except ImportError:
     import simplejson as json
 import sys
-from zanatalib import *
+
+from zanatalib.outpututil import Logger
+from zanatalib.error import InvalidPOTFileException
 
 class PublicanUtility:
     def __init__(self):
