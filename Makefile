@@ -18,7 +18,7 @@ lint-report:
 	pylint --reports=n zanata zanataclient
 
 test: 
-	(cd test; ls test_*.py | xargs --verbose -n1 python)
+	(cd test; python test_all.py)
 
 all: run lint test sdist
 

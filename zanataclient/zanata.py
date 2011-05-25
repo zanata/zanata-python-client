@@ -261,7 +261,7 @@ def read_project_config(command_options):
 
     for path in config_file:
         if os.path.exists(path):
-            log.info("Loading zanata project config from %s" % path)
+            log.info("Loading zanata project config from: %s" % path)
             project_config = config.read_project_config(path)
             break
 
@@ -298,7 +298,7 @@ def read_user_config(url, command_options):
 
     for path in user_config:
         if os.path.exists(path):
-            log.info("Loading zanata/flies user config from %s" % path)
+            log.info("Loading zanata/flies user config from: %s" % path)
 
             #Read the user-config file
             config.set_userconfig(path)
@@ -311,6 +311,8 @@ def read_user_config(url, command_options):
             except Exception, e:
                 log.info("Processing user-config file:%s" % str(e))
                 break
+            
+            break
 
     if not (user_name, apikey):
         log.info("Can not find user-config file in home folder, current path or path in 'user-config' option")
@@ -377,14 +379,17 @@ def get_sourcefolder(command_options, project_type):
 
 def process_srcfile(command_options):
     tmlfolder = ""
-    filepath = ""
+    file_path = ""
 
     if command_options.has_key('srcfile'):
-        filepath = command_options['srcfile'][0]['value']
-        import_file = filepath.split('/')[-1]
-        tmlfolder = filepath.split(import_file)[0]
+        path = command_options['srcfile'][0]['value']
+        file_path = os.path.abspath(path)
+        import_file = file_path.split('/')[-1]
+        tmlfolder = file_path.split(import_file)[0]
+        if tmlfolder[-1] == '/':
+            tmlfolder = tmlfolder[:-1]
 
-    return tmlfolder, filepath
+    return tmlfolder, file_path
 
 def process_transdir(command_options):
     trans_folder = ""
@@ -846,7 +851,6 @@ def push(command_options, args, project_type = None):
 
     zanata = generate_zanataresource(url, username, apikey)
 
-    #if file not specified, push all the files in pot folder to zanata server
     project_id, iteration_id = zanatacmd.check_project(zanata, command_options, project_config)
     log.info("Username: %s" % username)
     log.info("Source language: en-US")

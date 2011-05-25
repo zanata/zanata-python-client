@@ -20,7 +20,7 @@
 # Boston, MA  02111-1307  USA
 
 all__ = (
-            "CommandlineTest",
+            "ZanataCmdTest",
         )
 
 import unittest
@@ -33,7 +33,7 @@ from zanataclient.zanatalib import ZanataResource
 from zanataclient.zanatalib.project import Project
 
 
-class CommandlineTest(unittest.TestCase):
+class ZanataCmdTest(unittest.TestCase):
     def setUp(self):
         self.zanatacmd = ZanataCommand()
 

@@ -41,9 +41,6 @@ class PublicanUtility:
     def __init__(self):
         self.log = Logger()
 
-    def get_potheader(self, entry):
-        extracted_comment = entry.comment
-       
     def create_txtflow(self, pofile):
         """
         Convert the content of the pot file to a list of text flow.
@@ -111,18 +108,18 @@ class PublicanUtility:
         
         return textflowtargets
 
-    def create_extensions(self, pofile, type):
+    def create_extensions(self, pofile, object_type):
         """
         "extensions":[{"object-type":"po-header","comment":"comment_value", "entries":[{"key":"h1","value":"v1"}]}]
         "extensions":[{"object-type":"po-target-header", "comment":"comment_value", "entries":[{"key":"ht","value":"vt1"}]}]
         """
         entries = []
-        list = pofile.ordered_metadata()
-        for item in list:
+        metadatas = pofile.ordered_metadata()
+        for item in metadatas:
             entry = {"key":item[0], "value":item[1]}
             entries.append(entry)
        
-        extensions = [{"object-type":type,"comment":pofile.header, "entries":entries}]
+        extensions = [{"object-type":object_type,"comment":pofile.header, "entries":entries}]
         return extensions
 
     def create_pofile(self, path):
@@ -138,23 +135,23 @@ class PublicanUtility:
 
         return po
 
-    def get_file_list(self, path, type):
+    def get_file_list(self, path, file_type):
         final_file_list = []
         root_list = os.listdir(path)
         for item in root_list:
             if item == '.svn':
                 continue
             full_path = os.path.join(path,item)    
-            if full_path.endswith(type):
+            if full_path.endswith(file_type):
                 final_file_list.append(full_path)
             if os.path.isdir(full_path):
                 final_file_list+=self.get_file_list(full_path, type)
         return final_file_list
 
-    def hash_match(self, message, id):
+    def hash_match(self, message, msgid):
         m = hashlib.md5()
         m.update(message.msgid.encode('utf-8'))
-        if m.hexdigest() == id:
+        if m.hexdigest() == msgid:
             return True
         else:
             return False 
@@ -230,9 +227,9 @@ class PublicanUtility:
                             for item in entry.get('references'):
                                 #in some cases, entry contains more than one reference
                                 if ' ' in item:
-                                    list = item.split(' ')
+                                    reference = item.split(' ')
                                     ref_list = []
-                                    for i in list:
+                                    for i in reference:
                                         ref = tuple(i.split(':'))
                                         ref_list.append(ref)
                                     poentry.occurrences= ref_list 
@@ -276,10 +273,10 @@ class PublicanUtility:
                 for translation in targets:
                     if translation.get('extensions'):
                         extensions=translation.get('extensions')[0]
-                        if extensions:
-                            ext_type = extensions.get('object-type')
-                            comment = extensions.get('comment')
-                            entries = extensions.get('value')
+                        #if extensions:
+                        #    ext_type = extensions.get('object-type')
+                        #    comment = extensions.get('comment')
+                        #    entries = extensions.get('value')
                     if self.hash_match(message, translation.get('resId')):
                         message.msgstr = translation.get('content')
                    

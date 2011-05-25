@@ -35,7 +35,7 @@ class ConfigTest(unittest.TestCase):
         self.config = ZanataConfig()
 
     def test_user_config(self):
-        self.config.set_userconfig("./flies.ini")
+        self.config.set_userconfig("./testfiles/zanata.ini")
         server = self.config.get_server("http://localhost:8080/flies")
         user_name = self.config.get_config_value("username", 'servers', server)
         apikey = self.config.get_config_value("key", 'servers',server)
@@ -44,7 +44,7 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(apikey, "key")
   
     def test_project_config(self):
-        project_config = self.config.read_project_config("./flies.xml")
+        project_config = self.config.read_project_config("./testfiles/zanata.xml")
         self.assertEqual(project_config['project_url'], "http://localhost:8080/flies/")
         self.assertEqual(project_config['project_id'], "test-project")
         self.assertEqual(project_config['project_version'], "5.4")

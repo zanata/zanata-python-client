@@ -36,9 +36,15 @@ class ZanataTest(unittest.TestCase):
         self.assertEqual(version_number, 1.3)
 
     def test_seachfile(self):
-        path = "./po"
+        path = "./testfiles/po"
         result = zanata.search_file(path, "test.po")
-        self.assertEqual(result, "./po/test.po")
+        self.assertEqual(result, "./testfiles/po/test.po")
+
+    def test_processsrcfile(self):
+        command_options = {'srcfile': [{'name': '--srcfile', 'value': 'test.po', 'internal': 'src_file', 'long': ['--srcfile'], 'type': 'command', 'metavar': 'SRCFILE'}]}
+        tmlfolder, input_file = zanata.process_srcfile(command_options)
+        self.assertEqual(tmlfolder, os.getcwd())
+        self.assertEqual(input_file, os.path.abspath(os.path.join(os.getcwd(),'test.po')))
 
 if __name__ == '__main__':
     unittest.main()
