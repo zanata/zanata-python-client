@@ -179,6 +179,13 @@ option_sets = {
             type='command',
             long=['--no-copytrans'],
         ),
+    ],
+    'project_type': [
+        dict(
+            type='command',
+            long=['--project-type'],
+            metavar='PROJECTTYPE',
+        ),
     ]
 }
 
@@ -189,7 +196,8 @@ subcmds = {
     'project': ['info', 'create', 'remove'],
     'version': ['info', 'create', 'remove'],
     'publican': ['push', 'pull'],
-    'po': ['push', 'pull']
+    'po': ['push', 'pull'],
+    'push':[]
     }
 
 usage = """Client for talking to a Zanata/Flies Server
@@ -206,6 +214,7 @@ publican pull       Pull the content of publican file
 publican push       Push the content of publican file to Zanata/Flies server
 po pull       Pull the content of software project file
 po push       Push the content of software project file to Zanata/Flies server
+push          Push the content of software project/docbook project to Zanata/Flies server
 
 Use 'zanata help' for the full list of commands
 Use 'zanata help <command>, zanata <command> --help or zanata <command> -h' for detail usage of commands
@@ -358,7 +367,7 @@ def get_sourcefolder(command_options, project_type):
     elif command_options.has_key('srcdir'):
         tmlfolder = command_options['srcdir'][0]['value']
     else:
-        tmlfolder = os.path.join(os.getcwd(), file_type)
+        tmlfolder = os.path.abspath(os.path.join(os.getcwd(), file_type))
 
     if not os.path.isdir(tmlfolder):
         log.error("Can not find source folder, please specify the source folder with '--srcdir' or '--dir' option")
@@ -368,13 +377,14 @@ def get_sourcefolder(command_options, project_type):
 
 def process_srcfile(command_options):
     tmlfolder = ""
+    filepath = ""
 
     if command_options.has_key('srcfile'):
-        filename = command_options['srcfile'][0]['value']
-        import_file = filename.split('/')[-1]
-        tmlfolder = filename.split(import_file)[0]
+        filepath = command_options['srcfile'][0]['value']
+        import_file = filepath.split('/')[-1]
+        tmlfolder = filepath.split(import_file)[0]
 
-    return tmlfolder
+    return tmlfolder, filepath
 
 def process_transdir(command_options):
     trans_folder = ""
@@ -719,84 +729,8 @@ def po_push(command_options, args):
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
     """
-    copytrans = True
-    importpo = False
-    filelist = []
-    force = False
-    import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': ''}
-
-    zanatacmd = ZanataCommand()
-
-    project_config = read_project_config(command_options)
-
-    if not project_config:
-        log.info("Can not find zanata.xml/flies.xml, please specify the path of zanata.xml")
-
-    url = process_url(project_config, command_options)
-    username, apikey = read_user_config(url, command_options)
-    get_version(url)
-
-    zanata = generate_zanataresource(url, username, apikey)
-    tmlfolder = get_sourcefolder(command_options, "software")
-    log.info("PO directory (originals):%s" % tmlfolder)
-
-    if command_options.has_key('importpo'):
-        log.info("Importing translation")
-        transdir = process_transdir(command_options)
-        log.info("Reading locale folders from %s" % transdir)
-    else:
-        log.info("Importing source documents only")
-
-            #if file not specified, push all the files in pot folder to zanata server
-    project_id, iteration_id = zanatacmd.check_project(zanata, command_options, project_config)
-
-    log.info("Source language: en-US")
-
-    if command_options.has_key('nocopytrans'):
-        copytrans = False
-
-    log.info("Copy previous translations:%s" % copytrans)
-
-    tmlfolder = get_sourcefolder(command_options, "publican")
-    log.info("POT directory (originals):%s" % tmlfolder)
-
-    if command_options.has_key('importpo'):
-        log.info("Importing translation")
-        import_param['transdir'] = process_transdir(command_options)
-        log.info("Reading locale folders from %s" % import_param['transdir'])
-        import_param['merge'] = process_merge(command_options)
-        import_param['lang_list'] = get_lang_list(command_options, project_config)
-        import_param['locale_map'] = project_config['locale_map']
-        import_param['project_type'] = "software"
-        importpo = True
-    else:
-        log.info("Importing source documents only")
-
-    if args:
-        try:
-            full_path = search_file(tmlfolder, args[0])
-            filelist.append(full_path)
-        except NoSuchFileException, e:
-            log.error(e.msg)
-            sys.exit(1)
-    else:
-        #get all the pot files from the template folder
-        publicanutil = PublicanUtility()
-        filelist = publicanutil.get_file_list(tmlfolder, ".pot")
-
-        if not filelist:
-            log.error("The template folder is empty")
-            sys.exit(1)
-
-    if command_options.has_key('force'):
-        force = True
-    zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force)
-
-    if importpo:
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, import_param)
-    else:
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans)
-
+    push(command_options, args, "software")
+    
 def publican_pull(command_options, args):
     """
     Usage: zanata publican pull [OPTIONS] {documents} {lang}
@@ -867,9 +801,34 @@ def publican_push(command_options, args):
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
     """
+    push(command_options, args, "publican")
+    
+def push(command_options, args, project_type = None):
+    """
+    Usage: zanata publican push OPTIONS {documents}
+
+    Push publican content to server for translation.
+
+    Argumensts: documents
+
+    Options:
+        -f: force to remove content on server side
+        --username: user name
+        --apikey: api key of user
+        --project-id: id of the project
+        --project-version: id of the version
+        --dir: the full path of the folder that contain pot folder and locale folders
+        --srcdir: the full path of the pot folder
+        --transdir: the full path of the folder that contain locale folders
+        --import-po: push local translations to server
+        --merge: override merge algorithm: auto (default) or import
+        --no-copytrans: prevent server from copying translations from other versions
+    """
     copytrans = True
     importpo = False
     force = False
+    command_type = ''
+    tmlfolder = ""
     filelist = []
 
     import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': ''}
@@ -896,10 +855,26 @@ def publican_push(command_options, args):
         copytrans = False
 
     log.info("Copy previous translations:%s" % copytrans)
-
-    tmlfolder = get_sourcefolder(command_options, "publican")
-    log.info("POT directory (originals):%s" % tmlfolder)
-
+    
+    if command_options.has_key('project_type'):
+        command_type = command_options['project_type'][0]['value']
+    elif project_type:
+        command_type = project_type
+    else:
+        log.error("The project type is unknown")
+        sys.exit(1)
+        
+    if command_type == 'software' and command_options.has_key('srcfile'):
+        tmlfolder, import_file = process_srcfile(command_options)
+        filelist.append(import_file)
+    else:
+        tmlfolder = get_sourcefolder(command_options, command_type)
+    
+    if command_type == 'publican':
+        log.info("POT directory (originals):%s" % tmlfolder)
+    elif command_type == 'software':
+        log.info("PO directory (originals):%s" % tmlfolder)
+        
     if command_options.has_key('importpo'):
         log.info("Importing translation")
         import_param['transdir'] = process_transdir(command_options)
@@ -907,7 +882,7 @@ def publican_push(command_options, args):
         import_param['merge'] = process_merge(command_options)
         import_param['lang_list'] = get_lang_list(command_options, project_config)
         import_param['locale_map'] = project_config['locale_map']
-        import_param['project_type'] = "publican"
+        import_param['project_type'] = command_type
         importpo = True
     else:
         log.info("Importing source documents only")
@@ -920,13 +895,14 @@ def publican_push(command_options, args):
             log.error(e.msg)
             sys.exit(1)
     else:
-        #get all the pot files from the template folder
-        publicanutil = PublicanUtility()
-        filelist = publicanutil.get_file_list(tmlfolder, ".pot")
+        if not command_options.has_key('srcfile'):
+            #get all the pot files from the template folder
+            publicanutil = PublicanUtility()
+            filelist = publicanutil.get_file_list(tmlfolder, ".pot")
 
-        if not filelist:
-            log.error("The template folder is empty")
-            sys.exit(1)
+            if not filelist:
+                log.error("The template folder is empty")
+                sys.exit(1)
 
     if command_options.has_key('force'):
         force = True
@@ -935,7 +911,7 @@ def publican_push(command_options, args):
     if importpo:
         zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, import_param)
     else:
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans)
+        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans)    
 
 command_handler_factories = {
     'help': makeHandler(help_info),
@@ -947,10 +923,11 @@ command_handler_factories = {
     'po_pull': makeHandler(po_pull),
     'po_push': makeHandler(po_push),
     'publican_pull': makeHandler(publican_pull),
-    'publican_push': makeHandler(publican_push)
+    'publican_push': makeHandler(publican_push),
+    'push': makeHandler(push)
 }
 
-def signal_handler():
+def signal_handler(signal, frame):
     print '\nPressed Ctrl+C! Stop processing!'
     sys.exit(0)
 
