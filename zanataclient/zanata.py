@@ -332,10 +332,14 @@ def get_version(url):
     #Retrieve the version of client
     path = os.path.dirname(os.path.realpath(__file__))
     version_file = os.path.join(path, 'VERSION-FILE')
-    version = open(version_file, 'rb')
-    client_version = version.read()
-    version.close()
-    version_number = client_version[:-1].strip('version: ')
+    try:
+        version = open(version_file, 'rb')
+        client_version = version.read()
+        version.close()
+        version_number = client_version[:-1].strip('version: ')
+    except IOError:
+        log.error("Please run VERSION-GEN to generate VERSION-FILE first")
+        sys.exit(1)
 
     #Retrieve the version of the zanata server
     version = VersionService(url)
