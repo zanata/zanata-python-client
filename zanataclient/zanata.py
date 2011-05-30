@@ -330,16 +330,17 @@ def read_user_config(url, command_options):
 
 def get_version(url):
     #Retrieve the version of client
+    version_number = ""
     path = os.path.dirname(os.path.realpath(__file__))
     version_file = os.path.join(path, 'VERSION-FILE')
     try:
         version = open(version_file, 'rb')
         client_version = version.read()
         version.close()
-        version_number = client_version[:-1].strip('version: ')
+        version_number = client_version.rstrip().strip('version: ')
     except IOError:
-        log.error("Please run VERSION-GEN to generate VERSION-FILE first")
-        sys.exit(1)
+        log.error("Please run VERSION-GEN or 'make install' to generate VERSION-FILE")
+        version_number = "UNKNOWN"
 
     #Retrieve the version of the zanata server
     version = VersionService(url)
