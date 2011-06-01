@@ -141,11 +141,11 @@ class PublicanUtility:
         for item in root_list:
             if item == '.svn':
                 continue
-            full_path = os.path.join(path,item)    
+            full_path = os.path.join(path, item)
             if full_path.endswith(file_type):
                 final_file_list.append(full_path)
             if os.path.isdir(full_path):
-                final_file_list+=self.get_file_list(full_path, type)
+                final_file_list+=self.get_file_list(full_path, file_type)
         return final_file_list
 
     def hash_match(self, message, msgid):
