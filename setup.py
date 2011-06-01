@@ -17,6 +17,12 @@ def get_client_version():
     output = p.stdout.readline()
     number = output.rstrip().strip('version: ')
 
+    subprocess.Popen("""
+    cat << EOF > MANIFEST.in
+    include zanataclient/VERSION-FILE
+    EOF
+    """, shell=True)
+
     if number=='UKNOWN':
         try:
             file = open(version_file, 'rb')
