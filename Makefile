@@ -9,7 +9,8 @@ install:
 	python setup.py install
 
 uninstall:
-	rm -fr /usr/lib/python2.*/site-packages/zanata*
+	@/bin/echo "NB: if you don't have pip-python, try this: rm -rf /usr/bin/flies /usr/bin/zanata /usr/lib/python2.*/site-packages/zanata*"
+	pip-python uninstall zanata-python-client
 
 clean:
 	python setup.py clean
