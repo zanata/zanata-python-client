@@ -742,20 +742,6 @@ def po_push(command_options, args):
     push(command_options, args, "software")
     
 def publican_pull(command_options, args):
-    """
-    Usage: zanata publican pull [OPTIONS] {documents} {lang}
-
-    Retrieve translated publican content files from server
-
-    Options:
-        --username: user name
-        --apikey: api key of user
-        --project-id: id of the project
-        --project-version: id of the version
-        --dir: output folder
-        --dstdir: output folder for po files
-        --lang: language list
-    """
     filelist = []
     zanatacmd = ZanataCommand()
 
@@ -814,26 +800,6 @@ def publican_push(command_options, args):
     push(command_options, args, "publican")
     
 def push(command_options, args, project_type = None):
-    """
-    Usage: zanata publican push OPTIONS {documents}
-
-    Push publican content to server for translation.
-
-    Argumensts: documents
-
-    Options:
-        -f: force to remove content on server side
-        --username: user name
-        --apikey: api key of user
-        --project-id: id of the project
-        --project-version: id of the version
-        --dir: the full path of the folder that contain pot folder and locale folders
-        --srcdir: the full path of the pot folder
-        --transdir: the full path of the folder that contain locale folders
-        --import-po: push local translations to server
-        --merge: override merge algorithm: auto (default) or import
-        --no-copytrans: prevent server from copying translations from other versions
-    """
     copytrans = True
     importpo = False
     force = False
