@@ -8,6 +8,12 @@ sdist:
 install:
 	python setup.py install
 
+uninstall:
+	rm -fr /usr/lib/python2.*/site-packages/zanata*
+
+clean:
+	python setup.py clean
+
 run:
 	python zanata help
 
@@ -22,4 +28,4 @@ test:
 
 all: run lint test sdist
 
-.PHONY: test
+.PHONY: test uninstall
