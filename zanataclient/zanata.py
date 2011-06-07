@@ -355,58 +355,7 @@ def get_version(url):
         log.info("zanata python client version: %s" % version_number)
         log.error("Can not retrieve the server version, server may not support the version service")
 
-def get_sourcefolder(command_options, project_type):
-    file_type = ""
-    tmlfolder = ""
 
-    if project_type == "publican":
-        file_type = "pot"
-    elif project_type == "software":
-        file_type = "po"
-
-    if command_options.has_key('srcdir'):
-        tmlfolder = command_options['srcdir'][0]['value']
-    else:
-        tmlfolder = os.path.join(os.getcwd(), file_type)
-
-    if command_options.has_key('dir'):
-        tmlfolder = os.path.join(command_options['dir'][0]['value'], file_type)
-    elif command_options.has_key('srcdir'):
-        tmlfolder = command_options['srcdir'][0]['value']
-    else:
-        tmlfolder = os.path.abspath(os.path.join(os.getcwd(), file_type))
-
-    if not os.path.isdir(tmlfolder):
-        log.error("Can not find source folder, please specify the source folder with '--srcdir' or '--dir' option")
-        sys.exit(1)
-
-    return tmlfolder
-
-def process_srcfile(command_options):
-    tmlfolder = ""
-    file_path = ""
-
-    if command_options.has_key('srcfile'):
-        path = command_options['srcfile'][0]['value']
-        file_path = os.path.abspath(path)
-        import_file = file_path.split('/')[-1]
-        tmlfolder = file_path.split(import_file)[0]
-        if tmlfolder[-1] == '/':
-            tmlfolder = tmlfolder[:-1]
-
-    return tmlfolder, file_path
-
-def process_transdir(command_options):
-    trans_folder = ""
-
-    if command_options.has_key('dir'):
-        trans_folder = command_options['dir'][0]['value']
-    elif command_options.has_key('transdir'):
-        trans_folder = command_options['transdir'][0]['value']
-    else:
-        trans_folder = os.getcwd()
-
-    return trans_folder
 
 def process_merge(command_options):
     merge = ""
@@ -442,23 +391,75 @@ def get_lang_list(command_options, project_config):
 
     return lang_list
 
+#################################
+#
+# Process source, trans and output folder
+#
+#################################
+
+def get_sourcefolder(command_options, project_type):
+    tmlfolder = ""
+
+    if project_type == "publican":
+        sub_folder = "pot"
+    elif project_type == "software":
+        sub_folder = "po"
+
+    if command_options.has_key('srcdir'):
+        tmlfolder = command_options['srcdir'][0]['value']
+    elif command_options.has_key('dir'):
+        folder = command_options['dir'][0]['value']
+        tmlfolder = os.path.abspath(os.path.join(folder, sub_folder))
+    else:
+        tmlfolder = os.path.abspath(os.path.join(os.getcwd(), sub_folder))
+
+    if not os.path.isdir(tmlfolder):
+        log.error("Can not find source folder, please specify the source folder with '--srcdir' or '--dir' option")
+        sys.exit(1)
+
+    return tmlfolder
+
+def process_srcfile(command_options):
+    tmlfolder = ""
+    file_path = ""
+
+    if command_options.has_key('srcfile'):
+        path = command_options['srcfile'][0]['value']
+        file_path = os.path.abspath(path)
+        import_file = file_path.split('/')[-1]
+        tmlfolder = file_path.split(import_file)[0]
+        if tmlfolder[-1] == '/':
+            tmlfolder = tmlfolder[:-1]
+
+    return tmlfolder, file_path
+
+def process_transdir(command_options):
+    trans_folder = ""
+    
+    if command_options.has_key('transdir'):
+        trans_folder = command_options['transdir'][0]['value']
+    elif command_options.has_key('dir'):
+        trans_folder = command_options['dir'][0]['value']
+    else:
+        trans_folder = os.getcwd()
+
+    return trans_folder
+
 def create_outpath(command_options):
-    if command_options.has_key('dir'):
-        output = command_options['dir'][0]['value']
-    elif command_options.has_key('dstdir'):
+    if command_options.has_key('dstdir'):
         output = command_options['dstdir'][0]['value']
+    elif command_options.has_key('dir'):
+        folder = command_options['dir'][0]['value']
+        if not os.path.isdir(folder):
+            os.mkdir(folder)
+        output = os.path.abspath(os.path.join(folder, 'po'))
     else:
         output = os.getcwd()
 
     if not os.path.isdir(output):
         os.mkdir(output)
 
-    outpath = os.path.join(output, "po")
-
-    if not os.path.isdir(outpath):
-        os.mkdir(outpath)
-
-    return outpath
+    return output
 
 def search_file(path, filename):
     for root, dirs, names in os.walk(path):

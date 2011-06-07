@@ -255,7 +255,6 @@ class ZanataCommand:
 
             if project_type == "publican":
                 folder = os.path.join(trans_folder, item)
-
                     
                 if not os.path.isdir(folder):
                     self.log.error("Can not find translation, please specify path of the translation folder")
