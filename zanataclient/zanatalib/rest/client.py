@@ -100,7 +100,7 @@ class RestClient(object):
                 sys.exit(2)
 
     def request_version(self, resource):
-        http = httplib2.Http(".cache")
+        http = httplib2.Http()
         try:
             response, content = http.request("%s%s" % (self.base_url, resource), "GET")
             if response.previous is not None:

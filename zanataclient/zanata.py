@@ -8,6 +8,7 @@ from zanatalib.versionservice import VersionService
 from zanatalib.client import ZanataResource
 from zanatalib.error import UnAvaliableResourceException
 from zanatalib.error import NoSuchFileException
+from zanatalib.error import UnavailableServiceError
 from zanatalib.outpututil import Logger
 from zanatacmd import ZanataCommand
 from parseconfig import ZanataConfig
@@ -354,9 +355,10 @@ def get_version(url):
     except UnAvaliableResourceException:
         log.info("zanata python client version: %s" % version_number)
         log.error("Can not retrieve the server version, server may not support the version service")
-
-
-
+    except UnavailableServiceError:
+        log.error("Service Temporarily Unavailable, stop processing!")
+        sys.exit(1)
+        
 def process_merge(command_options):
     merge = ""
 
@@ -397,7 +399,7 @@ def get_lang_list(command_options, project_config):
 #
 #################################
 
-def get_sourcefolder(command_options, project_type):
+def process_srcdir(command_options, project_type):
     tmlfolder = ""
 
     if project_type == "publican":
@@ -449,10 +451,7 @@ def create_outpath(command_options):
     if command_options.has_key('dstdir'):
         output = command_options['dstdir'][0]['value']
     elif command_options.has_key('dir'):
-        folder = command_options['dir'][0]['value']
-        if not os.path.isdir(folder):
-            os.mkdir(folder)
-        output = os.path.abspath(os.path.join(folder, 'po'))
+        output = command_options['dir'][0]['value']
     else:
         output = os.getcwd()
 
@@ -685,6 +684,7 @@ def po_pull(command_options, args):
         --apikey: api key of user
         --project-id: id of the project
         --project-version: id of the version
+        --dir: output folder for po files (same to --dstdir)
         --dstdir: output folder for po files
         --lang: language list'
     """
@@ -719,6 +719,7 @@ def po_pull(command_options, args):
 
     locale_map = project_config['locale_map']
     zanatacmd = ZanataCommand()
+    print filelist
     zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, "software")
 
 def po_push(command_options, args):
@@ -733,9 +734,11 @@ def po_push(command_options, args):
         --apikey: api key of user
         --project-id: id of the project
         --project-version: id of the version
-        --srcdir: the full path of the pot folder
+        --dir: the full path of the folder that contain pot files and po files,
+               no need to specify --srcdir and --transdir if specified --dir option
+        --srcdir: the full path of the po folder
         --srcfile: the full path of the source file
-        --transdir: the full path of the folder that contain locale folders
+        --transdir: the full path of the folder that contain po files(e.g. zh_CN.po)
         --import-po: push local translations to server
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
@@ -743,6 +746,20 @@ def po_push(command_options, args):
     push(command_options, args, "software")
     
 def publican_pull(command_options, args):
+    """
+    Usage: zanata publican pull [OPTIONS] {documents} {lang}
+
+    Retrieve translated publican content files from server
+
+    Options:
+        --username: user name
+        --apikey: api key of user
+        --project-id: id of the project
+        --project-version: id of the version
+        --dir: output folder for store loacle folders (same to --dstdir option)
+        --dstdir: output folder for store loacle folders
+        --lang: language list
+    """
     filelist = []
     zanatacmd = ZanataCommand()
 
@@ -791,9 +808,11 @@ def publican_push(command_options, args):
         --apikey: api key of user
         --project-id: id of the project
         --project-version: id of the version
-        --dir: the full path of the folder that contain pot folder and locale folders
-        --srcdir: the full path of the pot folder
+        --dir: the full path of the folder that contain pot folder and locale folders,
+               no need to specify --srcdir and --transdir if specified --dir option
+        --srcdir: the full path of the pot folder (e.g. /home/jamesni/myproject/pot)
         --transdir: the full path of the folder that contain locale folders
+                    (e.g. /home/jamesni/myproject)
         --import-po: push local translations to server
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
@@ -844,7 +863,7 @@ def push(command_options, args, project_type = None):
         tmlfolder, import_file = process_srcfile(command_options)
         filelist.append(import_file)
     else:
-        tmlfolder = get_sourcefolder(command_options, command_type)
+        tmlfolder = process_srcdir(command_options, command_type)
     
     if command_type == 'publican':
         log.info("POT directory (originals):%s" % tmlfolder)

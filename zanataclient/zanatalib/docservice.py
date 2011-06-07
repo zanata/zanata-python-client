@@ -34,6 +34,7 @@ from error import UnAuthorizedException
 from error import BadRequestBodyException
 from error import SameNameDocumentException
 from error import UnAvaliableResourceException
+from error import UnavailableServiceError
 
 
 class DocumentService:    
@@ -42,13 +43,15 @@ class DocumentService:
     
     def get_file_list(self, projectid, iterationid):
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid, iterationid))
-        
+
         if res['status'] == '200' or res['status'] == '304':
             files = json.loads(content)
             filelist = [item.get('name') for item in files]
             return filelist
         elif res['status'] == '500':
             raise InternalServerError('Error 500', 'An internal server error happens')
+        elif res['status'] == '503':
+            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
     
     def update_template(self, projectid, iterationid, file_id, resources, copytrans):
         headers = {}
@@ -65,6 +68,8 @@ class DocumentService:
             raise BadRequestBodyException('Error 400', 'Unable to read request body.')
         elif res['status'] == '409':
             raise SameNameDocumentException('Error 409', 'A document with same name already exists.')
+        elif res['status'] == '503':
+            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
     
     def commit_template(self, projectid, iterationid, resources, copytrans):
         """
@@ -91,6 +96,8 @@ class DocumentService:
             raise BadRequestBodyException('Error 400', content)
         elif res['status'] == '409':
             raise SameNameDocumentException('Error 409', content)
+        elif res['status'] == '503':
+            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
 
     def delete_template(self, projectid, iterationid, file_id):
         headers = {}
@@ -105,6 +112,8 @@ class DocumentService:
             raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey') 
+        elif res['status'] == '503':
+            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
     
     def retrieve_template(self, projectid, iterationid, file_id):
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file_id))
@@ -118,6 +127,8 @@ class DocumentService:
             raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')       
+        elif res['status'] == '503':
+            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
 
     def retrieve_translation(self, lang, projectid, iterationid, file_id):
         """
@@ -144,6 +155,8 @@ class DocumentService:
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
             raise BadRequestBodyException('Error 400', content)
+        elif res['status'] == '503':
+            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
   
     def commit_translation(self, projectid, iterationid, fileid, localeid, resources, merge):
         headers = {}
@@ -158,5 +171,7 @@ class DocumentService:
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
             raise BadRequestBodyException('Error 400', content)
+        elif res['status'] == '503':
+            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
       
 

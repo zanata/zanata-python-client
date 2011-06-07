@@ -28,7 +28,7 @@ __all__ = (
         "ProjectExistException", "UnAvaliableResourceException",
         "UnAvaliablePOTException", "BadRequestBodyException",
         "SameNameDocumentException","InternalServerError",
-        "NotAllowedException"
+        "NotAllowedException", "UnavailableServiceError"
 )
 class ZanataException(Exception):
     def __init__(self, expr, msg):
@@ -39,6 +39,9 @@ class ZanataException(Exception):
         return self.msg
 
 class InternalServerError(ZanataException):
+    pass
+
+class UnavailableServiceError(ZanataException):
     pass
 
 class NoSuchProjectException(ZanataException):

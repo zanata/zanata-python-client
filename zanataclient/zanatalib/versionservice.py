@@ -31,6 +31,7 @@ except ImportError:
     import simplejson as json
 from rest.client import RestClient
 from error import UnAvaliableResourceException
+from error import UnavailableServiceError
 
 
 class VersionService:
@@ -45,3 +46,5 @@ class VersionService:
             return version
         elif res['status'] == '404':
             raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')
+        elif res['status'] == '503':
+            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
