@@ -1,8 +1,8 @@
 # Makefile for python client
 
-default: test
+default: all
 
-sdist:
+sdist: all lint test
 	python setup.py sdist
 
 install:
@@ -14,6 +14,7 @@ uninstall:
 
 clean:
 	python setup.py clean
+	rm -f zanataclient/VERSION-FILE
 
 run:
 	python zanata help
@@ -27,6 +28,16 @@ lint-report:
 test: 
 	(cd test; python test_all.py)
 
-all: run lint test sdist
+all: zanataclient/VERSION-FILE
 
-.PHONY: test uninstall
+zanataclient/VERSION-FILE:
+	./VERSION-GEN
+
+help:
+	@echo "Avail targets:"
+	@echo "   all sdist install uninstall clean run lint lint-report test"
+	@echo ""
+	@echo "For help on zanata itself, use 'make run'"
+
+
+.PHONY: all sdist install uninstall clean run lint lint-report test
