@@ -58,11 +58,11 @@ class ZanataCommand:
             iteration_id = project_config['project_version']
 
         if not project_id:
-            self.log.error("Please specify a valid project id in zanata.xml/flies.xml or with '--project-id' option")
+            self.log.error("Please specify a valid project id in zanata.xml or with '--project-id' option")
             sys.exit(1)
         
         if not iteration_id:
-            self.log.error("Please specify a valid version id in zanata.xml/flies.xml or with '--project-version' option")
+            self.log.error("Please specify a valid version id in zanata.xml or with '--project-version' option")
             sys.exit(1)
         
         self.log.info("Project: %s"%project_id)

@@ -49,6 +49,8 @@ class PublicanUtility:
         textflows = []
         for entry in pofile:
             reflist = []
+            if entry.msgctxt:
+                self.log.info("Warning: find msgctxt, the zanata server doesnt' support msgctxt now")
             m = hashlib.md5()
             m.update(entry.msgid.encode('utf-8'))
             textflowId = m.hexdigest()

@@ -255,7 +255,7 @@ def read_project_config(command_options):
     config = ZanataConfig()
     #Read the project configuration file using --project-config option
     config_file = [os.path.join(os.getcwd(), filename) for filename\
-                    in ['zanata.xml', 'flies.xml']]
+                    in ['zanata.xml']]
 
     if command_options.has_key('project_config'):
         config_file.append(command_options['project_config'][0]['value'])
@@ -279,7 +279,7 @@ def process_url(project_config, command_options):
         url = command_options['url'][0]['value']
 
     if not url or url.isspace():
-        log.error("Please specify valid server url in zanata.xml/flies.xml or with '--url' option")
+        log.error("Please specify valid server url in zanata.xml or with '--url' option")
         sys.exit(1)
 
     if url[-1] == "/":
@@ -292,14 +292,14 @@ def read_user_config(url, command_options):
     apikey = ""
     config = ZanataConfig()
     #Try to read user-config file
-    user_config = [os.path.join(os.path.expanduser("~") + '/.config', filename) for filename in ['zanata.ini', 'flies.ini']]
+    user_config = [os.path.join(os.path.expanduser("~") + '/.config', filename) for filename in ['zanata.ini']]
 
     if command_options.has_key('user_config'):
         user_config.append(command_options['user_config'][0]['value'])
 
     for path in user_config:
         if os.path.exists(path):
-            log.info("Loading zanata/flies user config from: %s" % path)
+            log.info("Loading zanata user config from: %s" % path)
 
             #Read the user-config file
             config.set_userconfig(path)
@@ -318,7 +318,7 @@ def read_user_config(url, command_options):
     if not (user_name, apikey):
         log.info("Can not find user-config file in home folder, current path or path in 'user-config' option")
 
-    log.info("zanata/flies server: %s" % url)
+    log.info("zanata server: %s" % url)
 
     #The value in commandline options will overwrite the value in user-config file
     if command_options.has_key('user_name'):
@@ -350,7 +350,7 @@ def get_version(url):
         content = version.get_server_version()
         if content:
             server_version = content['versionNo']
-            log.info("zanata python client version: %s, zanata/flies server API version: %s" % (version_number, content['versionNo']))
+            log.info("zanata python client version: %s, zanata server API version: %s" % (version_number, content['versionNo']))
             return server_version
     except UnAvaliableResourceException:
         log.info("zanata python client version: %s" % version_number)
@@ -378,7 +378,7 @@ def generate_zanataresource(url, username, apikey):
     if username and apikey:
         return ZanataResource(url, username, apikey)
     else:
-        log.error("Please specify username and apikey in zanata.ini/flies.ini or with '--username' and '--apikey' options")
+        log.error("Please specify username and apikey in zanata.ini or with '--username' and '--apikey' options")
         sys.exit(1)
 
 def get_lang_list(command_options, project_config):
@@ -513,7 +513,7 @@ def project_info(command_options, args):
     project_config = read_project_config(command_options)
 
     if not project_config:
-        log.info("Can not find zanata.xml/flies.xml, please specify the path of zanata.xml")
+        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
     url = process_url(project_config, command_options)
     get_version(url)
 
@@ -523,7 +523,7 @@ def project_info(command_options, args):
         project_id = project_config['project_id']
 
     if not project_id:
-        log.error('Please use zanata project info --project-id=project_id or zanata.xml/flies.xml to specify the project id')
+        log.error('Please use zanata project info --project-id=project_id or zanata.xml to specify the project id')
         sys.exit(1)
 
     zanata = ZanataResource(url)
@@ -546,7 +546,7 @@ def version_info(command_options, args):
     project_config = read_project_config(command_options)
 
     if not project_config:
-        log.info("Can not find zanata.xml/flies.xml, please specify the path of zanata.xml")
+        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
     else:
         project_id = project_config['project_id']
         iteration_id = project_config['project_version']
@@ -588,7 +588,7 @@ def create_project(command_options, args):
     project_config = read_project_config(command_options)
 
     if not project_config:
-        log.info("Can not find zanata.xml/flies.xml, please specify the path of zanata.xml")
+        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
@@ -632,7 +632,7 @@ def create_version(command_options, args):
     project_config = read_project_config(command_options)
 
     if not project_config:
-        log.info("Can not find zanata.xml/flies.xml, please specify the path of zanata.xml")
+        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
@@ -694,7 +694,7 @@ def po_pull(command_options, args):
     project_config = read_project_config(command_options)
 
     if not project_config:
-        log.info("Can not find zanata.xml/flies.xml, please specify the path of zanata.xml")
+        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
@@ -766,7 +766,7 @@ def publican_pull(command_options, args):
     project_config = read_project_config(command_options)
 
     if not project_config:
-        log.info("Can not find zanata.xml/flies.xml, please specify the path of zanata.xml")
+        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
@@ -834,7 +834,7 @@ def push(command_options, args, project_type = None):
     project_config = read_project_config(command_options)
 
     if not project_config:
-        log.info("Can not find zanata.xml/flies.xml, please specify the path of zanata.xml")
+        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)

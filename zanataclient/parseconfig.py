@@ -73,7 +73,7 @@ class ZanataConfig:
         log = Logger()
 
         if os.path.getsize(filename) == 0:
-            log.info('The project xml: flies.xml is empty, need command line options')
+            log.info('The project config file is empty, need command line options')
             return project_config
 
         xmldoc = minidom.parse(filename)
