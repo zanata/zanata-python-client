@@ -47,16 +47,20 @@ class ZanataCommand:
     ##
     ############################################## 
     def check_project(self, zanataclient, command_options, project_config):
+        project_id = ''
+        iteration_id = ''
         if command_options.has_key('project_id'):
             project_id =  command_options['project_id'][0]['value'] 
         else:
-            project_id = project_config['project_id']
+            if project_config.has_key('project_id'):
+                project_id = project_config['project_id']
         
         if command_options.has_key('project_version'):
             iteration_id = command_options['project_version'][0]['value'] 
         else:
-            iteration_id = project_config['project_version']
-
+            if project_config.has_key('project_version'):
+                iteration_id = project_config['project_version']
+        
         if not project_id:
             self.log.error("Please specify a valid project id in zanata.xml or with '--project-id' option")
             sys.exit(1)
@@ -99,7 +103,10 @@ class ZanataCommand:
         try:
             result = zanata.documents.commit_translation(project_id, iteration_id, request_name, lang, body, merge)
             if result:
-                self.log.info("Successfully pushed translation %s to the Zanata/Flies server"%pofile) 
+                if result == "success":
+                    self.log.info("Successfully pushed translation %s to the Zanata server"%pofile)
+                else:
+                    self.log.info(result)
             else:
                 self.log.error("Failed to push translation")
         except UnAuthorizedException, e:
@@ -242,10 +249,13 @@ class ZanataCommand:
         sub_dir = ""        
         publicanutil = PublicanUtility()        
         for item in lang_list:
-            if item in locale_map:
-                lang = locale_map[item]
-            else:
+            if not locale_map:
                 lang = item
+            else:
+                if item in locale_map:
+                    lang = locale_map[item]
+                else:
+                    lang = item
             
             if '/' in potfile:
                 request_name = potfile.replace('/', ',')
@@ -287,7 +297,7 @@ class ZanataCommand:
 
     def push_command(self, zanata, file_list, srcfolder, project_id, iteration_id, copytrans, import_param = None):
         """
-        Push the content of publican files to a Project version on Zanata/Flies server
+        Push the content of publican files to a Project version on Zanata server
         @param args: name of the publican file
         """
         publicanutil = PublicanUtility()
@@ -320,7 +330,7 @@ class ZanataCommand:
 
     def pull_command(self, zanata, locale_map, project_id, iteration_id, filelist, lang_list, output, project_type):
         """
-        Retrieve the content of documents in a Project version from Zanata/Flies server. If the name of publican
+        Retrieve the content of documents in a Project version from Zanata server. If the name of publican
         file is specified, the content of that file will be pulled from server. Otherwise, all the document of that
         Project iteration will be pulled from server.
         @param args: the name of publican file
@@ -340,7 +350,7 @@ class ZanataCommand:
                 name = file_item
                 request_name = file_item
 
-            self.log.info("\nFetching the content of %s from Zanata/Flies server: "%name)                    
+            self.log.info("\nFetching the content of %s from Zanata server: "%name)                    
                     
             for item in lang_list:
                 if item in locale_map:

@@ -166,11 +166,18 @@ class DocumentService:
         res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers, merge=merge)
 
         if res['status'] == '200':
-            return True
+            if content:
+                return content
+            else:
+                return "success"
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
-            raise BadRequestBodyException('Error 400', content)
+            if "Unexpected target" in content:
+                msg = 'Try running publican update_po (or msgmerge) to ensure your PO files are in sync with your POT files'
+            else:
+                msg = content
+            raise BadRequestBodyException('Error 400', msg)
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
       

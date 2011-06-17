@@ -876,7 +876,10 @@ def push(command_options, args, project_type = None):
         log.info("Reading locale folders from %s" % import_param['transdir'])
         import_param['merge'] = process_merge(command_options)
         import_param['lang_list'] = get_lang_list(command_options, project_config)
-        import_param['locale_map'] = project_config['locale_map']
+        if project_config.has_key('locale_map'):
+            import_param['locale_map'] = project_config['locale_map']
+        else:
+            import_param['locale_map'] = None
         import_param['project_type'] = command_type
         importpo = True
     else:
