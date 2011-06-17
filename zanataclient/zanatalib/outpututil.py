@@ -26,13 +26,21 @@ __all__ = (
 class Logger:
     def __init__(self):
         self.enable_infoprefix = False
+        self.enable_warnprefix = True
         self.enable_errprefix = True
+        self.warn_prefix = 'warning: '
         self.error_prefix = 'error: '
         self.info_prefix = '[INFO] '
 
     def info(self, message):
         if self.enable_infoprefix:
             print self.info_prefix+message
+        else:
+            print message
+
+    def warn(self, message):
+        if self.enable_warnprefix:
+            print self.warn_prefix+message
         else:
             print message
 
