@@ -820,6 +820,30 @@ def publican_push(command_options, args):
     push(command_options, args, "publican")
     
 def push(command_options, args, project_type = None):
+    """
+    Usage: zanata push OPTIONS {documents}
+
+    Generic push command to push content to server for translation.
+
+    Argumensts: documents
+
+    Options:
+        -f: force to remove content on server side
+        --username: user name
+        --apikey: api key of user
+        --project-type: project type (software or publican)
+        --project-id: id of the project
+        --project-version: id of the version
+        --dir: the full path of the folder that contain pot folder and locale folders,
+               no need to specify --srcdir and --transdir if specified --dir option
+        --srcdir: the full path of the pot folder (e.g. /home/jamesni/myproject/pot)
+        --transdir: the full path of the folder that contain locale folders
+                    (e.g. /home/jamesni/myproject)
+        --import-po: push local translations to server
+        --merge: override merge algorithm: auto (default) or import
+        --no-copytrans: prevent server from copying translations from other versions
+    """
+    push(command_options, args, "publican")
     copytrans = True
     importpo = False
     force = False
