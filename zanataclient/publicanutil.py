@@ -34,7 +34,7 @@ except ImportError:
     import simplejson as json
 import sys
 
-from zanatalib.outpututil import Logger
+from zanatalib.logger import Logger
 from zanatalib.error import InvalidPOTFileException
 
 class PublicanUtility:
@@ -50,7 +50,7 @@ class PublicanUtility:
         for entry in pofile:
             reflist = []
             if entry.msgctxt:
-                self.log.info("Warning: find msgctxt, the zanata server doesnt' support msgctxt now")
+                self.log.warn("encountered msgctxt; not currently supported")
             m = hashlib.md5()
             m.update(entry.msgid.encode('utf-8'))
             textflowId = m.hexdigest()
