@@ -9,7 +9,7 @@ from zanatalib.client import ZanataResource
 from zanatalib.error import UnAvaliableResourceException
 from zanatalib.error import NoSuchFileException
 from zanatalib.error import UnavailableServiceError
-from zanatalib.outpututil import Logger
+from zanatalib.logger import Logger
 from zanatacmd import ZanataCommand
 from parseconfig import ZanataConfig
 from publicanutil import PublicanUtility

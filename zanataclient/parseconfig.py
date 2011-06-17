@@ -25,7 +25,7 @@ __all__ = (
 
 import ConfigParser
 import os.path
-from zanatalib.outpututil import Logger
+from zanatalib.logger import Logger
 from xml.dom import minidom 
 
 project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}

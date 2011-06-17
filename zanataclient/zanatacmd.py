@@ -26,7 +26,7 @@ import os
 from publicanutil import PublicanUtility
 from zanatalib.project import Project
 from zanatalib.project import Iteration
-from zanatalib.outpututil import Logger 
+from zanatalib.logger import Logger 
 from zanatalib.error import NoSuchProjectException
 from zanatalib.error import UnAuthorizedException
 from zanatalib.error import UnAvaliableResourceException

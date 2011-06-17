@@ -34,7 +34,7 @@ except ImportError:
     import simplejson as json
 import sys
 
-from zanatalib.outpututil import Logger
+from zanatalib.logger import Logger
 from zanatalib.error import InvalidPOTFileException
 
 class PublicanUtility:
