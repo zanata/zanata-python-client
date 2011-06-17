@@ -255,7 +255,7 @@ def read_project_config(command_options):
     config = ZanataConfig()
     #Read the project configuration file using --project-config option
     config_file = [os.path.join(os.getcwd(), filename) for filename\
-                    in ['zanata.xml']]
+                    in ['zanata.xml', 'flies.xml']]
 
     if command_options.has_key('project_config'):
         config_file.append(command_options['project_config'][0]['value'])
@@ -292,7 +292,7 @@ def read_user_config(url, command_options):
     apikey = ""
     config = ZanataConfig()
     #Try to read user-config file
-    user_config = [os.path.join(os.path.expanduser("~") + '/.config', filename) for filename in ['zanata.ini']]
+    user_config = [os.path.join(os.path.expanduser("~") + '/.config', filename) for filename in ['zanata.ini', 'flies.ini']]
 
     if command_options.has_key('user_config'):
         user_config.append(command_options['user_config'][0]['value'])
