@@ -167,17 +167,14 @@ class DocumentService:
 
         if res['status'] == '200':
             if content:
-                return content
+                return content+", Try running publican update_po (or msgmerge) to ensure your PO files are in sync with your POT files"
             else:
                 return "success"
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
-            if "Unexpected target" in content:
-                msg = 'Try running publican update_po (or msgmerge) to ensure your PO files are in sync with your POT files'
-            else:
-                msg = content
-            raise BadRequestBodyException('Error 400', msg)
+            msg = " If 'Unexpected target', try running publican update_po (or msgmerge) to ensure your PO files are in sync with your POT files"
+            raise BadRequestBodyException('Error 400', content+msg)
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
       

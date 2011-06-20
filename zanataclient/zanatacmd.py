@@ -106,6 +106,7 @@ class ZanataCommand:
                 if result == "success":
                     self.log.info("Successfully pushed translation %s to the Zanata server"%pofile)
                 else:
+                    self.log.info("Successfully pushed translation %s to the Zanata server"%pofile)
                     self.log.info(result)
             else:
                 self.log.error("Failed to push translation")
@@ -353,10 +354,13 @@ class ZanataCommand:
             self.log.info("\nFetching the content of %s from Zanata server: "%name)                    
                     
             for item in lang_list:
-                if item in locale_map:
-                    lang = locale_map[item]
-                else:
+                if not locale_map:
                     lang = item
+                else:
+                    if item in locale_map:
+                        lang = locale_map[item]
+                    else:
+                        lang = item
                     
                 if project_type == "publican":
                     outpath = os.path.join(output, item) 

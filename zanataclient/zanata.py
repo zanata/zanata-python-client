@@ -198,7 +198,8 @@ subcmds = {
     'version': ['info', 'create', 'remove'],
     'publican': ['push', 'pull'],
     'po': ['push', 'pull'],
-    'push':[]
+    'push':[],
+    'pull':[]
     }
 
 usage = """Client for talking to a Zanata/Flies Server
@@ -688,39 +689,7 @@ def po_pull(command_options, args):
         --dstdir: output folder for po files
         --lang: language list'
     """
-    filelist = []
-    zanatacmd = ZanataCommand()
-
-    project_config = read_project_config(command_options)
-
-    if not project_config:
-        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-
-    url = process_url(project_config, command_options)
-    username, apikey = read_user_config(url, command_options)
-    get_version(url)
-
-    zanata = generate_zanataresource(url, username, apikey)
-
-    #if file not specified, push all the files in pot folder to zanata server
-    project_id, iteration_id = zanatacmd.check_project(zanata, command_options, project_config)
-    log.info("Username: %s" % username)
-
-    lang_list = get_lang_list(command_options, project_config)
-
-    #list the files in project
-    try:
-        filelist = zanata.documents.get_file_list(project_id, iteration_id)
-    except Exception, e:
-        log.error(str(e))
-        sys.exit(1)
-
-    outpath = create_outpath(command_options)
-
-    locale_map = project_config['locale_map']
-    zanatacmd = ZanataCommand()
-    print filelist
-    zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, "software")
+    pull(command_options, args, "software")
 
 def po_push(command_options, args):
     """
@@ -760,39 +729,7 @@ def publican_pull(command_options, args):
         --dstdir: output folder for store loacle folders
         --lang: language list
     """
-    filelist = []
-    zanatacmd = ZanataCommand()
-
-    project_config = read_project_config(command_options)
-
-    if not project_config:
-        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-
-    url = process_url(project_config, command_options)
-    username, apikey = read_user_config(url, command_options)
-    get_version(url)
-
-    zanata = generate_zanataresource(url, username, apikey)
-
-    #if file not specified, push all the files in pot folder to zanata server
-    project_id, iteration_id = zanatacmd.check_project(zanata, command_options, project_config)
-    log.info("Username: %s" % username)
-
-    lang_list = get_lang_list(command_options, project_config)
-
-    #list the files in project
-    try:
-        filelist = zanata.documents.get_file_list(project_id, iteration_id)
-    except Exception, e:
-        log.error(str(e))
-        sys.exit(1)
-
-    outpath = create_outpath(command_options)
-
-    locale_map = project_config['locale_map']
-
-    zanatacmd = ZanataCommand()
-    zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, "publican")
+    pull(command_options, args, "publican")
 
 def publican_push(command_options, args):
     """
@@ -834,8 +771,6 @@ def push(command_options, args, project_type = None):
         --project-type: project type (software or publican)
         --project-id: id of the project
         --project-version: id of the version
-        --dir: the full path of the folder that contain pot folder and locale folders,
-               no need to specify --srcdir and --transdir if specified --dir option
         --srcdir: the full path of the pot folder (e.g. /home/jamesni/myproject/pot)
         --transdir: the full path of the folder that contain locale folders
                     (e.g. /home/jamesni/myproject)
@@ -843,7 +778,6 @@ def push(command_options, args, project_type = None):
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
     """
-    push(command_options, args, "publican")
     copytrans = True
     importpo = False
     force = False
@@ -935,6 +869,66 @@ def push(command_options, args, project_type = None):
     else:
         zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans)    
 
+def pull(command_options, args, project_type = None):
+    """
+    Usage: zanata pull [OPTIONS] {documents} {lang}
+
+    Retrieve translated publican content files from server
+
+    Options:
+        --username: user name
+        --apikey: api key of user
+        --project-type: project type (software or publican)
+        --project-id: id of the project
+        --project-version: id of the version
+        --dstdir: output folder for store loacle folders
+        --lang: language list
+    """
+    filelist = []
+    zanatacmd = ZanataCommand()
+
+    project_config = read_project_config(command_options)
+
+    if not project_config:
+        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
+
+    url = process_url(project_config, command_options)
+    username, apikey = read_user_config(url, command_options)
+    get_version(url)
+
+    zanata = generate_zanataresource(url, username, apikey)
+
+    #if file not specified, push all the files in pot folder to zanata server
+    project_id, iteration_id = zanatacmd.check_project(zanata, command_options, project_config)
+    log.info("Username: %s" % username)
+
+    lang_list = get_lang_list(command_options, project_config)
+
+    #list the files in project
+    try:
+        filelist = zanata.documents.get_file_list(project_id, iteration_id)
+    except Exception, e:
+        log.error(str(e))
+        sys.exit(1)
+
+    outpath = create_outpath(command_options)
+
+    if project_config.has_key('locale_map'):
+        locale_map = project_config['locale_map']
+    else:
+        locale_map = None
+    
+    if command_options.has_key('project_type'):
+        command_type = command_options['project_type'][0]['value']
+    elif project_type:
+        command_type = project_type
+    else:
+        log.error("The project type is unknown")
+        sys.exit(1)
+
+    zanatacmd = ZanataCommand()
+    zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type)
+
 command_handler_factories = {
     'help': makeHandler(help_info),
     'list': makeHandler(list_project),
@@ -946,7 +940,8 @@ command_handler_factories = {
     'po_push': makeHandler(po_push),
     'publican_pull': makeHandler(publican_pull),
     'publican_push': makeHandler(publican_push),
-    'push': makeHandler(push)
+    'push': makeHandler(push),
+    'pull': makeHandler(pull)
 }
 
 def signal_handler(signal, frame):
