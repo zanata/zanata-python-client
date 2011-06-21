@@ -106,13 +106,6 @@ option_sets = {
             metavar='SRCFILE',
         ),
     ],
-    'dstdir': [
-        dict(
-            type='command',
-            long=['--dstdir'],
-            metavar='DSTDIR',
-        ),
-    ],
     'transdir': [
         dict(
             type='command',
@@ -400,7 +393,7 @@ def get_lang_list(command_options, project_config):
 #
 #################################
 
-def process_srcdir(command_options, project_type):
+def process_srcdir(command_options, project_type, project_config):
     tmlfolder = ""
 
     if project_type == "publican":
@@ -408,17 +401,16 @@ def process_srcdir(command_options, project_type):
     elif project_type == "software":
         sub_folder = "po"
 
-    if command_options.has_key('srcdir'):
-        tmlfolder = command_options['srcdir'][0]['value']
+    if project_config.has_key('project_srcdir'):
+        folder = project_config['project_srcdir']
+        tmlfolder = os.path.abspath(os.path.join(folder, sub_folder)) 
     elif command_options.has_key('dir'):
-        folder = command_options['dir'][0]['value']
-        tmlfolder = os.path.abspath(os.path.join(folder, sub_folder))
+        folder = command_options['dir'][0]['value']        
+        tmlfolder = os.path.abspath(os.path.join(folder, sub_folder)) 
+    elif command_options.has_key('srcdir'):
+        tmlfolder = command_options['srcdir'][0]['value']
     else:
         tmlfolder = os.path.abspath(os.path.join(os.getcwd(), sub_folder))
-
-    if not os.path.isdir(tmlfolder):
-        log.error("Can not find source folder, please specify the source folder with '--srcdir' or '--dir' option")
-        sys.exit(1)
 
     return tmlfolder
 
@@ -436,23 +428,25 @@ def process_srcfile(command_options):
 
     return tmlfolder, file_path
 
-def process_transdir(command_options):
+def process_transdir(command_options, project_config):
     trans_folder = ""
     
-    if command_options.has_key('transdir'):
-        trans_folder = command_options['transdir'][0]['value']
+    if project_config.has_key('project_srcdir'):
+        trans_folder = project_config['project_srcdir']
     elif command_options.has_key('dir'):
         trans_folder = command_options['dir'][0]['value']
+    elif command_options.has_key('transdir'):
+        trans_folder = command_options['transdir'][0]['value']
     else:
         trans_folder = os.getcwd()
 
     return trans_folder
 
 def create_outpath(command_options):
-    if command_options.has_key('dstdir'):
-        output = command_options['dstdir'][0]['value']
-    elif command_options.has_key('dir'):
+    if command_options.has_key('dir'):
         output = command_options['dir'][0]['value']
+    elif command_options.has_key('transdir'):
+        output = command_options['transdir'][0]['value']
     else:
         output = os.getcwd()
 
@@ -686,7 +680,7 @@ def po_pull(command_options, args):
         --project-id: id of the project
         --project-version: id of the version
         --dir: output folder for po files (same to --dstdir)
-        --dstdir: output folder for po files
+        --transdir: output folder for po files
         --lang: language list'
     """
     pull(command_options, args, "software")
@@ -726,7 +720,7 @@ def publican_pull(command_options, args):
         --project-id: id of the project
         --project-version: id of the version
         --dir: output folder for store loacle folders (same to --dstdir option)
-        --dstdir: output folder for store loacle folders
+        --transdir: output folder for store loacle folders
         --lang: language list
     """
     pull(command_options, args, "publican")
@@ -816,12 +810,16 @@ def push(command_options, args, project_type = None):
     else:
         log.error("The project type is unknown")
         sys.exit(1)
-        
+    
     if command_type == 'software' and command_options.has_key('srcfile'):
         tmlfolder, import_file = process_srcfile(command_options)
         filelist.append(import_file)
     else:
-        tmlfolder = process_srcdir(command_options, command_type)
+        tmlfolder = process_srcdir(command_options, command_type, project_config)
+    
+    if not os.path.isdir(tmlfolder):
+        log.error("Can not find source folder, please specify the source folder with '--srcdir' or '--dir' option")
+        sys.exit(1)
     
     if command_type == 'publican':
         log.info("POT directory (originals):%s" % tmlfolder)
@@ -830,7 +828,7 @@ def push(command_options, args, project_type = None):
         
     if command_options.has_key('importpo'):
         log.info("Importing translation")
-        import_param['transdir'] = process_transdir(command_options)
+        import_param['transdir'] = process_transdir(command_options, project_config)
         log.info("Reading locale folders from %s" % import_param['transdir'])
         import_param['merge'] = process_merge(command_options)
         import_param['lang_list'] = get_lang_list(command_options, project_config)
@@ -881,7 +879,7 @@ def pull(command_options, args, project_type = None):
         --project-type: project type (software or publican)
         --project-id: id of the project
         --project-version: id of the version
-        --dstdir: output folder for store loacle folders
+        --transdir: output folder for store loacle folders
         --lang: language list
     """
     filelist = []

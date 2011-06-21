@@ -45,10 +45,11 @@ class ConfigTest(unittest.TestCase):
   
     def test_project_config(self):
         project_config = self.config.read_project_config("./testfiles/zanata.xml")
-        self.assertEqual(project_config['project_url'], "http://localhost:8080/flies/")
+        self.assertEqual(project_config['project_url'], "http://localhost:8080/zanata/")
         self.assertEqual(project_config['project_id'], "test-project")
-        self.assertEqual(project_config['project_version'], "5.4")
-        self.assertEqual(project_config['locale_map'], {"zh-CN": "zh-Hans-CN"})
+        self.assertEqual(project_config['project_version'], "1.0")
+        self.assertEqual(project_config['project_srcdir'], "/home/jamesni/ibus-table")
+        self.assertEqual(project_config['locale_map'], {"zh-CN": "zh-Hans"})
 
 if __name__ == '__main__':
     unittest.main()

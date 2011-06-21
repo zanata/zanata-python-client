@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <config xmlns="http://flies.openl10n.net/config/v1/">
+
+
         <url>http://localhost:8080/zanata/</url>
+<!--
+        <url>http://hudson.englab.bne.redhat.com/zanata/</url>
+
+        <url>http://translate.jboss.org/flies/</url>
+-->
         <project>test-project</project>
         <project-version>1.0</project-version>
         <locales>
+<!--
+            <locale map-from="de-DE">de</locale>
+            <locale map-from="es-ES">es</locale>
+            <locale map-from="fr-FR">fr</locale>
+            <locale map-from="ja-JP">ja</locale>
+            <locale map-from="ko-KR">ko</locale>
+            <locale>pt-BR</locale>
+-->
             <locale map-from="zh-CN">zh-Hans</locale>
         </locales>
         <python-client>
