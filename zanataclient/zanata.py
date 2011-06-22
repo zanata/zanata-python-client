@@ -679,7 +679,7 @@ def po_pull(command_options, args):
         --apikey: api key of user
         --project-id: id of the project
         --project-version: id of the version
-        --dir: output folder for po files (same to --dstdir)
+        --dir: output folder for po files (same as --transdir)
         --transdir: output folder for po files
         --lang: language list'
     """
@@ -697,11 +697,11 @@ def po_push(command_options, args):
         --apikey: api key of user
         --project-id: id of the project
         --project-version: id of the version
-        --dir: the full path of the folder that contain pot files and po files,
-               no need to specify --srcdir and --transdir if specified --dir option
+        --dir: the full path of the folder that contains pot files and po files,
+               no need to specify --srcdir and --transdir if --dir option specified
         --srcdir: the full path of the po folder
         --srcfile: the full path of the source file
-        --transdir: the full path of the folder that contain po files(e.g. zh_CN.po)
+        --transdir: the full path of the folder that contains po files(e.g. zh_CN.po)
         --import-po: push local translations to server
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
@@ -719,8 +719,8 @@ def publican_pull(command_options, args):
         --apikey: api key of user
         --project-id: id of the project
         --project-version: id of the version
-        --dir: output folder for store loacle folders (same to --dstdir option)
-        --transdir: output folder for store loacle folders
+        --dir: output folder (same as --transdir option)
+        --transdir: translations will be written to this folder (one sub-folder per locale)
         --lang: language list
     """
     pull(command_options, args, "publican")
@@ -739,8 +739,8 @@ def publican_push(command_options, args):
         --apikey: api key of user
         --project-id: id of the project
         --project-version: id of the version
-        --dir: the full path of the folder that contain pot folder and locale folders,
-               no need to specify --srcdir and --transdir if specified --dir option
+        --dir: the full path of the folder that contains pot folder and locale folders,
+               no need to specify --srcdir and --transdir if --dir option specified
         --srcdir: the full path of the pot folder (e.g. /home/jamesni/myproject/pot)
         --transdir: the full path of the folder that contain locale folders
                     (e.g. /home/jamesni/myproject)
@@ -879,7 +879,7 @@ def pull(command_options, args, project_type = None):
         --project-type: project type (software or publican)
         --project-id: id of the project
         --project-version: id of the version
-        --transdir: output folder for store loacle folders
+        --transdir: translations will be written to this folder
         --lang: language list
     """
     filelist = []
