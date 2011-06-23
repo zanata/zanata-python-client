@@ -102,12 +102,11 @@ class ZanataCommand:
     def commit_translation(self, zanata, project_id, iteration_id, request_name, pofile, lang, body, merge):
         try:
             result = zanata.documents.commit_translation(project_id, iteration_id, request_name, lang, body, merge)
-            if result:
-                if result != "success":
-                    self.log.warn(result)
-                self.log.info("Successfully pushed translation %s to the Zanata server"%pofile)
+            if result != "no":
+                self.log.warn(result)
             else:
-                self.log.error("Failed to push translation")
+                self.log.error("Failed to push translation")    
+            self.log.info("Successfully pushed translation %s to the Zanata server"%pofile)
         except UnAuthorizedException, e:
             self.log.error(e.msg)                                            
         except BadRequestBodyException, e:

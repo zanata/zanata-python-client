@@ -113,6 +113,13 @@ option_sets = {
             metavar='TRANSDIR',
         ),
     ],
+    'dstdir': [
+        dict(
+            type='command',
+            long=['--dstdir'],
+            metavar='DSTDIR',
+        ),
+    ],
     'project_name': [
         dict(
             type='command',
@@ -393,7 +400,7 @@ def get_lang_list(command_options, project_config):
 #
 #################################
 
-def process_srcdir(command_options, project_type, project_config):
+def process_srcdir(command_options, project_type, project_config, default_folder):
     tmlfolder = ""
 
     if project_type == "publican":
@@ -401,14 +408,10 @@ def process_srcdir(command_options, project_type, project_config):
     elif project_type == "software":
         sub_folder = "po"
 
-    if project_config.has_key('project_srcdir'):
-        folder = project_config['project_srcdir']
-        tmlfolder = os.path.abspath(os.path.join(folder, sub_folder)) 
-    elif command_options.has_key('dir'):
-        folder = command_options['dir'][0]['value']        
-        tmlfolder = os.path.abspath(os.path.join(folder, sub_folder)) 
-    elif command_options.has_key('srcdir'):
+    if command_options.has_key('srcdir'):
         tmlfolder = command_options['srcdir'][0]['value']
+    elif default_folder:
+        tmlfolder = os.path.abspath(os.path.join(default_folder, sub_folder))
     else:
         tmlfolder = os.path.abspath(os.path.join(os.getcwd(), sub_folder))
 
@@ -442,11 +445,11 @@ def process_transdir(command_options, project_config):
 
     return trans_folder
 
-def create_outpath(command_options):
-    if command_options.has_key('dir'):
-        output = command_options['dir'][0]['value']
-    elif command_options.has_key('transdir'):
+def create_outpath(command_options, output_folder):
+    if command_options.has_key('transdir'):
         output = command_options['transdir'][0]['value']
+    elif output_folder:
+        output = output_folder
     else:
         output = os.getcwd()
 
@@ -775,6 +778,7 @@ def push(command_options, args, project_type = None):
     copytrans = True
     importpo = False
     force = False
+    dir_option = False
     command_type = ''
     tmlfolder = ""
     filelist = []
@@ -802,24 +806,43 @@ def push(command_options, args, project_type = None):
         copytrans = False
 
     log.info("Copy previous translations:%s" % copytrans)
-    
-    if command_options.has_key('project_type'):
-        command_type = command_options['project_type'][0]['value']
-    elif project_type:
+
+    if project_type:
         command_type = project_type
+        dir_option = True
+    elif command_options.has_key('project_type'):
+        command_type = command_options['project_type'][0]['value']
     else:
         log.error("The project type is unknown")
         sys.exit(1)
-    
+        
     if command_type == 'software' and command_options.has_key('srcfile'):
         tmlfolder, import_file = process_srcfile(command_options)
         filelist.append(import_file)
     else:
-        tmlfolder = process_srcdir(command_options, command_type, project_config)
-    
-    if not os.path.isdir(tmlfolder):
-        log.error("Can not find source folder, please specify the source folder with '--srcdir' or '--dir' option")
-        sys.exit(1)
+        if dir_option:
+            #Keep dir option for publican/po push
+            if command_options.has_key('dir'):
+                default_folder = command_options['dir'][0]['value']
+            else:
+                default_folder = None
+            tmlfolder = process_srcdir(command_options, command_type, project_config, default_folder)
+            
+            if not os.path.isdir(tmlfolder):
+                log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
+                sys.exit(1)
+        else:
+            #Disable dir option for generic push command
+            if command_options.has_key('dir'):
+                log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")        
+            if project_config.has_key('project_srcdir'):
+                default_folder = project_config['project_srcdir']
+            else:
+                default_folder = None
+            tmlfolder = process_srcdir(command_options, command_type, project_config, default_folder)
+            if not os.path.isdir(tmlfolder):
+                log.error("Can not find source folder, please specify the source folder with '--srcdir' or using zanata.xml")
+                sys.exit(1)
     
     if command_type == 'publican':
         log.info("POT directory (originals):%s" % tmlfolder)
@@ -882,6 +905,7 @@ def pull(command_options, args, project_type = None):
         --transdir: translations will be written to this folder
         --lang: language list
     """
+    dir_option = False
     filelist = []
     zanatacmd = ZanataCommand()
 
@@ -909,20 +933,44 @@ def pull(command_options, args, project_type = None):
         log.error(str(e))
         sys.exit(1)
 
-    outpath = create_outpath(command_options)
-
     if project_config.has_key('locale_map'):
         locale_map = project_config['locale_map']
     else:
         locale_map = None
     
-    if command_options.has_key('project_type'):
-        command_type = command_options['project_type'][0]['value']
-    elif project_type:
+    if project_type:
         command_type = project_type
+        dir_option = True
+    elif command_options.has_key('project_type'):
+        command_type = command_options['project_type'][0]['value']
     else:
         log.error("The project type is unknown")
         sys.exit(1)
+
+    if dir_option:
+        #Keep dir option for publican/po pull
+        if command_options.has_key('dir'):
+            output_folder = command_options['dir'][0]['value']
+        else:
+            output_folder = None
+
+        if command_options.has_key('dstdir'):
+            output_folder = command_options['dstdir'][0]['value']
+    else:
+        #Disable dir option for generic pull command
+        if command_options.has_key('dir'):
+            log.warn("dir option is disabled in pull command, please use --transdir, or specify value in zanata.xml")
+
+        if project_config.has_key('project_srcdir'):
+            output_folder = project_config['project_srcdir']
+        else:
+            output_folder = None        
+                     
+        if command_options.has_key('dstdir'):
+            log.warn("dstdir option is changed to transdir option for generic pull command")
+            output_folder = command_options['dstdir'][0]['value']
+
+    outpath = create_outpath(command_options, output_folder)
 
     zanatacmd = ZanataCommand()
     zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type)
