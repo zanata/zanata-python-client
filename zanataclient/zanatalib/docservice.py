@@ -35,7 +35,7 @@ from error import BadRequestBodyException
 from error import SameNameDocumentException
 from error import UnAvaliableResourceException
 from error import UnavailableServiceError
-
+from error import UnexpectedStatusException
 
 class DocumentService:    
     def __init__(self, projects):
@@ -52,6 +52,8 @@ class DocumentService:
             raise InternalServerError('Error 500', 'An internal server error happens')
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
+        else:
+            raise UnexpectedStatusException('Error', 'Unexpected Status, failed to get file list')
     
     def update_template(self, projectid, iterationid, file_id, resources, copytrans):
         headers = {}
@@ -70,7 +72,9 @@ class DocumentService:
             raise SameNameDocumentException('Error 409', 'A document with same name already exists.')
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
-    
+        else:
+            raise UnexpectedStatusException('Error', 'Unexpected Status, failed to update')
+
     def commit_template(self, projectid, iterationid, resources, copytrans):
         """
         Push the json object to Zanata server
@@ -98,6 +102,8 @@ class DocumentService:
             raise SameNameDocumentException('Error 409', content)
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
+        else:
+            raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push')
 
     def delete_template(self, projectid, iterationid, file_id):
         headers = {}
@@ -114,7 +120,9 @@ class DocumentService:
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey') 
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
-    
+        else:
+            raise UnexpectedStatusException('Error', 'Unexpected Status, failed to delete')
+
     def retrieve_template(self, projectid, iterationid, file_id):
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file_id))
         headers = {}
@@ -129,6 +137,8 @@ class DocumentService:
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')       
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
+        else:
+            raise UnexpectedStatusException('Error', 'Unexpected Status, failed to pull')
 
     def retrieve_translation(self, lang, projectid, iterationid, file_id):
         """
@@ -157,7 +167,9 @@ class DocumentService:
             raise BadRequestBodyException('Error 400', content)
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
-  
+        else:
+            raise UnexpectedStatusException('Error', 'Unexpected Status, failed to retrieve translation')
+
     def commit_translation(self, projectid, iterationid, fileid, localeid, resources, merge):
         headers = {}
         headers['X-Auth-User'] = self.projects.username
@@ -176,5 +188,5 @@ class DocumentService:
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
         else:
-            return "no"
+            raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push translation to zanata server')
 

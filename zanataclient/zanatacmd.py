@@ -36,6 +36,7 @@ from zanatalib.error import SameNameDocumentException
 from zanatalib.error import InvalidOptionException
 from zanatalib.error import NotAllowedException
 from zanatalib.error import ProjectExistException
+from zanatalib.error import UnexpectedStatusException
 
 class ZanataCommand:
     def __init__(self):
@@ -84,6 +85,8 @@ class ZanataCommand:
         except NoSuchProjectException, e:
             self.log.error(e.msg)
             sys.exit(1)
+        except UnexpectedStatusException, e:
+            self.log.error(e.msg)
 
     def update_template(self, zanata, project_id, iteration_id, filename, body, copytrans):
         if '/' in filename:
@@ -96,20 +99,21 @@ class ZanataCommand:
             if result:
                 self.log.info("Successfully updated template %s on the server"%filename)
         except BadRequestBodyException, e:
-            self.log.error(e.msg) 
-
+            self.log.error(e.msg)
+        except UnexpectedStatusException, e:
+            self.log.error(e.msg)
 
     def commit_translation(self, zanata, project_id, iteration_id, request_name, pofile, lang, body, merge):
         try:
             result = zanata.documents.commit_translation(project_id, iteration_id, request_name, lang, body, merge)
-            if result != "no":
-                self.log.warn(result)
-            else:
-                self.log.error("Failed to push translation")    
+            if result:
+                self.log.warn(result)   
             self.log.info("Successfully pushed translation %s to the Zanata server"%pofile)
         except UnAuthorizedException, e:
             self.log.error(e.msg)                                            
         except BadRequestBodyException, e:
+            self.log.error(e.msg)
+        except UnexpectedStatusException, e:
             self.log.error(e.msg)
 
     def del_server_content(self, zanata, tmlfolder, project_id, iteration_id, push_files, force):
@@ -187,7 +191,7 @@ class ZanataCommand:
             self.log.error("There is no Such Project on the server")
         except InvalidOptionException:
             self.log.error("Options are not valid")
-               
+
     def version_info(self, zanata, project_id, iteration_id):
         """
         Retrieve the information of a project iteration.
@@ -316,6 +320,9 @@ class ZanataCommand:
                 continue
             except SameNameDocumentException, e:
                 self.update_template(zanata, project_id, iteration_id, filename, body, copytrans)
+            except UnexpectedStatusException, e:
+                self.log.error(e.msg)
+                continue
             
             if import_param:
                 merge = import_param['merge']
@@ -386,6 +393,9 @@ class ZanataCommand:
                 except UnAvaliableResourceException, e:
                     self.log.error("Can't find pot file for %s on server"%name)
                     break
+                except UnexpectedStatusException, e:
+                    self.log.error(e.msg)
+                    break
                     
                 try:
                     result = zanata.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
@@ -397,6 +407,8 @@ class ZanataCommand:
                 except BadRequestBodyException, e:
                     self.log.error(e.msg)
                     continue 
+                except UnexpectedStatusException, e:
+                    self.log.error(e.msg)
      
                 try:
                     publicanutil.save_to_pofile(pofile, result, pot)

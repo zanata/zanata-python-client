@@ -431,15 +431,13 @@ def process_srcfile(command_options):
 
     return tmlfolder, file_path
 
-def process_transdir(command_options, project_config):
+def process_transdir(command_options, project_config, default_folder):
     trans_folder = ""
-    
-    if project_config.has_key('project_srcdir'):
-        trans_folder = project_config['project_srcdir']
-    elif command_options.has_key('dir'):
-        trans_folder = command_options['dir'][0]['value']
-    elif command_options.has_key('transdir'):
+
+    if command_options.has_key('transdir'):
         trans_folder = command_options['transdir'][0]['value']
+    elif default_folder:
+        trans_folder = default_folder
     else:
         trans_folder = os.getcwd()
 
@@ -682,6 +680,7 @@ def po_pull(command_options, args):
         --apikey: api key of user
         --project-id: id of the project
         --project-version: id of the version
+        --dstdir: output folder (same as --transdir option)
         --dir: output folder for po files (same as --transdir)
         --transdir: output folder for po files
         --lang: language list'
@@ -700,11 +699,11 @@ def po_push(command_options, args):
         --apikey: api key of user
         --project-id: id of the project
         --project-version: id of the version
-        --dir: the full path of the folder that contains pot files and po files,
+        --dir: the path of the folder that contains pot files and po files,
                no need to specify --srcdir and --transdir if --dir option specified
-        --srcdir: the full path of the po folder
-        --srcfile: the full path of the source file
-        --transdir: the full path of the folder that contains po files(e.g. zh_CN.po)
+        --srcdir: the path of the po folder(e.g. ./po)
+        --srcfile: the path of the source file
+        --transdir: the path of the folder that contains po files(e.g. ./po)
         --import-po: push local translations to server
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
@@ -722,6 +721,7 @@ def publican_pull(command_options, args):
         --apikey: api key of user
         --project-id: id of the project
         --project-version: id of the version
+        --dstdir: output folder (same as --transdir option)
         --dir: output folder (same as --transdir option)
         --transdir: translations will be written to this folder (one sub-folder per locale)
         --lang: language list
@@ -742,11 +742,11 @@ def publican_push(command_options, args):
         --apikey: api key of user
         --project-id: id of the project
         --project-version: id of the version
-        --dir: the full path of the folder that contains pot folder and locale folders,
+        --dir: the path of the folder that contains pot folder and locale folders,
                no need to specify --srcdir and --transdir if --dir option specified
-        --srcdir: the full path of the pot folder (e.g. /home/jamesni/myproject/pot)
-        --transdir: the full path of the folder that contain locale folders
-                    (e.g. /home/jamesni/myproject)
+        --srcdir: the path of the pot folder (e.g. ./pot)
+        --transdir: the path of the folder that contain locale folders
+                    (e.g. ./myproject)
         --import-po: push local translations to server
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
@@ -768,9 +768,9 @@ def push(command_options, args, project_type = None):
         --project-type: project type (software or publican)
         --project-id: id of the project
         --project-version: id of the version
-        --srcdir: the full path of the pot folder (e.g. /home/jamesni/myproject/pot)
-        --transdir: the full path of the folder that contain locale folders
-                    (e.g. /home/jamesni/myproject)
+        --srcdir: the path of the pot folder (e.g. ./pot)
+        --transdir: the path of the folder that contain locale folders
+                    (e.g. ./myproject)
         --import-po: push local translations to server
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
@@ -780,6 +780,7 @@ def push(command_options, args, project_type = None):
     force = False
     dir_option = False
     command_type = ''
+    default_folder = ""
     tmlfolder = ""
     filelist = []
 
@@ -851,7 +852,7 @@ def push(command_options, args, project_type = None):
         
     if command_options.has_key('importpo'):
         log.info("Importing translation")
-        import_param['transdir'] = process_transdir(command_options, project_config)
+        import_param['transdir'] = process_transdir(command_options, project_config, default_folder)
         log.info("Reading locale folders from %s" % import_param['transdir'])
         import_param['merge'] = process_merge(command_options)
         import_param['lang_list'] = get_lang_list(command_options, project_config)

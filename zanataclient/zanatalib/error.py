@@ -28,7 +28,8 @@ __all__ = (
         "ProjectExistException", "UnAvaliableResourceException",
         "UnAvaliablePOTException", "BadRequestBodyException",
         "SameNameDocumentException","InternalServerError",
-        "NotAllowedException", "UnavailableServiceError"
+        "NotAllowedException", "UnavailableServiceError",
+        "UnexpectedStatusException"
 )
 class ZanataException(Exception):
     def __init__(self, expr, msg):
@@ -78,4 +79,7 @@ class SameNameDocumentException(ZanataException):
     pass
 
 class NotAllowedException(ZanataException):
+    pass
+
+class UnexpectedStatusException(ZanataException):
     pass
