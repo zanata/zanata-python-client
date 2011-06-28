@@ -23,7 +23,7 @@
 
 __all__ = (
         "NoSuchProjectException", "InvalidOptionException", 
-        "NoSuchFileException", "InvalidPOTFileException",
+        "NoSuchFileException",
         "UnAuthorizedException", "BadRequestException",
         "ProjectExistException", "UnAvaliableResourceException",
         "UnAvaliablePOTException", "BadRequestBodyException",
@@ -52,9 +52,6 @@ class InvalidOptionException(ZanataException):
     pass 
 
 class NoSuchFileException(ZanataException):
-    pass 
-
-class InvalidPOTFileException(ZanataException):
     pass 
 
 class UnAuthorizedException(ZanataException):

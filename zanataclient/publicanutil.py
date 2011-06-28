@@ -35,7 +35,6 @@ except ImportError:
 import sys
 
 from zanatalib.logger import Logger
-from zanatalib.error import InvalidPOTFileException
 
 class PublicanUtility:
     def __init__(self):
@@ -213,9 +212,7 @@ class PublicanUtility:
             extensions = potcontent.get('extensions')[0]
             po.header = extensions.get('comment')     
             for item in extensions.get('entries'):
-                po.metadata[item['key']]=item['value']                    
-        else:
-            raise InvalidPOTFileException("Error", "the extensions of Resource is empty")
+                po.metadata[item['key']]=item['value']
 
         for textflow in textflows:
             if textflow.get('extensions'):
@@ -248,8 +245,6 @@ class PublicanUtility:
                          
                 poentry.msgid = textflow.get('content')
                 po.append(poentry)
-            else:
-                raise InvalidPOTFileException("Error", "the extensions of TextFlow is empty")
           
         #If the translation is exist, read the content of the po file
         if translations:

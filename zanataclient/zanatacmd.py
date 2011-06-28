@@ -31,7 +31,6 @@ from zanatalib.error import NoSuchProjectException
 from zanatalib.error import UnAuthorizedException
 from zanatalib.error import UnAvaliableResourceException
 from zanatalib.error import BadRequestBodyException
-from zanatalib.error import InvalidPOTFileException
 from zanatalib.error import SameNameDocumentException
 from zanatalib.error import InvalidOptionException
 from zanatalib.error import NotAllowedException
@@ -410,9 +409,4 @@ class ZanataCommand:
                 except UnexpectedStatusException, e:
                     self.log.error(e.msg)
      
-                try:
-                    publicanutil.save_to_pofile(pofile, result, pot)
-                except InvalidPOTFileException, e:
-                    self.log.error("Can't generate po file for %s,"%name+e.msg)
- 
-            
+                publicanutil.save_to_pofile(pofile, result, pot)
