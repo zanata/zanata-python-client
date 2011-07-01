@@ -603,7 +603,7 @@ def create_project(command_options, args):
         sys.exit(1)
 
     if command_options.has_key('project_desc'):
-        project_name = command_options['project_desc'][0]['value']
+        project_desc = command_options['project_desc'][0]['value']
 
     zanata = generate_zanataresource(url, username, apikey)
     zanatacmd = ZanataCommand()
