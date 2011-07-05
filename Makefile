@@ -5,7 +5,7 @@ default: all
 sdist: all lint test
 	python setup.py sdist
 
-install:
+install: all
 	python setup.py install
 
 uninstall:
@@ -25,7 +25,7 @@ lint:
 lint-report:
 	pylint --reports=n zanata zanataclient
 
-test: 
+test:
 	(cd test; python test_all.py)
 
 all: zanataclient/VERSION-FILE
