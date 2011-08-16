@@ -274,12 +274,11 @@ class ZanataCommand:
                 pofile = os.path.join(folder, potfile+'.po') 
 
             elif project_type == "software":
-                folder = os.path.join(trans_folder, 'po')
                 filename = item.replace('-','_')+'.po'
                 if sub_dir:
-                    path = os.path.join(folder, sub_dir)
+                    path = os.path.join(trans_folder, sub_dir)
                 else:
-                    path = folder
+                    path = trans_folder
                 pofile = os.path.join(path, filename)  
                 
             if not os.path.isfile(pofile):

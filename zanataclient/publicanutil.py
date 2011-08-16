@@ -147,6 +147,7 @@ class PublicanUtility:
                 final_file_list.append(full_path)
             if os.path.isdir(full_path):
                 final_file_list+=self.get_file_list(full_path, file_type)
+
         return final_file_list
 
     def hash_match(self, message, msgid):
