@@ -95,6 +95,8 @@ class PublicanUtility:
             else:
                 state = "New"
             #need judge for fuzzy state
+            if "fuzzy" in entry.flags:
+                state = "NeedReview"
             
             #create extensions
             extensions = [{"object-type":"comment","value":comment,"space":"preserve"}]

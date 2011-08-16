@@ -371,7 +371,7 @@ class ZanataCommand:
                     save_name = name
                 elif project_type == "software":
                     outpath = output
-                    save_name = item
+                    save_name = item.replace('-','_')
                                         
                 if folder:
                     subdirectory = os.path.join(outpath, folder)
