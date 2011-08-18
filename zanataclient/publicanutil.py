@@ -64,7 +64,7 @@ class PublicanUtility:
                 node = ref[0]+":"+ref[1]
                 reflist.append(node)
             flags = entry.flags
-            
+
             #extensions_single_comment = [{'object-type':'comment','value':'test','space':'preserve'}]
             #extensions_pot_entry_header = [{"object-type":"pot-entry-header","context":"context","references":["fff"],"extractedComment":"extractedComment","flags":["java-format"]}]
 
@@ -239,9 +239,10 @@ class PublicanUtility:
                                     poentry.occurrences = [tuple(item.split(':'))]
                         else:
                             poentry.occurrences = None
-                        #print poentry.occurrences
-                        poentry.flags = entry.get('flags')  
                     
+                        if entry.get('flags'):
+                            poentry.flags = entry.get('flags')
+                                            
                     if entry.get('object-type') == 'comment':
                         #SimpleComment
                         poentry.comment = entry.get('value')
@@ -279,7 +280,15 @@ class PublicanUtility:
                         #    entries = extensions.get('value')
                     if self.hash_match(message, translation.get('resId')):
                         message.msgstr = translation.get('content')
-                   
+                        if translation.get('state') == 'NeedReview':
+                            if message.flags == [u'']:
+                                message.flags = ['fuzzy']
+                            else:
+                                message.flags.insert(0, 'fuzzy')
+                        else:
+                            if message.flags == [u'']:
+                                message.flags = None
+
         # finally save resulting po to outpath as lang/myfile.po
        
         po.save()
