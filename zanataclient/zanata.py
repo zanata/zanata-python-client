@@ -416,9 +416,9 @@ def find_po(folder):
 def check_pofile(tmlfolder, project_type):
     folder = ""
     
-    if project_type == "publican":
+    if project_type == "podir":
         folder_type = "pot"
-    elif project_type == "software":
+    elif project_type == "gettext":
         folder_type = "po"
 
     if not os.path.isdir(tmlfolder):
@@ -705,7 +705,7 @@ def po_pull(command_options, args):
     """
     Usage: zanata po pull [OPTIONS] {documents} {lang}
 
-    Retrieve software project translation files from server
+    Retrieve gettext project translation files from server
 
     Options:
         --username: user name
@@ -717,7 +717,7 @@ def po_pull(command_options, args):
         --transdir: output folder for po files
         --lang: language list'
     """
-    pull(command_options, args, "software")
+    pull(command_options, args, "gettext")
 
 def po_push(command_options, args):
     """
@@ -750,7 +750,7 @@ def po_push(command_options, args):
     tmlfolder = ""
     filelist = []
 
-    import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': 'software'}
+    import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': 'gettext'}
 
     zanatacmd = ZanataCommand()
 
@@ -782,7 +782,7 @@ def po_push(command_options, args):
     if command_options.has_key('dir'):
         default_folder = command_options['dir'][0]['value']
     
-    tmlfolder = process_srcdir(command_options, "software", project_config, default_folder)
+    tmlfolder = process_srcdir(command_options, "gettext", project_config, default_folder)
             
     if not os.path.isdir(tmlfolder):
         log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
@@ -846,7 +846,7 @@ def publican_pull(command_options, args):
         --transdir: translations will be written to this folder (one sub-folder per locale)
         --lang: language list
     """
-    pull(command_options, args, "publican")
+    pull(command_options, args, "podir")
 
 def publican_push(command_options, args):
     """
@@ -881,7 +881,7 @@ def publican_push(command_options, args):
     tmlfolder = ""
     filelist = []
 
-    import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': 'publican'}
+    import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': 'podir'}
 
     zanatacmd = ZanataCommand()
 
@@ -909,7 +909,7 @@ def publican_push(command_options, args):
     if command_options.has_key('dir'):
         default_folder = command_options['dir'][0]['value']
     
-    tmlfolder = process_srcdir(command_options, "publican", project_config, default_folder)
+    tmlfolder = process_srcdir(command_options, "podir", project_config, default_folder)
             
     log.info("POT directory (originals):%s" % tmlfolder)
         
@@ -965,7 +965,7 @@ def push(command_options, args, project_type = None):
         -f: force to remove content on server side
         --username: user name
         --apikey: api key of user
-        --project-type: project type (software or publican)
+        --project-type: project type (gettext or podir)
         --project-id: id of the project
         --project-version: id of the version
         --srcdir: the path of the pot folder (e.g. ./pot)
@@ -1015,7 +1015,7 @@ def push(command_options, args, project_type = None):
         log.error("The project type is unknown")
         sys.exit(1)
         
-    if command_type == 'software' and command_options.has_key('srcfile'):
+    if command_type == 'gettext' and command_options.has_key('srcfile'):
         tmlfolder, import_file = process_srcfile(command_options)
         filelist.append(import_file)
     else:
@@ -1033,10 +1033,10 @@ def push(command_options, args, project_type = None):
         log.error("Can not find source folder, please specify the source folder with '--srcdir' or using zanata.xml")
         sys.exit(1)
     
-    if command_type == 'publican':
+    if command_type == 'podir':
         log.info("POT directory (originals):%s" % tmlfolder)
         folder = None;
-    elif command_type == 'software':
+    elif command_type == 'gettext':
         log.info("PO directory (originals):%s" % tmlfolder)
         folder = tmlfolder
 
@@ -1090,7 +1090,7 @@ def pull(command_options, args, project_type = None):
     Options:
         --username: user name
         --apikey: api key of user
-        --project-type: project type (software or publican)
+        --project-type: project type (gettext or podir)
         --project-id: id of the project
         --project-version: id of the version
         --transdir: translations will be written to this folder
@@ -1166,6 +1166,9 @@ def pull(command_options, args, project_type = None):
     zanatacmd = ZanataCommand()
     zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type)
 
+def version(command_options, args):
+    pass
+
 command_handler_factories = {
     'help': makeHandler(help_info),
     'list': makeHandler(list_project),
@@ -1178,7 +1181,8 @@ command_handler_factories = {
     'publican_pull': makeHandler(publican_pull),
     'publican_push': makeHandler(publican_push),
     'push': makeHandler(push),
-    'pull': makeHandler(pull)
+    'pull': makeHandler(pull),
+    'version': makeHandler(version)
 }
 
 def signal_handler(signal, frame):

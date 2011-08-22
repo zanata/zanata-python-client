@@ -200,11 +200,12 @@ def _parse_command_line(option_sets, subcmds=None, sys_args=None):
                         command = orig_command+'_'+sub[0]
                         args = sub[1:]
                     else:
-                        print "Unknown command"
+                        print "Unknown command!"
                         sys.exit(1)
                 else:
-                    print "Please complete the command!"
-                    sys.exit(1)
+                    command = orig_command
+                #    print "Please complete the command!"
+                #    sys.exit(1)
 
             if orig_command == name and not subcmd:
                 command = orig_command

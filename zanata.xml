@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <config xmlns="http://flies.openl10n.net/config/v1/">
 
-
-        <url>http://localhost:8080/zanata/</url>
 <!--
+        <url>http://localhost:8080/zanata/</url>
+-->
         <url>http://hudson.englab.bne.redhat.com/zanata/</url>
-
-        <url>http://translate.jboss.org/flies/</url>
+<!--
+        <url>http://translate.engineering.redhat.com</url>
 -->
         <project>test-project</project>
         <project-version>1.0</project-version>

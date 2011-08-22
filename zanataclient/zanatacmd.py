@@ -364,12 +364,12 @@ class ZanataCommand:
                     else:
                         lang = item
                     
-                if project_type == "publican":
+                if project_type == "podir":
                     outpath = os.path.join(output, item) 
                     if not os.path.isdir(outpath):
                         os.mkdir(outpath)  
                     save_name = name
-                elif project_type == "software":
+                elif project_type == "gettext":
                     outpath = output
                     save_name = item.replace('-','_')
                                         

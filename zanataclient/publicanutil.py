@@ -68,7 +68,8 @@ class PublicanUtility:
             #extensions_single_comment = [{'object-type':'comment','value':'test','space':'preserve'}]
             #extensions_pot_entry_header = [{"object-type":"pot-entry-header","context":"context","references":["fff"],"extractedComment":"extractedComment","flags":["java-format"]}]
 
-            extensions=[{'object-type':'comment','value':extracted_comment,'space':'preserve'}, {"object-type":"pot-entry-header","context":"","references":reflist,"extractedComment":'',"flags":flags}]
+            extensions=[{'object-type':'comment','value':extracted_comment,'space':'preserve'},
+            {"object-type":"pot-entry-header","context":"","references":reflist,"extractedComment":'',"flags":flags}]
 
             textflow = {'id': textflowId, 'lang':'en-US', 'content':entry.msgid, 'extensions':extensions, 'revision':1}
             textflows.append(textflow)
@@ -226,17 +227,16 @@ class PublicanUtility:
                         #PotEntryHeader
                         #Check the references is not empty
                         if entry.get('references')!=[u'']:
+                            ref_list = []
                             for item in entry.get('references'):
                                 #in some cases, entry contains more than one reference
                                 if ' ' in item:
                                     reference = item.split(' ')
-                                    ref_list = []
                                     for i in reference:
-                                        ref = tuple(i.split(':'))
-                                        ref_list.append(ref)
-                                    poentry.occurrences= ref_list 
+                                        ref_list.append(tuple(item.rsplit(':', 1)))
                                 else:
-                                    poentry.occurrences = [tuple(item.split(':'))]
+                                    ref_list.append(tuple(item.rsplit(':', 1)))
+                            poentry.occurrences = ref_list
                         else:
                             poentry.occurrences = None
                     
