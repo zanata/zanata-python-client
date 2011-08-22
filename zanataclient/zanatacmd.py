@@ -264,7 +264,7 @@ class ZanataCommand:
             else:
                 request_name = potfile
 
-            if project_type == "publican":
+            if project_type == "podir":
                 folder = os.path.join(trans_folder, item)
                     
                 if not os.path.isdir(folder):
@@ -273,7 +273,7 @@ class ZanataCommand:
 
                 pofile = os.path.join(folder, potfile+'.po') 
 
-            elif project_type == "software":
+            elif project_type == "gettext":
                 filename = item.replace('-','_')+'.po'
                 if sub_dir:
                     path = os.path.join(trans_folder, sub_dir)
