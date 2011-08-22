@@ -3,6 +3,7 @@ import sys
 import os
 import string
 import signal
+import subprocess
 
 from zanatalib.versionservice import VersionService
 from zanatalib.client import ZanataResource
@@ -1167,8 +1168,34 @@ def pull(command_options, args, project_type = None):
     zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type)
 
 def version(command_options, args):
-    pass
+    """
+    Usage: zanata version
 
+    Display version of zanata python client, if running command from git repo, it will also show the latest commit id
+    """
+
+    #Retrieve the version of client
+    version_number = ""
+    path = os.path.dirname(os.path.realpath(__file__))
+    version_file = os.path.join(path, 'VERSION-FILE')
+    try:
+        version = open(version_file, 'rb')
+        client_version = version.read()
+        version.close()
+        version_number = client_version.rstrip().strip('version: ')
+    except IOError:
+        log.error("Please run VERSION-GEN or 'make install' to generate VERSION-FILE")
+        version_number = "UNKNOWN"
+
+    log.info("zanata python client version: %s"%version_number)
+    
+    p = subprocess.Popen('/usr/bin/git rev-parse HEAD', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,  close_fds=True)
+    output = p.stdout.readline()
+    if output != '':
+        commit_id = output.rstrip()
+        log.info("commit id: %s"%commit_id)
+        
 command_handler_factories = {
     'help': makeHandler(help_info),
     'list': makeHandler(list_project),
