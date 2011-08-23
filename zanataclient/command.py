@@ -293,7 +293,7 @@ def handle_program(
             version.close()
             version_number = client_version.rstrip().strip('version: ')
         except IOError:
-            log.error("Please run VERSION-GEN or 'make install' to generate VERSION-FILE")
+            print "Please run VERSION-GEN or 'make install' to generate VERSION-FILE"
             version_number = "UNKNOWN"
 
         print "zanata python client version: %s"%version_number
