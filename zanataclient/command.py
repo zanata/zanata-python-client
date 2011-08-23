@@ -26,7 +26,7 @@
 
 import getopt
 import sys
-
+import os
 
 class OptionConfigurationError(Exception):
     pass
@@ -203,9 +203,8 @@ def _parse_command_line(option_sets, subcmds=None, sys_args=None):
                         print "Unknown command!"
                         sys.exit(1)
                 else:
-                    command = orig_command
-                #    print "Please complete the command!"
-                #    sys.exit(1)
+                    print "Please complete the command!"
+                    sys.exit(1)
 
             if orig_command == name and not subcmd:
                 command = orig_command
@@ -283,6 +282,21 @@ def handle_program(
                 }
             )
         sys.exit(0)
+    elif program_options.has_key('client_version'):
+        #Retrieve the version of client
+        version_number = ""
+        path = os.path.dirname(os.path.realpath(__file__))
+        version_file = os.path.join(path, 'VERSION-FILE')
+        try:
+            version = open(version_file, 'rb')
+            client_version = version.read()
+            version.close()
+            version_number = client_version.rstrip().strip('version: ')
+        except IOError:
+            log.error("Please run VERSION-GEN or 'make install' to generate VERSION-FILE")
+            version_number = "UNKNOWN"
+
+        print "zanata python client version: %s"%version_number
     else:
         if not command:
             raise getopt.GetoptError("No command specified.")

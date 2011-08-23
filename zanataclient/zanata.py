@@ -188,6 +188,13 @@ option_sets = {
             long=['--project-type'],
             metavar='PROJECTTYPE',
         ),
+    ],
+    'client_version': [
+        dict(
+            type='program',
+            long=['--version'],
+            short=['-V'],
+        ),
     ]
 }
 
@@ -219,6 +226,10 @@ po pull       Pull the content of software project file
 po push       Push the content of software project file to Zanata server
 push          Push the content of software project/docbook project to Zanata server
 pull          Pull the content of software project/docbook project from Zanata server
+
+available system options:
+--help              Display this help or detail usage of commands
+--version           Display python client version
 
 Use 'zanata help' for the full list of commands
 Use 'zanata help <command>, zanata <command> --help or zanata <command> -h' for detail usage of commands
@@ -1023,8 +1034,6 @@ def push(command_options, args, project_type = None):
         #Disable dir option for generic push command
         if command_options.has_key('dir'):
             log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")        
-        if project_config.has_key('project_srcdir'):
-            default_folder = project_config['project_srcdir']
         else:
             default_folder = None
         
@@ -1152,9 +1161,6 @@ def pull(command_options, args, project_type = None):
         #Disable dir option for generic pull command
         if command_options.has_key('dir'):
             log.warn("dir option is disabled in pull command, please use --transdir, or specify value in zanata.xml")
-
-        if project_config.has_key('project_srcdir'):
-            output_folder = project_config['project_srcdir']
         else:
             output_folder = None        
                      
@@ -1166,35 +1172,6 @@ def pull(command_options, args, project_type = None):
 
     zanatacmd = ZanataCommand()
     zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type)
-
-def version(command_options, args):
-    """
-    Usage: zanata version
-
-    Display version of zanata python client, if running command from git repo, it will also show the latest commit id
-    """
-
-    #Retrieve the version of client
-    version_number = ""
-    path = os.path.dirname(os.path.realpath(__file__))
-    version_file = os.path.join(path, 'VERSION-FILE')
-    try:
-        version = open(version_file, 'rb')
-        client_version = version.read()
-        version.close()
-        version_number = client_version.rstrip().strip('version: ')
-    except IOError:
-        log.error("Please run VERSION-GEN or 'make install' to generate VERSION-FILE")
-        version_number = "UNKNOWN"
-
-    log.info("zanata python client version: %s"%version_number)
-    
-    p = subprocess.Popen('/usr/bin/git rev-parse HEAD', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE,  close_fds=True)
-    output = p.stdout.readline()
-    if output != '':
-        commit_id = output.rstrip()
-        log.info("commit id: %s"%commit_id)
         
 command_handler_factories = {
     'help': makeHandler(help_info),
@@ -1208,8 +1185,7 @@ command_handler_factories = {
     'publican_pull': makeHandler(publican_pull),
     'publican_push': makeHandler(publican_push),
     'push': makeHandler(push),
-    'pull': makeHandler(pull),
-    'version': makeHandler(version)
+    'pull': makeHandler(pull)
 }
 
 def signal_handler(signal, frame):
