@@ -48,7 +48,6 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(project_config['project_url'], "http://localhost:8080/zanata/")
         self.assertEqual(project_config['project_id'], "test-project")
         self.assertEqual(project_config['project_version'], "1.0")
-        self.assertEqual(project_config['project_srcdir'], "/home/jamesni/ibus-table")
         self.assertEqual(project_config['locale_map'], {"zh-CN": "zh-Hans"})
 
 if __name__ == '__main__':
