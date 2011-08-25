@@ -207,7 +207,8 @@ subcmds = {
     'publican': ['push', 'pull'],
     'po': ['push', 'pull'],
     'push':[],
-    'pull':[]
+    'pull':[],
+    'glossary':['push']
     }
 
 usage = """Client for talking to a Zanata Server
@@ -1172,6 +1173,50 @@ def pull(command_options, args, project_type = None):
 
     zanatacmd = ZanataCommand()
     zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type)
+
+def glossary_push(command_options, args):
+    """
+    Usage: zanata glossary push [OPTIONS] GLOSSARY_POFILE
+
+    Push glossary file in po format to zanata server
+
+    Options:
+        --url: URL of zanata server
+        --username: user name
+        --apikey: api key of user
+        --lang: language of glossary file
+    """
+    zanatacmd = ZanataCommand()
+    project_config = read_project_config(command_options)
+    
+    if not project_config:
+        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
+                
+    url = process_url(project_config, command_options)
+    username, apikey = read_user_config(url, command_options)
+    if args:
+        path = os.path.join(os.getcwd(), args[0])
+        if not os.path.isfile(path):
+            log.error("Can not find glossary file %s under current path"%args[0])
+            sys.exit(1)
+    else:
+        log.info("Please specify the file name of glossary file")
+        sys.exit(1)        
+   
+    if command_options.has_key('lang'):
+        locale = command_options['lang'][0]['value'].split(',')[0]
+    else:
+        log.error("Please specify the language with '--lang' option")
+        sys.exit(1)
+
+    if project_config.has_key('locale_map'):
+        locale_map = project_config['locale_map']
+        if locale in locale_map:
+            lang = locale_map[locale]
+        else:
+            lang = locale
+
+    zanatacmd.glossary_push(path, url, username, apikey, lang)
         
 command_handler_factories = {
     'help': makeHandler(help_info),
@@ -1185,7 +1230,8 @@ command_handler_factories = {
     'publican_pull': makeHandler(publican_pull),
     'publican_push': makeHandler(publican_push),
     'push': makeHandler(push),
-    'pull': makeHandler(pull)
+    'pull': makeHandler(pull),
+    'glossary_push': makeHandler(glossary_push)
 }
 
 def signal_handler(signal, frame):

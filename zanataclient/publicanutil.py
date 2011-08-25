@@ -199,6 +199,20 @@ class PublicanUtility:
         
         return json.dumps(items)
 
+    def glossary_to_json(self, filepath, lang):
+        pofile = self.create_pofile(filepath)
+        entries = []
+        
+        for item in pofile:
+            terms = [{'locale':lang, 'content':item.msgstr, 'comments':[]}, {'locale':'en-US',
+            'content':item.msgid, 'comments':[]}]
+            entry= {'srcLang':'en-US','glossaryTerms':terms, 'sourcereference':''}
+            entries.append(entry)
+
+        glossary = {'glossaryEntries':entries}
+        
+        return json.dumps(glossary)
+
     def save_to_pofile(self, path, translations, pot):
         """
         Save PO file to path, based on json objects of pot and translations 
@@ -294,5 +308,4 @@ class PublicanUtility:
         po.save()
         # pylint: disable-msg=E1103
         self.log.info("Writing po file to %s"%(path))
-        
-        
+

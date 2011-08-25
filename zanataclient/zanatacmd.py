@@ -24,6 +24,7 @@ import sys
 import os
 
 from publicanutil import PublicanUtility
+from zanatalib.glossaryservice import GlossaryService
 from zanatalib.project import Project
 from zanatalib.project import Iteration
 from zanatalib.logger import Logger 
@@ -36,6 +37,7 @@ from zanatalib.error import InvalidOptionException
 from zanatalib.error import NotAllowedException
 from zanatalib.error import ProjectExistException
 from zanatalib.error import UnexpectedStatusException
+from zanatalib.error import UnavailableServiceError
 
 class ZanataCommand:
     def __init__(self):
@@ -409,3 +411,21 @@ class ZanataCommand:
                     self.log.error(e.msg)
      
                 publicanutil.save_to_pofile(pofile, result, pot)
+    
+    def glossary_push(self, path, url, username, apikey, lang):
+        publicanutil = PublicanUtility()
+
+        json = publicanutil.glossary_to_json(path, lang)
+        glossary = GlossaryService(url)
+
+        try:
+            content = glossary.commit_glossary(username, apikey, json)
+            if content:
+                self.log.info("Successfully pushed glossary to the server")
+        except UnAvaliableResourceException:
+            log.error("Can not push")
+        except UnavailableServiceError:
+            log.error("Service Temporarily Unavailable, stop processing!")
+            sys.exit(1)
+        except UnexpectedStatusException, e:
+            self.log.error(e.msg)
