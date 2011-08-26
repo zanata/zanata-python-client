@@ -423,10 +423,9 @@ class ZanataCommand:
             if content:
                 self.log.info("Successfully pushed glossary to the server")
         except UnAvaliableResourceException:
-            log.error("Can not push")
+            self.log.error("Can not push")
         except UnavailableServiceError:
-            log.error("Service Temporarily Unavailable, stop processing!")
-            sys.exit(1)
+            self.log.error("Service Temporarily Unavailable, stop processing!")
         except BadRequestBodyException, e:
             self.log.error(e.msg)
         except UnexpectedStatusException, e:
