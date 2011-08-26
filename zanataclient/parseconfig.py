@@ -112,6 +112,7 @@ class ZanataConfig:
         if xmldoc.getElementsByTagName("locales"):
             locales = xmldoc.getElementsByTagName("locales")[0]
             localelist = locales.getElementsByTagName("locale")
+
             for locale in localelist:
                 for node in locale.childNodes:
                     if node.nodeType == node.TEXT_NODE:
