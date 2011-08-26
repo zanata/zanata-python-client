@@ -202,6 +202,10 @@ class PublicanUtility:
     def glossary_to_json(self, filepath, lang):
         pofile = self.create_pofile(filepath)
         entries = []
+        targetlocales = []
+        targetlocales.append(lang)
+        srclocales = []
+        srclocales.append('en-US')
         
         for item in pofile:
             terms = [{'locale':lang, 'content':item.msgstr, 'comments':[]}, {'locale':'en-US',
@@ -209,7 +213,7 @@ class PublicanUtility:
             entry= {'srcLang':'en-US','glossaryTerms':terms, 'sourcereference':''}
             entries.append(entry)
 
-        glossary = {'glossaryEntries':entries}
+        glossary = {'sourceLocales':srclocales, 'glossaryEntries':entries, 'targetLocales':targetlocales}
         
         return json.dumps(glossary)
 

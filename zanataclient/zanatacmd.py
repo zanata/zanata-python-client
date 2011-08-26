@@ -427,5 +427,7 @@ class ZanataCommand:
         except UnavailableServiceError:
             log.error("Service Temporarily Unavailable, stop processing!")
             sys.exit(1)
+        except BadRequestBodyException, e:
+            self.log.error(e.msg)
         except UnexpectedStatusException, e:
             self.log.error(e.msg)
