@@ -176,6 +176,12 @@ option_sets = {
             long=['--push-trans'],
         ),
     ],
+    'importpo': [
+        dict(
+            type='command',
+            long=['--import-po']
+        ),
+    ],
     'nocopytrans': [
         dict(
             type='command',
@@ -348,6 +354,7 @@ def get_version(url):
     version_number = ""
     path = os.path.dirname(os.path.realpath(__file__))
     version_file = os.path.join(path, 'VERSION-FILE')
+
     try:
         version = open(version_file, 'rb')
         client_version = version.read()
@@ -802,7 +809,7 @@ def po_push(command_options, args):
     
     log.info("PO directory (originals):%s" % tmlfolder)
         
-    if command_options.has_key('pushtrans'):
+    if command_options.has_key('importpo'):
         log.info("Importing translation")
         import_param['transdir'] = process_transdir(command_options, project_config, tmlfolder)
         log.info("Reading locale folders from %s" % import_param['transdir'])
@@ -925,7 +932,7 @@ def publican_push(command_options, args):
             
     log.info("POT directory (originals):%s" % tmlfolder)
         
-    if command_options.has_key('pushtrans'):
+    if command_options.has_key('importpo'):
         log.info("Importing translation")
         import_param['transdir'] = process_transdir(command_options, project_config, None)
         log.info("Reading locale folders from %s" % import_param['transdir'])
@@ -1050,7 +1057,14 @@ def push(command_options, args, project_type = None):
         log.info("PO directory (originals):%s" % tmlfolder)
         folder = tmlfolder
 
+    if command_options.has_key('importpo'):
+        log.info("--import-po option has renamed to --push-trans, please use --push-trans instead")
+        importpo = True
+
     if command_options.has_key('pushtrans'):
+        importpo = True
+
+    if importpo:
         log.info("Importing translation")
         import_param['transdir'] = process_transdir(command_options, project_config, folder)
         log.info("Reading locale folders from %s" % import_param['transdir'])
@@ -1061,7 +1075,6 @@ def push(command_options, args, project_type = None):
         else:
             import_param['locale_map'] = None
         import_param['project_type'] = command_type
-        importpo = True
     else:
         log.info("Importing source documents only")
 
