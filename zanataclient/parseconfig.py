@@ -117,10 +117,10 @@ class ZanataConfig:
                 for node in locale.childNodes:
                     if node.nodeType == node.TEXT_NODE:
                         if locale.getAttribute("map-from"):
-                            locale_map = {locale.getAttribute("map-from"):node.data}
+                            locale_map = {str(locale.getAttribute("map-from")):str(node.data)}
                             project_config['locale_map'].update(locale_map)
                         else:
-                            locale_map = {node.data:node.data}
+                            locale_map = {str(node.data):str(node.data)}
                             project_config['locale_map'].update(locale_map)
         
         return project_config

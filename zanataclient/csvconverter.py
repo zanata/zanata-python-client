@@ -101,4 +101,4 @@ class CSVConverter:
     
 if __name__ == "__main__":
     converter = CSVConverter()        
-    converter.convert_to_json("/home/jamesni/Downloads/test_data.csv", ["description", "pos"])
+    converter.convert_to_json("/home/jamesni/Downloads/test_data.csv", {'es':'es-ES'}, ["description", "pos"])
