@@ -24,6 +24,7 @@ import sys
 import os
 
 from publicanutil import PublicanUtility
+from csvconverter import CSVConverter
 from zanatalib.glossaryservice import GlossaryService
 from zanatalib.project import Project
 from zanatalib.project import Iteration
@@ -412,10 +413,27 @@ class ZanataCommand:
      
                 publicanutil.save_to_pofile(pofile, result, pot)
     
-    def glossary_push(self, path, url, username, apikey, lang):
+    def poglossary_push(self, path, url, username, apikey, lang):
         publicanutil = PublicanUtility()
-
         json = publicanutil.glossary_to_json(path, lang)
+        glossary = GlossaryService(url)
+
+        try:
+            content = glossary.commit_glossary(username, apikey, json)
+            if content:
+                self.log.info("Successfully pushed glossary to the server")
+        except UnAvaliableResourceException:
+            self.log.error("Can not push")
+        except UnavailableServiceError:
+            self.log.error("Service Temporarily Unavailable, stop processing!")
+        except BadRequestBodyException, e:
+            self.log.error(e.msg)
+        except UnexpectedStatusException, e:
+            self.log.error(e.msg)
+
+    def csvglossary_push(self, path, url, username, apikey, locale_map, comments_header):
+        csvconverter = CSVConverter()
+        json = csvconverter.convert_to_json(path, locale_map, comments_header)        
         glossary = GlossaryService(url)
 
         try:

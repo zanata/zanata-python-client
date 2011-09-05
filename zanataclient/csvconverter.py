@@ -65,7 +65,7 @@ class CSVConverter:
         
         return data
 
-    def convert_to_json(self, filepath, comments_header):
+    def convert_to_json(self, filepath, locale_map, comments_header):
         data = self.read_data(filepath)
         srclocales = []
         srclocales.append('en-US')
@@ -83,7 +83,11 @@ class CSVConverter:
                 if key == 'en':
                     term = {'locale':'en-US', 'content':item[key], 'comments':comments}
                 else:
-                    term = {'locale':key, 'content':item[key], 'comments':[]}
+                    if key in locale_map:
+                        locale = locale_map[key]
+                    else:
+                        locale = key
+                    term = {'locale':locale, 'content':item[key], 'comments':[]}
                     if key not in targetlocales:
                         targetlocales.append(key)
                 terms.append(term)

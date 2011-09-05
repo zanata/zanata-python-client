@@ -4,6 +4,7 @@ import os
 import string
 import signal
 import subprocess
+import collections
 
 from zanatalib.versionservice import VersionService
 from zanatalib.client import ZanataResource
@@ -194,6 +195,13 @@ option_sets = {
             type='program',
             long=['--version'],
             short=['-V'],
+        ),
+    ],
+    'comments_header': [
+        dict(
+            type='command',
+            long=['--comments-header'],
+            metavar='COMMENTSHEADER',
         ),
     ]
 }
@@ -1201,22 +1209,49 @@ def glossary_push(command_options, args):
             sys.exit(1)
     else:
         log.info("Please specify the file name of glossary file")
-        sys.exit(1)        
-   
-    if command_options.has_key('lang'):
-        locale = command_options['lang'][0]['value'].split(',')[0]
-    else:
-        log.error("Please specify the language with '--lang' option")
-        sys.exit(1)
+        sys.exit(1)   
 
-    if project_config.has_key('locale_map'):
-        locale_map = project_config['locale_map']
-        if locale in locale_map:
-            lang = locale_map[locale]
+    basename, extension = os.path.splitext(path)
+
+    if extension == '.po':  
+        if command_options.has_key('lang'):
+            locale = command_options['lang'][0]['value'].split(',')[0]
         else:
-            lang = locale
+            log.error("Please specify the language with '--lang' option")
+            sys.exit(1)
 
-    zanatacmd.glossary_push(path, url, username, apikey, lang)
+        if project_config.has_key('locale_map'):
+            locale_map = project_config['locale_map']
+            if locale in locale_map:
+                lang = locale_map[locale]
+            else:
+                lang = locale
+
+        zanatacmd.poglossary_push(path, url, username, apikey, lang)
+    elif extension == '.csv':
+        if project_config.has_key('locale_map'):
+            locales = project_config['locale_map']
+        
+        locale_map = convert(locales)
+
+        if command_options.has_key('comments_header'):
+            comments_header = command_options['comments_header'][0]['value'].split(',')
+        else:
+            log.error("Please specify the comments header, otherwise processing will be fault")
+            sys.exit(1)
+        
+        zanatacmd.csvglossary_push(path, url, username, apikey, locale_map, comments_header)
+
+        
+def convert(data):
+    if isinstance(data, unicode):
+        return str(data)
+    elif isinstance(data, collections.Mapping):
+        return dict(map(convert, data.iteritems()))
+    elif isinstance(data, collections.Iterable):
+        return type(data)(map(convert, data))
+    else:
+        return data
         
 command_handler_factories = {
     'help': makeHandler(help_info),
