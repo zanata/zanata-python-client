@@ -413,7 +413,7 @@ class ZanataCommand:
      
                 publicanutil.save_to_pofile(pofile, result, pot)
     
-    def poglossary_push(self, path, url, username, apikey, lang):
+    def poglossary_push(self, path, url, username, apikey, lang, sourcecomments):
         publicanutil = PublicanUtility()
         json = publicanutil.glossary_to_json(path, lang)
         glossary = GlossaryService(url)

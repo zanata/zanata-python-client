@@ -196,13 +196,19 @@ option_sets = {
             short=['-V'],
         ),
     ],
-    'comments_header': [
+    'comments_cols': [
         dict(
             type='command',
-            long=['--comments-header'],
+            long=['--commentscols'],
             metavar='COMMENTSHEADER',
         ),
-    ]
+    ],
+    'sourcecomments': [
+        dict(
+            type='command',
+            long=['--sourcecommentsastarget'],
+        ),
+    ],
 }
 
 subcmds = {
@@ -1226,13 +1232,17 @@ def glossary_push(command_options, args):
             else:
                 lang = locale
 
-        zanatacmd.poglossary_push(path, url, username, apikey, lang)
+        if command_options.has_key('sourcecomments'):
+            sourcecomments = command_options['sourcecomments'][0]['value']
+        else:
+            sourcecomments = False
+        zanatacmd.poglossary_push(path, url, username, apikey, lang, sourcecomments)
     elif extension == '.csv':
         if project_config.has_key('locale_map'):
             locale_map = project_config['locale_map']
 
-        if command_options.has_key('comments_header'):
-            comments_header = command_options['comments_header'][0]['value'].split(',')
+        if command_options.has_key('comments_cols'):
+            comments_header = command_options['comments_cols'][0]['value'].split(',')
         else:
             log.error("Please specify the comments header, otherwise processing will be fault")
             sys.exit(1)
