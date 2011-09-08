@@ -196,11 +196,11 @@ option_sets = {
             short=['-V'],
         ),
     ],
-    'comments_cols': [
+    'comment_cols': [
         dict(
             type='command',
-            long=['--commentscols'],
-            metavar='COMMENTSHEADER',
+            long=['--commentcols'],
+            metavar='COMMENTCOLS',
         ),
     ],
     'sourcecomments': [
@@ -1241,8 +1241,8 @@ def glossary_push(command_options, args):
         if project_config.has_key('locale_map'):
             locale_map = project_config['locale_map']
 
-        if command_options.has_key('comments_cols'):
-            comments_header = command_options['comments_cols'][0]['value'].split(',')
+        if command_options.has_key('comment_cols'):
+            comments_header = command_options['comment_cols'][0]['value'].split(',')
         else:
             log.error("Please specify the comments header, otherwise processing will be fault")
             sys.exit(1)
