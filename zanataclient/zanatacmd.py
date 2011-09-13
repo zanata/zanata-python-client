@@ -415,7 +415,7 @@ class ZanataCommand:
     
     def poglossary_push(self, path, url, username, apikey, lang, sourcecomments):
         publicanutil = PublicanUtility()
-        json = publicanutil.glossary_to_json(path, lang)
+        json = publicanutil.glossary_to_json(path, lang, sourcecomments)
         glossary = GlossaryService(url)
 
         try:

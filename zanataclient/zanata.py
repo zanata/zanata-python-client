@@ -1198,6 +1198,8 @@ def glossary_push(command_options, args):
         --username: user name
         --apikey: api key of user
         --lang: language of glossary file
+        --sourcecommentsastarget: treat extracted comments and references as target comments of term
+                                  or treat as source reference of entry
     """
     zanatacmd = ZanataCommand()
     project_config = read_project_config(command_options)
@@ -1233,7 +1235,7 @@ def glossary_push(command_options, args):
                 lang = locale
 
         if command_options.has_key('sourcecomments'):
-            sourcecomments = command_options['sourcecomments'][0]['value']
+            sourcecomments = True
         else:
             sourcecomments = False
         zanatacmd.poglossary_push(path, url, username, apikey, lang, sourcecomments)

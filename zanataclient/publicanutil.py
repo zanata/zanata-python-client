@@ -199,7 +199,7 @@ class PublicanUtility:
         
         return json.dumps(items)
 
-    def glossary_to_json(self, filepath, lang):
+    def glossary_to_json(self, filepath, lang, sourcecomments):
         pofile = self.create_pofile(filepath)
         entries = []
         targetlocales = []
@@ -208,9 +208,32 @@ class PublicanUtility:
         srclocales.append('en-US')
         
         for item in pofile:
-            terms = [{'locale':lang, 'content':item.msgstr, 'comments':[]}, {'locale':'en-US',
-            'content':item.msgid, 'comments':[]}]
-            entry= {'srcLang':'en-US','glossaryTerms':terms, 'sourcereference':''}
+            entry= {'srcLang':'en-US','glossaryTerms':'', 'sourcereference':''}
+            target_comments=[]
+            source_comments=[]
+            comments=''
+            reflist = []
+            references = item.occurrences
+            
+            for ref in references:
+                node = ref[0]+":"+ref[1]
+                reflist.append(node)
+
+            if sourcecomments:
+                target_comments = target_comments+reflist
+                target_comments.append(item.comment)
+            else:
+                if entry['sourcereference']:
+                    comments = comments+entry['sourcereference']
+                if reflist:
+                    ref = '\n'.join(str(n) for n in reflist)
+                    comments = comments+ref
+                entry['sourcereference'] = comments    
+                source_comments.append(item.comment)
+
+            terms = [{'locale':lang, 'content':item.msgstr, 'comments':target_comments}, {'locale':'en-US', 'content':item.msgid, 'comments':source_comments}]
+            entry['glossaryTerms'] = terms 
+ 
             entries.append(entry)
 
         glossary = {'sourceLocales':srclocales, 'glossaryEntries':entries, 'targetLocales':targetlocales}
