@@ -250,6 +250,7 @@ class ZanataCommand:
         sub_dir = ""        
         publicanutil = PublicanUtility()        
         for item in lang_list:
+            self.log.info("Pushing %s translation to server:" %item)
             if not locale_map:
                 lang = item
             else:

@@ -301,10 +301,14 @@ def process_url(project_config, command_options):
     if not url or url.isspace():
         log.error("Please specify valid server url in zanata.xml or with '--url' option")
         sys.exit(1)
+    
+    if '\n' or "" in url:
+        log.info("Warning, the url which contains '\\n' or whitespace is not valid, please check zanata.xml")
+    url = url.strip()
 
     if url[-1] == "/":
         url = url[:-1]
-
+    
     return url
 
 def read_user_config(url, command_options):
@@ -451,7 +455,7 @@ def check_pofile(tmlfolder, project_type):
     elif find_po(sub_folder):
         return sub_folder         
     else:
-        log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
+        log.error("The source folder is empty, please specify the valid source folder with '--srcdir' or 'dir' option")
         sys.exit(1)    
 
 def process_srcdir(command_options, project_type, project_config, default_folder):

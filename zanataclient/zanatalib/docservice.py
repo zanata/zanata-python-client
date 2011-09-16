@@ -165,6 +165,8 @@ class DocumentService:
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
             raise BadRequestBodyException('Error 400', content)
+        elif res['status'] == '403':
+            raise UnexpectedStatusException('Error 403', content)
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
         else:
@@ -187,6 +189,8 @@ class DocumentService:
             raise BadRequestBodyException('Error 400', content+msg)
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
+        elif res['status'] == '403':
+            raise UnexpectedStatusException('Error 403', content)
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push translation to zanata server')
 
