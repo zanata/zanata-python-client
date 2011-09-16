@@ -302,7 +302,7 @@ def process_url(project_config, command_options):
         log.error("Please specify valid server url in zanata.xml or with '--url' option")
         sys.exit(1)
     
-    if '\n' or "" in url:
+    if ' ' in url or '\n' in url:
         log.info("Warning, the url which contains '\\n' or whitespace is not valid, please check zanata.xml")
     url = url.strip()
 
