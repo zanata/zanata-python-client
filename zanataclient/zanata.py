@@ -1163,6 +1163,8 @@ def pull(command_options, args, project_type = None):
         dir_option = True
     elif command_options.has_key('project_type'):
         command_type = command_options['project_type'][0]['value']
+    elif project_config['project_type']:
+        command_type = project_config['project_type']
     else:
         log.error("The project type is unknown")
         sys.exit(1)
