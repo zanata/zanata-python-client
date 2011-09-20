@@ -28,7 +28,7 @@ import os.path
 from zanatalib.logger import Logger
 from xml.dom import minidom 
 
-project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'locale_map':{}}
+project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'project_type':'', 'locale_map':{}}
 
 
 class ZanataConfig:
@@ -107,6 +107,16 @@ class ZanataConfig:
                 if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
                     rc = rc + node.data
             project_config['project_version'] = rc
+
+        #Read the project-type
+        if xmldoc.getElementsByTagName("project-type"):
+            node = xmldoc.getElementsByTagName("project-type")[0]
+            rc = ""
+        
+            for node in node.childNodes:
+                if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
+                    rc = rc + node.data
+            project_config['project_type'] = rc
 
         #Read the locale map
         if xmldoc.getElementsByTagName("locales"):
