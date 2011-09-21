@@ -54,21 +54,18 @@ class RestClient(object):
     
     def request(self, resource, method = "get", args = None, body = None, headers = {}, extension = None, copytrans =
     None, merge = None):
+        copytrans_ext = ""
+        merge_ext = ""
         headers['Accept'] = 'application/json'
         http = httplib2.Http()
         ext = "?ext=gettext&ext=comment"
                 
-        if copytrans:
-            if ext == "":
-                ext="?copyTrans=true"
-            else:
-                ext=ext+"&copyTrans=true"
+        copytrans_ext = "copyTrans=%s"%copytrans
 
         if merge:
-            if ext == "":
-                ext="?merge=%s"%merge
-            else:
-                ext=ext+"&merge=%s"%merge
+            merge_ext="merge=%s"%merge
+
+        ext = ext+copytrans_ext+merge_ext
         
         if args:
             if method == "put" or method == "post":

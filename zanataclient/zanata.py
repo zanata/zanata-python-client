@@ -176,6 +176,12 @@ option_sets = {
             long=['--push-trans'],
         ),
     ],
+    'importpo': [
+        dict(
+            type='command',
+            long=['--import-po']
+        ),
+    ],
     'nocopytrans': [
         dict(
             type='command',
@@ -309,10 +315,14 @@ def process_url(project_config, command_options):
     if not url or url.isspace():
         log.error("Please specify valid server url in zanata.xml or with '--url' option")
         sys.exit(1)
+    
+    if ' ' in url or '\n' in url:
+        log.info("Warning, the url which contains '\\n' or whitespace is not valid, please check zanata.xml")
+    url = url.strip()
 
     if url[-1] == "/":
         url = url[:-1]
-
+    
     return url
 
 def read_user_config(url, command_options):
@@ -362,6 +372,7 @@ def get_version(url):
     version_number = ""
     path = os.path.dirname(os.path.realpath(__file__))
     version_file = os.path.join(path, 'VERSION-FILE')
+
     try:
         version = open(version_file, 'rb')
         client_version = version.read()
@@ -458,7 +469,7 @@ def check_pofile(tmlfolder, project_type):
     elif find_po(sub_folder):
         return sub_folder         
     else:
-        log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
+        log.error("The source folder is empty, please specify the valid source folder with '--srcdir' or 'dir' option")
         sys.exit(1)    
 
 def process_srcdir(command_options, project_type, project_config, default_folder):
@@ -816,7 +827,7 @@ def po_push(command_options, args):
     
     log.info("PO directory (originals):%s" % tmlfolder)
         
-    if command_options.has_key('pushtrans'):
+    if command_options.has_key('importpo'):
         log.info("Importing translation")
         import_param['transdir'] = process_transdir(command_options, project_config, tmlfolder)
         log.info("Reading locale folders from %s" % import_param['transdir'])
@@ -939,7 +950,7 @@ def publican_push(command_options, args):
             
     log.info("POT directory (originals):%s" % tmlfolder)
         
-    if command_options.has_key('pushtrans'):
+    if command_options.has_key('importpo'):
         log.info("Importing translation")
         import_param['transdir'] = process_transdir(command_options, project_config, None)
         log.info("Reading locale folders from %s" % import_param['transdir'])
@@ -1037,6 +1048,8 @@ def push(command_options, args, project_type = None):
 
     if command_options.has_key('project_type'):
         command_type = command_options['project_type'][0]['value']
+    elif project_config['project_type']:
+        command_type = project_config['project_type']
     else:
         log.error("The project type is unknown")
         sys.exit(1)
@@ -1064,7 +1077,14 @@ def push(command_options, args, project_type = None):
         log.info("PO directory (originals):%s" % tmlfolder)
         folder = tmlfolder
 
+    if command_options.has_key('importpo'):
+        log.info("--import-po option has renamed to --push-trans, please use --push-trans instead")
+        importpo = True
+
     if command_options.has_key('pushtrans'):
+        importpo = True
+
+    if importpo:
         log.info("Importing translation")
         import_param['transdir'] = process_transdir(command_options, project_config, folder)
         log.info("Reading locale folders from %s" % import_param['transdir'])
@@ -1075,7 +1095,6 @@ def push(command_options, args, project_type = None):
         else:
             import_param['locale_map'] = None
         import_param['project_type'] = command_type
-        importpo = True
     else:
         log.info("Importing source documents only")
 
@@ -1158,6 +1177,8 @@ def pull(command_options, args, project_type = None):
         dir_option = True
     elif command_options.has_key('project_type'):
         command_type = command_options['project_type'][0]['value']
+    elif project_config['project_type']:
+        command_type = project_config['project_type']
     else:
         log.error("The project type is unknown")
         sys.exit(1)

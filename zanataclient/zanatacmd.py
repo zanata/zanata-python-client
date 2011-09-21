@@ -267,6 +267,8 @@ class ZanataCommand:
             else:
                 request_name = potfile
 
+            self.log.info("Pushing %s translation for %s to server:"%(item, potfile))
+
             if project_type == "podir":
                 folder = os.path.join(trans_folder, item)
                     
@@ -287,9 +289,7 @@ class ZanataCommand:
             if not os.path.isfile(pofile):
                 self.log.error("Can not find the %s translation for %s"%(item, potfile))
                 continue
-            
-            self.log.info("Pushing %s translation for %s to server:"%(item, potfile))
-                
+                        
             body = publicanutil.pofile_to_json(pofile)           
     
             if not body:
