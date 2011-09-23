@@ -1,3 +1,25 @@
+#vim:set et sts=4 sw=4: 
+# 
+# Zanata Python Client
+#
+# Copyright (c) 2011 Jian Ni <jni@redhat.com>
+# Copyright (c) 2011 Red Hat, Inc.
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this program; if not, write to the
+# Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+# Boston, MA  02111-1307  USA
+
 import getopt
 import sys
 import os
@@ -14,6 +36,7 @@ from zanatalib.logger import Logger
 from zanatacmd import ZanataCommand
 from parseconfig import ZanataConfig
 from publicanutil import PublicanUtility
+from optionsutil import OptionsUtil
 
 from command import makeHandler
 from command import strip_docstring
@@ -733,7 +756,6 @@ def create_version(command_options, args):
         if not version_name:
             version_name = args[0]
 
-
     zanata = generate_zanataresource(url, username, apikey)
     zanatacmd = ZanataCommand()
     zanatacmd.create_version(zanata, project_id, version_id, version_name, version_desc)
@@ -1222,14 +1244,13 @@ def glossary_push(command_options, args):
         --sourcecommentsastarget: treat extracted comments and references as target comments of term
                                   or treat as source reference of entry
     """
+    locale_map = []
     zanatacmd = ZanataCommand()
-    project_config = read_project_config(command_options)
-    
-    if not project_config:
-        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-                
-    url = process_url(project_config, command_options)
-    username, apikey = read_user_config(url, command_options)
+    optionsutil = OptionsUtil(command_options)
+    url, username, apikey = optionsutil.apply_configfiles()
+    get_version(url)
+    log.info("Username: %s" % username)
+ 
     if args:
         path = os.path.join(os.getcwd(), args[0])
         if not os.path.isfile(path):
@@ -1241,19 +1262,19 @@ def glossary_push(command_options, args):
 
     basename, extension = os.path.splitext(path)
 
+    locale_map = optionsutil.get_localemap()
+
+    log.info("pushing glossary document %s to server"%args[0]);
+
     if extension == '.po':  
         if command_options.has_key('lang'):
-            locale = command_options['lang'][0]['value'].split(',')[0]
+            lang = command_options['lang'][0]['value'].split(',')[0]
         else:
             log.error("Please specify the language with '--lang' option")
             sys.exit(1)
 
-        if project_config.has_key('locale_map'):
-            locale_map = project_config['locale_map']
-            if locale in locale_map:
-                lang = locale_map[locale]
-            else:
-                lang = locale
+        if lang in locale_map:
+            lang = locale_map[lang]
 
         if command_options.has_key('sourcecomments'):
             sourcecomments = True
@@ -1261,9 +1282,6 @@ def glossary_push(command_options, args):
             sourcecomments = False
         zanatacmd.poglossary_push(path, url, username, apikey, lang, sourcecomments)
     elif extension == '.csv':
-        if project_config.has_key('locale_map'):
-            locale_map = project_config['locale_map']
-
         if command_options.has_key('comment_cols'):
             comments_header = command_options['comment_cols'][0]['value'].split(',')
         else:
