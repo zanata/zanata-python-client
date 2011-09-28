@@ -103,6 +103,8 @@ class OptionsUtil:
         return locale_map
 
     def apply_user_config(self, url):
+        user_name = ""
+        apikey = ""
         #Try to read user-config file
         user_config = [os.path.join(os.path.expanduser("~") + '/.config', filename) for filename in ['zanata.ini', 'flies.ini']]
 
