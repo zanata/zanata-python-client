@@ -59,8 +59,10 @@ class DocumentService:
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey        
-         
-        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid,iterationid,file_id), args=resources, headers=headers, copytrans=copytrans)
+        
+        ext = "?ext=gettext&ext=comment&copyTrans=%s"%copytrans
+ 
+        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid,iterationid,file_id), args=resources, headers=headers, extension=ext)
          
         if res['status'] == '201' or res['status'] == '200':
             return True
@@ -88,9 +90,11 @@ class DocumentService:
         """
         headers = {}
         headers['X-Auth-User'] = self.projects.username
-        headers['X-Auth-Token'] = self.projects.apikey        
-        
-        res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers, copytrans=copytrans)
+        headers['X-Auth-Token'] = self.projects.apikey
+
+        ext = "?ext=gettext&ext=comment&copyTrans=%s"%copytrans
+  
+        res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers, extension=ext)
         
         if res['status'] == '201':
             return True
@@ -124,7 +128,9 @@ class DocumentService:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to delete')
 
     def retrieve_template(self, projectid, iterationid, file_id):
-        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file_id))
+        ext = "?ext=gettext&ext=comment"
+
+        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file_id), extension=ext)
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey 
@@ -154,8 +160,9 @@ class DocumentService:
         headers = {}
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey 
+        ext = "?ext=gettext&ext=comment"
 
-        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file_id, lang))
+        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file_id, lang), extension=ext)
                 
         if res['status'] == '200' or res['status'] == '304':
             return content
@@ -175,9 +182,11 @@ class DocumentService:
     def commit_translation(self, projectid, iterationid, fileid, localeid, resources, merge):
         headers = {}
         headers['X-Auth-User'] = self.projects.username
-        headers['X-Auth-Token'] = self.projects.apikey        
+        headers['X-Auth-Token'] = self.projects.apikey
+
+        ext = "?ext=gettext&ext=comment&merge=%s"%merge       
         
-        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers, merge=merge)
+        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers, extension=ext)
 
         if res['status'] == '200':
             if content:

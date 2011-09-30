@@ -426,13 +426,13 @@ def process_merge(command_options):
 
     if command_options.has_key('merge'):
         merge = command_options['merge'][0]['value']
-        log.info("merge option set to value %s" % merge)
-
-        if not merge == 'auto' or not merge == 'import':
+        if merge != 'auto' and merge != 'import':
             log.info("merge option %s is not acceptable, change to default value 'auto'" % merge)
             merge = 'auto'
     else:
         merge = 'auto'
+
+    log.info("merge option set to value %s" % merge)
 
     return merge
 
