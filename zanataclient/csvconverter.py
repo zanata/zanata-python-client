@@ -27,6 +27,7 @@ __all__ = (
 import polib
 import hashlib
 import os
+import csv
 
 try:
     import json
@@ -44,17 +45,15 @@ class CSVConverter:
     def read_data(self, csv_file):
         data = []
         try:
-            content = open(csv_file, 'r')
-            headers = content.readline().rstrip()
-            header = headers.split(',')
-            size = len(header)               
-            for line in content:
+            reader = csv.reader(open(csv_file, 'rb'))
+            header = reader.next()
+            size = len(header)
+            for line in reader:
                 items = {}
-                entries = line.split(',', size-1)
-                entry_size = len(entries)                
+                entry_size = len(line)                
                 for x in range(size):  
                     if x < entry_size:  
-                        item = {header[x]: entries[x]}
+                        item = {header[x]: line[x]}
                     else:
                         item = {header[x]: ""}
                     items.update(item)
