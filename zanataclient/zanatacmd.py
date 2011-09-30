@@ -430,6 +430,8 @@ class ZanataCommand:
             self.log.error(e.msg)
         except UnexpectedStatusException, e:
             self.log.error(e.msg)
+        except UnAuthorizedException,e:
+            self.log.error(e.msg)
 
     def csvglossary_push(self, path, url, username, apikey, locale_map, comments_header):
         csvconverter = CSVConverter()
@@ -447,4 +449,6 @@ class ZanataCommand:
         except BadRequestBodyException, e:
             self.log.error(e.msg)
         except UnexpectedStatusException, e:
+            self.log.error(e.msg)
+        except UnAuthorizedException,e:
             self.log.error(e.msg)
