@@ -1234,15 +1234,16 @@ def glossary_push(command_options, args):
     """
     Usage: zanata glossary push [OPTIONS] GLOSSARY_POFILE
 
-    Push glossary file in po format to zanata server
+    Push glossary file in po/csv format to zanata server
 
     Options:
         --url: URL of zanata server
         --username: user name
         --apikey: api key of user
-        --lang: language of glossary file
-        --sourcecommentsastarget: treat extracted comments and references as target comments of term
+        --lang(po format): language of glossary file
+        --sourcecommentsastarget(po format): treat extracted comments and references as target comments of term
                                   or treat as source reference of entry
+        --commentcols(csv format): comments header of csv format glossary file
     """
     locale_map = []
     zanatacmd = ZanataCommand()

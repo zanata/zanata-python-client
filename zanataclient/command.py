@@ -263,7 +263,21 @@ def handle_program(
     """
     usage: %(program)s [PROGRAM_OPTIONS] COMMAND [OPTIONS] ARGS
 
-    Try %(program)s COMMAND --help' for help on a specific command."""
+    Try %(program)s COMMAND --help' for help on a specific command.
+    The following are valid zanata commands:
+    list
+    project info
+    project create
+    version info
+    version create
+    publican push
+    publican pull
+    po push
+    po pull
+    push 
+    pull
+    glossary push  
+    """
     if existing is None:
         existing={}
     # First, are they asking for program help?
