@@ -795,7 +795,7 @@ def po_push(command_options, args):
         --srcdir: the path of the po folder(e.g. ./po)
         --srcfile: the path of the source file
         --transdir: the path of the folder that contains po files(e.g. ./po)
-        --push-trans: push local translations to server
+        --import-po: push local translations to server
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
         --lang: language list
@@ -926,7 +926,7 @@ def publican_push(command_options, args):
         --srcdir: the path of the pot folder (e.g. ./pot)
         --transdir: the path of the folder that contain locale folders
                     (e.g. ./myproject)
-        --push-trans: push local translations to server
+        --import-po: push local translations to server
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
         --lang: language list
