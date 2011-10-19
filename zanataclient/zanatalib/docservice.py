@@ -64,7 +64,7 @@ class DocumentService:
  
         res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid,iterationid,file_id), args=resources, headers=headers, extension=ext)
          
-        if res['status'] == '201' or res['status'] == '200':
+        if res['status'] == '201' or res['status'] == '200' or res['status'] == '301':
             return True
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
@@ -95,8 +95,8 @@ class DocumentService:
         ext = "?ext=gettext&ext=comment&copyTrans=%s"%copytrans
   
         res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers, extension=ext)
-        
-        if res['status'] == '201':
+         
+        if res['status'] == '201' or res['status'] == '301':
             return True
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
@@ -191,6 +191,8 @@ class DocumentService:
         if res['status'] == '200':
             if content:
                 return content+", Try running publican update_po (or msgmerge) to ensure your PO files are in sync with your POT files"
+        elif res['status'] == '301':
+            return "HTTP redirect, please update the server URL to new URL"
         elif res['status'] == '401':
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
