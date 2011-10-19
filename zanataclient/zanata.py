@@ -882,7 +882,7 @@ def po_push(command_options, args):
 
     if command_options.has_key('force'):
         force = True
-    zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force)
+    zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "gettext")
 
     if importpo:
         zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, import_param)
@@ -1005,7 +1005,7 @@ def publican_push(command_options, args):
 
     if command_options.has_key('force'):
         force = True
-    zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force)
+    zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "podir")
 
     if importpo:
         zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, import_param)
@@ -1139,7 +1139,7 @@ def push(command_options, args, project_type = None):
 
     if command_options.has_key('force'):
         force = True
-    zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force)
+    zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, command_type)
 
     if importpo:
         zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, import_param)

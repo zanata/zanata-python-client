@@ -118,7 +118,7 @@ class ZanataCommand:
         except UnexpectedStatusException, e:
             self.log.error(e.msg)
 
-    def del_server_content(self, zanata, tmlfolder, project_id, iteration_id, push_files, force):
+    def del_server_content(self, zanata, tmlfolder, project_id, iteration_id, push_files, force, project_type):
         #Get the file list of this version of project
         try:
             filelist = zanata.documents.get_file_list(project_id, iteration_id)
@@ -140,6 +140,7 @@ class ZanataCommand:
                         self.log.error("Please enter yes(y) or no(n)")
 
             for name in filelist:
+                delete = False
                 if ',' in name: 
                     request = name.replace(',', '\,')
                 elif '/' in name:
@@ -152,15 +153,22 @@ class ZanataCommand:
                 else:
                     path = os.path.join(tmlfolder, name+".pot")
 
-                if push_files:
-                    if path not in push_files: 
-                        self.log.info("Delete the %s"%name)
+                if project_type== "gettext":
+                    if push_files:
+                        if path not in push_files:
+                            delete = True
+                elif project_type=="podir":
+                    if not os.path.exists(path):
+                        delete = True
 
-                        try:
-                            zanata.documents.delete_template(project_id, iteration_id, request)
-                        except Exception, e:
-                            self.log.error(str(e))
-                            sys.exit(1)
+                if delete:
+                    self.log.info("Delete the %s"%name)
+
+                    try:
+                        zanata.documents.delete_template(project_id, iteration_id, request)
+                    except Exception, e:
+                        self.log.error(str(e))
+                        sys.exit(1)
   
     def list_projects(self, zanata):
         """
