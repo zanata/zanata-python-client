@@ -935,8 +935,8 @@ def publican_push(command_options, args):
     importpo = False
     force = False
     dir_option = False
-    command_type = ''
     default_folder = None
+    deletefiles = False
     tmlfolder = ""
     filelist = []
 
@@ -969,23 +969,7 @@ def publican_push(command_options, args):
         default_folder = command_options['dir'][0]['value']
     
     tmlfolder = process_srcdir(command_options, "podir", project_config, default_folder)
-            
-    log.info("POT directory (originals):%s" % tmlfolder)
-        
-    if command_options.has_key('importpo'):
-        log.info("Importing translation")
-        import_param['transdir'] = process_transdir(command_options, project_config, None)
-        log.info("Reading locale folders from %s" % import_param['transdir'])
-        import_param['merge'] = process_merge(command_options)
-        import_param['lang_list'] = get_lang_list(command_options, project_config)
-        if project_config.has_key('locale_map'):
-            import_param['locale_map'] = project_config['locale_map']
-        else:
-            import_param['locale_map'] = None
-        importpo = True
-    else:
-        log.info("Importing source documents only")
-
+    
     if args:
         try:
             full_path = search_file(tmlfolder, args[0])
@@ -1002,14 +986,31 @@ def publican_push(command_options, args):
             log.error("The template folder is empty")
             sys.exit(1)
 
-        if command_options.has_key('force'):
-            force = True
-        zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "podir")
+        deletefiles = True
 
-    if importpo:
+    if command_options.has_key('force'):
+        force = True
+            
+    log.info("POT directory (originals):%s" % tmlfolder)
+        
+    if command_options.has_key('importpo'):
+        log.info("Importing translation")
+        import_param['transdir'] = process_transdir(command_options, project_config, None)
+        log.info("Reading locale folders from %s" % import_param['transdir'])
+        import_param['merge'] = process_merge(command_options)
+        import_param['lang_list'] = get_lang_list(command_options, project_config)
+        if project_config.has_key('locale_map'):
+            import_param['locale_map'] = project_config['locale_map']
+        else:
+            import_param['locale_map'] = None
+        if deletefiles:            
+            zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "podir")
         zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, import_param)
     else:
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans)    
+        log.info("Importing source documents only")
+        if deletefiles:
+            zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "podir")
+        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans)
     
 def push(command_options, args, project_type = None):
     """
@@ -1035,11 +1036,11 @@ def push(command_options, args, project_type = None):
         --no-copytrans: prevent server from copying translations from other versions
         --lang: language list
     """
-    srcfile = False
     copytrans = True
     importpo = False
     force = False
     dir_option = False
+    deletefiles = False
     command_type = ''
     default_folder = ""
     tmlfolder = ""
@@ -1077,23 +1078,42 @@ def push(command_options, args, project_type = None):
         log.error("The project type is unknown")
         sys.exit(1)
       
-    if command_options.has_key('srcfile'):
-        if command_type == 'gettext': 
-            tmlfolder, import_file = process_srcfile(command_options)
-            filelist.append(import_file)
-            srcfile = True
-        else:
-            log.warn("srcfile option is not used for podir type project, ignoredg")
-        
-    if not srcfile:
-        #Disable dir option for generic push command
-        if command_options.has_key('dir'):
-            log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")        
+    if command_options.has_key('srcfile') and command_type == 'gettext': 
+        tmlfolder, import_file = process_srcfile(command_options)
+        filelist.append(import_file)
+    else:
+        log.warn("srcfile option is not used for podir type project, ignored")
+
+    #Disable dir option for generic push command
+    if command_options.has_key('dir'):
+        log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")
+
+    if tmlfolder == "":        
         tmlfolder = process_srcdir(command_options, command_type, project_config, None)
         
     if not os.path.isdir(tmlfolder):
         log.error("Can not find source folder, please specify the source folder with '--srcdir' or using zanata.xml")
         sys.exit(1)
+    
+    if args:
+        try:
+            full_path = search_file(tmlfolder, args[0])
+            filelist.append(full_path)
+        except NoSuchFileException, e:
+            log.error(e.msg)
+            sys.exit(1)
+    else:
+        #get all the pot files from the template folder
+        publicanutil = PublicanUtility()
+        filelist = publicanutil.get_file_list(tmlfolder, ".pot")
+
+        if not filelist:
+            log.error("The template folder is empty")
+            sys.exit(1)
+        deletefiles = True
+
+    if command_options.has_key('force'):
+        force = True
     
     if command_type == 'podir':
         log.info("POT directory (originals):%s" % tmlfolder)
@@ -1120,33 +1140,14 @@ def push(command_options, args, project_type = None):
         else:
             import_param['locale_map'] = None
         import_param['project_type'] = command_type
-    else:
-        log.info("Importing source documents only")
-
-    if args:
-        try:
-            full_path = search_file(tmlfolder, args[0])
-            filelist.append(full_path)
-        except NoSuchFileException, e:
-            log.error(e.msg)
-            sys.exit(1)
-    else:
-        #get all the pot files from the template folder
-        publicanutil = PublicanUtility()
-        filelist = publicanutil.get_file_list(tmlfolder, ".pot")
-
-        if not filelist:
-            log.error("The template folder is empty")
-            sys.exit(1)
-
-        if command_options.has_key('force'):
-            force = True
-        zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, command_type)
-
-    if importpo:
+        if deletefiles:
+            zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, command_type)
         zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, import_param)
     else:
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans)    
+        log.info("Importing source documents only")
+        if deletefiles:
+            zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, command_type)
+        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans) 
 
 def pull(command_options, args, project_type = None):
     """
