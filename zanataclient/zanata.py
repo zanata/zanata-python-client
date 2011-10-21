@@ -880,9 +880,9 @@ def po_push(command_options, args):
                 log.error("The template folder is empty")
                 sys.exit(1)
 
-    if command_options.has_key('force'):
-        force = True
-    zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "gettext")
+        if command_options.has_key('force'):
+            force = True
+        zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "gettext")
 
     if importpo:
         zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, import_param)
@@ -994,18 +994,17 @@ def publican_push(command_options, args):
             log.error(e.msg)
             sys.exit(1)
     else:
-        if not command_options.has_key('srcfile'):
-            #get all the pot files from the template folder
-            publicanutil = PublicanUtility()
-            filelist = publicanutil.get_file_list(tmlfolder, ".pot")
+        #get all the pot files from the template folder
+        publicanutil = PublicanUtility()
+        filelist = publicanutil.get_file_list(tmlfolder, ".pot")
 
-            if not filelist:
-                log.error("The template folder is empty")
-                sys.exit(1)
+        if not filelist:
+            log.error("The template folder is empty")
+            sys.exit(1)
 
-    if command_options.has_key('force'):
-        force = True
-    zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "podir")
+        if command_options.has_key('force'):
+            force = True
+        zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "podir")
 
     if importpo:
         zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, import_param)
@@ -1028,6 +1027,7 @@ def push(command_options, args, project_type = None):
         --project-id: id of the project
         --project-version: id of the version
         --srcdir: the path of the pot folder (e.g. ./pot)
+        --srcfile: the path of the pot file(gettext project only)
         --transdir: the path of the folder that contain locale folders
                     (e.g. ./myproject)
         --push-trans: push local translations to server
@@ -1035,6 +1035,7 @@ def push(command_options, args, project_type = None):
         --no-copytrans: prevent server from copying translations from other versions
         --lang: language list
     """
+    srcfile = False
     copytrans = True
     importpo = False
     force = False
@@ -1075,18 +1076,20 @@ def push(command_options, args, project_type = None):
     else:
         log.error("The project type is unknown")
         sys.exit(1)
+      
+    if command_options.has_key('srcfile'):
+        if command_type == 'gettext': 
+            tmlfolder, import_file = process_srcfile(command_options)
+            filelist.append(import_file)
+            srcfile = True
+        else:
+            log.warn("srcfile option is not used for podir type project, ignoredg")
         
-    if command_type == 'gettext' and command_options.has_key('srcfile'):
-        tmlfolder, import_file = process_srcfile(command_options)
-        filelist.append(import_file)
-    else:
+    if not srcfile:
         #Disable dir option for generic push command
         if command_options.has_key('dir'):
             log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")        
-        else:
-            default_folder = None
-        
-    tmlfolder = process_srcdir(command_options, command_type, project_config, default_folder)
+        tmlfolder = process_srcdir(command_options, command_type, project_config, None)
         
     if not os.path.isdir(tmlfolder):
         log.error("Can not find source folder, please specify the source folder with '--srcdir' or using zanata.xml")
@@ -1128,18 +1131,17 @@ def push(command_options, args, project_type = None):
             log.error(e.msg)
             sys.exit(1)
     else:
-        if not command_options.has_key('srcfile'):
-            #get all the pot files from the template folder
-            publicanutil = PublicanUtility()
-            filelist = publicanutil.get_file_list(tmlfolder, ".pot")
+        #get all the pot files from the template folder
+        publicanutil = PublicanUtility()
+        filelist = publicanutil.get_file_list(tmlfolder, ".pot")
 
-            if not filelist:
-                log.error("The template folder is empty")
-                sys.exit(1)
+        if not filelist:
+            log.error("The template folder is empty")
+            sys.exit(1)
 
-    if command_options.has_key('force'):
-        force = True
-    zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, command_type)
+        if command_options.has_key('force'):
+            force = True
+        zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, command_type)
 
     if importpo:
         zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, import_param)
