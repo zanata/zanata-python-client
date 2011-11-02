@@ -162,6 +162,10 @@ class PublicanUtility:
         return final_file_list
 
     def hash_match(self, message, resid):
+        """
+        Caculate the hash of msgid and msgctxt, then compare result with resId from server,
+        return true if equal
+        """
         if message.msgctxt:
             hashbase = message.msgctxt + u"\u0000" + message.msgid
         else:
