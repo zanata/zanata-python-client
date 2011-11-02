@@ -211,6 +211,12 @@ option_sets = {
             long=['--no-copytrans'],
         ),
     ],
+    'localsource': [
+        dict(
+            type='command',
+            long=['--localsource'],
+        ),
+    ],
     'project_type': [
         dict(
             type='command',
@@ -771,6 +777,8 @@ def po_pull(command_options, args):
         --apikey: api key of user
         --project-id: id of the project
         --project-version: id of the version
+        --srcdir: the path of the pot folder (e.g. ./pot)
+        --localsource: read source file from local
         --dstdir: output folder (same as --transdir option)
         --dir: output folder for po files (same as --transdir)
         --transdir: output folder for po files
@@ -900,6 +908,8 @@ def publican_pull(command_options, args):
         --apikey: api key of user
         --project-id: id of the project
         --project-version: id of the version
+        --srcdir: the path of the pot folder (e.g. ./pot)
+        --localsource: read source file from local
         --dstdir: output folder (same as --transdir option)
         --dir: output folder (same as --transdir option)
         --transdir: translations will be written to this folder (one sub-folder per locale)
@@ -1161,7 +1171,9 @@ def pull(command_options, args, project_type = None):
         --project-type: project type (gettext or podir)
         --project-id: id of the project
         --project-version: id of the version
+        --srcdir: the path of the pot folder (e.g. ./pot)
         --transdir: translations will be written to this folder
+        --localsource: read source file from local
         --lang: language list
     """
     dir_option = False
@@ -1227,11 +1239,20 @@ def pull(command_options, args, project_type = None):
         if command_options.has_key('dstdir'):
             log.warn("dstdir option is changed to transdir option for generic pull command")
             output_folder = command_options['dstdir'][0]['value']
-
+    
     outpath = create_outpath(command_options, output_folder)
-
     zanatacmd = ZanataCommand()
-    zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type)
+
+    if command_options.has_key('localsource'):
+        tmlfolder = process_srcdir(command_options, command_type, project_config, None)
+        
+        if not os.path.isdir(tmlfolder):
+            log.error("Can not find source folder, please specify the source folder with '--srcdir' or using zanata.xml")
+            sys.exit(1)
+        
+        zanatacmd.pull_command_with_local(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, tmlfolder, command_type)
+    else:    
+        zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type)
 
 def glossary_push(command_options, args):
     """

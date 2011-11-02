@@ -49,9 +49,11 @@ class PublicanUtility:
         for entry in pofile:
             reflist = []
             if entry.msgctxt:
-                self.log.warn("encountered msgctxt; not currently supported")
+                hashbase = entry.msgctxt + u"\u0000" + entry.msgid
+            else:
+                hashbase = entry.msgid
             m = hashlib.md5()
-            m.update(entry.msgid.encode('utf-8'))
+            m.update(hashbase.encode('utf-8'))
             textflowId = m.hexdigest()
             """
             "extensions":[{"object-type":"pot-entry-header","context":"context",
@@ -86,8 +88,12 @@ class PublicanUtility:
         for entry in pofile:
             if entry in obs_list:
                 continue
+            if entry.msgctxt:
+                hashbase = entry.msgctxt + u"\u0000" + entry.msgid
+            else:
+                hashbase = entry.msgid
             m = hashlib.md5()
-            m.update(entry.msgid.encode('utf-8'))
+            m.update(hashbase.encode('utf-8'))
             textflowId = m.hexdigest()
             comment = entry.comment
             
@@ -133,8 +139,8 @@ class PublicanUtility:
         """
         try:
             po = polib.pofile(path)
-        except Exception:
-            self.log.error("Can not processing the po file")
+        except Exception, e:
+            self.log.error("Can not processing the po file: %s"%str(e))
             sys.exit()
 
         return po
@@ -240,6 +246,61 @@ class PublicanUtility:
         
         return json.dumps(glossary)
 
+    def save_to_pofile_with_pot(self, path, translations, srcpath):
+        po = polib.pofile(srcpath)
+
+        #If the translation is exist, read the content of the po file
+        if translations:
+            content = json.loads(translations)
+            """            
+            "extensions":[{"object-type":"po-target-header", "comment":"comment_value", "entries":[{"key":"ht","value":"vt1"}]}]
+            """
+            if content.get('extensions'):
+                ext = content.get('extensions')[0]
+                header_comment = ext.get('comment')
+                if header_comment:
+                    po.header = header_comment
+                for item in ext.get('entries'):
+                    po.metadata[item['key']]=item['value']  
+            
+            targets = content.get('textFlowTargets')
+                            
+            """
+            "extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
+            """ 
+            # copy any other stuff you need to transfer
+            for entry in po:
+                for translation in targets:
+                    if translation.get('extensions'):
+                        extensions=translation.get('extensions')[0]
+                        #if extensions:
+                        #    ext_type = extensions.get('object-type')
+                        #    comment = extensions.get('comment')
+                        #    entries = extensions.get('value')
+                    if entry.msgctxt:
+                        hashbase = entry.msgctxt + u"\u0000" + entry.msgid
+                    else:
+                        hashbase = entry.msgid
+                    m = hashlib.md5()
+                    m.update(hashbase.encode('utf-8'))
+                    res_id = m.hexdigest()
+
+                    if res_id == translation.get('resId'):
+                        entry.msgstr = translation.get('content')
+                        if translation.get('state') == 'NeedReview':
+                            if entry.flags == [u'']:
+                                entry.flags = ['fuzzy']
+                            else:
+                                entry.flags.insert(0, 'fuzzy')
+                        else:
+                            if entry.flags == [u'']:
+                                entry.flags = None
+
+        # finally save resulting po to outpath
+        po.save(path)
+        # pylint: disable-msg=E1103
+        self.log.info("Writing po file to %s"%(path))
+
     def save_to_pofile(self, path, translations, pot):
         """
         Save PO file to path, based on json objects of pot and translations 
@@ -330,8 +391,7 @@ class PublicanUtility:
                             if message.flags == [u'']:
                                 message.flags = None
 
-        # finally save resulting po to outpath as lang/myfile.po
-       
+        # finally save resulting po to outpath
         po.save()
         # pylint: disable-msg=E1103
         self.log.info("Writing po file to %s"%(path))

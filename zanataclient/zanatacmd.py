@@ -420,6 +420,72 @@ class ZanataCommand:
                     self.log.error(e.msg)
      
                 publicanutil.save_to_pofile(pofile, result, pot)
+
+    def pull_command_with_local(self, zanata, locale_map, project_id, iteration_id, filelist, lang_list, output, tmlfolder, project_type):
+        publicanutil = PublicanUtility()
+        #if file no specified, retrieve all the files of project
+        for file_item in filelist:
+            path = ""
+            result = ""
+            folder = ""
+
+            if ".pot" in file_item:
+                path = os.path.join(tmlfolder, file_item)
+            else:
+                path = os.path.join(tmlfolder, file_item+".pot")
+            
+            if '/' in file_item: 
+                name = file_item.split('/')[-1]
+                folder = file_item.split('/')[0]
+                request_name = file_item.replace('/', ',')
+            else:
+                name = file_item
+                request_name = file_item     
+
+            self.log.info("Read the content of %s from local folder %s: "%(name, tmlfolder))
+
+            for item in lang_list:
+                if not locale_map:
+                    lang = item
+                else:
+                    if item in locale_map:
+                        lang = locale_map[item]
+                    else:
+                        lang = item
+                    
+                if project_type == "podir":
+                    outpath = os.path.join(output, item) 
+                    if not os.path.isdir(outpath):
+                        os.mkdir(outpath)  
+                    save_name = name
+                elif project_type == "gettext":
+                    outpath = output
+                    save_name = item.replace('-','_')
+                                        
+                if folder:
+                    subdirectory = os.path.join(outpath, folder)
+                    if not os.path.isdir(subdirectory):
+                        os.makedirs(subdirectory)
+                    pofile = os.path.join(subdirectory, save_name+'.po') 
+                else:
+                    pofile = os.path.join(outpath, save_name+'.po')
+
+                self.log.info("Retrieving %s translation from server:"%item)
+             
+                try:
+                    result = zanata.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
+                except UnAuthorizedException, e:
+                    self.log.error(e.msg)                        
+                    break
+                except UnAvaliableResourceException, e:
+                    self.log.info("There is no %s translation for %s"%(item, name))
+                except BadRequestBodyException, e:
+                    self.log.error(e.msg)
+                    continue 
+                except UnexpectedStatusException, e:
+                    self.log.error(e.msg)
+     
+                publicanutil.save_to_pofile_with_pot(pofile, result, path)
     
     def poglossary_push(self, path, url, username, apikey, lang, sourcecomments):
         publicanutil = PublicanUtility()
