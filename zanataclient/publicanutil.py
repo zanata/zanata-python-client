@@ -47,11 +47,15 @@ class PublicanUtility:
         """
         textflows = []
         for entry in pofile:
+            context = ""
             reflist = []
             if entry.msgctxt:
-                self.log.warn("encountered msgctxt; not currently supported")
+                hashbase = entry.msgctxt + u"\u0000" + entry.msgid
+                context = entry.msgctxt
+            else:
+                hashbase = entry.msgid
             m = hashlib.md5()
-            m.update(entry.msgid.encode('utf-8'))
+            m.update(hashbase.encode('utf-8'))
             textflowId = m.hexdigest()
             """
             "extensions":[{"object-type":"pot-entry-header","context":"context",
@@ -68,8 +72,7 @@ class PublicanUtility:
             #extensions_single_comment = [{'object-type':'comment','value':'test','space':'preserve'}]
             #extensions_pot_entry_header = [{"object-type":"pot-entry-header","context":"context","references":["fff"],"extractedComment":"extractedComment","flags":["java-format"]}]
 
-            extensions=[{'object-type':'comment','value':extracted_comment,'space':'preserve'},
-            {"object-type":"pot-entry-header","context":"","references":reflist,"extractedComment":'',"flags":flags}]
+            extensions=[{'object-type':'comment','value':extracted_comment,'space':'preserve'}, {"object-type":"pot-entry-header", "context": context, "references":reflist,"extractedComment":'',"flags":flags}]
 
             textflow = {'id': textflowId, 'lang':'en-US', 'content':entry.msgid, 'extensions':extensions, 'revision':1}
             textflows.append(textflow)
@@ -86,8 +89,13 @@ class PublicanUtility:
         for entry in pofile:
             if entry in obs_list:
                 continue
+
+            if entry.msgctxt:
+                hashbase = entry.msgctxt + u"\u0000" + entry.msgid
+            else:
+                hashbase = entry.msgid
             m = hashlib.md5()
-            m.update(entry.msgid.encode('utf-8'))
+            m.update(hashbase.encode('utf-8'))
             textflowId = m.hexdigest()
             comment = entry.comment
             
@@ -153,10 +161,15 @@ class PublicanUtility:
 
         return final_file_list
 
-    def hash_match(self, message, msgid):
+    def hash_match(self, message, resid):
+        if message.msgctxt:
+            hashbase = message.msgctxt + u"\u0000" + message.msgid
+        else:
+            hashbase = message.msgid
         m = hashlib.md5()
-        m.update(message.msgid.encode('utf-8'))
-        if m.hexdigest() == msgid:
+        m.update(hashbase.encode('utf-8'))
+
+        if m.hexdigest() == resid:
             return True
         else:
             return False 
@@ -283,6 +296,9 @@ class PublicanUtility:
                     
                         if entry.get('flags'):
                             poentry.flags = entry.get('flags')
+
+                        if entry.get('context'):
+                            poentry.msgctxt = entry.get('context')
                                             
                     if entry.get('object-type') == 'comment':
                         #SimpleComment
@@ -294,9 +310,9 @@ class PublicanUtility:
         #If the translation is exist, read the content of the po file
         if translations:
             content = json.loads(translations)
-            """            
-            "extensions":[{"object-type":"po-target-header", "comment":"comment_value", "entries":[{"key":"ht","value":"vt1"}]}]
-            """
+            #"extensions":[{"object-type":"po-target-header", "comment":"comment_value", "entries":
+            #[{"key":"ht","value":"vt1"}]}]
+            
             if content.get('extensions'):
                 ext = content.get('extensions')[0]
                 header_comment = ext.get('comment')
@@ -306,10 +322,9 @@ class PublicanUtility:
                     po.metadata[item['key']]=item['value']  
             
             targets = content.get('textFlowTargets')
-                            
-            """
-            "extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
-            """ 
+
+            #"extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
+             
             # copy any other stuff you need to transfer
             for message in po:
                 for translation in targets:
@@ -331,7 +346,6 @@ class PublicanUtility:
                                 message.flags = None
 
         # finally save resulting po to outpath as lang/myfile.po
-       
         po.save()
         # pylint: disable-msg=E1103
         self.log.info("Writing po file to %s"%(path))
