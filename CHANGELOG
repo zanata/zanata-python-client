@@ -1,0 +1,16 @@
+=========
+Changelog
+=========
+
+Version 1.3.2 (2011/11/03)
+--------------------------
+ - csv format glossary file support
+ - support msgctxt when pushing po file to server and pull it back 
+ - Fixed rhbz#696474: python client should only delete files from server which no longer exist on client
+ - Fixed rhbz#690687: python client should log a message for 301 redirects
+ - Fixed rhbz#738510: --help does not list commands
+ - Fixed rhbz#740159: python client: pushing with --merge=import does not overwrite the translation on server
+ - Fixed rhbz#738907: can not disable copytrans option when pushing source to zanata server with --no-copytrans option
+ - Fixed rhbz#738514: zanata push fails with JSON error
+ - Fixed rhbz#750675: zanata client pull command should be able to reconstruct msgctxt and msgid
+
