@@ -36,9 +36,9 @@ class ZanataTest(unittest.TestCase):
         self.assertEqual(version_number, 1.3)
 
     def test_seachfile(self):
-        path = "./testfiles/po"
+        path = "./test/testfiles/po"
         result = zanata.search_file(path, "test.po")
-        self.assertEqual(result, "./testfiles/po/test.po")
+        self.assertEqual(result, "./test/testfiles/po/test.po")
 
     def test_processsrcfile(self):
         command_options = {'srcfile': [{'name': '--srcfile', 'value': 'test.po', 'internal': 'src_file', 'long': ['--srcfile'], 'type': 'command', 'metavar': 'SRCFILE'}]}

@@ -192,7 +192,7 @@ class ZanataCommand:
         Retrieve the information of a project
         """
         try:
-            p = zanata.projects.get(project_id)
+            p = zanata.projects.get(project_id)            
             print ("Project ID:          %s")%p.id
             print ("Project Name:        %s")%p.name 
             print ("Project Type:        %s")%p.type

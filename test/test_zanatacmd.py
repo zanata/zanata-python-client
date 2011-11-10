@@ -25,7 +25,7 @@ all__ = (
 
 import unittest
 import sys, os
-from minimock import Mock
+from minimock import mock, Mock
 sys.path.insert(0, os.path.abspath(__file__+"/../.."))
 
 from zanataclient.zanatacmd import ZanataCommand
@@ -44,13 +44,17 @@ class ZanataCmdTest(unittest.TestCase):
 
         url = "http://localhost"
         zanata = ZanataResource(url)
-        zanata.projects = Mock(url)
-        zanata.projects.list.mock_returns = projects
+        mock('zanata.projects.list', returns = projects)
         result = self.zanatacmd.list_projects(zanata)
         self.assertEqual(result[0].id, 'test-project')
 
     def test_project_info(self):
-        pass
+        project_data = {'id':"test-project", 'name':"Test Project", 'type':"IterationProject", 'links':[], 'description':''}        
+        
+        url = "http://localhost"
+        zanata = ZanataResource(url)
+        mock('zanata.projects.get', returns = Project(project_data))
+        result = self.zanatacmd.project_info(zanata, 'test-project')
 
     def test_version_info(self):
         pass
