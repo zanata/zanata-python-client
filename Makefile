@@ -26,7 +26,7 @@ lint-report:
 	pylint --reports=n zanata zanataclient
 
 test:
-	(cd test; python test/test_all.py)
+	python test/test_all.py
 
 all: zanataclient/VERSION-FILE
 
