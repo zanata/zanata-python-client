@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.abspath(__file__+"/../.."))
 from zanataclient.zanatacmd import ZanataCommand
 from zanataclient.zanatalib import ZanataResource
 from zanataclient.zanatalib.project import Project
-
+from zanataclient.zanatalib.project import Iteration
 
 class ZanataCmdTest(unittest.TestCase):
     def setUp(self):
@@ -57,7 +57,16 @@ class ZanataCmdTest(unittest.TestCase):
         result = self.zanatacmd.project_info(zanata, 'test-project')
 
     def test_version_info(self):
-        pass
+        project_data = {'id':"test-project", 'name':"Test Project", 'type':"IterationProject", 'links':[], 'description':''} 
+        version_data = {'id':"1.0", 'name':"Version 1.0", 'description':''}        
+        
+        url = "http://localhost"
+        zanata = ZanataResource(url)
+        project = Project(project_data)
+        mock('project.set_iteration', returns = Mock('iteration_service'))
+        mock('project.get_iteration', returns = Iteration(version_data))
+        mock('zanata.projects.get', returns = project)
+        self.zanatacmd.version_info(zanata, 'test-project', '1.0')
 
     def test_create_project(self):
         pass
