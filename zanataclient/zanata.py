@@ -1077,16 +1077,25 @@ def push(command_options, args, project_type = None):
     else:
         log.error("The project type is unknown")
         sys.exit(1)
-      
-    if command_options.has_key('srcfile') and command_type == 'gettext': 
-        tmlfolder, import_file = process_srcfile(command_options)
-        filelist.append(import_file)
-    else:
-        log.warn("srcfile option is not used for podir type project, ignored")
+    
+    if command_type != 'podir' and command_type != 'gettext':
+        log.error("The project type is not correct, please use 'podir' and 'gettext' as project type")
+        sys.exit(1)
+
+    if command_options.has_key('srcfile'):
+        if command_type == 'gettext': 
+            tmlfolder, import_file = process_srcfile(command_options)
+            filelist.append(import_file)
+        else:
+            log.warn("srcfile option is not used for podir type project, ignored")
 
     #Disable dir option for generic push command
     if command_options.has_key('dir'):
         log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")
+    
+    if command_type != 'podir' and command_type != 'gettext':
+        log.error("The project type is unknown")
+        sys.exit(1)
 
     if tmlfolder == "":        
         tmlfolder = process_srcdir(command_options, command_type, project_config, None)

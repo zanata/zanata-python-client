@@ -106,6 +106,8 @@ class DocumentService:
             raise SameNameDocumentException('Error 409', content)
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
+        elif res['status'] == '403':
+            raise UnexpectedStatusException('Error 403', content)
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push')
 
