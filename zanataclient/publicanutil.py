@@ -178,15 +178,15 @@ class PublicanUtility:
         else:
             return False 
 
-    def strip_path(self, full_path, root_path):
+    def strip_path(self, full_path, root_path, suffix):
         if root_path[-1] != "/":
             root_path = root_path+'/'
 
         filename = full_path.split(root_path)[1]
 
-        if '.' in filename:
-            # Strip the file name
-            filename = filename.split('.')[0]
+        if suffix in filename:
+            # remove suffix from file name
+            filename = filename.split(suffix)[0]
 
         return filename
 
@@ -195,7 +195,7 @@ class PublicanUtility:
         Parse the pot file, create the request body
         @param filepath: the path of the pot file
         """
-        filename = self.strip_path(filepath, root_path)
+        filename = self.strip_path(filepath, root_path, '.pot')
         pofile = self.create_pofile(filepath)
         textflows = self.create_txtflow(pofile)
         extensions = self.create_extensions(pofile, "po-header")
