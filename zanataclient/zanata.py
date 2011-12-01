@@ -848,8 +848,15 @@ def po_push(command_options, args):
         sys.exit(1)
     
     log.info("PO directory (originals):%s" % tmlfolder)
-        
+
     if command_options.has_key('importpo'):
+        importpo = True
+
+    if command_options.has_key('pushtrans'):
+        log.info("please use --import-po for old publican push command")
+        importpo = True
+
+    if importpo:
         log.info("Importing translation")
         import_param['transdir'] = process_transdir(command_options, project_config, tmlfolder)
         log.info("Reading locale folders from %s" % import_param['transdir'])
@@ -992,8 +999,15 @@ def publican_push(command_options, args):
         force = True
             
     log.info("POT directory (originals):%s" % tmlfolder)
-        
+
     if command_options.has_key('importpo'):
+        importpo = True
+
+    if command_options.has_key('pushtrans'):
+        log.info("please use --import-po for old publican push command")
+        importpo = True
+        
+    if importpo:
         log.info("Importing translation")
         import_param['transdir'] = process_transdir(command_options, project_config, None)
         log.info("Reading locale folders from %s" % import_param['transdir'])
