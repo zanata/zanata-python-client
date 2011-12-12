@@ -54,6 +54,7 @@ class PublicanUtility:
                 context = entry.msgctxt
             else:
                 hashbase = entry.msgid
+            # pylint: disable=E1101
             m = hashlib.md5()
             m.update(hashbase.encode('utf-8'))
             textflowId = m.hexdigest()
@@ -94,6 +95,7 @@ class PublicanUtility:
                 hashbase = entry.msgctxt + u"\u0000" + entry.msgid
             else:
                 hashbase = entry.msgid
+            # pylint: disable=E1101
             m = hashlib.md5()
             m.update(hashbase.encode('utf-8'))
             textflowId = m.hexdigest()
@@ -170,6 +172,7 @@ class PublicanUtility:
             hashbase = message.msgctxt + u"\u0000" + message.msgid
         else:
             hashbase = message.msgid
+        # pylint: disable=E1101
         m = hashlib.md5()
         m.update(hashbase.encode('utf-8'))
 
@@ -351,6 +354,6 @@ class PublicanUtility:
 
         # finally save resulting po to outpath as lang/myfile.po
         po.save()
-        # pylint: disable-msg=E1103
+        # pylint: disable=E1103
         self.log.info("Writing po file to %s"%(path))
 
