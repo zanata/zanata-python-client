@@ -35,7 +35,7 @@ class PublicanUtilityTest(unittest.TestCase):
         self.publican = PublicanUtility()
 
     def test_strippath(self):
-        filename = self.publican.strip_path("./testfiles/pot/test.pot", "./testfiles/pot")
+        filename = self.publican.strip_path("./testfiles/pot/test.pot", "./testfiles/pot", '.pot')
         self.assertEqual(filename, "test")
         
     def test_potfiletojson(self):
