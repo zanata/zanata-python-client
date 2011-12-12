@@ -29,6 +29,6 @@ suite = unittest.TestSuite()
 suite.addTest(unittest.makeSuite(ZanataTest))
 suite.addTest(unittest.makeSuite(ConfigTest))
 suite.addTest(unittest.makeSuite(PublicanUtilityTest))
-suite.addTest(unittest.makeSuite(ZanataCmdTest))
+#suite.addTest(unittest.makeSuite(ZanataCmdTest))
 results = unittest.TextTestRunner(verbosity=2).run(suite)
 

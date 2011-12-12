@@ -270,7 +270,7 @@ class PublicanUtility:
         po = polib.POFile(fpath=path)
         
         potcontent = json.loads(pot)
-        # pylint: disable-msg=E1103
+        # pylint: disable=E1103
         textflows = potcontent.get('textFlows')
                 
         if potcontent.get('extensions'):
