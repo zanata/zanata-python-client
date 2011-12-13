@@ -27,6 +27,7 @@ __all__ = (
 import polib
 import hashlib
 import os
+import re
 
 try:
     import json
@@ -122,6 +123,20 @@ class PublicanUtility:
         
         return textflowtargets
 
+    def validate_content_type(self, content_type, object_type):
+        PATTERN = r'.+? charset=([\w_\-:\.]+)'
+        rxt = re.compile(unicode(PATTERN))
+
+        match = rxt.search(content_type)
+        if match:
+            enc = match.group(1).strip()
+            if enc != "UTF-8" and enc != "utf-8":
+                if enc == 'CHARSET':
+                    if object_type == 'po-target-header':
+                        self.log.warn("Please change charset of header entry to UTF-8/utf-8")
+                else:
+                    self.log.warn("Please change charset of header entry to UTF-8/utf-8")
+
     def create_extensions(self, pofile, object_type):
         """
         "extensions":[{"object-type":"po-header","comment":"comment_value", "entries":[{"key":"h1","value":"v1"}]}]
@@ -132,7 +147,10 @@ class PublicanUtility:
         for item in metadatas:
             entry = {"key":item[0], "value":item[1]}
             entries.append(entry)
-       
+
+        if pofile.metadata.has_key('Content-Type'):
+            self.validate_content_type(pofile.metadata['Content-Type'], object_type)
+
         extensions = [{"object-type":object_type,"comment":pofile.header, "entries":entries}]
         return extensions
 
