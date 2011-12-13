@@ -130,7 +130,7 @@ class PublicanUtility:
         match = rxt.search(content_type)
         if match:
             enc = match.group(1).strip()
-            if enc != "UTF-8" and enc != "utf-8":
+            if enc not in ["UTF-8", "utf-8", "utf8", "ascii", "UTF8", "ASCII"]:
                 if enc == 'CHARSET':
                     if object_type == 'po-target-header':
                         self.log.warn("Please change charset of header entry to UTF-8/utf-8")
