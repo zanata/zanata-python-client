@@ -364,7 +364,19 @@ class ZanataCommand:
                 name = file_item
                 request_name = file_item
 
-            self.log.info("\nFetching the content of %s from Zanata server: "%name)                    
+            self.log.info("\nFetching the content of %s from Zanata server: "%name)
+
+            try:
+                pot = zanata.documents.retrieve_template(project_id, iteration_id, request_name)                    
+            except UnAuthorizedException, e:
+                self.log.error(e.msg)
+                break
+            except UnAvaliableResourceException, e:
+                self.log.error("Can't find pot file for %s on server"%name)
+                break
+            except UnexpectedStatusException, e:
+                self.log.error(e.msg)
+                break                    
                     
             for item in lang_list:
                 if not locale_map:
@@ -393,21 +405,10 @@ class ZanataCommand:
                     pofile = os.path.join(outpath, save_name+'.po')
 
                 self.log.info("Retrieving %s translation from server:"%item)
-
-                try:
-                    pot = zanata.documents.retrieve_template(project_id, iteration_id, request_name)                    
-                except UnAuthorizedException, e:
-                    self.log.error(e.msg)
-                    break
-                except UnAvaliableResourceException, e:
-                    self.log.error("Can't find pot file for %s on server"%name)
-                    break
-                except UnexpectedStatusException, e:
-                    self.log.error(e.msg)
-                    break
                     
                 try:
                     result = zanata.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
+                    publicanutil.save_to_pofile(pofile, result, pot)
                 except UnAuthorizedException, e:
                     self.log.error(e.msg)                        
                     break
@@ -418,8 +419,7 @@ class ZanataCommand:
                     continue 
                 except UnexpectedStatusException, e:
                     self.log.error(e.msg)
-     
-                publicanutil.save_to_pofile(pofile, result, pot)
+
     
     def poglossary_push(self, path, url, username, apikey, lang, sourcecomments):
         publicanutil = PublicanUtility()
