@@ -298,7 +298,9 @@ class PublicanUtility:
             po.header = extensions.get('comment')     
             for item in extensions.get('entries'):
                 po.metadata[item['key']]=item['value']
-
+            #specify Content-Type charset to UTF-8
+            po.metadata['Content-Type'] = "text/plain; charset=UTF-8"
+        
         for textflow in textflows:
             if textflow.get('extensions'):
                 poentry = polib.POEntry(occurrences=None)
