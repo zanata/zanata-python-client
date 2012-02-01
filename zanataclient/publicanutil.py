@@ -133,9 +133,11 @@ class PublicanUtility:
             if enc not in ["UTF-8", "utf-8", "utf8", "ascii", "UTF8", "ASCII"]:
                 if enc == 'CHARSET':
                     if object_type == 'po-target-header':
-                        self.log.warn("Please change charset of header entry to UTF-8/utf-8")
+                        self.log.error("Invalid encoding CHARSET; please correct the Content-Type charset (UTF-8 recommended)")
+                        sys.exit(1)
                 else:
-                    self.log.warn("Please change charset of header entry to UTF-8/utf-8")
+                    self.log.error("Unsupported encoding; please change the Content-Type charset (UTF-8 recommended)")
+                    sys.exit(1)
 
     def create_extensions(self, pofile, object_type):
         """
@@ -162,8 +164,8 @@ class PublicanUtility:
         try:
             po = polib.pofile(path)
         except Exception:
-            self.log.error("Can not processing the po file")
-            sys.exit()
+            self.log.error("Cannot process the po file")
+            sys.exit(1)
 
         return po
 
