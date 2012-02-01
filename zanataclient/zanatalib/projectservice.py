@@ -72,7 +72,11 @@ class ProjectService:
         """     
         res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s'%projectid)
         if res['status'] == '200' or res['status'] == '304':
-            project = Project(json.loads(content))
+            server_return = json.loads(content)
+            if server_return.has_key('status'):
+                if server_return['status'] == "Retired":
+                    print "Warning: The project %s is retired!"%projectid
+            project = Project(server_return)
             project.set_iteration(self.iterations)
             return project
         elif res['status'] == '404':
@@ -128,11 +132,14 @@ class IterationService:
         @return: Iteration object
         @raise NoSuchProjectException:
         """
-        
         res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
-                
+        
         if res['status'] == '200' or res['status'] == '304':
-            return Iteration(json.loads(content))
+            server_return = json.loads(content)
+            if server_return.has_key('status'):
+                if server_return['status'] == "Retired":
+                    print "Warning: The version %s is retired!"%iterationid
+            return Iteration(server_return)
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', content)
   
