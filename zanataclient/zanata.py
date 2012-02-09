@@ -238,6 +238,12 @@ option_sets = {
             long=['--sourcecommentsastarget'],
         ),
     ],
+    'noskeletons' : [
+        dict(
+            type='command',
+            long=['--noskeletons'],
+        ),
+    ]
 }
 
 subcmds = {
@@ -775,6 +781,7 @@ def po_pull(command_options, args):
         --dir: output folder for po files (same as --transdir)
         --transdir: output folder for po files
         --lang: language list'
+        --noskeleton: omit po files when translations not found
     """
     pull(command_options, args, "gettext")
 
@@ -911,6 +918,7 @@ def publican_pull(command_options, args):
         --dir: output folder (same as --transdir option)
         --transdir: translations will be written to this folder (one sub-folder per locale)
         --lang: language list
+        --noskeleton: omit po files when translations not found
     """
     pull(command_options, args, "podir")
 
@@ -1188,6 +1196,7 @@ def pull(command_options, args, project_type = None):
         --lang: language list
     """
     dir_option = False
+    create_skeletons = True
     filelist = []
     zanatacmd = ZanataCommand()
 
@@ -1250,11 +1259,15 @@ def pull(command_options, args, project_type = None):
         if command_options.has_key('dstdir'):
             log.warn("dstdir option is changed to transdir option for generic pull command")
             output_folder = command_options['dstdir'][0]['value']
+    
+    if command_options.has_key('noskeletons'):
+        create_skeletons = False
 
     outpath = create_outpath(command_options, output_folder)
 
     zanatacmd = ZanataCommand()
-    zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type)
+    zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type,
+    create_skeletons)
 
 def glossary_push(command_options, args):
     """

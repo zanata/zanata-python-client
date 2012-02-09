@@ -280,7 +280,7 @@ class PublicanUtility:
         
         return json.dumps(glossary)
 
-    def save_to_pofile(self, path, translations, pot):
+    def save_to_pofile(self, path, translations, pot, create_skeletons, locale, doc_name):
         """
         Save PO file to path, based on json objects of pot and translations 
         @param translations: the json object of the content retrieved from server
@@ -304,7 +304,6 @@ class PublicanUtility:
                 re.sub(pattern, "charset=UTF-8", po.metadata['Content-Type'])
             else:
                 po.metadata['Content-Type']="text/plain; charset=UTF-8"
-
 
         for textflow in textflows:
             if textflow.get('extensions'):
@@ -356,6 +355,10 @@ class PublicanUtility:
                     po.metadata[item['key']]=item['value']  
             
             targets = content.get('textFlowTargets')
+            if not create_skeletons:
+                if not targets:
+                    self.log.warn("No translations found in %s for document %s"%(locale, doc_name))
+                    return
 
             #"extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
              
@@ -383,4 +386,3 @@ class PublicanUtility:
         po.save()
         # pylint: disable=E1103
         self.log.info("Writing po file to %s"%(path))
-
