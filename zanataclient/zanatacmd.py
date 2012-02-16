@@ -271,7 +271,7 @@ class ZanataCommand:
             
             if '/' in potfile:
                 request_name = potfile.replace('/', ',')
-                sub_dir = potfile.split('/')[0]
+                sub_dir = potfile[0:potfile.rfind('/'))
             else:
                 request_name = potfile
 

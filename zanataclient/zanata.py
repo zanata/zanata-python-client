@@ -523,9 +523,7 @@ def process_srcfile(command_options):
         path = command_options['srcfile'][0]['value']
         file_path = os.path.abspath(path)
         import_file = file_path.split('/')[-1]
-        tmlfolder = file_path.split(import_file)[0]
-        if tmlfolder[-1] == '/':
-            tmlfolder = tmlfolder[:-1]
+        tmlfolder = file_path[0:file_path.rfind('/')]
 
     return tmlfolder, file_path
 
