@@ -205,11 +205,12 @@ class PublicanUtility:
         if root_path[-1] != "/":
             root_path = root_path+'/'
 
-        filename = full_path.split(root_path)[1]
+        # strip root path from the front of full_path
+        filename = full_path[len(root_path):]
 
         if suffix in filename:
             # remove suffix from file name
-            filename = filename.split(suffix)[0]
+            filename = filename[0:-len(suffix)]
 
         return filename
 

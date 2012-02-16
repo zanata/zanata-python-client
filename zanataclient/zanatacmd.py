@@ -359,7 +359,7 @@ class ZanataCommand:
 
             if '/' in file_item: 
                 name = file_item.split('/')[-1]
-                folder = file_item.rstrip(name)
+                folder = file_item[0:file_item.rfind('/')]
                 request_name = file_item.replace('/', ',')
             else:
                 name = file_item
