@@ -47,7 +47,7 @@ def option_names_from_option_list(option_list):
 
 def strip_docstring(docstring, tabstop=4):
     docstring = docstring.replace('\r', '\n')
-    min = len(docstring)
+    minimum = len(docstring)
     lines = docstring.split('\n')
     for line in lines:
         if line:
@@ -62,8 +62,8 @@ def strip_docstring(docstring, tabstop=4):
                     chars += tabstop
                 else:
                     break
-            if chars < min:
-                min = chars
+            if chars < minimum:
+                minimum = chars
     # Now we know the amount of whitespace for the line with the least 
     # we can regenerate the final docstring whitespace
     final = []
@@ -71,7 +71,7 @@ def strip_docstring(docstring, tabstop=4):
         if not line:
             final.append('')
         else:
-            final.append(line[min:])
+            final.append(line[minimum:])
     return '\n'.join(final)
 
 def extract_metavars(list_of_option_sets):
@@ -152,19 +152,19 @@ def _parse_command_line(option_sets, subcmds=None, sys_args=None):
                         new = option.copy()
                         new['name'] = short.strip(':')
                         by_option[short.strip(':')] = new 
-            for long in option['long']:
+            for longopt in option['long']:
                 if option.has_key('metavar'):
-                    long_options.append(long.strip('-=')+'=')
+                    long_options.append(longopt.strip('-=')+'=')
                 else:
-                    long_options.append(long.strip('-='))
-                if by_option.has_key(long.strip('=')):
+                    long_options.append(longopt.strip('-='))
+                if by_option.has_key(longopt.strip('=')):
                     raise OptionConfigurationError(
-                        'The long option %r is already being used'%long
+                        'The long option %r is already being used'%longopt
                     )
                 else:
                     new = option.copy()
-                    new['name'] = long.strip('=')
-                    by_option[long.strip('=')] = new
+                    new['name'] = longopt.strip('=')
+                    by_option[longopt.strip('=')] = new
 
     # Now we know the options are valid, parse them
     opts, args = getopt.gnu_getopt(sys_args, short_options, long_options)
