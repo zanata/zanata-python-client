@@ -406,7 +406,7 @@ def get_version(url):
         version = open(version_file, 'rb')
         client_version = version.read()
         version.close()
-        version_number = client_version.rstrip().strip('version: ')
+        version_number = client_version.rstrip()[len('version: '):]
     except IOError:
         log.error("Please run VERSION-GEN or 'make install' to generate VERSION-FILE")
         version_number = "UNKNOWN"
@@ -559,11 +559,11 @@ def search_file(path, filename):
 
     raise NoSuchFileException('Error 404', 'File %s not found' % filename)
 
-def convert_serverversion(server_version):
-    version = str(server_version.split('-')[0])
-    main_ver = version[:3]
-    version_number = string.atof(main_ver)
-    return version_number
+#def convert_serverversion(server_version):
+#    version = str(server_version.split('-')[0])
+#    main_ver = version[:3]
+#    version_number = string.atof(main_ver)
+#    return version_number
 
 #################################
 #
@@ -751,14 +751,14 @@ def create_version(command_options, args):
     if command_options.has_key('version_desc'):
         version_desc = command_options['version_desc'][0]['value']
 
-    if server_version:
-        version_number = convert_serverversion(server_version)
+    #if server_version:
+    #    version_number = convert_serverversion(server_version)
 
-        if version_number <= 1.2 and not version_name:
-            version_name = args[0]
-    else:
-        if not version_name:
-            version_name = args[0]
+    #    if version_number <= 1.2 and not version_name:
+    #        version_name = args[0]
+    #else:
+    #    if not version_name:
+    #        version_name = args[0]
 
     zanata = generate_zanataresource(url, username, apikey)
     zanatacmd = ZanataCommand()

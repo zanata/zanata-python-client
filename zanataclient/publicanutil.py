@@ -321,7 +321,7 @@ class PublicanUtility:
                                 if ' ' in item:
                                     reference = item.split(' ')
                                     for i in reference:
-                                        ref_list.append(tuple(item.rsplit(':', 1)))
+                                        ref_list.append(tuple(i.rsplit(':', 1)))
                                 else:
                                     ref_list.append(tuple(item.rsplit(':', 1)))
                             poentry.occurrences = ref_list

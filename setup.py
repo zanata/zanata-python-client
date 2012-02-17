@@ -15,8 +15,8 @@ def get_client_version():
 
     p = subprocess.Popen(version_gen, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  close_fds=True)
     output = p.stdout.readline()
-    number = output.rstrip().strip('version: ')
-
+    number = output.rstrip()[len('version: '):]
+    
     subprocess.Popen("""
     cat << EOF > MANIFEST.in
     include zanataclient/VERSION-FILE
@@ -28,7 +28,7 @@ def get_client_version():
             file = open(version_file, 'rb')
             client_version = file.read()
             file.close()
-            number = client_version[:-1].strip('version: ')
+            number = client_version[:-1][len('version: '):]
         except IOError:
             file = open(version_file, 'w')
             file.write("version: UKNOWN")
