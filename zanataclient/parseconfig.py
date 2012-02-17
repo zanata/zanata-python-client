@@ -30,7 +30,6 @@ from xml.dom import minidom
 
 project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'project_type':'', 'locale_map':{}}
 
-
 class ZanataConfig:
     def __init__(self):
         self.configparser = ""
@@ -81,42 +80,22 @@ class ZanataConfig:
         #Read the project url
         if xmldoc.getElementsByTagName("url"):
             node = xmldoc.getElementsByTagName("url")[0]
-            rc = ""
-
-            for node in node.childNodes:
-                if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
-                    rc = rc + node.data
-            project_config['project_url'] = rc
+            project_config['project_url'] = getCombinedTextChildren(node)
 
         #Read the project id
         if xmldoc.getElementsByTagName("project"):
             node = xmldoc.getElementsByTagName("project")[0]
-            rc = ""
-
-            for node in node.childNodes:
-                if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
-                    rc = rc + node.data
-            project_config['project_id'] = rc
+            project_config['project_id'] = getCombinedTextChildren(node)
         
         #Read the project-version
         if xmldoc.getElementsByTagName("project-version"):
             node = xmldoc.getElementsByTagName("project-version")[0]
-            rc = ""
-        
-            for node in node.childNodes:
-                if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
-                    rc = rc + node.data
-            project_config['project_version'] = rc
+            project_config['project_version'] = getCombinedTextChildren(node)
 
         #Read the project-type
         if xmldoc.getElementsByTagName("project-type"):
             node = xmldoc.getElementsByTagName("project-type")[0]
-            rc = ""
-        
-            for node in node.childNodes:
-                if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
-                    rc = rc + node.data
-            project_config['project_type'] = rc
+            project_config['project_type'] = getCombinedTextChildren(node)
 
         #Read the locale map
         if xmldoc.getElementsByTagName("locales"):
@@ -128,12 +107,20 @@ class ZanataConfig:
                     if node.nodeType == node.TEXT_NODE:
                         if locale.getAttribute("map-from"):
                             locale_map = {str(locale.getAttribute("map-from")):str(node.data)}
-                            project_config['locale_map'].update(locale_map)
                         else:
                             locale_map = {str(node.data):str(node.data)}
-                            project_config['locale_map'].update(locale_map)
+                        project_config['locale_map'].update(locale_map)
         
         return project_config
     
 
+
+def getCombinedTextChildren(node):
+    """Combine all TEXT_NODE and CDATA_SECTION_NODE children"""
+    
+    rc = ""
+    for node in node.childNodes:
+        if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
+            rc = rc + node.data
+    return rc
 
