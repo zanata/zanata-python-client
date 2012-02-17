@@ -70,7 +70,7 @@ class RestClient(object):
             response, content = http.request(resource, method.upper(), body, headers=headers)
             if response.previous is not None:
                 if response.previous.status == 301 or response.previous.status == 302:
-                    new_url= response.previous['-x-permanent-redirect-url'].split(resource)[0]
+                    new_url= response.previous['-x-permanent-redirect-url'][:-len(resource)]
                     print "HTTP redirect: redirect to %s, please update the server URL to new URL"%new_url
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
@@ -96,7 +96,7 @@ class RestClient(object):
             response, content = http.request("%s%s" % (self.base_url, resource), "GET")
             if response.previous is not None:
                 if response.previous.status == 301 or response.previous.status == 302:
-                    new_url= response.previous['-x-permanent-redirect-url'].split(resource)[0]
+                    new_url= response.previous['-x-permanent-redirect-url'][:-len(resource)]
                     print "HTTP redirect: redirect to %s, please update the server URL to new URL"%new_url
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
