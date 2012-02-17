@@ -265,18 +265,18 @@ def handle_program(
 
     Try %(program)s COMMAND --help' for help on a specific command.
     The following are valid zanata commands:
+    push
+    pull
     list
     project info
     project create
     version info
     version create
-    publican push
-    publican pull
-    po push
-    po pull
-    push 
-    pull
     glossary push  
+    publican push (deprecated: use "push" with project type "podir")
+    publican pull (deprecated: use "pull" with project type "podir")
+    po push (deprecated: use "push" with project type "gettext")
+    po pull (deprecated: use "pull" with project type "gettext")
     """
     if existing is None:
         existing={}

@@ -433,7 +433,7 @@ def process_merge(command_options):
     if command_options.has_key('merge'):
         merge = command_options['merge'][0]['value']
         if merge != 'auto' and merge != 'import':
-            log.info("merge option %s is not acceptable, change to default value 'auto'" % merge)
+            log.info("merge option %s is not recognized, assuming default value 'auto'" % merge)
             merge = 'auto'
     else:
         merge = 'auto'
@@ -583,7 +583,7 @@ def list_project(command_options, args):
     List all available projects
 
     Options:
-        --url address of the Zanata/Flies server, eg http://example.com/zanata
+        --url address of the Zanata server, eg http://example.com/zanata
     """
     project_config = read_project_config(command_options)
     url = process_url(project_config, command_options)
@@ -669,8 +669,8 @@ def create_project(command_options, args):
     Create a project
 
     Options:
-        --username: user name
-        --apikey: api key of user
+        --username: user name (defaults to zanata.ini value)
+        --apikey: api key of user (defaults to zanata.ini value)
         --project-name: project name
         --project-desc: project description
     """
@@ -712,8 +712,8 @@ def create_version(command_options, args):
     Create a version
 
     Options:
-        --username: user name
-        --apikey: api key of user
+        --username: user name (defaults to zanata.ini value)
+        --apikey: api key of user (defaults to zanata.ini value)
         --project-id: id of the project
         --version-name: version name
         --version-desc: version description
@@ -771,14 +771,14 @@ def po_pull(command_options, args):
     Retrieve gettext project translation files from server
 
     Options:
-        --username: user name
-        --apikey: api key of user
-        --project-id: id of the project
-        --project-version: id of the version
+        --username: user name (defaults to zanata.ini value)
+        --apikey: api key of user (defaults to zanata.ini value)
+        --project-id: id of the project (defaults to zanata.xml value)
+        --project-version: id of the version (defaults to zanata.xml value)
         --dstdir: output folder (same as --transdir option)
         --dir: output folder for po files (same as --transdir)
         --transdir: output folder for po files
-        --lang: language list'
+        --lang: language list
         --noskeleton: omit po files when translations not found
     """
     pull(command_options, args, "gettext")
@@ -791,10 +791,10 @@ def po_push(command_options, args):
 
     Options:
         -f: force to remove content on server side
-        --username: user name
-        --apikey: api key of user
-        --project-id: id of the project
-        --project-version: id of the version
+        --username: user name (defaults to zanata.ini value)
+        --apikey: api key of user (defaults to zanata.ini value)
+        --project-id: id of the project (defaults to zanata.xml value)
+        --project-version: id of the version (defaults to zanata.xml value)
         --dir: the path of the folder that contains pot files and po files,
                no need to specify --srcdir and --transdir if --dir option specified
         --srcdir: the path of the po folder(e.g. ./po)
@@ -908,10 +908,10 @@ def publican_pull(command_options, args):
     Retrieve translated publican content files from server
 
     Options:
-        --username: user name
-        --apikey: api key of user
-        --project-id: id of the project
-        --project-version: id of the version
+        --username: user name (defaults to zanata.ini value)
+        --apikey: api key of user (defaults to zanata.ini value)
+        --project-id: id of the project (defaults to zanata.xml value)
+        --project-version: id of the version (defaults to zanata.xml value)
         --dstdir: output folder (same as --transdir option)
         --dir: output folder (same as --transdir option)
         --transdir: translations will be written to this folder (one sub-folder per locale)
@@ -930,10 +930,10 @@ def publican_push(command_options, args):
 
     Options:
         -f: force to remove content on server side
-        --username: user name
-        --apikey: api key of user
-        --project-id: id of the project
-        --project-version: id of the version
+        --username: user name (defaults to zanata.ini value)
+        --apikey: api key of user (defaults to zanata.ini value)
+        --project-id: id of the project (defaults to zanata.xml value)
+        --project-version: id of the version (defaults to zanata.xml value)
         --dir: the path of the folder that contains pot folder and locale folders,
                no need to specify --srcdir and --transdir if --dir option specified
         --srcdir: the path of the pot folder (e.g. ./pot)
@@ -1042,11 +1042,11 @@ def push(command_options, args, project_type = None):
 
     Options:
         -f: force to remove content on server side
-        --username: user name
-        --apikey: api key of user
+        --username: user name (defaults to zanata.ini value)
+        --apikey: api key of user (defaults to zanata.ini value)
         --project-type: project type (gettext or podir)
-        --project-id: id of the project
-        --project-version: id of the version
+        --project-id: id of the project (defaults to zanata.xml value)
+        --project-version: id of the version (defaults to zanata.xml value)
         --srcdir: the path of the pot folder (e.g. ./pot)
         --srcfile: the path of the pot file(gettext project only)
         --transdir: the path of the folder that contain locale folders
@@ -1054,7 +1054,7 @@ def push(command_options, args, project_type = None):
         --push-trans: push local translations to server
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
-        --lang: language list
+        --lang: language list (defaults to zanata.xml locales)
     """
     copytrans = True
     importpo = False
@@ -1185,13 +1185,13 @@ def pull(command_options, args, project_type = None):
     Retrieve translated publican content files from server
 
     Options:
-        --username: user name
-        --apikey: api key of user
+        --username: user name (defaults to zanata.ini value)
+        --apikey: api key of user (defaults to zanata.ini value)
         --project-type: project type (gettext or podir)
-        --project-id: id of the project
-        --project-version: id of the version
+        --project-id: id of the project (defaults to zanata.xml value)
+        --project-version: id of the version (defaults to zanata.xml value)
         --transdir: translations will be written to this folder
-        --lang: language list
+        --lang: language list (defaults to zanata.xml locales)
     """
     dir_option = False
     create_skeletons = True
@@ -1275,8 +1275,8 @@ def glossary_push(command_options, args):
 
     Options:
         --url: URL of zanata server
-        --username: user name
-        --apikey: api key of user
+        --username: user name (defaults to zanata.ini value)
+        --apikey: api key of user (defaults to zanata.ini value)
         --lang(po format): language of glossary file
         --sourcecommentsastarget(po format): treat extracted comments and references as target comments of term
                                   or treat as source reference of entry
