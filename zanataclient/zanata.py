@@ -730,8 +730,8 @@ def create_version(command_options, args):
         --username: user name (defaults to zanata.ini value)
         --apikey: api key of user (defaults to zanata.ini value)
         --project-id: id of the project
-        --version-name: version name
-        --version-desc: version description
+        --version-name(Deprecated): version name 
+        --version-desc(Deprecated): version description 
     """
     project_id = ""
     version_name = ""
@@ -762,10 +762,12 @@ def create_version(command_options, args):
 
     if command_options.has_key('version_name'):
         version_name = command_options['version_name'][0]['value']
+        log.warn("This option is deprecated, it should not be used on new zanata server")
 
     if command_options.has_key('version_desc'):
         version_desc = command_options['version_desc'][0]['value']
-
+        log.warn("This option is deprecated, it should not be used on new zanata server")
+    
     #if server_version:
     #    version_number = convert_serverversion(server_version)
 
