@@ -486,10 +486,6 @@ def check_pofile(tmlfolder, project_type):
         folder_type = "pot"
     elif project_type == "gettext":
         folder_type = "po"
-
-    if not os.path.isdir(tmlfolder):
-        log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
-        sys.exit(1)
     
     sub_folder = os.path.join(tmlfolder, folder_type)
 
@@ -501,17 +497,36 @@ def check_pofile(tmlfolder, project_type):
         log.error("The source folder is empty, please specify the valid source folder with '--srcdir' or 'dir' option")
         sys.exit(1)    
 
-def process_srcdir(command_options, project_type, project_config, default_folder):
+def process_srcdir_withsub(command_options, project_type):
     tmlfolder = ""
 
     if command_options.has_key('srcdir'):
         tmlfolder = command_options['srcdir'][0]['value']
-    elif default_folder:
-        tmlfolder = os.path.abspath(default_folder)
+    elif command_options.has_key('dir'):
+        #Keep dir option for publican/po push
+        tmlfolder = command_options['dir'][0]['value']
+    else:
+        tmlfolder = os.path.abspath(os.getcwd())
+    
+    if not os.path.isdir(tmlfolder):
+        log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
+        sys.exit(1)
+
+    tmlfolder = check_pofile(tmlfolder, project_type)
+
+    return tmlfolder
+
+def process_srcdir(command_options):
+    tmlfolder = ""
+
+    if command_options.has_key('srcdir'):
+        tmlfolder = command_options['srcdir'][0]['value']
     else:
         tmlfolder = os.path.abspath(os.getcwd())
      
-    tmlfolder = check_pofile(tmlfolder, project_type)
+    if not find_po(tmlfolder):
+        log.error("The source folder is empty, please specify the valid source folder with '--srcdir'")
+        sys.exit(1)
 
     return tmlfolder
 
@@ -527,7 +542,7 @@ def process_srcfile(command_options):
 
     return tmlfolder, file_path
 
-def process_transdir(command_options, project_config, src_folder):
+def process_transdir(command_options, src_folder):
     trans_folder = ""
 
     if command_options.has_key('transdir'):
@@ -810,7 +825,6 @@ def po_push(command_options, args):
     force = False
     dir_option = False
     command_type = ''
-    default_folder = None
     tmlfolder = ""
     filelist = []
 
@@ -842,11 +856,7 @@ def po_push(command_options, args):
         tmlfolder, import_file = process_srcfile(command_options)
         filelist.append(import_file)
 
-    #Keep dir option for publican/po push
-    if command_options.has_key('dir'):
-        default_folder = command_options['dir'][0]['value']
-    
-    tmlfolder = process_srcdir(command_options, "gettext", project_config, default_folder)
+    tmlfolder = process_srcdir_withsub(command_options, "gettext")
             
     if not os.path.isdir(tmlfolder):
         log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
@@ -863,7 +873,7 @@ def po_push(command_options, args):
 
     if importpo:
         log.info("Importing translation")
-        import_param['transdir'] = process_transdir(command_options, project_config, tmlfolder)
+        import_param['transdir'] = process_transdir(command_options, tmlfolder)
         log.info("Reading locale folders from %s" % import_param['transdir'])
         import_param['merge'] = process_merge(command_options)
         import_param['lang_list'] = get_lang_list(command_options, project_config)
@@ -948,7 +958,6 @@ def publican_push(command_options, args):
     importpo = False
     force = False
     dir_option = False
-    default_folder = None
     deletefiles = False
     tmlfolder = ""
     filelist = []
@@ -977,11 +986,7 @@ def publican_push(command_options, args):
 
     log.info("Copy previous translations:%s" % copytrans)
 
-    #Keep dir option for publican/po push
-    if command_options.has_key('dir'):
-        default_folder = command_options['dir'][0]['value']
-    
-    tmlfolder = process_srcdir(command_options, "podir", project_config, default_folder)
+    tmlfolder = process_srcdir_withsub(command_options, "podir")
     
     if args:
         try:
@@ -1015,7 +1020,7 @@ def publican_push(command_options, args):
         
     if importpo:
         log.info("Importing translation")
-        import_param['transdir'] = process_transdir(command_options, project_config, None)
+        import_param['transdir'] = process_transdir(command_options, None)
         log.info("Reading locale folders from %s" % import_param['transdir'])
         import_param['merge'] = process_merge(command_options)
         import_param['lang_list'] = get_lang_list(command_options, project_config)
@@ -1062,7 +1067,6 @@ def push(command_options, args, project_type = None):
     dir_option = False
     deletefiles = False
     command_type = ''
-    default_folder = ""
     tmlfolder = ""
     filelist = []
 
@@ -1118,7 +1122,7 @@ def push(command_options, args, project_type = None):
         sys.exit(1)
 
     if tmlfolder == "":        
-        tmlfolder = process_srcdir(command_options, command_type, project_config, None)
+        tmlfolder = process_srcdir(command_options)
         
     if not os.path.isdir(tmlfolder):
         log.error("Can not find source folder, please specify the source folder with '--srcdir' or using zanata.xml")
@@ -1160,7 +1164,7 @@ def push(command_options, args, project_type = None):
 
     if importpo:
         log.info("Importing translation")
-        import_param['transdir'] = process_transdir(command_options, project_config, folder)
+        import_param['transdir'] = process_transdir(command_options, folder)
         log.info("Reading locale folders from %s" % import_param['transdir'])
         import_param['merge'] = process_merge(command_options)
         import_param['lang_list'] = get_lang_list(command_options, project_config)
@@ -1197,6 +1201,7 @@ def pull(command_options, args, project_type = None):
     create_skeletons = True
     filelist = []
     zanatacmd = ZanataCommand()
+    output_folder = None
 
     project_config = read_project_config(command_options)
 
@@ -1242,8 +1247,6 @@ def pull(command_options, args, project_type = None):
         #Keep dir option for publican/po pull
         if command_options.has_key('dir'):
             output_folder = command_options['dir'][0]['value']
-        else:
-            output_folder = None
 
         if command_options.has_key('dstdir'):
             output_folder = command_options['dstdir'][0]['value']
@@ -1251,8 +1254,6 @@ def pull(command_options, args, project_type = None):
         #Disable dir option for generic pull command
         if command_options.has_key('dir'):
             log.warn("dir option is disabled in pull command, please use --transdir, or specify value in zanata.xml")
-        else:
-            output_folder = None        
                      
         if command_options.has_key('dstdir'):
             log.warn("dstdir option is changed to transdir option for generic pull command")
