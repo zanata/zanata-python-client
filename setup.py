@@ -20,7 +20,7 @@ def get_client_version():
     subprocess.Popen("""
     cat << EOF > MANIFEST.in
     include zanataclient/VERSION-FILE
-    EOF
+EOF
     """, shell=True)
 
     if number=='UKNOWN':
