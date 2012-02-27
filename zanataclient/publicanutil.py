@@ -163,8 +163,8 @@ class PublicanUtility:
         """
         try:
             po = polib.pofile(path)
-        except Exception:
-            self.log.error("Cannot process the po file")
+        except Exception, e:
+            self.log.error(str(e))
             sys.exit(1)
 
         return po
