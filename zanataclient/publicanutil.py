@@ -100,7 +100,7 @@ class PublicanUtility:
             m = hashlib.md5()
             m.update(hashbase.encode('utf-8'))
             textflowId = m.hexdigest()
-            comment = entry.comment
+            translator_comment = entry.tcomment
             
             if entry.msgstr:
                 state = "Approved"
@@ -111,7 +111,7 @@ class PublicanUtility:
                 state = "NeedReview"
             
             #create extensions
-            extensions = [{"object-type":"comment","value":comment,"space":"preserve"}]
+            extensions = [{"object-type":"comment","value":translator_comment,"space":"preserve"}]
             
             # {"resId":"782f49c4e93c32403ba0b51821b38b90","state":"Approved","translator":{"email":"id","name":"name"},"content":"title:
             # ttff","extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]}
@@ -367,11 +367,12 @@ class PublicanUtility:
             for message in po:
                 for translation in targets:
                     if translation.get('extensions'):
-                        extensions=translation.get('extensions')[0]
-                        #if extensions:
-                        #    ext_type = extensions.get('object-type')
-                        #    comment = extensions.get('comment')
-                        #    entries = extensions.get('value')
+                        extensions=translation.get('extensions')
+                        if extensions:
+                            for entry in extensions:
+                                if entry.get('object-type') == 'comment':
+                                    message.tcomment = entry.get('value')
+               
                     if self.hash_match(message, translation.get('resId')):
                         message.msgstr = translation.get('content')
                         if translation.get('state') == 'NeedReview':
