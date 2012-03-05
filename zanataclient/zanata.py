@@ -466,36 +466,36 @@ def get_lang_list(command_options, project_config):
 # Process source, trans and output folder
 #
 #################################
-def find_po(folder):
-    if not os.path.isdir(folder):
-        log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
-        sys.exit(1)
+#def find_po(folder):
+#    if not os.path.isdir(folder):
+#        log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
+#        sys.exit(1)
 
-    file_list = os.listdir(folder)  
-    for item in file_list:
-        full_path = os.path.join(folder, item)
-        if full_path.endswith(".pot"):
-            return True
+#    file_list = os.listdir(folder)  
+#    for item in file_list:
+#        full_path = os.path.join(folder, item)
+#        if full_path.endswith(".pot"):
+#            return True
+#
+#    return False
 
-    return False
-
-def check_pofile(tmlfolder, project_type):
-    folder = ""
-    
-    if project_type == "podir":
-        folder_type = "pot"
-    elif project_type == "gettext":
-        folder_type = "po"
-    
-    sub_folder = os.path.join(tmlfolder, folder_type)
-
-    if find_po(tmlfolder):
-        return tmlfolder
-    elif find_po(sub_folder):
-        return sub_folder         
-    else:
-        log.error("The source folder is empty, please specify the valid source folder with '--srcdir' or 'dir' option")
-        sys.exit(1)    
+#def check_pofile(tmlfolder, project_type):
+#    folder = ""
+#    
+#    if project_type == "podir":
+#        folder_type = "pot"
+#    elif project_type == "gettext":
+#        folder_type = "po"
+#    
+#    sub_folder = os.path.join(tmlfolder, folder_type)
+#
+#    if find_po(tmlfolder):
+#        return tmlfolder
+#    elif find_po(sub_folder):
+#        return sub_folder         
+#    else:
+#        log.error("The source folder is empty, please specify the valid source folder with '--srcdir' or 'dir' option")
+#        sys.exit(1)    
 
 def process_srcdir_withsub(command_options, project_type):
     tmlfolder = ""
@@ -512,7 +512,7 @@ def process_srcdir_withsub(command_options, project_type):
         log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
         sys.exit(1)
 
-    tmlfolder = check_pofile(tmlfolder, project_type)
+    #tmlfolder = check_pofile(tmlfolder, project_type)
 
     return tmlfolder
 
@@ -524,9 +524,9 @@ def process_srcdir(command_options):
     else:
         tmlfolder = os.path.abspath(os.getcwd())
      
-    if not find_po(tmlfolder):
-        log.error("The source folder is empty, please specify the valid source folder with '--srcdir'")
-        sys.exit(1)
+    #if not find_po(tmlfolder):
+    #    log.error("The source folder is empty, please specify the valid source folder with '--srcdir'")
+    #    sys.exit(1)
 
     return tmlfolder
 
