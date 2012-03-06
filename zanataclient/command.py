@@ -17,8 +17,8 @@
 #
 # You should have received a copy of the GNU Lesser General Public
 # License along with this program; if not, write to the
-# Free Software Foundation, Inc., 59 Temple Place, Suite 330,
-# Boston, MA  02111-1307  USA
+# Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+# Boston, MA  02110-1301, USA.
 
 # Base on James Gardner's CommandTool v0.3.2, modified for python client requirement 
 # http://jimmyg.org/blog/2009/python-command-line-interface-%28cli%29-with-sub-commands.html
