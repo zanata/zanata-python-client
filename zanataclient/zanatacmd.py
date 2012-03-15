@@ -342,8 +342,7 @@ class ZanataCommand:
       
                 self.import_po(zanata, filename, transdir, project_id, iteration_id, lang_list, locale_map, merge, project_type)
 
-    def pull_command(self, zanata, locale_map, project_id, iteration_id, filelist, lang_list, output, project_type,
-    create_skeletons):
+    def pull_command(self, zanata, locale_map, project_id, iteration_id, filelist, lang_list, output, project_type, skeletons):
         """
         Retrieve the content of documents in a Project version from Zanata server. If the name of publican
         file is specified, the content of that file will be pulled from server. Otherwise, all the document of that
@@ -408,8 +407,8 @@ class ZanataCommand:
                 self.log.info("Retrieving %s translation from server:"%item)
                     
                 try:
-                    result = zanata.documents.retrieve_translation(lang, project_id, iteration_id, request_name)
-                    publicanutil.save_to_pofile(pofile, result, pot, create_skeletons, item, name)
+                    result = zanata.documents.retrieve_translation(lang, project_id, iteration_id, request_name, skeletons)
+                    publicanutil.save_to_pofile(pofile, result, pot, skeletons, item, name)
                 except UnAuthorizedException, e:
                     self.log.error(e.msg)                        
                     break

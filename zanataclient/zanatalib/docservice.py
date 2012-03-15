@@ -148,7 +148,7 @@ class DocumentService:
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to pull')
 
-    def retrieve_translation(self, lang, projectid, iterationid, file_id):
+    def retrieve_translation(self, lang, projectid, iterationid, file_id, skeletons):
         """
         Get translation content of file from Flies server
         @param lang: language
@@ -163,9 +163,13 @@ class DocumentService:
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey 
         ext = "?ext=gettext&ext=comment"
+       
+        if skeletons:
+            skeletons ="?skeletons=true"
+            ext = ext+skeletons
 
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file_id, lang), extension=ext)
-                
+       
         if res['status'] == '200' or res['status'] == '304':
             return content
         elif res['status'] == '404':

@@ -1200,7 +1200,7 @@ def pull(command_options, args, project_type = None):
         --lang: language list (defaults to zanata.xml locales)
     """
     dir_option = False
-    create_skeletons = True
+    skeletons = True
     filelist = []
     zanatacmd = ZanataCommand()
     output_folder = None
@@ -1262,12 +1262,11 @@ def pull(command_options, args, project_type = None):
             output_folder = command_options['dstdir'][0]['value']
     
     if command_options.has_key('noskeletons'):
-        create_skeletons = False
+        skeletons = False
 
     outpath = create_outpath(command_options, output_folder)
 
-    zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type,
-    create_skeletons)
+    zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type, skeletons)
 
 def glossary_push(command_options, args):
     """
