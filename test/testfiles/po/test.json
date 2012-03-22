@@ -1,0 +1,65 @@
+{
+    "textFlowTargets": [
+        {
+            "content": "<title>\u8bbf\u95ee\u5b58\u53d6\u63a7\u5236\u5217\u8868</title>",
+            "resId": "782f49c4e93c32403ba0b51821b38b90",
+            "state": "Approved",
+            "extensions": [
+                {
+                    "object-type": "comment",
+                    "value": "EXACT MATCH",
+                    "space": "preserve"
+                }
+            ]
+        }
+    ],
+    "extensions": [
+        {
+            "comment": "translation of Acls.po to Traditional Chinese\ntranslation of Acls.po to\nCopyright (C) 2003, 2007 Free Software Foundation, Inc.\n\nSarah Wang <sarahs@redhat.com>, 2003.\nXi HUANG <xhuang@redhat.com>, 2007.\nChester Cheng <ccheng@redhat.com>, 2007.",
+            "object-type": "po-target-header",
+            "entries": [
+                {
+                    "key": "Project-Id-Version",
+                    "value": "Acls"
+                },
+                {
+                    "key": "Report-Msgid-Bugs-To",
+                    "value": "http://bugs.kde.org"
+                },
+                {
+                    "key": "POT-Creation-Date",
+                    "value": "2001-02-09 01:25+0100"
+                },
+                {
+                    "key": "PO-Revision-Date",
+                    "value": "2007-07-11 14:49+1000"
+                },
+                {
+                    "key": "Last-Translator",
+                    "value": "Chester Cheng <ccheng@redhat.com>"
+                },
+                {
+                    "key": "Language-Team",
+                    "value": "Traditional Chinese <zh_TW@li.org>"
+                },
+                {
+                    "key": "MIME-Version",
+                    "value": "1.0"
+                },
+                {
+                    "key": "Content-Type",
+                    "value": "text/plain; charset=UTF-8"
+                },
+                {
+                    "key": "Content-Transfer-Encoding",
+                    "value": "8bit"
+                },
+                {
+                    "key": "X-Generator",
+                    "value": "KBabel 1.11.4"
+                }
+            ]
+        }
+    ],
+    "links": []
+}

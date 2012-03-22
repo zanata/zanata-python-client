@@ -1,0 +1,71 @@
+{
+    "lang": "en-US",
+    "contentType": "application/x-gettext",
+    "extensions": [
+        {
+            "comment": "SOME DESCRIPTIVE TITLE.\nCopyright (C) YEAR Free Software Foundation, Inc.\nFIRST AUTHOR <EMAIL@ADDRESS>, YEAR.\n",
+            "object-type": "po-header",
+            "entries": [
+                {
+                    "key": "Project-Id-Version",
+                    "value": "PACKAGE VERSION"
+                },
+                {
+                    "key": "POT-Creation-Date",
+                    "value": "2001-02-09 01:25+0100"
+                },
+                {
+                    "key": "PO-Revision-Date",
+                    "value": "YEAR-MO-DA HO:MI+ZONE"
+                },
+                {
+                    "key": "Last-Translator",
+                    "value": "FULL NAME <EMAIL@ADDRESS>"
+                },
+                {
+                    "key": "Language-Team",
+                    "value": "LANGUAGE <LL@li.org>"
+                },
+                {
+                    "key": "MIME-Version",
+                    "value": "1.0"
+                },
+                {
+                    "key": "Content-Type",
+                    "value": "application/x-xml2pot; charset=UTF-8"
+                },
+                {
+                    "key": "Content-Transfer-Encoding",
+                    "value": "ENCODING"
+                }
+            ]
+        }
+    ],
+    "name": "test",
+    "textFlows": [
+        {
+            "lang": "en-US",
+            "content": "<title>Access Control Lists</title>",
+            "extensions": [
+                {
+                    "object-type": "comment",
+                    "value": "Tag: title",
+                    "space": "preserve"
+                },
+                {
+                    "object-type": "pot-entry-header",
+                    "references": [
+                        "Acls.xml:8"
+                    ],
+                    "flags": [
+                        "no-c-format"
+                    ],
+                    "context": "",
+                    "extractedComment": ""
+                }
+            ],
+            "id": "782f49c4e93c32403ba0b51821b38b90",
+            "revision": 1
+        }
+    ]
+}

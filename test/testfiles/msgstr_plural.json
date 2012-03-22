@@ -1,0 +1,56 @@
+{
+    "textFlowTargets": [
+        {
+            "content": [
+                "Przy rezygnacji z zapisu wszystkie zmiany dokonane w ci\u0105gu ostatniej minuty zostan\u0105 utracone.",
+                "Przy rezygnacji z zapisu wszystkie zmiany dokonane w ci\u0105gu ostatnich %d minut zostan\u0105 utracone.",
+                "Przy rezygnacji z zapisu wszystkie zmiany dokonane w ci\u0105gu ostatnich %d minut zostan\u0105 utracone."
+            ],
+            "resId": "03c7e9ad7feec38cecd6da1188f7bce3",
+            "state": "New",
+            "extensions": [
+                {
+                    "object-type": "comment",
+                    "value": "",
+                    "space": "preserve"
+                }
+            ]
+        },
+        {
+            "content": "Przy rezygnacji z zapisu wszystkie zmiany dokonane w ci\u0105gu ostatniej godziny zostan\u0105 utracone.",
+            "resId": "69b1edf90cd5e358596e2febbfd4a881",
+            "state": "Approved",
+            "extensions": [
+                {
+                    "object-type": "comment",
+                    "value": "",
+                    "space": "preserve"
+                }
+            ]
+        },
+        {
+            "content": [
+                "Przy rezygnacji z zapisu wszystkie zmiany dokonane w ci\u0105gu ostatniej godziny zostan\u0105 utracone.",
+                "Przy rezygnacji z zapisu wszystkie zmiany dokonane w ci\u0105gu ostatnich %d godzin zostan\u0105 utracone.",
+                "Przy rezygnacji z zapisu wszystkie zmiany dokonane w ci\u0105gu ostatnich %d godzin zostan\u0105 utracone."
+            ],
+            "resId": "91b8f2f0b7124ff57b12289414d3831f",
+            "state": "New",
+            "extensions": [
+                {
+                    "object-type": "comment",
+                    "value": "",
+                    "space": "preserve"
+                }
+            ]
+        }
+    ],
+    "extensions": [
+        {
+            "comment": "",
+            "object-type": "po-target-header",
+            "entries": []
+        }
+    ],
+    "links": []
+}

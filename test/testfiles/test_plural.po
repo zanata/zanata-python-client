@@ -1,0 +1,35 @@
+#: ../src/planner-window.c:1372
+#, c-format
+msgid "If you don't save, changes made the last %d minute will be discarded."
+msgid_plural ""
+"If you don't save, changes made the last %d minutes will be discarded."
+msgstr[0] ""
+"Przy rezygnacji z zapisu wszystkie zmiany dokonane w ciągu ostatniej minuty "
+"zostaną utracone."
+msgstr[1] ""
+"Przy rezygnacji z zapisu wszystkie zmiany dokonane w ciągu ostatnich %d "
+"minut zostaną utracone."
+msgstr[2] ""
+"Przy rezygnacji z zapisu wszystkie zmiany dokonane w ciągu ostatnich %d "
+"minut zostaną utracone."
+
+#: ../src/planner-window.c:1380
+msgid "If you don't save, changes made the last hour will be discarded."
+msgstr ""
+"Przy rezygnacji z zapisu wszystkie zmiany dokonane w ciągu ostatniej godziny "
+"zostaną utracone."
+
+#: ../src/planner-window.c:1385
+#, c-format
+msgid "If you don't save, changes made the last %d hour will be discarded."
+msgid_plural ""
+"If you don't save, changes made the last %d hours will be discarded."
+msgstr[0] ""
+"Przy rezygnacji z zapisu wszystkie zmiany dokonane w ciągu ostatniej godziny "
+"zostaną utracone."
+msgstr[1] ""
+"Przy rezygnacji z zapisu wszystkie zmiany dokonane w ciągu ostatnich %d "
+"godzin zostaną utracone."
+msgstr[2] ""
+"Przy rezygnacji z zapisu wszystkie zmiany dokonane w ciągu ostatnich %d "
+"godzin zostaną utracone."
