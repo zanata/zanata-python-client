@@ -50,6 +50,7 @@ class PublicanUtility:
         for entry in pofile:
             context = ""
             reflist = []
+            content = ""
             if entry.msgctxt:
                 hashbase = entry.msgctxt + u"\u0000" + entry.msgid
                 context = entry.msgctxt
@@ -71,12 +72,14 @@ class PublicanUtility:
                 reflist.append(node)
             flags = entry.flags
 
-            #extensions_single_comment = [{'object-type':'comment','value':'test','space':'preserve'}]
-            #extensions_pot_entry_header = [{"object-type":"pot-entry-header","context":"context","references":["fff"],"extractedComment":"extractedComment","flags":["java-format"]}]
+            if entry.msgid_plural:
+                content = [entry.msgid, entry.msgid_plural]
+            else:
+                content = entry.msgid
 
             extensions=[{'object-type':'comment','value':extracted_comment,'space':'preserve'}, {"object-type":"pot-entry-header", "context": context, "references":reflist,"extractedComment":'',"flags":flags}]
 
-            textflow = {'id': textflowId, 'lang':'en-US', 'content':entry.msgid, 'extensions':extensions, 'revision':1}
+            textflow = {'id': textflowId, 'lang':'en-US', 'content':content, 'extensions':extensions, 'revision':1}
             textflows.append(textflow)
         return textflows
     
@@ -87,6 +90,7 @@ class PublicanUtility:
         """
         obs_list=pofile.obsolete_entries()
         textflowtargets = []
+        content = ""
         
         for entry in pofile:
             if entry in obs_list:
@@ -106,19 +110,25 @@ class PublicanUtility:
                 state = "Approved"
             else:
                 state = "New"
+            
             #need judge for fuzzy state
             if "fuzzy" in entry.flags:
                 state = "NeedReview"
             
             #create extensions
             extensions = [{"object-type":"comment","value":translator_comment,"space":"preserve"}]
+           
+            if entry.msgid_plural:
+                content = []
+                keys = entry.msgstr_plural.keys()
+                keys.sort()
+                for key in keys:
+                    content.append(entry.msgstr_plural[key])
+            else:
+                content = entry.msgstr
+    
+            textflowtarget = {'resId': textflowId, 'state': state, 'content':content,'extensions':extensions}
             
-            # {"resId":"782f49c4e93c32403ba0b51821b38b90","state":"Approved","translator":{"email":"id","name":"name"},"content":"title:
-            # ttff","extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]}
-            # Diable the translator to avoid issues on server side
-            textflowtarget = {'resId': textflowId, 'state': state, 'content':entry.msgstr,'extensions':extensions}
-            
-            #Temporary fill in the admin info for translator to pass the validation, waiting for server side change
             textflowtargets.append(textflowtarget)
         
         return textflowtargets
@@ -213,6 +223,13 @@ class PublicanUtility:
             filename = filename[0:-len(suffix)]
 
         return filename
+
+    def check_plural(self, filepath):
+        pofile = self.create_pofile(filepath)
+        for entry in pofile:
+            if entry.msgid_plural:
+                return True
+        return False
 
     def potfile_to_json(self, filepath, root_path):
         """

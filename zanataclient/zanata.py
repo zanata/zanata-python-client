@@ -580,6 +580,19 @@ def search_file(path, filename):
 #    version_number = string.atof(main_ver)
 #    return version_number
 
+def check_plural_support(server_version):
+    if server_version == None:
+        return False
+
+    version = str(server_version.split('-')[0])
+    main_ver = version[:3]
+    version_number = string.atof(main_ver)
+
+    if version_number >= 1.6:
+        return True
+    else:
+        return False
+
 #################################
 #
 # Command Handler
@@ -828,6 +841,7 @@ def po_push(command_options, args):
     dir_option = False
     command_type = ''
     tmlfolder = ""
+    plural_support = False
     filelist = []
 
     import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': 'gettext'}
@@ -841,7 +855,9 @@ def po_push(command_options, args):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    get_version(url)
+    server_version = get_version(url)
+
+    plural_support = check_plural_support(server_version)
 
     zanata = generate_zanataresource(url, username, apikey)
 
@@ -909,9 +925,9 @@ def po_push(command_options, args):
         zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "gettext")
 
     if importpo:
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, import_param)
+        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
     else:
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans)
+        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support)
     
 def publican_pull(command_options, args):
     """
@@ -961,6 +977,7 @@ def publican_push(command_options, args):
     force = False
     dir_option = False
     deletefiles = False
+    plural_support = False
     tmlfolder = ""
     filelist = []
 
@@ -975,8 +992,10 @@ def publican_push(command_options, args):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    get_version(url)
+    server_version = get_version(url)
 
+    plural_support = check_plural_support(server_version)
+    
     zanata = generate_zanataresource(url, username, apikey)
 
     project_id, iteration_id = zanatacmd.check_project(zanata, command_options, project_config)
@@ -1019,7 +1038,10 @@ def publican_push(command_options, args):
     if command_options.has_key('pushtrans'):
         log.info("please use --import-po for old publican push command")
         importpo = True
-        
+    
+    if deletefiles:
+        zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "podir")
+    
     if importpo:
         log.info("Importing translation")
         import_param['transdir'] = process_transdir(command_options, None)
@@ -1030,14 +1052,12 @@ def publican_push(command_options, args):
             import_param['locale_map'] = project_config['locale_map']
         else:
             import_param['locale_map'] = None
-        if deletefiles:            
-            zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "podir")
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, import_param)
+
+        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
     else:
         log.info("Importing source documents only")
-        if deletefiles:
-            zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "podir")
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans)
+
+        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support)
     
 def push(command_options, args, project_type = None):
     """
@@ -1068,6 +1088,7 @@ def push(command_options, args, project_type = None):
     force = False
     dir_option = False
     deletefiles = False
+    plural_support = False
     command_type = ''
     tmlfolder = ""
     filelist = []
@@ -1083,7 +1104,9 @@ def push(command_options, args, project_type = None):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    get_version(url)
+    server_version = get_version(url)
+
+    plural_support = check_plural_support(server_version)
 
     zanata = generate_zanataresource(url, username, apikey)
 
@@ -1164,6 +1187,9 @@ def push(command_options, args, project_type = None):
     if command_options.has_key('pushtrans'):
         importpo = True
 
+    if deletefiles:
+        zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, command_type)
+
     if importpo:
         log.info("Importing translation")
         import_param['transdir'] = process_transdir(command_options, folder)
@@ -1175,14 +1201,12 @@ def push(command_options, args, project_type = None):
         else:
             import_param['locale_map'] = None
         import_param['project_type'] = command_type
-        if deletefiles:
-            zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, command_type)
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, import_param)
+
+        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
     else:
         log.info("Importing source documents only")
-        if deletefiles:
-            zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, command_type)
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans) 
+
+        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support) 
 
 def pull(command_options, args, project_type = None):
     """

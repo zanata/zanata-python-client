@@ -306,7 +306,7 @@ class ZanataCommand:
             
             self.commit_translation(zanata, project_id, iteration_id, request_name, pofile, lang, body, merge)
 
-    def push_command(self, zanata, file_list, srcfolder, project_id, iteration_id, copytrans, import_param = None):
+    def push_command(self, zanata, file_list, srcfolder, project_id, iteration_id, copytrans, plural_support = False, import_param = None):
         """
         Push the content of publican files to a Project version on Zanata server
         @param args: name of the publican file
@@ -315,6 +315,10 @@ class ZanataCommand:
 
         for filepath in file_list:
             self.log.info("\nPushing the content of %s to server:"%filepath)
+            plural_exist = publicanutil.check_plural(filepath)
+            if plural_exist and not plural_support:
+                self.log.error("The plural is only supported in zanata server >= 1.6, this file will be ignored")
+                break                   
             body, filename = publicanutil.potfile_to_json(filepath, srcfolder)
                                           
             try:
