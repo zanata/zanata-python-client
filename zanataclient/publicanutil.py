@@ -129,10 +129,10 @@ class PublicanUtility:
                 keys.sort()
                 for key in keys:
                     content.append(entry.msgstr_plural[key])
+                textflowtarget = {'resId': textflowId, 'state': state, 'contents':content,'extensions':extensions}
             else:
                 content = entry.msgstr
-    
-            textflowtarget = {'resId': textflowId, 'state': state, 'content':content,'extensions':extensions}
+                textflowtarget = {'resId': textflowId, 'state': state, 'content':content,'extensions':extensions}
             
             textflowtargets.append(textflowtarget)
         
