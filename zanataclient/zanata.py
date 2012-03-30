@@ -630,17 +630,20 @@ def project_info(command_options, args):
     Options:
         --project-id: project id
     """
+    project_id = ""
     project_config = read_project_config(command_options)
 
     if not project_config:
         log.info("Can not find zanata.xml, please specify the path of zanata.xml")
+    
     url = process_url(project_config, command_options)
     get_version(url)
 
     if command_options.has_key('project_id'):
         project_id = command_options['project_id'][0]['value']
     else:
-        project_id = project_config['project_id']
+        if project_config:
+            project_id = project_config['project_id']
 
     if not project_id:
         log.error('Please use zanata project info --project-id=project_id or zanata.xml to specify the project id')
