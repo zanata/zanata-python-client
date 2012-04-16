@@ -307,6 +307,8 @@ class ZanataCommand:
             self.commit_translation(zanata, project_id, iteration_id, request_name, pofile, lang, body, merge)
 
     def push_trans_command(self, zanata, transfolder, project_id, iteration_id, lang_list, locale_map, project_type, merge):
+        filelist = ""
+        folder = ""
         publicanutil = PublicanUtility()
 
         for item in lang_list:
@@ -322,29 +324,42 @@ class ZanataCommand:
 
             if project_type == "podir":
                 folder = os.path.join(transfolder, item)
-
                 if not os.path.isdir(folder):
                     self.log.error("Can not find translation, please specify path of the translation folder")
                     continue
-
                 filelist = publicanutil.get_file_list(folder, ".po")
+            elif project_type == "gettext":
+                folder = transfolder
+                filelist = publicanutil.get_file_list(transfolder, ".pot")
 
-                for filepath in filelist:
-                    self.log.info("\nPushing the content of %s to server:"%filepath)
+            for filepath in filelist:
+                self.log.info("\nPushing the content of %s to server:"%filepath)
+
+                if project_type == "gettext":
+                    name = item.replace('-','_')+'.po'
+                    path = filepath[0:filepath.rfind('/')]
+                    pofile = os.path.join(path, name)
+                    filename = publicanutil.strip_path(filepath, folder, '.pot')
+                elif project_type == "podir":
+                    pofile = filepath
                     filename = publicanutil.strip_path(filepath, folder, '.po')
+ 
+                if not os.path.isfile(pofile):
+                    self.log.error("Can not find the %s translation for %s"%(item, filename))
+                    continue
 
-                    if '/' in filename:
-                        request_name = filename.replace('/', ',')
-                    else:
-                        request_name = filename
+                if '/' in filename:
+                    request_name = filename.replace('/', ',')
+                else:
+                    request_name = filename
 
-                    body = publicanutil.pofile_to_json(filepath)
+                body = publicanutil.pofile_to_json(pofile)
 
-                    if not body:
-                        self.log.error("No content or all entries are obsolete in %s"%filepath)
-                        sys.exit(1)
+                if not body:
+                    self.log.error("No content or all entries are obsolete in %s"%filepath)
+                    sys.exit(1)
 
-                    self.commit_translation(zanata, project_id, iteration_id, request_name, filepath, lang, body, merge)
+                self.commit_translation(zanata, project_id, iteration_id, request_name, pofile, lang, body, merge)
 
     def push_command(self, zanata, file_list, srcfolder, project_id, iteration_id, copytrans, plural_support = False, import_param = None):
         """
