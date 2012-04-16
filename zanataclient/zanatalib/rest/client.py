@@ -1,4 +1,4 @@
-# 
+# vim: set et sts=4 sw=4:
 # Zanata Python Client
 #
 # Copyright (c) 2011 Jian Ni <jni@redhat.com>
@@ -21,7 +21,7 @@
 
 __all__ = (
         "RestClient",
-    )  
+    )
 
 import urlparse
 import urllib
@@ -39,19 +39,19 @@ class RestClient(object):
     def __init__(self, base_url):
         self.base_url = base_url
         self.url = urlparse.urlparse(base_url)
-    
-    def request_get(self, resource, args = None, body = None, headers = {}, extension = None):        
+
+    def request_get(self, resource, args = None, body = None, headers = {}, extension = None):
         return self.request(resource, "get", args, body, headers, extension)
-    
+
     def request_post(self, resource, args = None, body = None, headers = {}, extension = None):
         return self.request(resource, "post", args, body, headers, extension)
-            
+
     def request_put(self, resource, args = None, body = None, headers = {}, extension = None):
         return self.request(resource, "put", args, body, headers, extension)
 
     def request_delete(self, resource, args = None, body = None, headers = {}, extension = None):
         return self.request(resource, "delete", args, body, headers, extension)
-    
+
     def request(self, resource, method = "get", args = None, body = None, headers = {}, extension = None):
         headers['Accept'] = 'application/json'
         http = httplib2.Http()
@@ -60,12 +60,12 @@ class RestClient(object):
             if method == "put" or method == "post":
                 headers['Content-Type'] = 'application/json'
                 body = args
-        
+
         if extension:
             resource = "%s%s%s"%(self.base_url, resource, extension)
         else:
             resource = "%s%s"%(self.base_url, resource)
-       
+
         try:
             response, content = http.request(resource, method.upper(), body, headers=headers)
             if response.previous is not None:
@@ -86,7 +86,7 @@ class RestClient(object):
                 if sys.version_info[:2] == (2, 6):
                     print "If version of python-httplib2 < 0.4.0, please use the patch in http://code.google.com/p/httplib2/issues/detail?id=39"
                 sys.exit(2)
-            else:            
+            else:
                 print "error: %s"%e
                 sys.exit(2)
 
@@ -112,7 +112,7 @@ class RestClient(object):
                 if sys.version_info[:2] == (2, 6):
                     print "If version of python-httplib2 < 0.4.0, please use the patch in http://code.google.com/p/httplib2/issues/detail?id=39"
                 sys.exit(2)
-            else:            
+            else:
                 print "error: %s"%e
                 sys.exit(2)
- 
+

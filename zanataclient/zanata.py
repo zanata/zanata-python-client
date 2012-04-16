@@ -1,5 +1,5 @@
-#vim:set et sts=4 sw=4: 
-# 
+# vim: set et sts=4 sw=4:
+#
 # Zanata Python Client
 #
 # Copyright (c) 2011 Jian Ni <jni@redhat.com>
@@ -242,6 +242,12 @@ option_sets = {
         dict(
             type='command',
             long=['--noskeletons'],
+        ),
+    ],
+    'pushtransonly' : [
+        dict(
+            type='command',
+            long=['--push-trans-only'],
         ),
     ]
 }
@@ -773,7 +779,7 @@ def create_version(command_options, args):
     if args:
         version_id = args[0]
     else:
-        log.error("Please provide ITERATION_ID for creating iteration")
+        log.error("Please provide ITERATION_ID for creating version")
         sys.exit(1)
 
     if command_options.has_key('version_name'):
@@ -1149,7 +1155,20 @@ def push(command_options, args, project_type = None):
         log.error("The project type is unknown")
         sys.exit(1)
 
-    if tmlfolder == "":        
+    if command_options.has_key('pushtransonly'):
+        transfolder = process_transdir(command_options, "")
+        merge = process_merge(command_options)
+        lang_list = get_lang_list(command_options, project_config)
+
+        if project_config.has_key('locale_map'):
+            locale_map = project_config['locale_map']
+        else:
+            locale_map = None
+
+        zanatacmd.push_trans_command(zanata, transfolder, project_id, iteration_id, lang_list, locale_map, command_type, merge)
+        sys.exit(0)
+
+    if tmlfolder == "":
         tmlfolder = process_srcdir(command_options)
         
     if not os.path.isdir(tmlfolder):

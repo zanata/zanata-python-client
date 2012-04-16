@@ -1,4 +1,4 @@
-#vim:set et sts=4 sw=4:
+# vim: set et sts=4 sw=4:
 #
 # Zanata Python Client
 #
@@ -57,21 +57,21 @@ class ZanataCommand:
         else:
             if project_config.has_key('project_id'):
                 project_id = project_config['project_id']
-        
+
         if command_options.has_key('project_version'):
             iteration_id = command_options['project_version'][0]['value'] 
         else:
             if project_config.has_key('project_version'):
                 iteration_id = project_config['project_version']
-        
+
         if not project_id:
             self.log.error("Please specify a valid project id in zanata.xml or with '--project-id' option")
             sys.exit(1)
-        
+
         if not iteration_id:
             self.log.error("Please specify a valid version id in zanata.xml or with '--project-version' option")
             sys.exit(1)
-        
+
         self.log.info("Project: %s"%project_id)
         self.log.info("Version: %s"%iteration_id)
 
@@ -95,7 +95,7 @@ class ZanataCommand:
             request_name = filename.replace('/', ',')
         else:
             request_name = filename
-        
+
         try:
             result = zanata.documents.update_template(project_id, iteration_id, request_name, body, copytrans)
             if result:
@@ -109,10 +109,10 @@ class ZanataCommand:
         try:
             result = zanata.documents.commit_translation(project_id, iteration_id, request_name, lang, body, merge)
             if result:
-                self.log.warn(result)   
+                self.log.warn(result)
             self.log.info("Successfully pushed translation %s to the Zanata server"%pofile)
         except UnAuthorizedException, e:
-            self.log.error(e.msg)                                            
+            self.log.error(e.msg)
         except BadRequestBodyException, e:
             self.log.error(e.msg)
         except UnexpectedStatusException, e:
@@ -169,13 +169,13 @@ class ZanataCommand:
                     except Exception, e:
                         self.log.error(str(e))
                         sys.exit(1)
-  
+
     def list_projects(self, zanata):
         """
         List the information of all the project on the zanata server
         """
         projects = zanata.projects.list()
-        
+
         if not projects:
             self.log.error("There is no projects on the server or the server not working")
             sys.exit(1)
@@ -186,7 +186,7 @@ class ZanataCommand:
             print ("Project Links:       %s\n")%[{'href':link.href, 'type':link.type, 'rel':link.rel} for link in project.links]
 
         return projects
-        
+
     def project_info(self, zanata, project_id):
         """
         Retrieve the information of a project
@@ -258,8 +258,8 @@ class ZanataCommand:
             self.log.error(e.msg)
 
     def import_po(self, zanata, potfile, trans_folder, project_id, iteration_id, lang_list, locale_map, merge, project_type):
-        sub_dir = ""        
-        publicanutil = PublicanUtility()        
+        sub_dir = ""
+        publicanutil = PublicanUtility()
         for item in lang_list:
             if not locale_map:
                 lang = item
@@ -268,7 +268,7 @@ class ZanataCommand:
                     lang = locale_map[item]
                 else:
                     lang = item
-            
+
             if '/' in potfile:
                 request_name = potfile.replace('/', ',')
                 sub_dir = potfile[0:potfile.rfind('/')]
@@ -279,10 +279,10 @@ class ZanataCommand:
 
             if project_type == "podir":
                 folder = os.path.join(trans_folder, item)
-                    
+
                 if not os.path.isdir(folder):
                     self.log.error("Can not find translation, please specify path of the translation folder")
-                    continue  
+                    continue
 
                 pofile = os.path.join(folder, potfile+'.po') 
 
@@ -292,19 +292,59 @@ class ZanataCommand:
                     path = os.path.join(trans_folder, sub_dir)
                 else:
                     path = trans_folder
-                pofile = os.path.join(path, filename)  
-                
+                pofile = os.path.join(path, filename)
+
             if not os.path.isfile(pofile):
                 self.log.error("Can not find the %s translation for %s"%(item, potfile))
                 continue
-                        
-            body = publicanutil.pofile_to_json(pofile)           
-    
+
+            body = publicanutil.pofile_to_json(pofile)
+
             if not body:
                 self.log.error("No content or all entries are obsolete in %s"%pofile)
                 sys.exit(1)
-            
+
             self.commit_translation(zanata, project_id, iteration_id, request_name, pofile, lang, body, merge)
+
+    def push_trans_command(self, zanata, transfolder, project_id, iteration_id, lang_list, locale_map, project_type, merge):
+        publicanutil = PublicanUtility()
+
+        for item in lang_list:
+            if not locale_map:
+                lang = item
+            else:
+                if item in locale_map:
+                    lang = locale_map[item]
+                else:
+                    lang = item
+
+            self.log.info("\nPushing %s translation for %s to server:"%(item, project_id))
+
+            if project_type == "podir":
+                folder = os.path.join(transfolder, item)
+
+                if not os.path.isdir(folder):
+                    self.log.error("Can not find translation, please specify path of the translation folder")
+                    continue
+
+                filelist = publicanutil.get_file_list(folder, ".po")
+
+                for filepath in filelist:
+                    self.log.info("\nPushing the content of %s to server:"%filepath)
+                    filename = publicanutil.strip_path(filepath, folder, '.po')
+
+                    if '/' in filename:
+                        request_name = filename.replace('/', ',')
+                    else:
+                        request_name = filename
+
+                    body = publicanutil.pofile_to_json(filepath)
+
+                    if not body:
+                        self.log.error("No content or all entries are obsolete in %s"%filepath)
+                        sys.exit(1)
+
+                    self.commit_translation(zanata, project_id, iteration_id, request_name, filepath, lang, body, merge)
 
     def push_command(self, zanata, file_list, srcfolder, project_id, iteration_id, copytrans, plural_support = False, import_param = None):
         """
@@ -318,16 +358,16 @@ class ZanataCommand:
             plural_exist = publicanutil.check_plural(filepath)
             if plural_exist and not plural_support:
                 self.log.error("The plural is only supported in zanata server >= 1.6, this file will be ignored")
-                break                   
+                break
             body, filename = publicanutil.potfile_to_json(filepath, srcfolder)
-                                          
+
             try:
                 result = zanata.documents.commit_template(project_id, iteration_id, body, copytrans)
                 if result:
                     self.log.info("Successfully pushed %s to the server"%filepath)
             except UnAuthorizedException, e:
                 self.log.error(e.msg)
-                break                             
+                break
             except BadRequestBodyException, e:
                 self.log.error(e.msg)
                 continue
@@ -336,14 +376,14 @@ class ZanataCommand:
             except UnexpectedStatusException, e:
                 self.log.error(e.msg)
                 continue
-            
+
             if import_param:
                 merge = import_param['merge']
                 lang_list = import_param['lang_list']
                 project_type = import_param['project_type']
                 transdir = import_param['transdir']
                 locale_map = import_param['locale_map']
-      
+
                 self.import_po(zanata, filename, transdir, project_id, iteration_id, lang_list, locale_map, merge, project_type)
 
     def pull_command(self, zanata, locale_map, project_id, iteration_id, filelist, lang_list, output, project_type, skeletons):
@@ -371,7 +411,7 @@ class ZanataCommand:
             self.log.info("\nFetching the content of %s from Zanata server: "%name)
 
             try:
-                pot = zanata.documents.retrieve_template(project_id, iteration_id, request_name)                    
+                pot = zanata.documents.retrieve_template(project_id, iteration_id, request_name)
             except UnAuthorizedException, e:
                 self.log.error(e.msg)
                 break
@@ -380,8 +420,8 @@ class ZanataCommand:
                 break
             except UnexpectedStatusException, e:
                 self.log.error(e.msg)
-                break                    
-                    
+                break
+
             for item in lang_list:
                 if not locale_map:
                     lang = item
@@ -390,16 +430,16 @@ class ZanataCommand:
                         lang = locale_map[item]
                     else:
                         lang = item
-                    
+
                 if project_type == "podir":
                     outpath = os.path.join(output, item) 
                     if not os.path.isdir(outpath):
-                        os.mkdir(outpath)  
+                        os.mkdir(outpath)
                     save_name = name
                 elif project_type == "gettext":
                     outpath = output
                     save_name = item.replace('-','_')
-                                        
+
                 if folder:
                     subdirectory = os.path.join(outpath, folder)
                     if not os.path.isdir(subdirectory):
@@ -409,22 +449,21 @@ class ZanataCommand:
                     pofile = os.path.join(outpath, save_name+'.po')
 
                 self.log.info("Retrieving %s translation from server:"%item)
-                    
+
                 try:
                     result = zanata.documents.retrieve_translation(lang, project_id, iteration_id, request_name, skeletons)
                     publicanutil.save_to_pofile(pofile, result, pot, skeletons, item, name)
                 except UnAuthorizedException, e:
-                    self.log.error(e.msg)                        
+                    self.log.error(e.msg)
                     break
                 except UnAvaliableResourceException, e:
                     self.log.info("There is no %s translation for %s"%(item, name))
                 except BadRequestBodyException, e:
                     self.log.error(e.msg)
-                    continue 
+                    continue
                 except UnexpectedStatusException, e:
                     self.log.error(e.msg)
 
-    
     def poglossary_push(self, path, url, username, apikey, lang, sourcecomments):
         publicanutil = PublicanUtility()
         json = publicanutil.glossary_to_json(path, lang, sourcecomments)
@@ -447,7 +486,7 @@ class ZanataCommand:
 
     def csvglossary_push(self, path, url, username, apikey, locale_map, comments_header):
         csvconverter = CSVConverter()
-        json = csvconverter.convert_to_json(path, locale_map, comments_header)        
+        json = csvconverter.convert_to_json(path, locale_map, comments_header)
         glossary = GlossaryService(url)
 
         try:
