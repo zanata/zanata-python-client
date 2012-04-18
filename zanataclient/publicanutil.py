@@ -198,6 +198,20 @@ class PublicanUtility:
 
         return final_file_list
 
+    def get_pofile_path(self, folder, file_name):
+        final_file_list = ""
+        root_list = os.listdir(folder)
+        for item in root_list:
+            if item == '.svn':
+                continue
+            full_path = os.path.join(folder, item)
+            if item == file_name:
+                return full_path
+            if os.path.isdir(full_path):
+                final_file_list = self.get_pofile_path(full_path, file_name)
+
+        return final_file_list
+
     def hash_match(self, message, resid):
         """
         Caculate the hash of msgid and msgctxt, then compare result with resId from server,

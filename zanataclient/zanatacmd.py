@@ -311,6 +311,14 @@ class ZanataCommand:
         folder = ""
         publicanutil = PublicanUtility()
 
+        if project_type == "podir":
+            try:
+                filelist = zanata.documents.get_file_list(project_id, iteration_id)
+            except Exception, e:
+                self.log.error(str(e))
+        elif project_type == "gettext":
+            filelist = publicanutil.get_file_list(transfolder, ".pot")
+
         for item in lang_list:
             if not locale_map:
                 lang = item
@@ -324,34 +332,36 @@ class ZanataCommand:
 
             if project_type == "podir":
                 folder = os.path.join(transfolder, item)
-                if not os.path.isdir(folder):
-                    self.log.error("Can not find translation, please specify path of the translation folder")
+                if not os.path.exists(folder):
+                    self.log.error("The folder %s is not exist"%os.path.abspath(folder))
                     continue
-                filelist = publicanutil.get_file_list(folder, ".po")
             elif project_type == "gettext":
                 folder = transfolder
-                filelist = publicanutil.get_file_list(transfolder, ".pot")
 
             for filepath in filelist:
                 self.log.info("\nPushing the content of %s to server:"%filepath)
 
                 if project_type == "gettext":
                     name = item.replace('-','_')+'.po'
-                    path = filepath[0:filepath.rfind('/')]
+                    if '/' in filepath:
+                        path = filepath[0:filepath.rfind('/')]
+                    else:
+                        path = filepath
                     pofile = os.path.join(path, name)
                     filename = publicanutil.strip_path(filepath, folder, '.pot')
                 elif project_type == "podir":
-                    pofile = filepath
-                    filename = publicanutil.strip_path(filepath, folder, '.po')
+                    if '/' in filepath:
+                        name = filepath[filepath.rfind('/')+1:]+'.po'
+                    else:
+                        name = filepath+'.po'
+                    pofile = publicanutil.get_pofile_path(folder, name)
+                    filename = filepath
  
                 if not os.path.isfile(pofile):
                     self.log.error("Can not find the %s translation for %s"%(item, filename))
                     continue
 
-                if '/' in filename:
-                    request_name = filename.replace('/', ',')
-                else:
-                    request_name = filename
+                request_name = filename.replace('/', ',')
 
                 body = publicanutil.pofile_to_json(pofile)
 
