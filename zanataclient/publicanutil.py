@@ -88,6 +88,44 @@ class PublicanUtility:
             textflows.append(textflow)
         return textflows
     
+    def check_empty(self, contents):
+        for string in contents:
+            if string != u'':
+                return False
+        return True
+
+    def check_nonempty(self, contents):
+        for string in contents:
+            if string == u'':
+                return False
+        return True
+
+    def get_contentstate(self, entry):
+        fuzzy = False
+        contents = []
+
+        if "fuzzy" in entry.flags:
+            fuzzy = True
+        
+        if entry.msgid_plural:
+            keys = entry.msgstr_plural.keys()
+            keys.sort()
+            for key in keys:
+                contents.append(entry.msgstr_plural[key])
+        else:
+            contents.append(entry.msgstr)
+
+        if self.check_empty(contents):
+            fuzzy = False;
+        
+        if fuzzy:
+            return "NeedReview"
+      
+        if self.check_nonempty(contents):
+            return "Approved"
+        else:
+            return "New"
+
     def create_txtflowtarget(self, pofile):
         """
         Convert the content of the po file to a list of textflowtarget.
@@ -96,7 +134,7 @@ class PublicanUtility:
         obs_list=pofile.obsolete_entries()
         textflowtargets = []
         content = ""
-        
+
         for entry in pofile:
             if entry in obs_list:
                 continue
@@ -111,20 +149,7 @@ class PublicanUtility:
             textflowId = m.hexdigest()
             translator_comment = entry.tcomment
 
-            #need judge for fuzzy state
-            if "fuzzy" in entry.flags:
-                state = "NeedReview"
-
-            if entry.msgid_plural:
-                if "" in entry.msgstr_plural.values():
-                    state = "New"
-                else:
-                    state = "Approved"
-            else:
-                if entry.msgstr:
-                    state = "Approved"
-                else:
-                    state = "New"
+            state = self.get_contentstate(entry)
 
             #create extensions
             extensions = [{"object-type":"comment","value":translator_comment,"space":"preserve"}]
@@ -139,9 +164,9 @@ class PublicanUtility:
             else:
                 content = entry.msgstr
                 textflowtarget = {'resId': textflowId, 'state': state, 'content':content,'extensions':extensions}
-            
+
             textflowtargets.append(textflowtarget)
-        
+
         return textflowtargets
 
     def validate_content_type(self, content_type, object_type):
