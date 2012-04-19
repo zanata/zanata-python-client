@@ -110,19 +110,25 @@ class PublicanUtility:
             m.update(hashbase.encode('utf-8'))
             textflowId = m.hexdigest()
             translator_comment = entry.tcomment
-            
-            if entry.msgstr:
-                state = "Approved"
-            else:
-                state = "New"
-            
+
             #need judge for fuzzy state
             if "fuzzy" in entry.flags:
                 state = "NeedReview"
-            
+
+            if entry.msgid_plural:
+                if "" in entry.msgstr_plural.values():
+                    state = "New"
+                else:
+                    state = "Approved"
+            else:
+                if entry.msgstr:
+                    state = "Approved"
+                else:
+                    state = "New"
+
             #create extensions
             extensions = [{"object-type":"comment","value":translator_comment,"space":"preserve"}]
-           
+
             if entry.msgid_plural:
                 content = []
                 keys = entry.msgstr_plural.keys()
@@ -260,7 +266,7 @@ class PublicanUtility:
         textflows = self.create_txtflow(pofile)
         extensions = self.create_extensions(pofile, "po-header")
         items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en-US', 'extensions':extensions, 'textFlows':textflows}
-        
+
         return json.dumps(items), filename
 
     def pofile_to_json(self, filepath):
@@ -273,7 +279,7 @@ class PublicanUtility:
         #the function for extensions have not implemented yet
         extensions = self.create_extensions(pofile, "po-target-header")
         items = {'links':[],'extensions':extensions, 'textFlowTargets':textflowtargets}
-        
+
         return json.dumps(items)
 
     def glossary_to_json(self, filepath, lang, sourcecomments):
@@ -283,7 +289,7 @@ class PublicanUtility:
         targetlocales.append(lang)
         srclocales = []
         srclocales.append('en-US')
-        
+
         for item in pofile:
             entry= {'srcLang':'en-US','glossaryTerms':'', 'sourcereference':''}
             target_comments=[]
@@ -291,7 +297,7 @@ class PublicanUtility:
             comments=''
             reflist = []
             references = item.occurrences
-            
+
             for ref in references:
                 node = ref[0]+":"+ref[1]
                 reflist.append(node)
@@ -309,12 +315,11 @@ class PublicanUtility:
                 source_comments.append(item.comment)
 
             terms = [{'locale':lang, 'content':item.msgstr, 'comments':target_comments}, {'locale':'en-US', 'content':item.msgid, 'comments':source_comments}]
-            entry['glossaryTerms'] = terms 
- 
+            entry['glossaryTerms'] = terms
             entries.append(entry)
 
         glossary = {'sourceLocales':srclocales, 'glossaryEntries':entries, 'targetLocales':targetlocales}
-        
+
         return json.dumps(glossary)
 
     def save_to_pofile(self, path, translations, pot, create_skeletons, locale, doc_name):
@@ -325,14 +330,14 @@ class PublicanUtility:
         @param pot: the json object of the pot retrieved from server
         """
         po = polib.POFile(fpath=path)
-        
+
         potcontent = json.loads(pot)
         # pylint: disable=E1103
         textflows = potcontent.get('textFlows')
-                
+
         if potcontent.get('extensions'):
             extensions = potcontent.get('extensions')[0]
-            po.header = extensions.get('comment')     
+            po.header = extensions.get('comment')
             for item in extensions.get('entries'):
                 po.metadata[item['key']]=item['value']
             #specify Content-Type charset to UTF-8
@@ -363,42 +368,46 @@ class PublicanUtility:
                             poentry.occurrences = ref_list
                         else:
                             poentry.occurrences = None
-                    
+
                         if entry.get('flags'):
                             poentry.flags = entry.get('flags')
 
                         if entry.get('context'):
                             poentry.msgctxt = entry.get('context')
-                                            
+
                     if entry.get('object-type') == 'comment':
                         #SimpleComment
                         poentry.comment = entry.get('value')
-                         
+
                 poentry.msgid = textflow.get('content')
+                if textflow.get('contents'):
+                    poentry.msgid = textflow.get('contents')[0]
+                    poentry.msgid_plural = textflow.get('contents')[1]
                 po.append(poentry)
-          
+
         #If the translation is exist, read the content of the po file
         if translations:
             content = json.loads(translations)
             #"extensions":[{"object-type":"po-target-header", "comment":"comment_value", "entries":
             #[{"key":"ht","value":"vt1"}]}]
-            
+
             if content.get('extensions'):
                 ext = content.get('extensions')[0]
                 header_comment = ext.get('comment')
                 if header_comment:
                     po.header = header_comment
                 for item in ext.get('entries'):
-                    po.metadata[item['key']]=item['value']  
-            
+                    po.metadata[item['key']]=item['value']
+
             targets = content.get('textFlowTargets')
+
             if not create_skeletons:
                 if not targets:
                     self.log.warn("No translations found in %s for document %s"%(locale, doc_name))
                     return
 
             #"extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
-             
+
             # copy any other stuff you need to transfer
             for message in po:
                 for translation in targets:
@@ -408,9 +417,14 @@ class PublicanUtility:
                             for entry in extensions:
                                 if entry.get('object-type') == 'comment':
                                     message.tcomment = entry.get('value')
-               
+
                     if self.hash_match(message, translation.get('resId')):
                         message.msgstr = translation.get('content')
+                        if translation.get('contents'):
+                            i = 0
+                            for msg in translation.get('contents'):
+                                message.msgstr[i]=msg
+                                i = i+1
                         if translation.get('state') == 'NeedReview':
                             if message.flags == [u'']:
                                 message.flags = ['fuzzy']
