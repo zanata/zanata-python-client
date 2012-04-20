@@ -51,8 +51,9 @@ class OptionsUtil:
         self.log.info("zanata server: %s" % url)
 
         return url, username, apikey
-        
+
     def apply_project_config(self):
+        url = ""
         #Read the project configuration file using --project-config option
         config_file = [os.path.join(os.getcwd(), filename) for filename\
                     in ['zanata.xml', 'flies.xml']]
@@ -61,14 +62,15 @@ class OptionsUtil:
             config_file.append(self.command_options['project_config'][0]['value'])
 
         for path in config_file:
+
             if os.path.exists(path):
                 self.log.info("Loading zanata project config from: %s" % path)
-            self.project_config = self.config.read_project_config(path)
-            break
+                self.project_config = self.config.read_project_config(path)
+                break
 
         if not self.project_config:
             self.log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-   
+            
         #process the url of server
         if self.project_config.has_key('project_url'):
             url = self.project_config['project_url']
