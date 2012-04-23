@@ -316,6 +316,10 @@ class ZanataCommand:
         except Exception, e:
             self.log.error(str(e))
 
+        if not filelist:
+            self.log.error("There is no source files on the server, please push source files first")
+            sys.exit(1)
+
         for item in lang_list:
             if not locale_map:
                 lang = item
