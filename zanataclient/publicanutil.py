@@ -444,11 +444,13 @@ class PublicanUtility:
                                     message.tcomment = entry.get('value')
 
                     if self.hash_match(message, translation.get('resId')):
-                        message.msgstr = translation.get('content')
+                        if translation.get('content'):
+                            message.msgstr = translation.get('content')
+
                         if translation.get('contents'):
                             i = 0
                             for msg in translation.get('contents'):
-                                message.msgstr[i]=msg
+                                message.msgstr_plural[i] = msg
                                 i = i+1
                         if translation.get('state') == 'NeedReview':
                             if message.flags == [u'']:
