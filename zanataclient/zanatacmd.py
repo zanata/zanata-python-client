@@ -311,13 +311,10 @@ class ZanataCommand:
         folder = ""
         publicanutil = PublicanUtility()
 
-        if project_type == "podir":
-            try:
-                filelist = zanata.documents.get_file_list(project_id, iteration_id)
-            except Exception, e:
-                self.log.error(str(e))
-        elif project_type == "gettext":
-            filelist = publicanutil.get_file_list(transfolder, ".pot")
+        try:
+            filelist = zanata.documents.get_file_list(project_id, iteration_id)
+        except Exception, e:
+            self.log.error(str(e))
 
         for item in lang_list:
             if not locale_map:
@@ -338,26 +335,25 @@ class ZanataCommand:
             elif project_type == "gettext":
                 folder = transfolder
 
-            for filepath in filelist:
-                self.log.info("\nPushing the content of %s to server:"%filepath)
-
+            for filename in filelist:
                 if project_type == "gettext":
-                    name = item.replace('-','_')+'.po'
-                    if '/' in filepath:
-                        path = filepath[0:filepath.rfind('/')]
+                    pofile_name = item.replace('-','_')+'.po'
+                    if '/' in filename:
+                        name = filename[filename.rfind('/')+1:]+'.pot'
                     else:
-                        path = filepath
-                    pofile = os.path.join(path, name)
-                    filename = publicanutil.strip_path(filepath, folder, '.pot')
+                        name = filename+'.pot'
+                    filepath = publicanutil.get_pofile_path(folder, name)
+                    pofile = filepath[0:filepath.rfind('/')+1]+pofile_name
                 elif project_type == "podir":
-                    if '/' in filepath:
-                        name = filepath[filepath.rfind('/')+1:]+'.po'
+                    if '/' in filename:
+                        name = filename[filename.rfind('/')+1:]+'.po'
                     else:
-                        name = filepath+'.po'
+                        name = filename+'.po'
                     pofile = publicanutil.get_pofile_path(folder, name)
-                    filename = filepath
  
-                if not os.path.isfile(pofile):
+                self.log.info("\nPushing the %s translation of %s to server:"%(item, filename))
+
+                if not pofile or not os.path.isfile(pofile):
                     self.log.error("Can not find the %s translation for %s"%(item, filename))
                     continue
 
