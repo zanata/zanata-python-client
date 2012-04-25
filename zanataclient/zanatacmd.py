@@ -28,17 +28,17 @@ from csvconverter import CSVConverter
 from zanatalib.glossaryservice import GlossaryService
 from zanatalib.project import Project
 from zanatalib.project import Iteration
-from zanatalib.logger import Logger 
+from zanatalib.logger import Logger
+from zanatalib.error import ZanataException
 from zanatalib.error import NoSuchProjectException
 from zanatalib.error import UnAuthorizedException
 from zanatalib.error import UnAvaliableResourceException
 from zanatalib.error import BadRequestBodyException
 from zanatalib.error import SameNameDocumentException
 from zanatalib.error import InvalidOptionException
-from zanatalib.error import NotAllowedException
-from zanatalib.error import ProjectExistException
 from zanatalib.error import UnexpectedStatusException
 from zanatalib.error import UnavailableServiceError
+from zanatalib.error import InternalServerError
 
 class ZanataCommand:
     def __init__(self):
@@ -78,17 +78,17 @@ class ZanataCommand:
         try:
             zanataclient.projects.get(project_id)
         except NoSuchProjectException, e:
-            self.log.error(e.msg)
+            self.log.error(str(e))
             sys.exit(1)
-   
+
         try:
             zanataclient.projects.iterations.get(project_id, iteration_id)
             return project_id, iteration_id
         except NoSuchProjectException, e:
-            self.log.error(e.msg)
+            self.log.error(str(e))
             sys.exit(1)
-        except UnexpectedStatusException, e:
-            self.log.error(e.msg)
+        except ZanataException, e:
+            self.log.error(str(e))
 
     def update_template(self, zanata, project_id, iteration_id, filename, body, copytrans):
         if '/' in filename:
@@ -100,10 +100,8 @@ class ZanataCommand:
             result = zanata.documents.update_template(project_id, iteration_id, request_name, body, copytrans)
             if result:
                 self.log.info("Successfully updated template %s on the server"%filename)
-        except BadRequestBodyException, e:
-            self.log.error(e.msg)
-        except UnexpectedStatusException, e:
-            self.log.error(e.msg)
+        except ZanataException, e:
+            self.log.error(str(e))
 
     def commit_translation(self, zanata, project_id, iteration_id, request_name, pofile, lang, body, merge):
         try:
@@ -111,12 +109,8 @@ class ZanataCommand:
             if result:
                 self.log.warn(result)
             self.log.info("Successfully pushed translation %s to the Zanata server"%pofile)
-        except UnAuthorizedException, e:
-            self.log.error(e.msg)
-        except BadRequestBodyException, e:
-            self.log.error(e.msg)
-        except UnexpectedStatusException, e:
-            self.log.error(e.msg)
+        except ZanataException, e:
+            self.log.error(str(e))
 
     def del_server_content(self, zanata, tmlfolder, project_id, iteration_id, push_files, force, project_type):
         #Get the file list of this version of project
@@ -132,7 +126,7 @@ class ZanataCommand:
                 while True:
                     option = raw_input("Are you sure (y/n)?")
                     if option.lower() == "yes" or option.lower() == "y":
-                        break    
+                        break
                     elif option.lower() == "no" or option.lower() == "n":
                         self.log.info("Processing stopped, keeping existing content on the server")
                         sys.exit(1)
@@ -153,11 +147,11 @@ class ZanataCommand:
                 else:
                     path = os.path.join(tmlfolder, name+".pot")
 
-                if project_type== "gettext":
+                if project_type == "gettext":
                     if push_files:
                         if path not in push_files:
                             delete = True
-                elif project_type=="podir":
+                elif project_type == "podir":
                     if not os.path.exists(path):
                         delete = True
 
@@ -166,7 +160,7 @@ class ZanataCommand:
 
                     try:
                         zanata.documents.delete_template(project_id, iteration_id, request)
-                    except Exception, e:
+                    except ZanataException, e:
                         self.log.error(str(e))
                         sys.exit(1)
 
@@ -228,12 +222,8 @@ class ZanataCommand:
             result = zanata.projects.create(p)
             if result == "Success":
                 self.log.info("Successfully created project: %s"%project_id)
-        except NoSuchProjectException, e:
-            self.log.error(e.msg) 
-        except UnAuthorizedException, e:
-            self.log.error(e.msg)
-        except ProjectExistException, e:
-            self.log.error(e.msg)
+        except ZanataException, e:
+            self.log.error(str(e))
 
     def create_version(self, zanata, project_id, version_id, version_name=None, version_desc=None):
         """
@@ -246,16 +236,8 @@ class ZanataCommand:
             result = zanata.projects.iterations.create(project_id, iteration)
             if result == "Success":
                 self.log.info("Successfully created version: %s"%version_id)
-        except ProjectExistException, e:
-            self.log.error(e.msg)
-        except NoSuchProjectException, e:
-            self.log.error(e.msg)
-        except UnAuthorizedException, e:
-            self.log.error(e.msg)
-        except InvalidOptionException, e:
-            self.log.error(e.msg)
-        except NotAllowedException, e:
-            self.log.error(e.msg)
+        except ZanataException, e:
+            self.log.error(str(e))
 
     def import_po(self, zanata, potfile, trans_folder, project_id, iteration_id, lang_list, locale_map, merge, project_type):
         sub_dir = ""
@@ -313,7 +295,7 @@ class ZanataCommand:
 
         try:
             filelist = zanata.documents.get_file_list(project_id, iteration_id)
-        except Exception, e:
+        except ZanataException, e:
             self.log.error(str(e))
 
         if not filelist:
@@ -391,16 +373,19 @@ class ZanataCommand:
                 if result:
                     self.log.info("Successfully pushed %s to the server"%filepath)
             except UnAuthorizedException, e:
-                self.log.error(e.msg)
+                self.log.error(str(e))
                 break
             except BadRequestBodyException, e:
-                self.log.error(e.msg)
+                self.log.error(str(e))
                 continue
             except SameNameDocumentException, e:
                 self.update_template(zanata, project_id, iteration_id, filename, body, copytrans)
             except UnexpectedStatusException, e:
-                self.log.error(e.msg)
+                self.log.error(str(e))
                 continue
+            except InternalServerError, e:
+                self.log.error(str(e))
+                sys.exit(1)
 
             if import_param:
                 merge = import_param['merge']
@@ -438,14 +423,17 @@ class ZanataCommand:
             try:
                 pot = zanata.documents.retrieve_template(project_id, iteration_id, request_name)
             except UnAuthorizedException, e:
-                self.log.error(e.msg)
+                self.log.error(str(e))
                 break
             except UnAvaliableResourceException, e:
                 self.log.error("Can't find pot file for %s on server"%name)
                 break
             except UnexpectedStatusException, e:
-                self.log.error(e.msg)
+                self.log.error(str(e))
                 break
+            except InternalServerError, e:
+                self.log.error(str(e))
+                sys.exit(1)
 
             for item in lang_list:
                 if not locale_map:
@@ -479,15 +467,19 @@ class ZanataCommand:
                     result = zanata.documents.retrieve_translation(lang, project_id, iteration_id, request_name, skeletons)
                     publicanutil.save_to_pofile(pofile, result, pot, skeletons, item, name)
                 except UnAuthorizedException, e:
-                    self.log.error(e.msg)
+                    self.log.error(str(e))
                     break
                 except UnAvaliableResourceException, e:
                     self.log.info("There is no %s translation for %s"%(item, name))
                 except BadRequestBodyException, e:
-                    self.log.error(e.msg)
+                    self.log.error(str(e))
                     continue
                 except UnexpectedStatusException, e:
-                    self.log.error(e.msg)
+                    self.log.error(str(e))
+                except InternalServerError, e:
+                    self.log.error(str(e))
+                    sys.exit(1)
+
 
     def poglossary_push(self, path, url, username, apikey, lang, sourcecomments):
         publicanutil = PublicanUtility()
@@ -499,15 +491,11 @@ class ZanataCommand:
             if content:
                 self.log.info("Successfully pushed glossary to the server")
         except UnAvaliableResourceException:
-            self.log.error("Can not push")
+            self.log.error("Can not push glossary to the server")
         except UnavailableServiceError:
             self.log.error("Service Temporarily Unavailable, stop processing!")
-        except BadRequestBodyException, e:
-            self.log.error(e.msg)
-        except UnexpectedStatusException, e:
-            self.log.error(e.msg)
-        except UnAuthorizedException,e:
-            self.log.error(e.msg)
+        except ZanataException, e:
+            self.log.error(str(e))
 
     def csvglossary_push(self, path, url, username, apikey, locale_map, comments_header):
         csvconverter = CSVConverter()
@@ -519,12 +507,8 @@ class ZanataCommand:
             if content:
                 self.log.info("Successfully pushed glossary to the server")
         except UnAvaliableResourceException:
-            self.log.error("Can not push")
+            self.log.error("Can not push glossary to the server")
         except UnavailableServiceError:
             self.log.error("Service Temporarily Unavailable, stop processing!")
-        except BadRequestBodyException, e:
-            self.log.error(e.msg)
-        except UnexpectedStatusException, e:
-            self.log.error(e.msg)
-        except UnAuthorizedException,e:
-            self.log.error(e.msg)
+        except ZanataException, e:
+            self.log.error(str(e))

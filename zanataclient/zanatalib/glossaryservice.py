@@ -25,10 +25,6 @@ __all__ = (
         "GlossaryService",
    )
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
 from rest.client import RestClient
 from error import UnAuthorizedException
 from error import BadRequestBodyException

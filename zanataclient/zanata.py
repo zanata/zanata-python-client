@@ -503,7 +503,7 @@ def get_lang_list(command_options, project_config):
 #        log.error("The source folder is empty, please specify the valid source folder with '--srcdir' or 'dir' option")
 #        sys.exit(1)    
 
-def process_srcdir_withsub(command_options, project_type):
+def process_srcdir_withsub(command_options):
     tmlfolder = ""
 
     if command_options.has_key('srcdir'):
@@ -513,7 +513,7 @@ def process_srcdir_withsub(command_options, project_type):
         tmlfolder = command_options['dir'][0]['value']
     else:
         tmlfolder = os.path.abspath(os.getcwd())
-    
+
     if not os.path.isdir(tmlfolder):
         log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
         sys.exit(1)
@@ -543,7 +543,6 @@ def process_srcfile(command_options):
     if command_options.has_key('srcfile'):
         path = command_options['srcfile'][0]['value']
         file_path = os.path.abspath(path)
-        import_file = file_path.split('/')[-1]
         tmlfolder = file_path[0:file_path.rfind('/')]
 
     return tmlfolder, file_path
@@ -847,8 +846,6 @@ def po_push(command_options, args):
     copytrans = True
     importpo = False
     force = False
-    dir_option = False
-    command_type = ''
     tmlfolder = ""
     plural_support = False
     filelist = []
@@ -984,7 +981,6 @@ def publican_push(command_options, args):
     copytrans = True
     importpo = False
     force = False
-    dir_option = False
     deletefiles = False
     plural_support = False
     tmlfolder = ""
@@ -1067,8 +1063,8 @@ def publican_push(command_options, args):
         log.info("Importing source documents only")
 
         zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support)
-    
-def push(command_options, args, project_type = None):
+
+def push(command_options, args):
     """
     Usage: zanata push OPTIONS {documents}
 
@@ -1095,7 +1091,6 @@ def push(command_options, args, project_type = None):
     copytrans = True
     importpo = False
     force = False
-    dir_option = False
     deletefiles = False
     plural_support = False
     command_type = ''
@@ -1135,7 +1130,7 @@ def push(command_options, args, project_type = None):
     else:
         log.error("The project type is unknown")
         sys.exit(1)
-    
+
     if command_type != 'podir' and command_type != 'gettext':
         log.error("The project type is not correct, please use 'podir' and 'gettext' as project type")
         sys.exit(1)
@@ -1150,7 +1145,7 @@ def push(command_options, args, project_type = None):
     #Disable dir option for generic push command
     if command_options.has_key('dir'):
         log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")
-    
+
     if command_type != 'podir' and command_type != 'gettext':
         log.error("The project type is unknown")
         sys.exit(1)
@@ -1170,11 +1165,11 @@ def push(command_options, args, project_type = None):
 
     if tmlfolder == "":
         tmlfolder = process_srcdir(command_options)
-        
+
     if not os.path.isdir(tmlfolder):
         log.error("Can not find source folder, please specify the source folder with '--srcdir' or using zanata.xml")
         sys.exit(1)
-    
+
     if args:
         try:
             full_path = search_file(tmlfolder, args[0])
@@ -1194,10 +1189,10 @@ def push(command_options, args, project_type = None):
 
     if command_options.has_key('force'):
         force = True
-    
+
     if command_type == 'podir':
         log.info("POT directory (originals):%s" % tmlfolder)
-        folder = None;
+        folder = None
     elif command_type == 'gettext':
         log.info("PO directory (originals):%s" % tmlfolder)
         folder = tmlfolder
@@ -1279,7 +1274,7 @@ def pull(command_options, args, project_type = None):
         locale_map = project_config['locale_map']
     else:
         locale_map = None
-    
+
     if project_type:
         command_type = project_type
         dir_option = True
@@ -1302,11 +1297,11 @@ def pull(command_options, args, project_type = None):
         #Disable dir option for generic pull command
         if command_options.has_key('dir'):
             log.warn("dir option is disabled in pull command, please use --transdir, or specify value in zanata.xml")
-                     
+
         if command_options.has_key('dstdir'):
             log.warn("dstdir option is changed to transdir option for generic pull command")
             output_folder = command_options['dstdir'][0]['value']
-    
+
     if command_options.has_key('noskeletons'):
         skeletons = False
 
@@ -1335,7 +1330,7 @@ def glossary_push(command_options, args):
     url, username, apikey = optionsutil.apply_configfiles()
     get_version(url)
     log.info("Username: %s" % username)
- 
+
     if args:
         path = os.path.join(os.getcwd(), args[0])
         if not os.path.isfile(path):
@@ -1343,15 +1338,15 @@ def glossary_push(command_options, args):
             sys.exit(1)
     else:
         log.info("Please specify the file name of glossary file")
-        sys.exit(1)   
+        sys.exit(1)
 
     basename, extension = os.path.splitext(path)
 
     locale_map = optionsutil.get_localemap()
 
-    log.info("pushing glossary document %s to server"%args[0]);
+    log.info("pushing glossary document %s to server"%args[0])
 
-    if extension == '.po':  
+    if extension == '.po':
         if command_options.has_key('lang'):
             lang = command_options['lang'][0]['value'].split(',')[0]
         else:

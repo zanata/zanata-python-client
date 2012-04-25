@@ -51,7 +51,7 @@ class PublicanUtility:
             context = ""
             reflist = []
             content = ""
-            
+
             if entry.msgctxt:
                 hashbase = entry.msgctxt + u"\u0000" + entry.msgid
                 context = entry.msgctxt
@@ -78,16 +78,16 @@ class PublicanUtility:
             else:
                 content = entry.msgid
 
-            extensions=[{'object-type':'comment','value':extracted_comment,'space':'preserve'}, {"object-type":"pot-entry-header", "context": context, "references":reflist,"extractedComment":'',"flags":flags}]
+            extensions=[{'object-type':'comment', 'value': extracted_comment, 'space': 'preserve'}, {"object-type": "pot-entry-header", "context": context, "references": reflist, "extractedComment": '', "flags": flags}]
 
             if entry.msgid_plural:
                 textflow = {'id': textflowId, 'lang':'en-US', 'contents': content, 'plural':'true', 'extensions':extensions}
             else:
                 textflow = {'id': textflowId, 'lang':'en-US', 'content':content, 'plural':'false', 'extensions':extensions}
-            
+
             textflows.append(textflow)
         return textflows
-    
+
     def check_empty(self, contents):
         for string in contents:
             if string != u'':
@@ -106,7 +106,7 @@ class PublicanUtility:
 
         if "fuzzy" in entry.flags:
             fuzzy = True
-        
+
         if entry.msgid_plural:
             keys = entry.msgstr_plural.keys()
             keys.sort()
@@ -116,11 +116,11 @@ class PublicanUtility:
             contents.append(entry.msgstr)
 
         if self.check_empty(contents):
-            fuzzy = False;
-        
+            fuzzy = False
+
         if fuzzy:
             return "NeedReview"
-      
+
         if self.check_nonempty(contents):
             return "Approved"
         else:

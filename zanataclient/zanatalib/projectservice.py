@@ -21,7 +21,7 @@
 # Boston, MA  02110-1301, USA.
 
 __all__ = (
-        "ProjectService", 
+        "ProjectService",
    )
 
 try:
@@ -54,33 +54,34 @@ class ProjectService:
         @return: list of Project object
         """
         res, content = self.restclient.request_get('/seam/resource/restv1/projects')
-         
+
         if res['status'] == '200':
             projects = []
             projects_json = json.loads(content)
-            
+
             for p in projects_json:
                 projects.append(Project(p))
             return projects
-       
+
     def get(self, projectid):
         """
         Retrieve a specified Project Resource on Flies server
         @param projectid: Id of Project Resource
         @return: Project object
         @raise NoSuchProjectException:
-        """     
+        """
         res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s'%projectid)
         if res['status'] == '200' or res['status'] == '304':
+            # pylint: disable=E1103
             server_return = json.loads(content)
             if server_return.has_key('status'):
                 if server_return['status'] == "Retired":
-                    print "Warning: The project %s is retired!"%projectid
+                    print "Warning: The project %s is retired!" % projectid
             project = Project(server_return)
             project.set_iteration(self.iterations)
             return project
         elif res['status'] == '404':
-            raise NoSuchProjectException('Error 404', content) 
+            raise NoSuchProjectException('Error 404', content)
 
     def create(self, project):
         """
@@ -97,7 +98,7 @@ class ProjectService:
         headers['X-Auth-Token'] = self.apikey
         body ='''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(project.name,project.id,project.desc)
         res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s'%project.id, args=body, headers=headers)
-        
+
         if res['status'] == '201':
             return "Success"
         elif res['status'] == '200':
@@ -108,7 +109,7 @@ class ProjectService:
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
             raise BadRequestException('Error 400', content)
-                    
+
     def delete(self):
         pass
 
@@ -133,8 +134,9 @@ class IterationService:
         @raise NoSuchProjectException:
         """
         res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
-        
+
         if res['status'] == '200' or res['status'] == '304':
+            # pylint: disable=E1103
             server_return = json.loads(content)
             if server_return.has_key('status'):
                 if server_return['status'] == "Retired":
@@ -142,7 +144,7 @@ class IterationService:
             return Iteration(server_return)
         elif res['status'] == '404':
             raise NoSuchProjectException('Error 404', content)
-  
+
     def create(self, projectid, iteration):
         """
         Create a Iteration Resource on Flies Server

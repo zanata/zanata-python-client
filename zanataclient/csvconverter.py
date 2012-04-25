@@ -24,16 +24,12 @@ __all__ = (
             "CSVConverter",
           )
 
-import polib
-import hashlib
-import os
 import csv
 
 try:
     import json
 except ImportError:
     import simplejson as json
-import sys
 
 from zanatalib.logger import Logger
 
@@ -91,7 +87,7 @@ class CSVConverter:
                         targetlocales.append(key)
                 terms.append(term)
 
-            entry= {'srcLang':'en-US','glossaryTerms':terms, 'sourcereference':''}
+            entry = {'srcLang': 'en-US', 'glossaryTerms': terms, 'sourcereference': ''}
             entries.append(entry)
 
         glossary = {'sourceLocales':srclocales, 'glossaryEntries':entries, 'targetLocales':targetlocales}

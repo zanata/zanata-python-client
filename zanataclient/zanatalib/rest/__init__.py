@@ -1,4 +1,4 @@
-# 
+# vim: set et sts=4 sw=4:
 # Zanata Python Client
 #
 # Copyright (c) 2011 Jian Ni <jni@redhat.com>
@@ -20,5 +20,5 @@
 # Boston, MA  02110-1301, USA.
 
 
-from client import *
+from client import RestClient
 

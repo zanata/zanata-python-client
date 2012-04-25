@@ -37,7 +37,7 @@ class ZanataException(Exception):
         self.msg = msg
 
     def __str__ (self):
-        return self.msg
+        return self.expr+' - '+self.msg
 
 class InternalServerError(ZanataException):
     pass

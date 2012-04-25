@@ -74,6 +74,8 @@ class DocumentService:
             raise SameNameDocumentException('Error 409', 'A document with same name already exists.')
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
+        elif res['status'] == '500':
+            raise InternalServerError('Error 500', 'An internal server error happens')
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to update')
 
@@ -108,6 +110,8 @@ class DocumentService:
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
         elif res['status'] == '403':
             raise UnexpectedStatusException('Error 403', content)
+        elif res['status'] == '500':
+            raise InternalServerError('Error 500', 'An internal server error happens')
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push')
 
@@ -126,6 +130,8 @@ class DocumentService:
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey') 
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
+        elif res['status'] == '500':
+            raise InternalServerError('Error 500', 'An internal server error happens')
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to delete')
 
@@ -145,6 +151,8 @@ class DocumentService:
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')       
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
+        elif res['status'] == '500':
+            raise InternalServerError('Error 500', 'An internal server error happens')
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to pull')
 
@@ -182,6 +190,8 @@ class DocumentService:
             raise UnexpectedStatusException('Error 403', content)
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
+        elif res['status'] == '500':
+            raise InternalServerError('Error 500', 'An internal server error happens')
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to retrieve translation')
 
@@ -190,8 +200,8 @@ class DocumentService:
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey
 
-        ext = "?ext=gettext&ext=comment&merge=%s"%merge       
-        
+        ext = "?ext=gettext&ext=comment&merge=%s"%merge
+
         res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers, extension=ext)
 
         if res['status'] == '200':
@@ -208,6 +218,8 @@ class DocumentService:
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
         elif res['status'] == '403':
             raise UnexpectedStatusException('Error 403', content)
+        elif res['status'] == '500':
+            raise InternalServerError('Error 500', 'An internal server error happens')
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push translation to zanata server')
 

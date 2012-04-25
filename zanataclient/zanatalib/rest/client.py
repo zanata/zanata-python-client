@@ -24,15 +24,10 @@ __all__ = (
     )
 
 import urlparse
-import urllib
-import base64
-import warnings 
-import socket
-import sys
-import platform
-import exceptions
 import warnings
-warnings.simplefilter("ignore",DeprecationWarning)
+import sys
+import warnings
+warnings.simplefilter("ignore", DeprecationWarning)
 import httplib2
 
 class RestClient(object):
@@ -40,19 +35,24 @@ class RestClient(object):
         self.base_url = base_url
         self.url = urlparse.urlparse(base_url)
 
-    def request_get(self, resource, args = None, body = None, headers = {}, extension = None):
+    def request_get(self, resource, args = None, body = None,
+                    headers = {}, extension = None):
         return self.request(resource, "get", args, body, headers, extension)
 
-    def request_post(self, resource, args = None, body = None, headers = {}, extension = None):
+    def request_post(self, resource, args = None, body = None,
+                     headers = {}, extension = None):
         return self.request(resource, "post", args, body, headers, extension)
 
-    def request_put(self, resource, args = None, body = None, headers = {}, extension = None):
+    def request_put(self, resource, args = None, body = None,
+                    headers = {}, extension = None):
         return self.request(resource, "put", args, body, headers, extension)
 
-    def request_delete(self, resource, args = None, body = None, headers = {}, extension = None):
+    def request_delete(self, resource, args = None, body = None,
+                       headers = {}, extension = None):
         return self.request(resource, "delete", args, body, headers, extension)
 
-    def request(self, resource, method = "get", args = None, body = None, headers = {}, extension = None):
+    def request(self, resource, method = "get", args = None, body = None,
+                headers = {}, extension = None):
         headers['Accept'] = 'application/json'
         http = httplib2.Http()
 
@@ -62,22 +62,22 @@ class RestClient(object):
                 body = args
 
         if extension:
-            resource = "%s%s%s"%(self.base_url, resource, extension)
+            resource = "%s%s%s" % (self.base_url, resource, extension)
         else:
-            resource = "%s%s"%(self.base_url, resource)
+            resource = "%s%s" % (self.base_url, resource)
 
         try:
             response, content = http.request(resource, method.upper(), body, headers=headers)
             if response.previous is not None:
                 if response.previous.status == 301 or response.previous.status == 302:
-                    new_url= response.previous['-x-permanent-redirect-url'][:-len(resource)]
-                    print "HTTP redirect: redirect to %s, please update the server URL to new URL"%new_url
+                    new_url = response.previous['-x-permanent-redirect-url'][:-len(resource)]
+                    print "HTTP redirect: redirect to %s, please update the server URL to new URL" % new_url
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
-            print "error: %s, Maybe the flies sever is down?"%e
+            print "error: %s, Maybe the flies sever is down?" % e
             sys.exit(2)
         except httplib2.HttpLib2Error, e:
-            print "error: %s"%e
+            print "error: %s" % e
             sys.exit(2)
         except Exception, e:
             value = str(e).rstrip()
@@ -87,7 +87,7 @@ class RestClient(object):
                     print "If version of python-httplib2 < 0.4.0, please use the patch in http://code.google.com/p/httplib2/issues/detail?id=39"
                 sys.exit(2)
             else:
-                print "error: %s"%e
+                print "error: %s" % e
                 sys.exit(2)
 
     def request_version(self, resource):
@@ -96,14 +96,14 @@ class RestClient(object):
             response, content = http.request("%s%s" % (self.base_url, resource), "GET")
             if response.previous is not None:
                 if response.previous.status == 301 or response.previous.status == 302:
-                    new_url= response.previous['-x-permanent-redirect-url'][:-len(resource)]
-                    print "HTTP redirect: redirect to %s, please update the server URL to new URL"%new_url
+                    new_url = response.previous['-x-permanent-redirect-url'][:-len(resource)]
+                    print "HTTP redirect: redirect to %s, please update the server URL to new URL" % new_url
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
-            print "error: %s, Maybe the Zanata/Flies sever is down?"%e
+            print "error: %s, Maybe the Zanata/Flies sever is down?" % e
             sys.exit(2)
         except httplib2.HttpLib2Error, e:
-            print "error: %s"%e
+            print "error: %s" % e
             sys.exit(2)
         except Exception, e:
             value = str(e).rstrip()
@@ -113,6 +113,6 @@ class RestClient(object):
                     print "If version of python-httplib2 < 0.4.0, please use the patch in http://code.google.com/p/httplib2/issues/detail?id=39"
                 sys.exit(2)
             else:
-                print "error: %s"%e
+                print "error: %s" % e
                 sys.exit(2)
 
