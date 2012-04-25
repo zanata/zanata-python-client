@@ -472,36 +472,6 @@ def get_lang_list(command_options, project_config):
 # Process source, trans and output folder
 #
 #################################
-#def find_po(folder):
-#    if not os.path.isdir(folder):
-#        log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
-#        sys.exit(1)
-
-#    file_list = os.listdir(folder)  
-#    for item in file_list:
-#        full_path = os.path.join(folder, item)
-#        if full_path.endswith(".pot"):
-#            return True
-#
-#    return False
-
-#def check_pofile(tmlfolder, project_type):
-#    folder = ""
-#    
-#    if project_type == "podir":
-#        folder_type = "pot"
-#    elif project_type == "gettext":
-#        folder_type = "po"
-#    
-#    sub_folder = os.path.join(tmlfolder, folder_type)
-#
-#    if find_po(tmlfolder):
-#        return tmlfolder
-#    elif find_po(sub_folder):
-#        return sub_folder         
-#    else:
-#        log.error("The source folder is empty, please specify the valid source folder with '--srcdir' or 'dir' option")
-#        sys.exit(1)    
 
 def process_srcdir_withsub(command_options):
     tmlfolder = ""
@@ -518,8 +488,6 @@ def process_srcdir_withsub(command_options):
         log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
         sys.exit(1)
 
-    #tmlfolder = check_pofile(tmlfolder, project_type)
-
     return tmlfolder
 
 def process_srcdir(command_options):
@@ -529,10 +497,6 @@ def process_srcdir(command_options):
         tmlfolder = command_options['srcdir'][0]['value']
     else:
         tmlfolder = os.path.abspath(os.getcwd())
-     
-    #if not find_po(tmlfolder):
-    #    log.error("The source folder is empty, please specify the valid source folder with '--srcdir'")
-    #    sys.exit(1)
 
     return tmlfolder
 
@@ -880,12 +844,12 @@ def po_push(command_options, args):
         tmlfolder, import_file = process_srcfile(command_options)
         filelist.append(import_file)
 
-    tmlfolder = process_srcdir_withsub(command_options, "gettext")
-            
+    tmlfolder = process_srcdir_withsub(command_options)
+
     if not os.path.isdir(tmlfolder):
         log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
         sys.exit(1)
-    
+
     log.info("PO directory (originals):%s" % tmlfolder)
 
     if command_options.has_key('importpo'):
@@ -1000,7 +964,7 @@ def publican_push(command_options, args):
     server_version = get_version(url)
 
     plural_support = check_plural_support(server_version)
-    
+
     zanata = generate_zanataresource(url, username, apikey)
 
     project_id, iteration_id = zanatacmd.check_project(zanata, command_options, project_config)
@@ -1012,8 +976,8 @@ def publican_push(command_options, args):
 
     log.info("Copy previous translations:%s" % copytrans)
 
-    tmlfolder = process_srcdir_withsub(command_options, "podir")
-    
+    tmlfolder = process_srcdir_withsub(command_options)
+
     if args:
         try:
             full_path = search_file(tmlfolder, args[0])
