@@ -1203,6 +1203,7 @@ def pull(command_options, args, project_type = None):
         --project-version: id of the version (defaults to zanata.xml value)
         --transdir: translations will be written to this folder
         --lang: language list (defaults to zanata.xml locales)
+        --noskeletons: omit po files when translations not found
     """
     dir_option = False
     skeletons = True

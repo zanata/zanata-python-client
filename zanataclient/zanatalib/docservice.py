@@ -187,7 +187,7 @@ class DocumentService:
         elif res['status'] == '400':
             raise BadRequestBodyException('Error 400', content)
         elif res['status'] == '403':
-            raise UnexpectedStatusException('Error 403', content)
+            raise UnexpectedStatusException('Error 403', 'You do not have permission to access this resource on this server.')
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
         elif res['status'] == '500':
