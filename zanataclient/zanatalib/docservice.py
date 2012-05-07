@@ -171,11 +171,9 @@ class DocumentService:
         headers['X-Auth-User'] = self.projects.username
         headers['X-Auth-Token'] = self.projects.apikey 
         ext = "?ext=gettext&ext=comment"
-       
+
         if skeletons:
-            skeletons ="?skeletons=true"
-            if ext:
-                ext = ext+"&skeletons=true"
+            ext = ext+"&skeletons=true"
 
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file_id, lang), extension=ext)
        

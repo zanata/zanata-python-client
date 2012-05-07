@@ -804,6 +804,45 @@ def po_pull(command_options, args):
     """
     pull(command_options, args, "gettext")
 
+def get_importpo(command_options):
+    importpo = False
+
+    if command_options.has_key('importpo'):
+        importpo = True
+    elif command_options.has_key('pushtrans'):
+        importpo = True
+        log.info("please use --import-po for old publican push command")
+    
+    return importpo
+
+def get_pushtrans(command_options):
+    pushtrans = False
+
+    if command_options.has_key('pushtrans'):
+        pushtrans = True
+    elif command_options.has_key('importpo'):
+        pushtrans = True
+        log.info("--import-po option has renamed to --push-trans, please use --push-trans instead")
+
+    return pushtrans
+
+def get_importparam(command_type, command_options, project_config, folder):
+    import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': 'gettext'}
+    
+    import_param['transdir'] = process_transdir(command_options, folder)
+    log.info("Reading locale folders from %s" % import_param['transdir'])
+    import_param['merge'] = process_merge(command_options)
+    import_param['lang_list'] = get_lang_list(command_options, project_config)
+    
+    if project_config.has_key('locale_map'):
+        import_param['locale_map'] = project_config['locale_map']
+    else:
+        import_param['locale_map'] = None
+    
+    import_param['project_type'] = command_type
+
+    return import_param
+
 def po_push(command_options, args):
     """
     Usage: zanata po push [OPTIONS] {documents}
@@ -833,8 +872,6 @@ def po_push(command_options, args):
     tmlfolder = ""
     plural_support = False
     filelist = []
-
-    import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': 'gettext'}
 
     project_config = read_project_config(command_options)
 
@@ -873,24 +910,11 @@ def po_push(command_options, args):
 
     log.info("PO directory (originals):%s" % tmlfolder)
 
-    if command_options.has_key('importpo'):
-        importpo = True
-
-    if command_options.has_key('pushtrans'):
-        log.info("please use --import-po for old publican push command")
-        importpo = True
+    importpo = get_importpo(command_options)
 
     if importpo:
         log.info("Importing translation")
-        import_param['transdir'] = process_transdir(command_options, tmlfolder)
-        log.info("Reading locale folders from %s" % import_param['transdir'])
-        import_param['merge'] = process_merge(command_options)
-        import_param['lang_list'] = get_lang_list(command_options, project_config)
-        if project_config.has_key('locale_map'):
-            import_param['locale_map'] = project_config['locale_map']
-        else:
-            import_param['locale_map'] = None
-        importpo = True
+        import_param = get_importparam("gettext", command_options,  project_config, tmlfolder)
     else:
         log.info("Importing source documents only")
 
@@ -973,8 +997,6 @@ def publican_push(command_options, args):
     tmlfolder = ""
     filelist = []
 
-    import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': 'podir'}
-
     project_config = read_project_config(command_options)
 
     if not project_config:
@@ -1025,27 +1047,13 @@ def publican_push(command_options, args):
             
     log.info("POT directory (originals):%s" % tmlfolder)
 
-    if command_options.has_key('importpo'):
-        importpo = True
-
-    if command_options.has_key('pushtrans'):
-        log.info("please use --import-po for old publican push command")
-        importpo = True
+    importpo = get_importpo(command_options)
     
     if deletefiles:
         zanatacmd.del_server_content(tmlfolder, project_id, iteration_id, filelist, force, "podir")
     
     if importpo:
-        log.info("Importing translation")
-        import_param['transdir'] = process_transdir(command_options, None)
-        log.info("Reading locale folders from %s" % import_param['transdir'])
-        import_param['merge'] = process_merge(command_options)
-        import_param['lang_list'] = get_lang_list(command_options, project_config)
-        if project_config.has_key('locale_map'):
-            import_param['locale_map'] = project_config['locale_map']
-        else:
-            import_param['locale_map'] = None
-
+        import_param = get_importparam("podir", command_options,  project_config, tmlfolder)
         zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
     else:
         log.info("Importing source documents only")
@@ -1085,8 +1093,6 @@ def push(command_options, args):
     command_type = ''
     tmlfolder = ""
     filelist = []
-
-    import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': ''}
 
     project_config = read_project_config(command_options)
 
@@ -1136,10 +1142,6 @@ def push(command_options, args):
     if command_options.has_key('dir'):
         log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")
 
-    if command_type != 'podir' and command_type != 'gettext':
-        log.error("The project type is unknown")
-        sys.exit(1)
-
     if command_options.has_key('pushtransonly'):
         transfolder = process_transdir(command_options, "")
         merge = process_merge(command_options)
@@ -1187,32 +1189,17 @@ def push(command_options, args):
         log.info("PO directory (originals):%s" % tmlfolder)
         folder = tmlfolder
 
-    if command_options.has_key('importpo'):
-        log.info("--import-po option has renamed to --push-trans, please use --push-trans instead")
-        importpo = True
-
-    if command_options.has_key('pushtrans'):
-        importpo = True
+    pushtrans = get_pushtrans(command_options)
 
     if deletefiles:
         zanatacmd.del_server_content(tmlfolder, project_id, iteration_id, filelist, force, command_type)
 
-    if importpo:
+    if pushtrans:
         log.info("Importing translation")
-        import_param['transdir'] = process_transdir(command_options, folder)
-        log.info("Reading locale folders from %s" % import_param['transdir'])
-        import_param['merge'] = process_merge(command_options)
-        import_param['lang_list'] = get_lang_list(command_options, project_config)
-        if project_config.has_key('locale_map'):
-            import_param['locale_map'] = project_config['locale_map']
-        else:
-            import_param['locale_map'] = None
-        import_param['project_type'] = command_type
-
+        import_param = get_importparam(command_type, command_options,  project_config, folder)
         zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
     else:
         log.info("Importing source documents only")
-
         zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support) 
 
 def pull(command_options, args, project_type = None):
@@ -1319,7 +1306,6 @@ def glossary_push(command_options, args):
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     locale_map = []
-
 
     optionsutil = OptionsUtil(command_options)
     url, username, apikey = optionsutil.apply_configfiles()
