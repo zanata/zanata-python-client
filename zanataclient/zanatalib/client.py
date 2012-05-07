@@ -34,3 +34,6 @@ class ZanataResource:
         self.projects = ProjectService(base_url, username, apikey)
         self.documents = DocumentService(self.projects)
 
+    def disable_ssl_cert_validation(self):
+        self.projects.disable_ssl_cert_validation()
+

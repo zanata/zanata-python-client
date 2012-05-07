@@ -37,6 +37,9 @@ from error import UnavailableServiceError
 class VersionService:
     def __init__(self, base_url):
         self.restclient = RestClient(base_url)
+
+    def disable_ssl_cert_validation(self):
+        self.restclient.disable_ssl_cert_validation()
         
     def get_server_version(self):
         res, content = self.restclient.request_version('/seam/resource/restv1/version')

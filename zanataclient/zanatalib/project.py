@@ -50,6 +50,3 @@ class Project(object):
     def get_iteration(self, version_id):
         project_id = getattr(self, 'id')
         return self.__iterations.get(project_id, version_id)
-
-
-

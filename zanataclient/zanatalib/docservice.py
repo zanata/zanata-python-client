@@ -174,7 +174,8 @@ class DocumentService:
        
         if skeletons:
             skeletons ="?skeletons=true"
-            ext = ext+skeletons
+            if ext:
+                ext = ext+"&skeletons=true"
 
         res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file_id, lang), extension=ext)
        

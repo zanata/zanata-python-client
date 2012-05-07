@@ -48,6 +48,10 @@ class ProjectService:
         self.username = usrname
         self.apikey = apikey
 
+    def disable_ssl_cert_validation(self):
+        self.restclient.disable_ssl_cert_validation()
+        self.iterations.disable_ssl_cert_validation()
+
     def list(self):
         """
         List the Project Resources on the Flies server
@@ -124,6 +128,9 @@ class IterationService:
         self.restclient = RestClient(base_url)
         self.username = usrname
         self.apikey = apikey
+
+    def disable_ssl_cert_validation(self):
+        self.restclient.disable_ssl_cert_validation()
 
     def get(self, projectid, iterationid):
         """

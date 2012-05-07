@@ -28,7 +28,6 @@ import signal
 import subprocess
 
 from zanatalib.versionservice import VersionService
-from zanatalib.client import ZanataResource
 from zanatalib.error import UnAvaliableResourceException
 from zanatalib.error import NoSuchFileException
 from zanatalib.error import UnavailableServiceError
@@ -249,6 +248,12 @@ option_sets = {
             type='command',
             long=['--push-trans-only'],
         ),
+    ],
+    'disablesslcert' : [
+        dict(
+            type='command',
+            long=['--disable-ssl-cert'],
+        ),
     ]
 }
 
@@ -402,7 +407,7 @@ def read_user_config(url, command_options):
 
     return (user_name, apikey)
 
-def get_version(url):
+def get_version(url, command_options):
     #Retrieve the version of client
     version_number = ""
     path = os.path.dirname(os.path.realpath(__file__))
@@ -419,6 +424,9 @@ def get_version(url):
 
     #Retrieve the version of the zanata server
     version = VersionService(url)
+
+    if command_options.has_key('disablesslcert'):
+        version.disable_ssl_cert_validation()
 
     try:
         content = version.get_server_version()
@@ -448,9 +456,9 @@ def process_merge(command_options):
 
     return merge
 
-def generate_zanataresource(url, username, apikey):
+def generate_zanatacmd(url, username, apikey):
     if username and apikey:
-        return ZanataResource(url, username, apikey)
+        return ZanataCommand(url, username, apikey)
     else:
         log.error("Please specify username and apikey in zanata.ini or with '--username' and '--apikey' options")
         sys.exit(1)
@@ -581,14 +589,18 @@ def list_project(command_options, args):
 
     Options:
         --url address of the Zanata server, eg http://example.com/zanata
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     project_config = read_project_config(command_options)
     url = process_url(project_config, command_options)
-    get_version(url)
+    get_version(url, command_options)
 
-    zanata = ZanataResource(url)
-    zanatacmd = ZanataCommand()
-    zanatacmd.list_projects(zanata)
+    zanatacmd = ZanataCommand(url)
+
+    if command_options.has_key('disablesslcert'):
+        zanatacmd.disable_ssl_cert_validation()
+
+    zanatacmd.list_projects()
 
 def project_info(command_options, args):
     """
@@ -598,6 +610,7 @@ def project_info(command_options, args):
 
     Options:
         --project-id: project id
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     project_id = ""
     project_config = read_project_config(command_options)
@@ -606,7 +619,7 @@ def project_info(command_options, args):
         log.info("Can not find zanata.xml, please specify the path of zanata.xml")
     
     url = process_url(project_config, command_options)
-    get_version(url)
+    get_version(url, command_options)
 
     if command_options.has_key('project_id'):
         project_id = command_options['project_id'][0]['value']
@@ -618,9 +631,12 @@ def project_info(command_options, args):
         log.error('Please use zanata project info --project-id=project_id or zanata.xml to specify the project id')
         sys.exit(1)
 
-    zanata = ZanataResource(url)
-    zanatacmd = ZanataCommand()
-    zanatacmd.project_info(zanata, project_id)
+    zanatacmd = ZanataCommand(url)
+
+    if command_options.has_key('disablesslcert'):
+        zanatacmd.disable_ssl_cert_validation()
+
+    zanatacmd.project_info(project_id)
 
 def version_info(command_options, args):
     """
@@ -631,6 +647,7 @@ def version_info(command_options, args):
     Options:
         --project-id: project id
         --project-version: id of project version
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     project_id = ""
     iteration_id = ""
@@ -645,7 +662,7 @@ def version_info(command_options, args):
 
     url = process_url(project_config, command_options)
 
-    get_version(url)
+    get_version(url, command_options)
 
     if command_options.has_key('project_id'):
         project_id = command_options['project_id'][0]['value']
@@ -657,10 +674,12 @@ def version_info(command_options, args):
         log.error("Please use zanata version info --project-id=project_id --project-version=project_version to retrieve the version")
         sys.exit(1)
 
-    zanata = ZanataResource(url)
+    zanatacmd = ZanataCommand(url)
 
-    zanatacmd = ZanataCommand()
-    zanatacmd.version_info(zanata, project_id, iteration_id)
+    if command_options.has_key('disablesslcert'):
+        zanatacmd.disable_ssl_cert_validation()
+
+    zanatacmd.version_info(project_id, iteration_id)
 
 def create_project(command_options, args):
     """
@@ -673,6 +692,7 @@ def create_project(command_options, args):
         --apikey: api key of user (defaults to zanata.ini value)
         --project-name: project name
         --project-desc: project description
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     project_id = ""
     project_name = ""
@@ -684,7 +704,7 @@ def create_project(command_options, args):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    get_version(url)
+    get_version(url, command_options)
 
     if args:
         project_id = args[0]
@@ -701,9 +721,12 @@ def create_project(command_options, args):
     if command_options.has_key('project_desc'):
         project_desc = command_options['project_desc'][0]['value']
 
-    zanata = generate_zanataresource(url, username, apikey)
-    zanatacmd = ZanataCommand()
-    zanatacmd.create_project(zanata, project_id, project_name, project_desc)
+    zanatacmd = generate_zanatacmd(url, username, apikey)
+
+    if command_options.has_key('disablesslcert'):
+        zanatacmd.disable_ssl_cert_validation()
+
+    zanatacmd.create_project(project_id, project_name, project_desc)
 
 def create_version(command_options, args):
     """
@@ -716,7 +739,8 @@ def create_version(command_options, args):
         --apikey: api key of user (defaults to zanata.ini value)
         --project-id: id of the project
         --version-name(Deprecated): version name 
-        --version-desc(Deprecated): version description 
+        --version-desc(Deprecated): version description
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     project_id = ""
     version_name = ""
@@ -728,7 +752,7 @@ def create_version(command_options, args):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    server_version = get_version(url)
+    server_version = get_version(url, command_options)
 
     if command_options.has_key('project_id'):
         project_id = command_options['project_id'][0]['value']
@@ -752,19 +776,13 @@ def create_version(command_options, args):
     if command_options.has_key('version_desc'):
         version_desc = command_options['version_desc'][0]['value']
         log.warn("This option is deprecated, it should not be used on new zanata server")
-    
-    #if server_version:
-    #    version_number = convert_serverversion(server_version)
 
-    #    if version_number <= 1.2 and not version_name:
-    #        version_name = args[0]
-    #else:
-    #    if not version_name:
-    #        version_name = args[0]
+    zanatacmd = generate_zanatacmd(url, username, apikey)
 
-    zanata = generate_zanataresource(url, username, apikey)
-    zanatacmd = ZanataCommand()
-    zanatacmd.create_version(zanata, project_id, version_id, version_name, version_desc)
+    if command_options.has_key('disablesslcert'):
+        zanatacmd.disable_ssl_cert_validation()
+
+    zanatacmd.create_version(project_id, version_id, version_name, version_desc)
 
 def po_pull(command_options, args):
     """
@@ -782,6 +800,7 @@ def po_pull(command_options, args):
         --transdir: output folder for po files
         --lang: language list
         --noskeleton: omit po files when translations not found
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     pull(command_options, args, "gettext")
 
@@ -806,6 +825,7 @@ def po_push(command_options, args):
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
         --lang: language list
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     copytrans = True
     importpo = False
@@ -816,8 +836,6 @@ def po_push(command_options, args):
 
     import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': 'gettext'}
 
-    zanatacmd = ZanataCommand()
-
     project_config = read_project_config(command_options)
 
     if not project_config:
@@ -825,13 +843,16 @@ def po_push(command_options, args):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    server_version = get_version(url)
+    server_version = get_version(url, command_options)
 
     plural_support = check_plural_support(server_version)
 
-    zanata = generate_zanataresource(url, username, apikey)
+    zanatacmd = generate_zanatacmd(url, username, apikey)
 
-    project_id, iteration_id = zanatacmd.check_project(zanata, command_options, project_config)
+    if command_options.has_key('disablesslcert'):
+        zanatacmd.disable_ssl_cert_validation()
+
+    project_id, iteration_id = zanatacmd.check_project(command_options, project_config)
     log.info("Username: %s" % username)
     log.info("Source language: en-US")
 
@@ -892,12 +913,12 @@ def po_push(command_options, args):
 
         if command_options.has_key('force'):
             force = True
-        zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "gettext")
+        zanatacmd.del_server_content(tmlfolder, project_id, iteration_id, filelist, force, "gettext")
 
     if importpo:
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
+        zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
     else:
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support)
+        zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support)
     
 def publican_pull(command_options, args):
     """
@@ -915,6 +936,7 @@ def publican_pull(command_options, args):
         --transdir: translations will be written to this folder (one sub-folder per locale)
         --lang: language list
         --noskeleton: omit po files when translations not found
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     pull(command_options, args, "podir")
 
@@ -941,6 +963,7 @@ def publican_push(command_options, args):
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
         --lang: language list
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     copytrans = True
     importpo = False
@@ -952,8 +975,6 @@ def publican_push(command_options, args):
 
     import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': 'podir'}
 
-    zanatacmd = ZanataCommand()
-
     project_config = read_project_config(command_options)
 
     if not project_config:
@@ -961,13 +982,16 @@ def publican_push(command_options, args):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    server_version = get_version(url)
+    server_version = get_version(url, command_options)
 
     plural_support = check_plural_support(server_version)
 
-    zanata = generate_zanataresource(url, username, apikey)
+    zanatacmd = generate_zanatacmd(url, username, apikey)
 
-    project_id, iteration_id = zanatacmd.check_project(zanata, command_options, project_config)
+    if command_options.has_key('disablesslcert'):
+        zanatacmd.disable_ssl_cert_validation()
+
+    project_id, iteration_id = zanatacmd.check_project(command_options, project_config)
     log.info("Username: %s" % username)
     log.info("Source language: en-US")
 
@@ -1009,7 +1033,7 @@ def publican_push(command_options, args):
         importpo = True
     
     if deletefiles:
-        zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, "podir")
+        zanatacmd.del_server_content(tmlfolder, project_id, iteration_id, filelist, force, "podir")
     
     if importpo:
         log.info("Importing translation")
@@ -1022,11 +1046,11 @@ def publican_push(command_options, args):
         else:
             import_param['locale_map'] = None
 
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
+        zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
     else:
         log.info("Importing source documents only")
 
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support)
+        zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support)
 
 def push(command_options, args):
     """
@@ -1051,6 +1075,7 @@ def push(command_options, args):
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
         --lang: language list (defaults to zanata.xml locales)
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     copytrans = True
     importpo = False
@@ -1063,8 +1088,6 @@ def push(command_options, args):
 
     import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': ''}
 
-    zanatacmd = ZanataCommand()
-
     project_config = read_project_config(command_options)
 
     if not project_config:
@@ -1072,13 +1095,16 @@ def push(command_options, args):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    server_version = get_version(url)
+    server_version = get_version(url, command_options)
 
     plural_support = check_plural_support(server_version)
 
-    zanata = generate_zanataresource(url, username, apikey)
+    zanatacmd = generate_zanatacmd(url, username, apikey)
 
-    project_id, iteration_id = zanatacmd.check_project(zanata, command_options, project_config)
+    if command_options.has_key('disablesslcert'):
+        zanatacmd.disable_ssl_cert_validation()
+
+    project_id, iteration_id = zanatacmd.check_project(command_options, project_config)
     log.info("Username: %s" % username)
     log.info("Source language: en-US")
 
@@ -1124,7 +1150,7 @@ def push(command_options, args):
         else:
             locale_map = None
 
-        zanatacmd.push_trans_command(zanata, transfolder, project_id, iteration_id, lang_list, locale_map, command_type, merge)
+        zanatacmd.push_trans_command(transfolder, project_id, iteration_id, lang_list, locale_map, command_type, merge)
         sys.exit(0)
 
     if tmlfolder == "":
@@ -1169,7 +1195,7 @@ def push(command_options, args):
         importpo = True
 
     if deletefiles:
-        zanatacmd.del_server_content(zanata, tmlfolder, project_id, iteration_id, filelist, force, command_type)
+        zanatacmd.del_server_content(tmlfolder, project_id, iteration_id, filelist, force, command_type)
 
     if importpo:
         log.info("Importing translation")
@@ -1183,11 +1209,11 @@ def push(command_options, args):
             import_param['locale_map'] = None
         import_param['project_type'] = command_type
 
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
+        zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
     else:
         log.info("Importing source documents only")
 
-        zanatacmd.push_command(zanata, filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support) 
+        zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support) 
 
 def pull(command_options, args, project_type = None):
     """
@@ -1204,13 +1230,12 @@ def pull(command_options, args, project_type = None):
         --transdir: translations will be written to this folder
         --lang: language list (defaults to zanata.xml locales)
         --noskeletons: omit po files when translations not found
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     dir_option = False
     skeletons = True
     filelist = []
-    zanatacmd = ZanataCommand()
     output_folder = None
-
     project_config = read_project_config(command_options)
 
     if not project_config:
@@ -1218,19 +1243,22 @@ def pull(command_options, args, project_type = None):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    get_version(url)
+    get_version(url, command_options)
 
-    zanata = generate_zanataresource(url, username, apikey)
+    zanatacmd = generate_zanatacmd(url, username, apikey)
+
+    if command_options.has_key('disablesslcert'):
+        zanatacmd.disable_ssl_cert_validation()
 
     #if file not specified, push all the files in pot folder to zanata server
-    project_id, iteration_id = zanatacmd.check_project(zanata, command_options, project_config)
+    project_id, iteration_id = zanatacmd.check_project(command_options, project_config)
     log.info("Username: %s" % username)
 
     lang_list = get_lang_list(command_options, project_config)
 
     #list the files in project
     try:
-        filelist = zanata.documents.get_file_list(project_id, iteration_id)
+        filelist = zanatacmd.get_file_list(project_id, iteration_id)
     except Exception, e:
         log.error(str(e))
         sys.exit(1)
@@ -1272,7 +1300,7 @@ def pull(command_options, args, project_type = None):
 
     outpath = create_outpath(command_options, output_folder)
 
-    zanatacmd.pull_command(zanata, locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type, skeletons)
+    zanatacmd.pull_command(locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type, skeletons)
 
 def glossary_push(command_options, args):
     """
@@ -1288,13 +1316,20 @@ def glossary_push(command_options, args):
         --sourcecommentsastarget(po format): treat extracted comments and references as target comments of term
                                   or treat as source reference of entry
         --commentcols(csv format): comments header of csv format glossary file
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     locale_map = []
-    zanatacmd = ZanataCommand()
+
+
     optionsutil = OptionsUtil(command_options)
     url, username, apikey = optionsutil.apply_configfiles()
-    get_version(url)
+    get_version(url, command_options)
     log.info("Username: %s" % username)
+
+    zanatacmd = ZanataCommand(url, username, apikey)
+
+    if command_options.has_key('disablesslcert'):
+        zanatacmd.disable_ssl_cert_validation()
 
     if args:
         path = os.path.join(os.getcwd(), args[0])
