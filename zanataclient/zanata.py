@@ -41,6 +41,9 @@ from command import makeHandler
 from command import strip_docstring
 from command import parse_command_line
 from command import handle_program
+from pushcmd import PoPush
+from pushcmd import PublicanPush
+from pushcmd import GenericPush
 
 log = Logger()
 
@@ -441,21 +444,6 @@ def get_version(url, command_options):
         log.error("Service Temporarily Unavailable, stop processing!")
         sys.exit(1)
         
-def process_merge(command_options):
-    merge = ""
-
-    if command_options.has_key('merge'):
-        merge = command_options['merge'][0]['value']
-        if merge != 'auto' and merge != 'import':
-            log.info("merge option %s is not recognized, assuming default value 'auto'" % merge)
-            merge = 'auto'
-    else:
-        merge = 'auto'
-
-    log.info("merge option set to value %s" % merge)
-
-    return merge
-
 def generate_zanatacmd(url, username, apikey):
     if username and apikey:
         return ZanataCommand(url, username, apikey)
@@ -481,44 +469,6 @@ def get_lang_list(command_options, project_config):
 #
 #################################
 
-def process_srcdir_withsub(command_options):
-    tmlfolder = ""
-
-    if command_options.has_key('srcdir'):
-        tmlfolder = command_options['srcdir'][0]['value']
-    elif command_options.has_key('dir'):
-        #Keep dir option for publican/po push
-        tmlfolder = command_options['dir'][0]['value']
-    else:
-        tmlfolder = os.path.abspath(os.getcwd())
-
-    if not os.path.isdir(tmlfolder):
-        log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
-        sys.exit(1)
-
-    return tmlfolder
-
-def process_srcdir(command_options):
-    tmlfolder = ""
-
-    if command_options.has_key('srcdir'):
-        tmlfolder = command_options['srcdir'][0]['value']
-    else:
-        tmlfolder = os.path.abspath(os.getcwd())
-
-    return tmlfolder
-
-def process_srcfile(command_options):
-    tmlfolder = ""
-    file_path = ""
-
-    if command_options.has_key('srcfile'):
-        path = command_options['srcfile'][0]['value']
-        file_path = os.path.abspath(path)
-        tmlfolder = file_path[0:file_path.rfind('/')]
-
-    return tmlfolder, file_path
-
 def process_transdir(command_options, src_folder):
     trans_folder = ""
 
@@ -543,19 +493,6 @@ def create_outpath(command_options, output_folder):
         os.mkdir(output)
 
     return output
-
-def search_file(path, filename):
-    for root, dirs, names in os.walk(path):
-        if filename in names:
-            return os.path.join(root, filename)
-
-    raise NoSuchFileException('Error 404', 'File %s not found' % filename)
-
-#def convert_serverversion(server_version):
-#    version = str(server_version.split('-')[0])
-#    main_ver = version[:3]
-#    version_number = string.atof(main_ver)
-#    return version_number
 
 def check_plural_support(server_version):
     if server_version == None:
@@ -804,45 +741,6 @@ def po_pull(command_options, args):
     """
     pull(command_options, args, "gettext")
 
-def get_importpo(command_options):
-    importpo = False
-
-    if command_options.has_key('importpo'):
-        importpo = True
-    elif command_options.has_key('pushtrans'):
-        importpo = True
-        log.info("please use --import-po for old publican push command")
-    
-    return importpo
-
-def get_pushtrans(command_options):
-    pushtrans = False
-
-    if command_options.has_key('pushtrans'):
-        pushtrans = True
-    elif command_options.has_key('importpo'):
-        pushtrans = True
-        log.info("--import-po option has renamed to --push-trans, please use --push-trans instead")
-
-    return pushtrans
-
-def get_importparam(command_type, command_options, project_config, folder):
-    import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': 'gettext'}
-    
-    import_param['transdir'] = process_transdir(command_options, folder)
-    log.info("Reading locale folders from %s" % import_param['transdir'])
-    import_param['merge'] = process_merge(command_options)
-    import_param['lang_list'] = get_lang_list(command_options, project_config)
-    
-    if project_config.has_key('locale_map'):
-        import_param['locale_map'] = project_config['locale_map']
-    else:
-        import_param['locale_map'] = None
-    
-    import_param['project_type'] = command_type
-
-    return import_param
-
 def po_push(command_options, args):
     """
     Usage: zanata po push [OPTIONS] {documents}
@@ -866,83 +764,8 @@ def po_push(command_options, args):
         --lang: language list
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
-    copytrans = True
-    importpo = False
-    force = False
-    tmlfolder = ""
-    plural_support = False
-    filelist = []
-
-    project_config = read_project_config(command_options)
-
-    if not project_config:
-        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-
-    url = process_url(project_config, command_options)
-    username, apikey = read_user_config(url, command_options)
-    server_version = get_version(url, command_options)
-
-    plural_support = check_plural_support(server_version)
-
-    zanatacmd = generate_zanatacmd(url, username, apikey)
-
-    if command_options.has_key('disablesslcert'):
-        zanatacmd.disable_ssl_cert_validation()
-
-    project_id, iteration_id = zanatacmd.check_project(command_options, project_config)
-    log.info("Username: %s" % username)
-    log.info("Source language: en-US")
-
-    if command_options.has_key('nocopytrans'):
-        copytrans = False
-
-    log.info("Copy previous translations:%s" % copytrans)
-
-    if command_options.has_key('srcfile'):
-        tmlfolder, import_file = process_srcfile(command_options)
-        filelist.append(import_file)
-
-    tmlfolder = process_srcdir_withsub(command_options)
-
-    if not os.path.isdir(tmlfolder):
-        log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
-        sys.exit(1)
-
-    log.info("PO directory (originals):%s" % tmlfolder)
-
-    importpo = get_importpo(command_options)
-
-    if importpo:
-        log.info("Importing translation")
-        import_param = get_importparam("gettext", command_options,  project_config, tmlfolder)
-    else:
-        log.info("Importing source documents only")
-
-    if args:
-        try:
-            full_path = search_file(tmlfolder, args[0])
-            filelist.append(full_path)
-        except NoSuchFileException, e:
-            log.error(e.msg)
-            sys.exit(1)
-    else:
-        if not command_options.has_key('srcfile'):
-            #get all the pot files from the template folder
-            publicanutil = PublicanUtility()
-            filelist = publicanutil.get_file_list(tmlfolder, ".pot")
-
-            if not filelist:
-                log.error("The template folder is empty")
-                sys.exit(1)
-
-        if command_options.has_key('force'):
-            force = True
-        zanatacmd.del_server_content(tmlfolder, project_id, iteration_id, filelist, force, "gettext")
-
-    if importpo:
-        zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
-    else:
-        zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support)
+    command = PoPush()
+    command.run(command_options, args)
     
 def publican_pull(command_options, args):
     """
@@ -989,76 +812,8 @@ def publican_push(command_options, args):
         --lang: language list
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
-    copytrans = True
-    importpo = False
-    force = False
-    deletefiles = False
-    plural_support = False
-    tmlfolder = ""
-    filelist = []
-
-    project_config = read_project_config(command_options)
-
-    if not project_config:
-        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-
-    url = process_url(project_config, command_options)
-    username, apikey = read_user_config(url, command_options)
-    server_version = get_version(url, command_options)
-
-    plural_support = check_plural_support(server_version)
-
-    zanatacmd = generate_zanatacmd(url, username, apikey)
-
-    if command_options.has_key('disablesslcert'):
-        zanatacmd.disable_ssl_cert_validation()
-
-    project_id, iteration_id = zanatacmd.check_project(command_options, project_config)
-    log.info("Username: %s" % username)
-    log.info("Source language: en-US")
-
-    if command_options.has_key('nocopytrans'):
-        copytrans = False
-
-    log.info("Copy previous translations:%s" % copytrans)
-
-    tmlfolder = process_srcdir_withsub(command_options)
-
-    if args:
-        try:
-            full_path = search_file(tmlfolder, args[0])
-            filelist.append(full_path)
-        except NoSuchFileException, e:
-            log.error(e.msg)
-            sys.exit(1)
-    else:
-        #get all the pot files from the template folder
-        publicanutil = PublicanUtility()
-        filelist = publicanutil.get_file_list(tmlfolder, ".pot")
-
-        if not filelist:
-            log.error("The template folder is empty")
-            sys.exit(1)
-
-        deletefiles = True
-
-    if command_options.has_key('force'):
-        force = True
-            
-    log.info("POT directory (originals):%s" % tmlfolder)
-
-    importpo = get_importpo(command_options)
-    
-    if deletefiles:
-        zanatacmd.del_server_content(tmlfolder, project_id, iteration_id, filelist, force, "podir")
-    
-    if importpo:
-        import_param = get_importparam("podir", command_options,  project_config, tmlfolder)
-        zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
-    else:
-        log.info("Importing source documents only")
-
-        zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support)
+    command = PublicanPush()
+    command.run(command_options, args)
 
 def push(command_options, args):
     """
@@ -1085,122 +840,8 @@ def push(command_options, args):
         --lang: language list (defaults to zanata.xml locales)
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
-    copytrans = True
-    importpo = False
-    force = False
-    deletefiles = False
-    plural_support = False
-    command_type = ''
-    tmlfolder = ""
-    filelist = []
-
-    project_config = read_project_config(command_options)
-
-    if not project_config:
-        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-
-    url = process_url(project_config, command_options)
-    username, apikey = read_user_config(url, command_options)
-    server_version = get_version(url, command_options)
-
-    plural_support = check_plural_support(server_version)
-
-    zanatacmd = generate_zanatacmd(url, username, apikey)
-
-    if command_options.has_key('disablesslcert'):
-        zanatacmd.disable_ssl_cert_validation()
-
-    project_id, iteration_id = zanatacmd.check_project(command_options, project_config)
-    log.info("Username: %s" % username)
-    log.info("Source language: en-US")
-
-    if command_options.has_key('nocopytrans'):
-        copytrans = False
-
-    log.info("Copy previous translations:%s" % copytrans)
-
-    if command_options.has_key('project_type'):
-        command_type = command_options['project_type'][0]['value']
-    elif project_config['project_type']:
-        command_type = project_config['project_type']
-    else:
-        log.error("The project type is unknown")
-        sys.exit(1)
-
-    if command_type != 'podir' and command_type != 'gettext':
-        log.error("The project type is not correct, please use 'podir' and 'gettext' as project type")
-        sys.exit(1)
-
-    if command_options.has_key('srcfile'):
-        if command_type == 'gettext': 
-            tmlfolder, import_file = process_srcfile(command_options)
-            filelist.append(import_file)
-        else:
-            log.warn("srcfile option is not used for podir type project, ignored")
-
-    #Disable dir option for generic push command
-    if command_options.has_key('dir'):
-        log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")
-
-    if command_options.has_key('pushtransonly'):
-        transfolder = process_transdir(command_options, "")
-        merge = process_merge(command_options)
-        lang_list = get_lang_list(command_options, project_config)
-
-        if project_config.has_key('locale_map'):
-            locale_map = project_config['locale_map']
-        else:
-            locale_map = None
-
-        zanatacmd.push_trans_command(transfolder, project_id, iteration_id, lang_list, locale_map, command_type, merge)
-        sys.exit(0)
-
-    if tmlfolder == "":
-        tmlfolder = process_srcdir(command_options)
-
-    if not os.path.isdir(tmlfolder):
-        log.error("Can not find source folder, please specify the source folder with '--srcdir' or using zanata.xml")
-        sys.exit(1)
-
-    if args:
-        try:
-            full_path = search_file(tmlfolder, args[0])
-            filelist.append(full_path)
-        except NoSuchFileException, e:
-            log.error(e.msg)
-            sys.exit(1)
-    else:
-        #get all the pot files from the template folder
-        publicanutil = PublicanUtility()
-        filelist = publicanutil.get_file_list(tmlfolder, ".pot")
-
-        if not filelist:
-            log.error("The template folder is empty")
-            sys.exit(1)
-        deletefiles = True
-
-    if command_options.has_key('force'):
-        force = True
-
-    if command_type == 'podir':
-        log.info("POT directory (originals):%s" % tmlfolder)
-        folder = None
-    elif command_type == 'gettext':
-        log.info("PO directory (originals):%s" % tmlfolder)
-        folder = tmlfolder
-
-    pushtrans = get_pushtrans(command_options)
-
-    if deletefiles:
-        zanatacmd.del_server_content(tmlfolder, project_id, iteration_id, filelist, force, command_type)
-
-    if pushtrans:
-        log.info("Importing translation")
-        import_param = get_importparam(command_type, command_options,  project_config, folder)
-        zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
-    else:
-        log.info("Importing source documents only")
-        zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support) 
+    command = GenericPush()
+    command.run(command_options, args)
 
 def pull(command_options, args, project_type = None):
     """
