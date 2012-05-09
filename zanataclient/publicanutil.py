@@ -78,7 +78,10 @@ class PublicanUtility:
             else:
                 content = entry.msgid
 
-            extensions=[{'object-type':'comment', 'value': extracted_comment, 'space': 'preserve'}, {"object-type": "pot-entry-header", "context": context, "references": reflist, "extractedComment": '', "flags": flags}]
+            if entry.msgctxt:
+                extensions=[{'object-type':'comment', 'value': extracted_comment, 'space': 'preserve'}, {"object-type": "pot-entry-header", "context": context, "references": reflist, "extractedComment": '', "flags": flags}]
+            else:
+                extensions=[{'object-type':'comment', 'value': extracted_comment, 'space': 'preserve'}, {"object-type": "pot-entry-header", "references": reflist, "extractedComment": '', "flags": flags}]
 
             if entry.msgid_plural:
                 textflow = {'id': textflowId, 'lang':'en-US', 'contents': content, 'plural':'true', 'extensions':extensions}

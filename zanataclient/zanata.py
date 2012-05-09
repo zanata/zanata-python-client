@@ -44,6 +44,7 @@ from command import handle_program
 from pushcmd import PoPush
 from pushcmd import PublicanPush
 from pushcmd import GenericPush
+from pullcmd import GenericPull
 
 log = Logger()
 
@@ -451,62 +452,6 @@ def generate_zanatacmd(url, username, apikey):
         log.error("Please specify username and apikey in zanata.ini or with '--username' and '--apikey' options")
         sys.exit(1)
 
-def get_lang_list(command_options, project_config):
-    lang_list = []
-    if command_options.has_key('lang'):
-        lang_list = command_options['lang'][0]['value'].split(',')
-    elif project_config.has_key('locale_map'):
-        lang_list = project_config['locale_map'].keys()
-    else:
-        log.error("Please specify the language with '--lang' option or in zanata.xml")
-        sys.exit(1)
-
-    return lang_list
-
-#################################
-#
-# Process source, trans and output folder
-#
-#################################
-
-def process_transdir(command_options, src_folder):
-    trans_folder = ""
-
-    if command_options.has_key('transdir'):
-        trans_folder = command_options['transdir'][0]['value']
-    elif src_folder:
-        trans_folder = src_folder
-    else:
-        trans_folder = os.getcwd()
-
-    return trans_folder
-
-def create_outpath(command_options, output_folder):
-    if command_options.has_key('transdir'):
-        output = command_options['transdir'][0]['value']
-    elif output_folder:
-        output = output_folder
-    else:
-        output = os.getcwd()
-
-    if not os.path.isdir(output):
-        os.mkdir(output)
-
-    return output
-
-def check_plural_support(server_version):
-    if server_version == None:
-        return False
-
-    version = str(server_version.split('-')[0])
-    main_ver = version[:3]
-    version_number = string.atof(main_ver)
-
-    if version_number >= 1.6:
-        return True
-    else:
-        return False
-
 #################################
 #
 # Command Handler
@@ -860,75 +805,8 @@ def pull(command_options, args, project_type = None):
         --noskeletons: omit po files when translations not found
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
-    dir_option = False
-    skeletons = True
-    filelist = []
-    output_folder = None
-    project_config = read_project_config(command_options)
-
-    if not project_config:
-        log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-
-    url = process_url(project_config, command_options)
-    username, apikey = read_user_config(url, command_options)
-    get_version(url, command_options)
-
-    zanatacmd = generate_zanatacmd(url, username, apikey)
-
-    if command_options.has_key('disablesslcert'):
-        zanatacmd.disable_ssl_cert_validation()
-
-    #if file not specified, push all the files in pot folder to zanata server
-    project_id, iteration_id = zanatacmd.check_project(command_options, project_config)
-    log.info("Username: %s" % username)
-
-    lang_list = get_lang_list(command_options, project_config)
-
-    #list the files in project
-    try:
-        filelist = zanatacmd.get_file_list(project_id, iteration_id)
-    except Exception, e:
-        log.error(str(e))
-        sys.exit(1)
-
-    if project_config.has_key('locale_map'):
-        locale_map = project_config['locale_map']
-    else:
-        locale_map = None
-
-    if project_type:
-        command_type = project_type
-        dir_option = True
-    elif command_options.has_key('project_type'):
-        command_type = command_options['project_type'][0]['value']
-    elif project_config['project_type']:
-        command_type = project_config['project_type']
-    else:
-        log.error("The project type is unknown")
-        sys.exit(1)
-
-    if dir_option:
-        #Keep dir option for publican/po pull
-        if command_options.has_key('dir'):
-            output_folder = command_options['dir'][0]['value']
-
-        if command_options.has_key('dstdir'):
-            output_folder = command_options['dstdir'][0]['value']
-    else:
-        #Disable dir option for generic pull command
-        if command_options.has_key('dir'):
-            log.warn("dir option is disabled in pull command, please use --transdir, or specify value in zanata.xml")
-
-        if command_options.has_key('dstdir'):
-            log.warn("dstdir option is changed to transdir option for generic pull command")
-            output_folder = command_options['dstdir'][0]['value']
-
-    if command_options.has_key('noskeletons'):
-        skeletons = False
-
-    outpath = create_outpath(command_options, output_folder)
-
-    zanatacmd.pull_command(locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type, skeletons)
+    command = GenericPull()
+    command.run(command_options, args, project_type)
 
 def glossary_push(command_options, args):
     """

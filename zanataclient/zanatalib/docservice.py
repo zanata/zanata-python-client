@@ -95,9 +95,9 @@ class DocumentService:
         headers['X-Auth-Token'] = self.projects.apikey
 
         ext = "?ext=gettext&ext=comment&copyTrans=%s"%copytrans
-  
+
         res, content = self.projects.restclient.request_post('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid,iterationid), args=resources, headers=headers, extension=ext)
-         
+
         if res['status'] == '201' or res['status'] == '301':
             return True
         elif res['status'] == '401':
