@@ -48,11 +48,11 @@ class PublicanUtility:
         """
         textflows = []
         for entry in pofile:
-            context = ""
+            context = None
             reflist = []
             content = ""
 
-            if entry.msgctxt:
+            if entry.msgctxt is not None:
                 hashbase = entry.msgctxt + u"\u0000" + entry.msgid
                 context = entry.msgctxt
             else:
@@ -78,7 +78,7 @@ class PublicanUtility:
             else:
                 content = entry.msgid
 
-            if entry.msgctxt:
+            if context is not None:
                 extensions=[{'object-type':'comment', 'value': extracted_comment, 'space': 'preserve'}, {"object-type": "pot-entry-header", "context": context, "references": reflist, "extractedComment": '', "flags": flags}]
             else:
                 extensions=[{'object-type':'comment', 'value': extracted_comment, 'space': 'preserve'}, {"object-type": "pot-entry-header", "references": reflist, "extractedComment": '', "flags": flags}]
@@ -142,7 +142,7 @@ class PublicanUtility:
             if entry in obs_list:
                 continue
 
-            if entry.msgctxt:
+            if entry.msgctxt is not None:
                 hashbase = entry.msgctxt + u"\u0000" + entry.msgid
             else:
                 hashbase = entry.msgid
@@ -244,8 +244,8 @@ class PublicanUtility:
             if os.path.isdir(full_path):
                 pofile_path = self.get_pofile_path(full_path, file_name)
                 if pofile_path:
-                    return pofile_path                
-    
+                    return pofile_path
+
     def hash_match(self, message, resid):
         """
         Caculate the hash of msgid and msgctxt, then compare result with resId from server,
@@ -383,7 +383,7 @@ class PublicanUtility:
                     if entry.get('object-type') == 'pot-entry-header':
                         #PotEntryHeader
                         #Check the references is not empty
-                        if entry.get('references')!=[u'']:
+                        if entry.get('references') != [u'']:
                             ref_list = []
                             for item in entry.get('references'):
                                 #in some cases, entry contains more than one reference
@@ -400,7 +400,7 @@ class PublicanUtility:
                         if entry.get('flags'):
                             poentry.flags = entry.get('flags')
 
-                        if entry.get('context'):
+                        if entry.get('context') is not None:
                             poentry.msgctxt = entry.get('context')
 
                     if entry.get('object-type') == 'comment':
