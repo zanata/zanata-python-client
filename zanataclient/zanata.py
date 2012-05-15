@@ -253,6 +253,13 @@ option_sets = {
             long=['--push-trans-only'],
         ),
     ],
+    'pushtype' : [
+        dict(
+            type='command',
+            long=['--push-type'],
+            metavar='PUSHTYPE',
+        ),
+    ],
     'disablesslcert' : [
         dict(
             type='command',
@@ -780,6 +787,9 @@ def push(command_options, args):
         --transdir: the path of the folder that contain locale folders
                     (e.g. ./myproject)
         --push-trans: push local translations to server
+        --push-trans-only: push translations only
+        --push-type: source: push source document only, target: push translations only, same to push-trans-only 
+                    both: push source and translations together, same to push-trans
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
         --lang: language list (defaults to zanata.xml locales)

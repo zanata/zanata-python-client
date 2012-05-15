@@ -312,7 +312,8 @@ class Push:
 class GenericPush(Push):
     def run(self, command_options, args):
         copytrans = True
-        importpo = False
+        pushtrans = None
+        push_trans_only = False
         force = False
         deletefiles = False
         plural_support = False
@@ -368,7 +369,21 @@ class GenericPush(Push):
         if command_options.has_key('dir'):
             log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")
 
+        if command_options.has_key('pushtype'):
+            if command_options.has_key('pushtrans'):
+                log.warn("--push-trans option will be omitted")
+            push_type = command_options['pushtype'][0]['value']
+            if push_type == "source":
+                pushtrans = False
+            elif push_type == "target":
+                push_trans_only = True
+            elif push_type == "both":
+                pushtrans = True
+
         if command_options.has_key('pushtransonly'):
+            push_trans_only = True
+
+        if push_trans_only:
             transfolder = self.process_transdir(command_options, "")
             merge = self.process_merge(command_options)
             lang_list = self.get_lang_list(command_options, project_config)
@@ -415,7 +430,8 @@ class GenericPush(Push):
             log.info("PO directory (originals):%s" % tmlfolder)
             folder = tmlfolder
 
-        pushtrans = self.get_pushtrans(command_options)
+        if pushtrans is None:
+            pushtrans = self.get_pushtrans(command_options)
 
         if deletefiles:
             zanatacmd.del_server_content(tmlfolder, project_id, iteration_id, filelist, force, command_type)
