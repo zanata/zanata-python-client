@@ -439,14 +439,14 @@ class PublicanUtility:
             # copy any other stuff you need to transfer
             for message in po:
                 for translation in targets:
-                    if translation.get('extensions'):
-                        extensions=translation.get('extensions')
-                        if extensions:
+                    if self.hash_match(message, translation.get('resId')):
+                        if translation.get('extensions'):
+                            extensions = translation.get('extensions')
                             for entry in extensions:
                                 if entry.get('object-type') == 'comment':
-                                    message.tcomment = entry.get('value')
+                                    if entry.get('value'):
+                                        message.tcomment = entry.get('value')
 
-                    if self.hash_match(message, translation.get('resId')):
                         if translation.get('content'):
                             message.msgstr = translation.get('content')
 
