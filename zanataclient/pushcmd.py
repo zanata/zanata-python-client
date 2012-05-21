@@ -24,7 +24,6 @@ import os
 import sys
 import string
 
-from zanatalib.versionservice import VersionService
 from zanatalib.error import UnAvaliableResourceException
 from zanatalib.error import NoSuchFileException
 from zanatalib.error import UnavailableServiceError
@@ -108,8 +107,6 @@ class Push:
         if not (user_name, apikey):
             log.info("Can not find user-config file in home folder, current path or path in 'user-config' option")
 
-        log.info("zanata server: %s" % url)
-
         #The value in commandline options will overwrite the value in user-config file
         if command_options.has_key('user_name'):
             user_name = command_options['user_name'][0]['value']
@@ -119,7 +116,7 @@ class Push:
 
         return (user_name, apikey)
 
-    def get_version(self, url, command_options):
+    def get_client_version(self, command_options):
         #Retrieve the version of client
         version_number = ""
         path = os.path.dirname(os.path.realpath(__file__))
@@ -134,24 +131,7 @@ class Push:
             log.error("Please run VERSION-GEN or 'make install' to generate VERSION-FILE")
             version_number = "UNKNOWN"
 
-        #Retrieve the version of the zanata server
-        version = VersionService(url)
-
-        if command_options.has_key('disablesslcert'):
-            version.disable_ssl_cert_validation()
-
-        try:
-            content = version.get_server_version()
-            if content:
-                server_version = content['versionNo']
-                log.info("zanata python client version: %s, zanata server API version: %s" % (version_number, content['versionNo']))
-                return server_version
-        except UnAvaliableResourceException:
-            log.info("zanata python client version: %s" % version_number)
-            log.error("Can not retrieve the server version, server may not support the version service")
-        except UnavailableServiceError:
-            log.error("Service Temporarily Unavailable, stop processing!")
-            sys.exit(1)
+        return version_number
             
     def process_merge(self, command_options):
         merge = ""
@@ -292,7 +272,7 @@ class Push:
 
         return pushtrans
 
-    def get_importparam(self, command_type, command_options, project_config, folder):
+    def get_importparam(self, project_type, command_options, project_config, folder):
         import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': 'gettext'}
         
         import_param['transdir'] = self.process_transdir(command_options, folder)
@@ -305,9 +285,75 @@ class Push:
         else:
             import_param['locale_map'] = None
         
-        import_param['project_type'] = command_type
+        import_param['project_type'] = project_type
 
         return import_param
+
+    def get_projectinfo(self, command_options):
+        project_id = ''
+        version_id = ''
+        
+        project_config = self.read_project_config(command_options)
+
+        if not project_config:
+            log.info("Can not find zanata.xml, please specify the path of zanata.xml")
+
+        url = self.process_url(project_config, command_options)
+
+        if command_options.has_key('project_id'):
+            project_id =  command_options['project_id'][0]['value'] 
+        else:
+            if project_config.has_key('project_id'):
+                project_id = project_config['project_id']
+
+        if command_options.has_key('project_version'):
+            version_id = command_options['project_version'][0]['value'] 
+        else:
+            if project_config.has_key('project_version'):
+                version_id = project_config['project_version']
+
+        if command_options.has_key('project_type'):
+            project_type = command_options['project_type'][0]['value']
+        elif project_config['project_type']:
+            project_type = project_config['project_type']
+
+        if not project_id:
+            log.error("Please specify a valid project id in zanata.xml or with '--project-id' option")
+            sys.exit(1)
+
+        if not version_id:
+            log.error("Please specify a valid version id in zanata.xml or with '--project-version' option")
+            sys.exit(1)
+
+        return url, project_id, version_id, project_type, project_config
+
+    def create_zanatacmd(self, url, command_options):
+        username, apikey = self.read_user_config(url, command_options)
+
+        zanatacmd = self.generate_zanatacmd(url, username, apikey)
+
+        if command_options.has_key('disablesslcert'):
+            zanatacmd.disable_ssl_cert_validation()
+
+        client_version = self.get_client_version(command_options)
+        server_version = zanatacmd.get_server_version(url)
+
+        plural_support = self.check_plural_support(server_version)
+
+        version_info =  "zanata python client version: "+client_version        
+        
+        if server_version:
+            version_info = version_info+", zanata server API version: "+server_version
+
+        return zanatacmd, version_info, username
+
+    def log_message(self, url, version_info, project_id, version_id, username):
+        log.info("zanata server: %s" % url)
+        log.info(version_info)
+        log.info("Project: %s" % project_id)
+        log.info("Version: %s" % version_id)        
+        log.info("Username: %s" % username)
+        log.info("Source language: en-US")
 
 class GenericPush(Push):
     def run(self, command_options, args):
@@ -317,49 +363,29 @@ class GenericPush(Push):
         force = False
         deletefiles = False
         plural_support = False
-        command_type = ''
+        project_type = ''
         tmlfolder = ""
         filelist = []
 
-        project_config = self.read_project_config(command_options)
-
-        if not project_config:
-            log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-
-        url = self.process_url(project_config, command_options)
-        username, apikey = self.read_user_config(url, command_options)
-        server_version = self.get_version(url, command_options)
-
-        plural_support = self.check_plural_support(server_version)
-
-        zanatacmd = self.generate_zanatacmd(url, username, apikey)
-
-        if command_options.has_key('disablesslcert'):
-            zanatacmd.disable_ssl_cert_validation()
-
-        project_id, iteration_id = zanatacmd.check_project(command_options, project_config)
-        log.info("Username: %s" % username)
-        log.info("Source language: en-US")
+        url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
+        zanatacmd, version_info, username = self.create_zanatacmd(url, command_options)
+        self.log_message(url, version_info, project_id, version_id, username)
+        zanatacmd.verify_project(project_id, version_id)
 
         if command_options.has_key('nocopytrans'):
             copytrans = False
 
         log.info("Copy previous translations:%s" % copytrans)
 
-        if command_options.has_key('project_type'):
-            command_type = command_options['project_type'][0]['value']
-        elif project_config['project_type']:
-            command_type = project_config['project_type']
-        else:
+        if not project_type:
             log.error("The project type is unknown")
             sys.exit(1)
-
-        if command_type != 'podir' and command_type != 'gettext':
+        elif project_type != 'podir' and project_type != 'gettext':
             log.error("The project type is not correct, please use 'podir' and 'gettext' as project type")
             sys.exit(1)
 
         if command_options.has_key('srcfile'):
-            if command_type == 'gettext': 
+            if project_type == 'gettext': 
                 tmlfolder, import_file = self.process_srcfile(command_options)
                 filelist.append(import_file)
             else:
@@ -393,7 +419,7 @@ class GenericPush(Push):
             else:
                 locale_map = None
 
-            zanatacmd.push_trans_command(transfolder, project_id, iteration_id, lang_list, locale_map, command_type, merge)
+            zanatacmd.push_trans_command(transfolder, project_id, version_id, lang_list, locale_map, project_type, merge)
             sys.exit(0)
 
         if tmlfolder == "":
@@ -423,10 +449,10 @@ class GenericPush(Push):
         if command_options.has_key('force'):
             force = True
 
-        if command_type == 'podir':
+        if project_type == 'podir':
             log.info("POT directory (originals):%s" % tmlfolder)
             folder = None
-        elif command_type == 'gettext':
+        elif project_type == 'gettext':
             log.info("PO directory (originals):%s" % tmlfolder)
             folder = tmlfolder
 
@@ -434,15 +460,15 @@ class GenericPush(Push):
             pushtrans = self.get_pushtrans(command_options)
 
         if deletefiles:
-            zanatacmd.del_server_content(tmlfolder, project_id, iteration_id, filelist, force, command_type)
+            zanatacmd.del_server_content(tmlfolder, project_id, version_id, filelist, force, project_type)
 
         if pushtrans:
             log.info("Importing translation")
-            import_param = self.get_importparam(command_type, command_options,  project_config, folder)
-            zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
+            import_param = self.get_importparam(project_type, command_options,  project_config, folder)
+            zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support, import_param)
         else:
             log.info("Importing source documents only")
-            zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support)
+            zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support)
 
 class PublicanPush(Push):
     def run(self, command_options, args):
@@ -454,25 +480,10 @@ class PublicanPush(Push):
         tmlfolder = ""
         filelist = []
 
-        project_config = self.read_project_config(command_options)
-
-        if not project_config:
-            log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-
-        url = self.process_url(project_config, command_options)
-        username, apikey = self.read_user_config(url, command_options)
-        server_version = self.get_version(url, command_options)
-
-        plural_support = self.check_plural_support(server_version)
-
-        zanatacmd = self.generate_zanatacmd(url, username, apikey)
-
-        if command_options.has_key('disablesslcert'):
-            zanatacmd.disable_ssl_cert_validation()
-
-        project_id, iteration_id = zanatacmd.check_project(command_options, project_config)
-        log.info("Username: %s" % username)
-        log.info("Source language: en-US")
+        url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
+        zanatacmd, version_info, username = self.create_zanatacmd(url, command_options)
+        self.log_message(url, version_info, project_id, version_id, username)
+        zanatacmd.verify_project(project_id, version_id)
 
         if command_options.has_key('nocopytrans'):
             copytrans = False
@@ -507,14 +518,14 @@ class PublicanPush(Push):
         importpo = self.get_importpo(command_options)
         
         if deletefiles:
-            zanatacmd.del_server_content(tmlfolder, project_id, iteration_id, filelist, force, "podir")
+            zanatacmd.del_server_content(tmlfolder, project_id, version_id, filelist, force, "podir")
         
         if importpo:
             import_param = self.get_importparam("podir", command_options,  project_config, tmlfolder)
-            zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
+            zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support, import_param)
         else:
             log.info("Importing source documents only")
-            zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support)
+            zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support)
 
 class PoPush(Push):
     def run(self, command_options, args):
@@ -525,25 +536,10 @@ class PoPush(Push):
         plural_support = False
         filelist = []
 
-        project_config = self.read_project_config(command_options)
-
-        if not project_config:
-            log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-
-        url = self.process_url(project_config, command_options)
-        username, apikey = self.read_user_config(url, command_options)
-        server_version = self.get_version(url, command_options)
-
-        plural_support = self.check_plural_support(server_version)
-
-        zanatacmd = self.generate_zanatacmd(url, username, apikey)
-
-        if command_options.has_key('disablesslcert'):
-            zanatacmd.disable_ssl_cert_validation()
-
-        project_id, iteration_id = zanatacmd.check_project(command_options, project_config)
-        log.info("Username: %s" % username)
-        log.info("Source language: en-US")
+        url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
+        zanatacmd, version_info, username = self.create_zanatacmd(url, command_options)
+        self.log_message(url, version_info, project_id, version_id, username)
+        zanatacmd.verify_project(project_id, version_id)
 
         if command_options.has_key('nocopytrans'):
             copytrans = False
@@ -589,10 +585,10 @@ class PoPush(Push):
 
             if command_options.has_key('force'):
                 force = True
-            zanatacmd.del_server_content(tmlfolder, project_id, iteration_id, filelist, force, "gettext")
+            zanatacmd.del_server_content(tmlfolder, project_id, version_id, filelist, force, "gettext")
 
         if importpo:
-            zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support, import_param)
+            zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support, import_param)
         else:
-            zanatacmd.push_command(filelist, tmlfolder, project_id, iteration_id, copytrans, plural_support)
+            zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support)
         

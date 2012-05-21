@@ -60,29 +60,21 @@ class GenericPull(Push):
         skeletons = True
         filelist = []
         output_folder = None
-        project_config = self.read_project_config(command_options)
 
-        if not project_config:
-            log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-
-        url = self.process_url(project_config, command_options)
-        username, apikey = self.read_user_config(url, command_options)
-        self.get_version(url, command_options)
-
-        zanatacmd = self.generate_zanatacmd(url, username, apikey)
-
-        if command_options.has_key('disablesslcert'):
-            zanatacmd.disable_ssl_cert_validation()
-
-        #if file not specified, push all the files in pot folder to zanata server
-        project_id, iteration_id = zanatacmd.check_project(command_options, project_config)
+        url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
+        zanatacmd, version_info, username = self.create_zanatacmd(url, command_options)
+        zanatacmd.verify_project(project_id, version_id)
+        log.info("zanata server: %s" % url)
+        log.info(version_info)
+        log.info("Project: %s" % project_id)
+        log.info("Version: %s" % version_id)        
         log.info("Username: %s" % username)
 
         lang_list = self.get_lang_list(command_options, project_config)
 
         #list the files in project
         try:
-            filelist = zanatacmd.get_file_list(project_id, iteration_id)
+            filelist = zanatacmd.get_file_list(project_id, version_id)
         except Exception, e:
             log.error(str(e))
             sys.exit(1)
@@ -124,4 +116,4 @@ class GenericPull(Push):
 
         outpath = self.create_outpath(command_options, output_folder)
 
-        zanatacmd.pull_command(locale_map, project_id, iteration_id, filelist, lang_list, outpath, command_type, skeletons)
+        zanatacmd.pull_command(locale_map, project_id, version_id, filelist, lang_list, outpath, command_type, skeletons)

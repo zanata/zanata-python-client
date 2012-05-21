@@ -27,12 +27,14 @@ __all__ = (
 
 from docservice import DocumentService
 from projectservice import ProjectService
+from versionservice import VersionService
 
 class ZanataResource:
     def __init__(self, base_url, username = None, apikey = None):
         self.base_url = base_url
         self.projects = ProjectService(base_url, username, apikey)
         self.documents = DocumentService(self.projects)
+        self.version = VersionService(base_url)
 
     def disable_ssl_cert_validation(self):
         self.projects.disable_ssl_cert_validation()

@@ -57,6 +57,19 @@ class ZanataCommand:
     def get_file_list(self, projectid, iterationid):
         return self.zanata_resource.documents.get_file_list(projectid, iterationid)
 
+    def get_server_version(self, url):
+        try:
+            content = self.zanata_resource.version.get_server_version()
+            if content:
+                server_version = content['versionNo']
+                return server_version
+        except UnAvaliableResourceException:
+            self.log.error("Can not retrieve the server version, server may not support the version service")
+        except UnavailableServiceError:
+            self.log.error("Service Temporarily Unavailable, stop processing!")
+            sys.exit(1)    
+
+    """
     def check_project(self, command_options, project_config):
         project_id = ''
         iteration_id = ''
@@ -82,7 +95,10 @@ class ZanataCommand:
 
         self.log.info("Project: %s"%project_id)
         self.log.info("Version: %s"%iteration_id)
+        self.verify_project(project_id, iteration_id)
+    """
 
+    def verify_project(self, project_id, version_id):
         try:
             self.zanata_resource.projects.get(project_id)
         except NoSuchProjectException, e:
@@ -90,8 +106,7 @@ class ZanataCommand:
             sys.exit(1)
 
         try:
-            self.zanata_resource.projects.iterations.get(project_id, iteration_id)
-            return project_id, iteration_id
+            self.zanata_resource.projects.iterations.get(project_id, version_id)
         except NoSuchProjectException, e:
             self.log.error(str(e))
             sys.exit(1)
