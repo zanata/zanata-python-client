@@ -20,13 +20,13 @@
 # Boston, MA  02110-1301, USA.
 
 import unittest
-from test_zanata import ZanataTest
+#from test_zanata import ZanataTest
 from test_parseconfig import ConfigTest
 from test_publicanutil import PublicanUtilityTest
 #from test_zanatacmd import ZanataCmdTest
 
 suite = unittest.TestSuite()
-suite.addTest(unittest.makeSuite(ZanataTest))
+#suite.addTest(unittest.makeSuite(ZanataTest))
 suite.addTest(unittest.makeSuite(ConfigTest))
 suite.addTest(unittest.makeSuite(PublicanUtilityTest))
 #suite.addTest(unittest.makeSuite(ZanataCmdTest))
