@@ -278,7 +278,7 @@ subcmds = {
     'po': ['push', 'pull'],
     'push':[],
     'pull':[],
-    'glossary':['push']
+    'glossary':['push', 'delete']
     }
 
 usage = """Client for talking to a Zanata Server
@@ -886,6 +886,21 @@ def glossary_push(command_options, args):
         
         zanatacmd.csvglossary_push(path, url, username, apikey, locale_map, comments_header)
 
+def glossary_delete(command_options, args):
+    optionsutil = OptionsUtil(command_options)
+    url, username, apikey = optionsutil.apply_configfiles()
+    get_version(url, command_options)
+    log.info("Username: %s" % username)
+
+    zanatacmd = ZanataCommand(url, username, apikey)
+
+    if command_options.has_key('disablesslcert'):
+        zanatacmd.disable_ssl_cert_validation()
+
+    log.info("Delete all the glossary terms on the server")
+
+    zanatacmd.delete_glossary(url, username, apikey)
+
 command_handler_factories = {
     'help': makeHandler(help_info),
     'list': makeHandler(list_project),
@@ -899,7 +914,8 @@ command_handler_factories = {
     'publican_push': makeHandler(publican_push),
     'push': makeHandler(push),
     'pull': makeHandler(pull),
-    'glossary_push': makeHandler(glossary_push)
+    'glossary_push': makeHandler(glossary_push),
+    'glossary_delete': makeHandler(glossary_delete)
 }
 
 def signal_handler(signal, frame):

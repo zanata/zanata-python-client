@@ -29,7 +29,8 @@ from rest.client import RestClient
 from error import UnAuthorizedException
 from error import BadRequestBodyException
 from error import UnavailableServiceError
-from error import UnexpectedStatusException   
+from error import UnexpectedStatusException
+from error import InternalServerError   
 
 class GlossaryService:
     def __init__(self, base_url):
@@ -48,7 +49,32 @@ class GlossaryService:
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
             raise BadRequestBodyException('Error 400', content)
+        elif res['status'] == '500':
+            raise InternalServerError('Error 500', content)
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push')
+
+    def delete(self, username, apikey):
+        headers = {}
+        headers['X-Auth-User'] = username
+        headers['X-Auth-Token'] = apikey        
+        
+        res, content = self.restclient.request_delete('/seam/resource/restv1/glossary', headers=headers)
+       
+        if res['status'] == '200':
+            return True
+        elif res['status'] == '401':
+            raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
+        elif res['status'] == '400':
+            raise BadRequestBodyException('Error 400', content)
+        elif res['status'] == '500':
+            raise InternalServerError('Error 500', content)
+        elif res['status'] == '503':
+            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
+        else:
+            raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push')
+
+        
+         

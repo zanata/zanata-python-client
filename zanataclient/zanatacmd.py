@@ -536,3 +536,17 @@ class ZanataCommand:
             self.log.error("Service Temporarily Unavailable, stop processing!")
         except ZanataException, e:
             self.log.error(str(e))
+
+    def delete_glossary(self, url, username, apikey):
+        glossary = GlossaryService(url)
+
+        try:
+            glossary.delete(username, apikey)
+        except UnAvaliableResourceException:
+            self.log.error("Can not delete glossary terms on the server")
+        except UnavailableServiceError:
+            self.log.error("Service Temporarily Unavailable, stop processing!")
+        except ZanataException, e:
+            self.log.error(str(e))
+        else:
+            self.log.info("Successfully delete all the glossary terms on the server")
