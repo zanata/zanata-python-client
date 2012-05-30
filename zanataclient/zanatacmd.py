@@ -537,11 +537,11 @@ class ZanataCommand:
         except ZanataException, e:
             self.log.error(str(e))
 
-    def delete_glossary(self, url, username, apikey):
+    def delete_glossary(self, url, username, apikey, lang = None):
         glossary = GlossaryService(url)
 
         try:
-            glossary.delete(username, apikey)
+            glossary.delete(username, apikey, lang)
         except UnAvaliableResourceException:
             self.log.error("Can not delete glossary terms on the server")
         except UnavailableServiceError:
@@ -549,4 +549,4 @@ class ZanataCommand:
         except ZanataException, e:
             self.log.error(str(e))
         else:
-            self.log.info("Successfully delete all the glossary terms on the server")
+            self.log.info("Successfully delete the glossary terms on the server")

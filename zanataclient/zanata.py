@@ -887,6 +887,7 @@ def glossary_push(command_options, args):
         zanatacmd.csvglossary_push(path, url, username, apikey, locale_map, comments_header)
 
 def glossary_delete(command_options, args):
+    lang = None
     optionsutil = OptionsUtil(command_options)
     url, username, apikey = optionsutil.apply_configfiles()
     get_version(url, command_options)
@@ -897,9 +898,13 @@ def glossary_delete(command_options, args):
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
 
-    log.info("Delete all the glossary terms on the server")
+    if command_options.has_key('lang'):
+        lang = command_options['lang'][0]['value'].split(',')[0]
+        log.info("Delete the glossary terms in %s on the server" % lang)
+    else:
+        log.info("Delete all the glossary terms on the server")
 
-    zanatacmd.delete_glossary(url, username, apikey)
+    zanatacmd.delete_glossary(url, username, apikey, lang)
 
 command_handler_factories = {
     'help': makeHandler(help_info),

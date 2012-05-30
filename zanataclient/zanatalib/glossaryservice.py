@@ -56,13 +56,18 @@ class GlossaryService:
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push')
 
-    def delete(self, username, apikey):
+    def delete(self, username, apikey, lang = None):
         headers = {}
         headers['X-Auth-User'] = username
         headers['X-Auth-Token'] = apikey        
         
-        res, content = self.restclient.request_delete('/seam/resource/restv1/glossary', headers=headers)
-       
+        resource = '/seam/resource/restv1/glossary'
+
+        if lang:
+            resource =  resource + '/'+lang
+
+        res, content = self.restclient.request_delete(resource, headers=headers)
+
         if res['status'] == '200':
             return True
         elif res['status'] == '401':
