@@ -345,7 +345,7 @@ class Push:
         if server_version:
             version_info = version_info+", zanata server API version: "+server_version
 
-        return zanatacmd, version_info, username
+        return zanatacmd, version_info, username, plural_support
 
     def log_message(self, url, version_info, project_id, version_id, username):
         log.info("zanata server: %s" % url)
@@ -368,7 +368,7 @@ class GenericPush(Push):
         filelist = []
 
         url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
-        zanatacmd, version_info, username = self.create_zanatacmd(url, command_options)
+        zanatacmd, version_info, username, plural_support = self.create_zanatacmd(url, command_options)
         self.log_message(url, version_info, project_id, version_id, username)
         zanatacmd.verify_project(project_id, version_id)
 
@@ -481,7 +481,7 @@ class PublicanPush(Push):
         filelist = []
 
         url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
-        zanatacmd, version_info, username = self.create_zanatacmd(url, command_options)
+        zanatacmd, version_info, username, plural_support = self.create_zanatacmd(url, command_options)
         self.log_message(url, version_info, project_id, version_id, username)
         zanatacmd.verify_project(project_id, version_id)
 
@@ -537,7 +537,7 @@ class PoPush(Push):
         filelist = []
 
         url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
-        zanatacmd, version_info, username = self.create_zanatacmd(url, command_options)
+        zanatacmd, version_info, username, plural_support = self.create_zanatacmd(url, command_options)
         self.log_message(url, version_info, project_id, version_id, username)
         zanatacmd.verify_project(project_id, version_id)
 

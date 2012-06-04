@@ -111,7 +111,7 @@ class DocumentService:
         elif res['status'] == '403':
             raise UnexpectedStatusException('Error 403', content)
         elif res['status'] == '500':
-            raise InternalServerError('Error 500', 'An internal server error happens')
+            raise InternalServerError('Error 500', content)
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push')
 
