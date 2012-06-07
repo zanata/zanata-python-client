@@ -62,13 +62,14 @@ class GenericPull(Push):
         output_folder = None
 
         url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
-        zanatacmd, version_info, username = self.create_zanatacmd(url, command_options)
-        zanatacmd.verify_project(project_id, version_id)
+        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options)
+        version_info = self.create_versioninfo(client_version, server_version)
         log.info("zanata server: %s" % url)
         log.info(version_info)
         log.info("Project: %s" % project_id)
         log.info("Version: %s" % version_id)        
         log.info("Username: %s" % username)
+        zanatacmd.verify_project(project_id, version_id)
 
         lang_list = self.get_lang_list(command_options, project_config)
 

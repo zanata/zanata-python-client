@@ -328,6 +328,8 @@ class Push:
         return url, project_id, version_id, project_type, project_config
 
     def create_zanatacmd(self, url, command_options):
+        server_version = ""
+
         username, apikey = self.read_user_config(url, command_options)
 
         zanatacmd = self.generate_zanatacmd(url, username, apikey)
@@ -338,14 +340,15 @@ class Push:
         client_version = self.get_client_version(command_options)
         server_version = zanatacmd.get_server_version(url)
 
-        plural_support = self.check_plural_support(server_version)
+        return zanatacmd, username, client_version, server_version
 
+    def create_versioninfo(self, client_version, server_version):
         version_info =  "zanata python client version: "+client_version        
         
         if server_version:
             version_info = version_info+", zanata server API version: "+server_version
 
-        return zanatacmd, version_info, username, plural_support
+        return version_info
 
     def log_message(self, url, version_info, project_id, version_id, username):
         log.info("zanata server: %s" % url)
@@ -368,7 +371,9 @@ class GenericPush(Push):
         filelist = []
 
         url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
-        zanatacmd, version_info, username, plural_support = self.create_zanatacmd(url, command_options)
+        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options)
+        plural_support = self.check_plural_support(server_version)
+        version_info = self.create_versioninfo(client_version, server_version)
         self.log_message(url, version_info, project_id, version_id, username)
         zanatacmd.verify_project(project_id, version_id)
 
@@ -481,7 +486,9 @@ class PublicanPush(Push):
         filelist = []
 
         url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
-        zanatacmd, version_info, username, plural_support = self.create_zanatacmd(url, command_options)
+        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options)
+        plural_support = self.check_plural_support(server_version)
+        version_info = self.create_versioninfo(client_version, server_version)
         self.log_message(url, version_info, project_id, version_id, username)
         zanatacmd.verify_project(project_id, version_id)
 
@@ -537,7 +544,9 @@ class PoPush(Push):
         filelist = []
 
         url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
-        zanatacmd, version_info, username, plural_support = self.create_zanatacmd(url, command_options)
+        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options)
+        plural_support = self.check_plural_support(server_version)
+        version_info = self.create_versioninfo(client_version, server_version)
         self.log_message(url, version_info, project_id, version_id, username)
         zanatacmd.verify_project(project_id, version_id)
 
