@@ -27,6 +27,7 @@ import urlparse
 import warnings
 import sys
 import warnings
+import StringIO
 warnings.simplefilter("ignore", DeprecationWarning)
 import httplib2
 
@@ -89,6 +90,11 @@ class RestClient(object):
         return self.request(resource, "get")
 
     def request(self, resource, method = "get", body = None, headers = None):
+        if body is not None:
+            thelen = str(len(body))
+            headers['Content-Length'] = thelen
+            body = StringIO.StringIO(body)
+
         try:
             response, content = self.http_client.request(resource, method.upper(), body, headers=headers)
             if response.previous is not None:
@@ -102,6 +108,8 @@ class RestClient(object):
         except httplib2.HttpLib2Error, e:
             print "error: %s" % e
             sys.exit(2)
+        except MemoryError, e:
+            print "error: The file is too big to process"
         except Exception, e:
             value = str(e).rstrip()
             if value == 'a float is required':
