@@ -50,6 +50,8 @@ class GenericPull(Push):
         else:
             output = os.getcwd()
 
+        output = os.path.expanduser(output)
+
         if not os.path.isdir(output):
             os.mkdir(output)
 
@@ -61,7 +63,7 @@ class GenericPull(Push):
         filelist = []
         output_folder = None
 
-        url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
+        url, project_id, version_id, project_config = self.get_projectinfo(command_options)
         zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options)
         version_info = self.create_versioninfo(client_version, server_version)
         log.info("zanata server: %s" % url)

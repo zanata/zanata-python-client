@@ -312,11 +312,6 @@ class Push:
             if project_config.has_key('project_version'):
                 version_id = project_config['project_version']
 
-        if command_options.has_key('project_type'):
-            project_type = command_options['project_type'][0]['value']
-        elif project_config['project_type']:
-            project_type = project_config['project_type']
-
         if not project_id:
             log.error("Please specify a valid project id in zanata.xml or with '--project-id' option")
             sys.exit(1)
@@ -325,7 +320,17 @@ class Push:
             log.error("Please specify a valid version id in zanata.xml or with '--project-version' option")
             sys.exit(1)
 
-        return url, project_id, version_id, project_type, project_config
+        return url, project_id, version_id, project_config
+
+    def get_projecttype(self, command_options, project_config):
+        project_type = ""
+
+        if command_options.has_key('project_type'):
+            project_type = command_options['project_type'][0]['value']
+        elif project_config['project_type']:
+            project_type = project_config['project_type']
+
+        return project_type
 
     def create_zanatacmd(self, url, command_options):
         server_version = ""
@@ -370,7 +375,7 @@ class GenericPush(Push):
         tmlfolder = ""
         filelist = []
 
-        url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
+        url, project_id, version_id, project_config = self.get_projectinfo(command_options)
         zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options)
         plural_support = self.check_plural_support(server_version)
         version_info = self.create_versioninfo(client_version, server_version)
@@ -382,6 +387,8 @@ class GenericPush(Push):
 
         log.info("Copy previous translations:%s" % copytrans)
 
+        project_type = self.get_projecttype(command_options, project_config)
+        
         if not project_type:
             log.error("The project type is unknown")
             sys.exit(1)
@@ -485,7 +492,7 @@ class PublicanPush(Push):
         tmlfolder = ""
         filelist = []
 
-        url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
+        url, project_id, version_id, project_config = self.get_projectinfo(command_options)
         zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options)
         plural_support = self.check_plural_support(server_version)
         version_info = self.create_versioninfo(client_version, server_version)
@@ -543,7 +550,7 @@ class PoPush(Push):
         plural_support = False
         filelist = []
 
-        url, project_id, version_id, project_type, project_config = self.get_projectinfo(command_options)
+        url, project_id, version_id, project_config = self.get_projectinfo(command_options)
         zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options)
         plural_support = self.check_plural_support(server_version)
         version_info = self.create_versioninfo(client_version, server_version)
