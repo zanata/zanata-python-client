@@ -506,20 +506,34 @@ class ZanataCommand:
 
 
     def poglossary_push(self, path, url, username, apikey, lang, sourcecomments):
+        i = 0
+        jsons = []
         publicanutil = PublicanUtility()
-        json = publicanutil.glossary_to_json(path, lang, sourcecomments)
+        jsons = publicanutil.glossary_to_json(path, lang, sourcecomments)
         glossary = GlossaryService(url)
 
-        try:
-            content = glossary.commit_glossary(username, apikey, json)
-            if content:
-                self.log.info("Successfully pushed glossary to the server")
-        except UnAvaliableResourceException:
-            self.log.error("Can not push glossary to the server")
-        except UnavailableServiceError:
-            self.log.error("Service Temporarily Unavailable, stop processing!")
-        except ZanataException, e:
-            self.log.error(str(e))
+        size = len(jsons)
+        if size > 1:
+            self.log.warn("The file is big, try to devide it to small parts. It may take a long time to push!")
+
+        while i < size:
+            if size > 1:
+                self.log.info("Push part %s of glossary file"%i)
+            try:
+                glossary.commit_glossary(username, apikey, jsons[i])
+            except UnAvaliableResourceException:
+                self.log.error("Can not push glossary to the server")
+                sys.exit(1)
+            except UnavailableServiceError:
+                self.log.error("Service Temporarily Unavailable, stop processing!")
+                sys.exit(1)
+            except ZanataException, e:
+                self.log.error(str(e))
+                sys.exit(1)
+
+            i+=1
+
+        self.log.info("Successfully pushed glossary to the server")
 
     def csvglossary_push(self, path, url, username, apikey, locale_map, comments_header):
         csvconverter = CSVConverter()

@@ -313,17 +313,20 @@ class PublicanUtility:
     def glossary_to_json(self, filepath, lang, sourcecomments):
         pofile = self.create_pofile(filepath)
         entries = []
+        jsons = []
         targetlocales = []
         targetlocales.append(lang)
         srclocales = []
         srclocales.append('en-US')
+        i = 0
 
-        for item in pofile:
+        while i < len(pofile):
             entry= {'srcLang':'en-US','glossaryTerms':'', 'sourcereference':''}
             target_comments=[]
             source_comments=[]
             comments=''
             reflist = []
+            item = pofile[i]
             references = item.occurrences
 
             for ref in references:
@@ -346,9 +349,14 @@ class PublicanUtility:
             entry['glossaryTerms'] = terms
             entries.append(entry)
 
-        glossary = {'sourceLocales':srclocales, 'glossaryEntries':entries, 'targetLocales':targetlocales}
+            if len(entries) == 300 or i == len(pofile)-1:
+                glossary = {'sourceLocales':srclocales, 'glossaryEntries':entries, 'targetLocales':targetlocales}
+                jsons.append(json.dumps(glossary))
+                entries = []
 
-        return json.dumps(glossary)
+            i+=1
+
+        return jsons
 
     def save_to_pofile(self, path, translations, pot, create_skeletons, locale, doc_name):
         """
