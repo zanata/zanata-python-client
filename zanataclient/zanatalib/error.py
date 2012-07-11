@@ -33,8 +33,10 @@ __all__ = (
 )
 class ZanataException(Exception):
     def __init__(self, expr, msg):
+        link = "Please take a reference in "\
+               "https://github.com/zanata/zanata/wiki/Python-Client-Troubleshooting"
         self.expr = expr
-        self.msg = msg
+        self.msg = msg+'\n'+link
 
     def __str__ (self):
         return self.expr+' - '+self.msg

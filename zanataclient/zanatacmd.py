@@ -215,8 +215,8 @@ class ZanataCommand:
             print ("Project Name:        %s")%p.name 
             print ("Project Type:        %s")%p.type
             print ("Project Description: %s")%p.description
-        except NoSuchProjectException:
-            self.log.error("There is no Such Project on the server")
+        except NoSuchProjectException, e:
+            self.log.error(str(e))
         except InvalidOptionException:
             self.log.error("Options are not valid")
 
@@ -232,8 +232,8 @@ class ZanataCommand:
                 print ("Version Name:        %s")%iteration.name
             if hasattr(iteration, 'description'):
                 print ("Version Description: %s")%iteration.description
-        except NoSuchProjectException:
-            self.log.error("There is no such project or version on the server")
+        except NoSuchProjectException, e:
+            self.log.error(str(e))
 
     def create_project(self, project_id, project_name, project_desc):
         """
@@ -521,12 +521,6 @@ class ZanataCommand:
                 self.log.info("Push part %s of glossary file"%i)
             try:
                 glossary.commit_glossary(username, apikey, jsons[i])
-            except UnAvaliableResourceException:
-                self.log.error("Can not push glossary to the server")
-                sys.exit(1)
-            except UnavailableServiceError:
-                self.log.error("Service Temporarily Unavailable, stop processing!")
-                sys.exit(1)
             except ZanataException, e:
                 self.log.error(str(e))
                 sys.exit(1)
@@ -544,10 +538,6 @@ class ZanataCommand:
             content = glossary.commit_glossary(username, apikey, json)
             if content:
                 self.log.info("Successfully pushed glossary to the server")
-        except UnAvaliableResourceException:
-            self.log.error("Can not push glossary to the server")
-        except UnavailableServiceError:
-            self.log.error("Service Temporarily Unavailable, stop processing!")
         except ZanataException, e:
             self.log.error(str(e))
 
@@ -556,10 +546,6 @@ class ZanataCommand:
 
         try:
             glossary.delete(username, apikey, lang)
-        except UnAvaliableResourceException:
-            self.log.error("Can not delete glossary terms on the server")
-        except UnavailableServiceError:
-            self.log.error("Service Temporarily Unavailable, stop processing!")
         except ZanataException, e:
             self.log.error(str(e))
         else:

@@ -52,7 +52,7 @@ class GlossaryService:
         elif res['status'] == '500':
             raise InternalServerError('Error 500', content)
         elif res['status'] == '503':
-            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
+            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable, stop processing!')
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push')
 
@@ -74,10 +74,12 @@ class GlossaryService:
             raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
             raise BadRequestBodyException('Error 400', content)
+        elif res['status'] == '404':
+            raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')
         elif res['status'] == '500':
             raise InternalServerError('Error 500', content)
         elif res['status'] == '503':
-            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
+            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable, stop processing!')
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push')
 
