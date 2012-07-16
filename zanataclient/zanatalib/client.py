@@ -38,4 +38,5 @@ class ZanataResource:
 
     def disable_ssl_cert_validation(self):
         self.projects.disable_ssl_cert_validation()
+        self.version.disable_ssl_cert_validation()
 

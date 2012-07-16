@@ -179,7 +179,7 @@ class ZanataCommand:
                         delete = True
 
                 if delete:
-                    self.log.info("Delete the %s"%name)
+                    self.log.info("Deleting the %s"%name)
 
                     try:
                         self.zanata_resource.documents.delete_template(project_id, iteration_id, request)
