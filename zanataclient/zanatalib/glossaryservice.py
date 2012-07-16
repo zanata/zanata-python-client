@@ -31,6 +31,7 @@ from error import BadRequestBodyException
 from error import UnavailableServiceError
 from error import UnexpectedStatusException
 from error import InternalServerError   
+from error import UnAvaliableResourceException
 
 class GlossaryService:
     def __init__(self, base_url):
@@ -39,10 +40,10 @@ class GlossaryService:
     def commit_glossary(self, username, apikey, resources):
         headers = {}
         headers['X-Auth-User'] = username
-        headers['X-Auth-Token'] = apikey        
-        
+        headers['X-Auth-Token'] = apikey
+
         res, content = self.restclient.request_put('/seam/resource/restv1/glossary', args=resources, headers=headers)
-       
+
         if res['status'] == '201':
             return True
         elif res['status'] == '401':
@@ -59,8 +60,8 @@ class GlossaryService:
     def delete(self, username, apikey, lang = None):
         headers = {}
         headers['X-Auth-User'] = username
-        headers['X-Auth-Token'] = apikey        
-        
+        headers['X-Auth-Token'] = apikey
+
         resource = '/seam/resource/restv1/glossary'
 
         if lang:
@@ -83,5 +84,4 @@ class GlossaryService:
         else:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push')
 
-        
-         
+ 
