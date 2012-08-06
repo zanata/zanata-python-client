@@ -66,14 +66,14 @@ class Push:
         if not url or url.isspace():
             log.error("Please specify valid server url in zanata.xml or with '--url' option")
             sys.exit(1)
-        
+
         if ' ' in url or '\n' in url:
             log.info("Warning, the url which contains '\\n' or whitespace is not valid, please check zanata.xml")
         url = url.strip()
 
         if url[-1] == "/":
             url = url[:-1]
-        
+
         return url
 
     def read_user_config(self, url, command_options):
@@ -101,7 +101,7 @@ class Push:
                 except Exception, e:
                     log.info("Processing user-config file:%s" % str(e))
                     break
-                
+
                 break
 
         if not (user_name, apikey):
@@ -132,7 +132,7 @@ class Push:
             version_number = "UNKNOWN"
 
         return version_number
-            
+
     def process_merge(self, command_options):
         merge = ""
 
@@ -258,7 +258,7 @@ class Push:
         elif command_options.has_key('pushtrans'):
             importpo = True
             log.info("please use --import-po for old publican push command")
-        
+
         return importpo
 
     def get_pushtrans(self, command_options):
@@ -268,23 +268,23 @@ class Push:
             pushtrans = True
         elif command_options.has_key('importpo'):
             pushtrans = True
-            log.info("--import-po option has renamed to --push-trans, please use --push-trans instead")
+            log.info("--import-po option is depreciated, please use '--push-type both'  instead")
 
         return pushtrans
 
     def get_importparam(self, project_type, command_options, project_config, folder):
         import_param = {'transdir': '', 'merge': 'auto', 'lang_list': {}, 'locale_map': {}, 'project_type': 'gettext'}
-        
+
         import_param['transdir'] = self.process_transdir(command_options, folder)
         log.info("Reading locale folders from %s" % import_param['transdir'])
         import_param['merge'] = self.process_merge(command_options)
         import_param['lang_list'] = self.get_lang_list(command_options, project_config)
-        
+
         if project_config.has_key('locale_map'):
             import_param['locale_map'] = project_config['locale_map']
         else:
             import_param['locale_map'] = None
-        
+
         import_param['project_type'] = project_type
 
         return import_param
@@ -292,7 +292,7 @@ class Push:
     def get_projectinfo(self, command_options):
         project_id = ''
         version_id = ''
-        
+
         project_config = self.read_project_config(command_options)
 
         if not project_config:
@@ -301,13 +301,13 @@ class Push:
         url = self.process_url(project_config, command_options)
 
         if command_options.has_key('project_id'):
-            project_id =  command_options['project_id'][0]['value'] 
+            project_id =  command_options['project_id'][0]['value']
         else:
             if project_config.has_key('project_id'):
                 project_id = project_config['project_id']
 
         if command_options.has_key('project_version'):
-            version_id = command_options['project_version'][0]['value'] 
+            version_id = command_options['project_version'][0]['value']
         else:
             if project_config.has_key('project_version'):
                 version_id = project_config['project_version']
@@ -348,8 +348,8 @@ class Push:
         return zanatacmd, username, client_version, server_version
 
     def create_versioninfo(self, client_version, server_version):
-        version_info =  "zanata python client version: "+client_version        
-        
+        version_info =  "zanata python client version: "+client_version
+
         if server_version:
             version_info = version_info+", zanata server API version: "+server_version
 
@@ -359,7 +359,7 @@ class Push:
         log.info("zanata server: %s" % url)
         log.info(version_info)
         log.info("Project: %s" % project_id)
-        log.info("Version: %s" % version_id)        
+        log.info("Version: %s" % version_id)
         log.info("Username: %s" % username)
         log.info("Source language: en-US")
 
@@ -385,10 +385,10 @@ class GenericPush(Push):
         if command_options.has_key('nocopytrans'):
             copytrans = False
 
-        log.info("Copy previous translations:%s" % copytrans)
+        log.info("Reuse previous translation on server:%s" %copytrans)
 
         project_type = self.get_projecttype(command_options, project_config)
-        
+
         if not project_type:
             log.error("The project type is unknown")
             sys.exit(1)
@@ -397,7 +397,7 @@ class GenericPush(Push):
             sys.exit(1)
 
         if command_options.has_key('srcfile'):
-            if project_type == 'gettext': 
+            if project_type == 'gettext':
                 tmlfolder, import_file = self.process_srcfile(command_options)
                 filelist.append(import_file)
             else:
@@ -407,9 +407,11 @@ class GenericPush(Push):
         if command_options.has_key('dir'):
             log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")
 
+        if command_options.has_key('pushtrans'):
+            log.warn("--push-trans is depreciated, please use '--pushtype both' instead")
+            pushtrans = True
+
         if command_options.has_key('pushtype'):
-            if command_options.has_key('pushtrans'):
-                log.warn("--push-trans option will be omitted")
             push_type = command_options['pushtype'][0]['value']
             if push_type == "source":
                 pushtrans = False
@@ -475,11 +477,11 @@ class GenericPush(Push):
             zanatacmd.del_server_content(tmlfolder, project_id, version_id, filelist, force, project_type)
 
         if pushtrans:
-            log.info("Importing translation")
+            log.info("Send local translation: True")
             import_param = self.get_importparam(project_type, command_options,  project_config, folder)
             zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support, import_param)
         else:
-            log.info("Importing source documents only")
+            log.info("Send local translation: False")
             zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support)
 
 class PublicanPush(Push):
@@ -502,7 +504,7 @@ class PublicanPush(Push):
         if command_options.has_key('nocopytrans'):
             copytrans = False
 
-        log.info("Copy previous translations:%s" % copytrans)
+        log.info("Reuse previous translation on server:%s" %copytrans)
 
         tmlfolder = self.process_srcdir_withsub(command_options)
 
@@ -526,14 +528,14 @@ class PublicanPush(Push):
 
         if command_options.has_key('force'):
             force = True
-                
+
         log.info("POT directory (originals):%s" % tmlfolder)
 
         importpo = self.get_importpo(command_options)
-        
+
         if deletefiles:
             zanatacmd.del_server_content(tmlfolder, project_id, version_id, filelist, force, "podir")
-        
+
         if importpo:
             import_param = self.get_importparam("podir", command_options,  project_config, tmlfolder)
             zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support, import_param)
@@ -560,7 +562,7 @@ class PoPush(Push):
         if command_options.has_key('nocopytrans'):
             copytrans = False
 
-        log.info("Copy previous translations:%s" % copytrans)
+        log.info("Reuse previous translation on server:%s" %copytrans)
 
         if command_options.has_key('srcfile'):
             tmlfolder, import_file = self.process_srcfile(command_options)
@@ -607,4 +609,4 @@ class PoPush(Push):
             zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support, import_param)
         else:
             zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support)
-        
+
