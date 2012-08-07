@@ -1,16 +1,213 @@
-=========
-Changelog
-=========
+* Tue Aug 07 2012 Ding-Yi Chen <dchen@redhat.com> - 1.3.11
+- Updated: CHANGELOG and setup.py
 
-Version 1.3.2 (2011/11/03)
---------------------------
- - csv format glossary file support
- - support msgctxt when pushing po file to server and pull it back 
- - Fixed rhbz#696474: python client should only delete files from server which no longer exist on client
- - Fixed rhbz#690687: python client should log a message for 301 redirects
- - Fixed rhbz#738510: --help does not list commands
- - Fixed rhbz#740159: python client: pushing with --merge=import does not overwrite the translation on server
- - Fixed rhbz#738907: can not disable copytrans option when pushing source to zanata server with --no-copytrans option
- - Fixed rhbz#738514: zanata push fails with JSON error
- - Fixed rhbz#750675: zanata client pull command should be able to reconstruct msgctxt and msgid
+* Tue Aug 07 2012 Ding-Yi Chen <dchen@redhat.com> - 1.3.10
+- Fixed rhbz#727833, "Copy previous translations:True" is ambiguous
+
+* Mon Jul 16 2012 James Ni <jni@redhat.com> - 1.3.8
+- Fix issue of po/publican push and po/publican pull command for project_type
+- Fixed rhbz826821, glossary-push failed on big compendium po file
+- Add link of trouble shooting page to error message
+- Fix bypass ssl certificate check issue
+- Change Delete to Deleting
+
+* Wed Jun 13 2012 James Ni <jni@redhat.com> - 1.3.7
+- Fixed rhbz#827316, failed to push pot with msgid_plural against 1.6 server
+- Fixed rhbz#826798, zanata pull fail to pull
+- Fixed rhbz#814593, "TypeError: 'unicode' object does not support item
+  assignment" when pulling translation from server
+- Fixed rhbz#820046, Python client generates empty msgctxt "" when pushing
+- Fixed rhbz#795643, Python client pushes extracted comments instead of
+  translator comments
+- Fix the query param of skeletons
+- Add option --disable-ssl-cert to python client
+- Add help message for noskeletons option in pull, change content of Error 403
+- Fixed the query param of skeletons
+- Implment --push-type option, omit --push-trans when specify --push-type
+  option
+- Implement glossary delete command
+- Refactoring code and remove duplicate code
+
+* Thu Apr 26 2012 James Ni <jni@redhat.com> - 1.3.5
+- Fixed rhbz#814593, "TypeError: 'unicode' object does not support item
+  assignment" when pulling translation from server
+- Part of rhbz#736898, implement push-trans-only option in python client so
+  that user can do offline translation
+- Fixed rhbz#814503, backtrace for zanata glossary push without "zanata.xml"
+- Fixed rhbz#798084, Python client does not show helpful error when missing
+  project id for 'project info' command
+- Fixed rhbz#796039, Python client not recognizing source directories with
+  pot files only in sub-directories.
+- Fixed rhbz#795643, Python client pushes extracted comments instead of
+  translator comments
+- Fixed rhbz#744277, output more informative error message for unescaped quote
+- Add msgid_plural and msgstr_plural support in python client
+  (for server >=1.6)
+- Add skeletons query parameter support in pull command
+- Replace the address of FSF in license
+- Add status code to error message
+
+* Tue Feb 21 2012 James Ni <jni@redhat.com> - 1.3.4
+- Fixed rhbz#795237: zanata python client still display depreciate help on
+ "version create"
+- Fixed rhbz#727386: zanata po push does not assume working directory
+- Fixed rhbz#754869: The python client is pulling some files with a wrong path
+- Fixed rhbz#768877: python client breaks PO file when no translation found
+- Fixed rhbz#748727: US31 As a translator I want the appropriate character
+  encoding for my language to be used so that the content is saved in the
+  correct encoding format
+- Add warning for retired project/version
+
+* Thu Dec 01 2011 James Ni <jni@redhat.com> - 1.3.3
+- Fixed rhbz#751648: Error reading path names with dots
+- Fixed rhbz#754869: The python client is pulling some files with a wrong path
+- Fixed rhbz#756617: python client process file name not correctly for file
+  name contain more than one dot
+- Fixed rhbz#753719: Python client explodes on F16
+
+* Thu Nov 03 2011 James Ni <jni@redhat.com> - 1.3.2-1
+- csv format glossary file support
+- support msgctxt when pushing po file to server and pull it back
+- Fixed rhbz#696474: python client should only delete files from server which
+  no longer exist on client
+- Fixed rhbz#690687: python client should log a message for 301 redirects
+- Fixed rhbz#738510: --help does not list commands
+- Fixed rhbz#740159: python client: pushing with --merge=import does not
+  overwrite the translation on server
+- Fixed rhbz#738907: can not disable copytrans option when pushing source to
+  zanata server with --no-copytrans option
+- Fixed rhbz#738514: zanata push fails with JSON error
+- Fixed rhbz#750675: zanata client pull command should be able to reconstruct
+  msgctxt and msgid
+
+* Wed Aug 31 2011 James Ni <jni@redhat.com> - 1.3.1
+- Fix #rhbz734270 Reinstate publican/po push '--import-po' option
+
+* Tue Aug 23 2011 James Ni <jni@redhat.com> - 1.3.0
+- Change to version 1.3.0
+
+* Wed Jul 20 2011 James Ni <jni@redhat.com> - 1.2.6
+- Change to version 1.2.6
+
+* Thu Jun 02 2011 James Ni <jni@redhat.com> - 1.2.5
+- Fix error of onditionals of RHEL5
+
+* Thu Jun 02 2011 James Ni <jni@redhat.com> - 1.2.5
+- Add python-simplejson requires for RHEL5
+
+* Wed Jun 01 2011 James Ni <jni@redhat.com> - 1.2.5
+- Bug fix and usability improvement
+
+* Thu May 05 2011 James Ni <jni@redhat.com> - 1.2.4
+- Fix rhbz#702192
+
+* Wed Apr 27 2011 James Ni <jni@redhat.com> - 1.2.3
+- Fix rhbz#696474, rhbz#696515, rhbz#696437, rhbz#698028,
+  rhbz#695598, rhbz#690687
+
+* Fri Apr 01 2011 James Ni <jni@redhat.com> - 1.2.2
+- Change to version 1.2.2
+
+* Thu Mar 31 2011 James Ni <jni@redhat.com> - 1.2.1
+- Fixed rpmlint: W: self-obsoletion flies-python-client < 1.3 obsoletes
+  flies-python-client = 1.2.1-1.el6
+
+* Thu Mar 31 2011 James Ni <jni@redhat.com> - 1.2.1
+- Add flies command for fallback
+
+* Thu Mar 31 2011 James Ni <jni@redhat.com> - 1.2.0
+- Change the URL, add Provides and Obsoletes, add zanata.ini in %doc
+
+* Tue Mar 29 2011 James Ni <jni@redhat.com> - 1.2.0
+- Rename the flies to zanata, rename fliesclient to zanataclient
+
+* Thu Mar 10 2011 James Ni <jni@redhat.com> - 0.8.1
+- Fix bugs(issue 272, issue 274) of retrieve the translation
+
+* Mon Mar 07 2011 James Ni <jni@redhat.com> - 0.8.0
+- Stable release
+
+* Wed Feb 23 2011 James Ni <jni@redhat.com> - 0.7.6
+- Rename the command line option, add a Logger class for better output, set
+  copytrans default value to true, make the
+  extensions to a list of gettext and comment.
+
+* Tue Feb 22 2011 James Ni <jni@redhat.com> - 0.7.4
+- Fix issue 245:stop processing when type 'n', Add version service, rename the
+  command line option and help info, add InternalServerError
+
+* Mon Feb 21 2011 James Ni <jni@redhat.com> - 0.7.3
+- Fix issue 244, issue 245, issue 247 and issue 30, add command list for
+  'flies publican', rewrite the README
+
+* Fri Feb 18 2011 James Ni <jni@redhat.com> - 0.7.2
+- Rename the gettextutil to publicanutil, Remove the translator from
+  textFlowTarget, Add more help info
+
+* Mon Jan 24 2011 James Ni <jni@redhat.com> - 0.7.1
+- Fix typo and make help more user-friendly
+
+* Mon Jan 24 2011 James Ni <jni@redhat.com> - 0.7.0
+- Add copyTrans option to client
+
+* Tue Jan 04 2011 James Ni <jni@redhat.com> - 0.6.1
+- Add exception handler for empty extensions
+
+* Wed Dec 29 2010 James Ni <jni@redhat.com> - 0.6.0
+- Create pot file with content retrieved from server, user could choose keep
+  or delete the content on the flies server when pushing publican
+
+* Tue Dec 07 2010 James Ni <jni@redhat.com> - 0.5.1
+- Fix bugs and add some log info for python client
+
+* Thu Dec 02 2010 James Ni <jni@redhat.com> - 0.5.0
+- Make the script compatible with python 2.4
+
+* Mon Nov 29 2010 James Ni <jni@redhat.com> - 0.4.0
+- Add command line option for translation folder and importPo, read and write
+  multiple locale, read the flies.xml first
+
+* Wed Oct 27 2010 James Ni <jni@redhat.com> - 0.3.2
+- Fix a typo in project creation
+
+* Fri Oct 22 2010 James Ni <jni@redhat.com> - 0.3.1
+- Fix an issue in project creation
+
+* Thu Oct 21 2010 James Ni <jni@redhat.com> - 0.3.0
+- Fix the issues in extension support and update translation command
+
+* Thu Oct 21 2010 James Ni <jni@redhat.com> - 0.2.0
+- Add extension support and update translation command
+
+* Wed Sep 29 2010 James Ni <jni@redhat.com> - 0.1.0
+- Modify the user configuration file and command line options
+
+* Wed Sep 08 2010 James Ni <jni@redhat.com> - 0.0.6
+- Try to resolve the dependency of python-setuptools
+
+* Mon Sep 06 2010 James Ni <jni@redhat.com> - 0.0.5
+- Add requires for python-polib
+- Rename resservice in flieslib/__init__.py to docservice
+
+* Mon Aug 30 2010 James Ni <jni@redhat.com> - 0.0.4
+- Rename module resservice to docservice
+- Set encode to UTF-8 when generate hash value for msgid of the po file
+- Change functions in flies.py to private
+- Fix a exception in projectservice and exception handler in flies
+- Provide more "readable" output for httplib2 connection error
+
+* Wed Aug 25 2010 James Ni <jni@redhat.com> - 0.0.3
+- Add an error handler for list command
+- Add cache to httplib2
+- Include the example configuration file
+- Add dependency of python-httplib2 for fedora 12(and less)
+- Modify the __inin__.py for importing the module
+- Modify the spec file and fliesrc.txt
+- Rewrite README file for giving detail of commands and how to implement
+  flies-python-lib in program
+- Add COPYING.LESSER
+
+* Mon Aug 16 2010 James Ni <jni@redhat.com> - 0.0.2
+- remove shebang from flies.py
+- initial package (#623871)
 

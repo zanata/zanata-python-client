@@ -268,7 +268,7 @@ class Push:
             pushtrans = True
         elif command_options.has_key('importpo'):
             pushtrans = True
-            log.info("--import-po option is depreciated, please use '--push-type both'  instead")
+            log.info("--import-po option is deprecated, please use '--push-type both'  instead")
 
         return pushtrans
 
@@ -408,7 +408,7 @@ class GenericPush(Push):
             log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")
 
         if command_options.has_key('pushtrans'):
-            log.warn("--push-trans is depreciated, please use '--pushtype both' instead")
+            log.warn("--push-trans is deprecated, please use '--pushtype both' instead")
             pushtrans = True
 
         if command_options.has_key('pushtype'):
