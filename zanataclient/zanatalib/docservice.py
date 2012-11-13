@@ -158,7 +158,7 @@ class DocumentService:
 
     def retrieve_translation(self, lang, projectid, iterationid, file_id, skeletons):
         """
-        Get translation content of file from Flies server
+        Get translation content of file from Zanata server
         @param lang: language
         @param projectid: Id of project
         @param iterationid: Id of iteration

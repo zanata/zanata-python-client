@@ -1,5 +1,5 @@
 # 
-# Flies Python Client
+# Zanata Python Client
 #
 # Copyright (c) 2010 Jian Ni <jni@redhat.com>
 # Copyright (c) 2010 Red Hat, Inc.

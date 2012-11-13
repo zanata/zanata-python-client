@@ -54,7 +54,7 @@ class ProjectService:
 
     def list(self):
         """
-        List the Project Resources on the Flies server
+        List the Project Resources on the Zanata server
         @return: list of Project object
         """
         res, content = self.restclient.request_get('/seam/resource/restv1/projects')
@@ -69,7 +69,7 @@ class ProjectService:
 
     def get(self, projectid):
         """
-        Retrieve a specified Project Resource on Flies server
+        Retrieve a specified Project Resource on Zanata server
         @param projectid: Id of Project Resource
         @return: Project object
         @raise NoSuchProjectException:
@@ -89,7 +89,7 @@ class ProjectService:
 
     def create(self, project):
         """
-        Create a Project Resource on Flies Server
+        Create a Project Resource on Zanata Server
         @param project: Project object
         @return: Success if status of response is 201
         @raise ProjectExistException:
@@ -134,7 +134,7 @@ class IterationService:
 
     def get(self, projectid, iterationid):
         """
-        Retrieve a specified Iteration Resource on Flies server
+        Retrieve a specified Iteration Resource on Zanata server
         @param projectid: Id of Project Resource
         @param iterationid: Id of Iteration Resource
         @return: Iteration object
@@ -154,7 +154,7 @@ class IterationService:
 
     def create(self, projectid, iteration):
         """
-        Create a Iteration Resource on Flies Server
+        Create a Iteration Resource on Zanata Server
         @param projectid: Id of Project Resource
         @param iteration: Iteration object
         @return: Success if status of response is 201

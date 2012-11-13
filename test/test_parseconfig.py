@@ -1,5 +1,5 @@
 # 
-# Flies Python Client
+# Zanata Python Client
 #
 # Copyright (c) 2010 Jian Ni <jni@redhat.com>
 # Copyright (c) 2010 Red Hat, Inc.
@@ -36,7 +36,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_user_config(self):
         self.config.set_userconfig("./testfiles/zanata.ini")
-        server = self.config.get_server("http://localhost:8080/flies")
+        server = self.config.get_server("http://localhost:8080/zanata")
         user_name = self.config.get_config_value("username", 'servers', server)
         apikey = self.config.get_config_value("key", 'servers',server)
         self.assertEqual(server, "local") 

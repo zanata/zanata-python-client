@@ -103,7 +103,7 @@ class RestClient(object):
                     print "HTTP redirect: redirect to %s, please update the server URL to new URL" % new_url
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
-            print "error: %s, Maybe the flies sever is down?" % e
+            print "error: %s, Maybe the Zanata server is down?" % e
             sys.exit(2)
         except httplib2.HttpLib2Error, e:
             print "error: %s" % e
