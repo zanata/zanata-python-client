@@ -158,12 +158,7 @@ class ZanataCommand:
 
             for name in filelist:
                 delete = False
-                if ',' in name: 
-                    request = name.replace(',', '\,')
-                elif '/' in name:
-                    request = name.replace('/', ',')
-                else:
-                    request = name
+                request = name.replace(',', '\,').replace('/', ',')
 
                 if ".pot" in name:
                     path = os.path.join(tmlfolder, name)
@@ -393,7 +388,7 @@ class ZanataCommand:
             body, filename = publicanutil.potfile_to_json(filepath, srcfolder)
 
             try:
-                result = self.zanata_resource.documents.commit_template(project_id, iteration_id, body, copytrans)
+                result = self.update_template(project_id, iteration_id, filename, body, copytrans)
                 if result:
                     self.log.info("Successfully pushed %s to the server"%filepath)
             except UnAuthorizedException, e:
@@ -402,8 +397,6 @@ class ZanataCommand:
             except BadRequestBodyException, e:
                 self.log.error(str(e))
                 continue
-            except SameNameDocumentException, e:
-                self.update_template(project_id, iteration_id, filename, body, copytrans)
             except UnexpectedStatusException, e:
                 self.log.error(str(e))
                 continue
