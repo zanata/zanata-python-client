@@ -1,4 +1,4 @@
-# 
+#
 # Zanata Python Client
 #
 # Copyright (c) 2010 Jian Ni <jni@redhat.com>
@@ -39,10 +39,10 @@ class ConfigTest(unittest.TestCase):
         server = self.config.get_server("http://localhost:8080/zanata")
         user_name = self.config.get_config_value("username", 'servers', server)
         apikey = self.config.get_config_value("key", 'servers',server)
-        self.assertEqual(server, "local") 
+        self.assertEqual(server, "local")
         self.assertEqual(user_name, "username")
         self.assertEqual(apikey, "key")
-  
+
     def test_project_config(self):
         project_config = self.config.read_project_config("./testfiles/zanata.xml")
         self.assertEqual(project_config['project_url'], "http://localhost:8080/zanata/")
