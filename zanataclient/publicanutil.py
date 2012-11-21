@@ -250,10 +250,10 @@ class PublicanUtility:
                 if pofile_path:
                     return pofile_path
 
-    def hash_match(self, message, resid):
+    def get_resId(self, message):
         """
-        Caculate the hash of msgid and msgctxt, then compare result with resId from server,
-        return true if equal
+        Calculate the hash of msgid and msgctxt
+        @return: resId
         """
         if message.msgctxt:
             hashbase = message.msgctxt + u"\u0000" + message.msgid
@@ -263,10 +263,7 @@ class PublicanUtility:
         m = hashlib.md5()
         m.update(hashbase.encode('utf-8'))
 
-        if m.hexdigest() == resid:
-            return True
-        else:
-            return False 
+        return m.hexdigest()
 
     def strip_path(self, full_path, root_path, suffix):
         if root_path[-1] != "/":
@@ -449,42 +446,47 @@ class PublicanUtility:
                     self.log.warn("No translations found in %s for document %s"%(locale, doc_name))
                     return
 
+            translationsByResId = {}
+            for translation in targets:
+                resId = translation.get('resId')
+                translationsByResId[resId] = translation
+
             #"extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
 
             # copy any other stuff you need to transfer
             for poentry in po:
-                # TODO use a map(resId -> translation)!
-                for translation in targets:
-                    if self.hash_match(poentry, translation.get('resId')):
-                        if translation.get('extensions'):
-                            extensions = translation.get('extensions')
-                            for entry in extensions:
-                                if entry.get('object-type') == 'comment':
-                                    if entry.get('value'):
-                                        poentry.tcomment = entry.get('value')
+                resId = self.get_resId(poentry)
+                translation = translationsByResId.get(resId)
+                if translation:
+                    if translation.get('extensions'):
+                        extensions = translation.get('extensions')
+                        for entry in extensions:
+                            if entry.get('object-type') == 'comment':
+                                if entry.get('value'):
+                                    poentry.tcomment = entry.get('value')
 
-                        content = translation.get('content')
-                        if poentry.msgid_plural:
-                            contents = translation.get('contents')
-                            if contents:
-                                i = 0
-                                for msg in contents:
-                                    poentry.msgstr_plural[i] = msg
-                                    i = i+1
-                            elif content:
-                                poentry.msgstr_plural[0] = content
-                        else:
-                            if content:
-                                poentry.msgstr = content
+                    content = translation.get('content')
+                    if poentry.msgid_plural:
+                        contents = translation.get('contents')
+                        if contents:
+                            i = 0
+                            for msg in contents:
+                                poentry.msgstr_plural[i] = msg
+                                i = i+1
+                        elif content:
+                            poentry.msgstr_plural[0] = content
+                    else:
+                        if content:
+                            poentry.msgstr = content
 
-                        if translation.get('state') == 'NeedReview':
-                            if poentry.flags == [u'']:
-                                poentry.flags = ['fuzzy']
-                            else:
-                                poentry.flags.insert(0, 'fuzzy')
+                    if translation.get('state') == 'NeedReview':
+                        if poentry.flags == [u'']:
+                            poentry.flags = ['fuzzy']
                         else:
-                            if poentry.flags == [u'']:
-                                poentry.flags = None
+                            poentry.flags.insert(0, 'fuzzy')
+                    else:
+                        if poentry.flags == [u'']:
+                            poentry.flags = None
 
         # finally save resulting po to outpath as lang/myfile.po
         po.save()
