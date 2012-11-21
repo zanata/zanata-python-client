@@ -423,6 +423,9 @@ class PublicanUtility:
                 if textflow.get('contents'):
                     poentry.msgid = textflow.get('contents')[0]
                     poentry.msgid_plural = textflow.get('contents')[1]
+                    poentry.msgstr_plural[0] = ''
+                else:
+                    poentry.msgstr = ''
                 po.append(poentry)
 
         #If the translation is exist, read the content of the po file
@@ -450,6 +453,7 @@ class PublicanUtility:
 
             # copy any other stuff you need to transfer
             for poentry in po:
+                # TODO use a map(resId -> translation)!
                 for translation in targets:
                     if self.hash_match(poentry, translation.get('resId')):
                         if translation.get('extensions'):
@@ -459,14 +463,20 @@ class PublicanUtility:
                                     if entry.get('value'):
                                         poentry.tcomment = entry.get('value')
 
-                        if translation.get('content'):
-                            poentry.msgstr = translation.get('content')
+                        content = translation.get('content')
+                        if poentry.msgid_plural:
+                            contents = translation.get('contents')
+                            if contents:
+                                i = 0
+                                for msg in contents:
+                                    poentry.msgstr_plural[i] = msg
+                                    i = i+1
+                            elif content:
+                                poentry.msgstr_plural[0] = content
+                        else:
+                            if content:
+                                poentry.msgstr = content
 
-                        if translation.get('contents'):
-                            i = 0
-                            for msg in translation.get('contents'):
-                                poentry.msgstr_plural[i] = msg
-                                i = i+1
                         if translation.get('state') == 'NeedReview':
                             if poentry.flags == [u'']:
                                 poentry.flags = ['fuzzy']
