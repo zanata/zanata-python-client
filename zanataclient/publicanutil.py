@@ -104,6 +104,10 @@ class PublicanUtility:
         return True
 
     def get_contentstate(self, entry):
+        """
+        Determine the ContentState for a PO entry, based on contents and fuzzy flag
+        @return: the state
+        """
         fuzzy = False
         contents = []
 
@@ -445,32 +449,32 @@ class PublicanUtility:
             #"extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
 
             # copy any other stuff you need to transfer
-            for message in po:
+            for poentry in po:
                 for translation in targets:
-                    if self.hash_match(message, translation.get('resId')):
+                    if self.hash_match(poentry, translation.get('resId')):
                         if translation.get('extensions'):
                             extensions = translation.get('extensions')
                             for entry in extensions:
                                 if entry.get('object-type') == 'comment':
                                     if entry.get('value'):
-                                        message.tcomment = entry.get('value')
+                                        poentry.tcomment = entry.get('value')
 
                         if translation.get('content'):
-                            message.msgstr = translation.get('content')
+                            poentry.msgstr = translation.get('content')
 
                         if translation.get('contents'):
                             i = 0
                             for msg in translation.get('contents'):
-                                message.msgstr_plural[i] = msg
+                                poentry.msgstr_plural[i] = msg
                                 i = i+1
                         if translation.get('state') == 'NeedReview':
-                            if message.flags == [u'']:
-                                message.flags = ['fuzzy']
+                            if poentry.flags == [u'']:
+                                poentry.flags = ['fuzzy']
                             else:
-                                message.flags.insert(0, 'fuzzy')
+                                poentry.flags.insert(0, 'fuzzy')
                         else:
-                            if message.flags == [u'']:
-                                message.flags = None
+                            if poentry.flags == [u'']:
+                                poentry.flags = None
 
         # finally save resulting po to outpath as lang/myfile.po
         po.save()
