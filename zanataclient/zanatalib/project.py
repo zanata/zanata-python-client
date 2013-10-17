@@ -42,7 +42,8 @@ class Project(object):
             if not a == 'links': 
                 setattr(self, str(a), b)
             else:
-                setattr(self, str(a), [Link(item) for item in b])
+                if b is not None:
+                    setattr(self, str(a), [Link(item) for item in b])
 
     def set_iteration(self, iterations):
         self.__iterations = iterations
