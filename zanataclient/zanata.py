@@ -453,9 +453,9 @@ def get_version(url, command_options,headers=None):
         log.error("Service Temporarily Unavailable, stop processing!")
         sys.exit(1)
         
-def generate_zanatacmd(url, username, apikey):
+def generate_zanatacmd(url, username, apikey,headers=None):
     if username and apikey:
-        return ZanataCommand(url, username, apikey)
+        return ZanataCommand(url, username, apikey,headers)
     else:
         log.error("Please specify username and apikey in zanata.ini or with '--username' and '--apikey' options")
         sys.exit(1)
@@ -602,7 +602,8 @@ def create_project(command_options, args):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    get_version(url, command_options)
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
+    get_version(url, command_options,headers)
 
     if args:
         project_id = args[0]
@@ -619,7 +620,7 @@ def create_project(command_options, args):
     if command_options.has_key('project_desc'):
         project_desc = command_options['project_desc'][0]['value']
 
-    zanatacmd = generate_zanatacmd(url, username, apikey)
+    zanatacmd = generate_zanatacmd(url, username, apikey,headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()

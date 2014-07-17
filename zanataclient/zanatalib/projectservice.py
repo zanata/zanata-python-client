@@ -103,11 +103,16 @@ class ProjectService:
         @raise UnAuthorizedException:
         @raise BadRequestException:
         """
-        headers = {}
-        headers['X-Auth-User'] = self.username
-        headers['X-Auth-Token'] = self.apikey
+        #headers = {}
+        #headers['X-Auth-User'] = self.username
+        #headers['X-Auth-Token'] = self.apikey
+        if self.http_headers:
+            self.http_headers['Accept'] = 'application/json'
         body ='''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(project.name,project.id,project.desc)
-        res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s'%project.id, args=body, headers=headers)
+
+        res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s'%project.id, args=body, headers=self.http_headers)
+        #res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s'%project.id,"put", body,self.http_headers)
+        
         if res['status'] == '201':
             return "Success"
         elif res['status'] == '200':
