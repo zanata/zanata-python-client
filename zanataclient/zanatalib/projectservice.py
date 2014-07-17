@@ -42,11 +42,13 @@ class ProjectService:
     """
     Provides services to interact with Project, handle operaions of list, create and retrieve Project Resources  
     """
-    def __init__(self, base_url, usrname, apikey):
+    def __init__(self, base_url, usrname, apikey,http_headers=None):
         self.restclient = RestClient(base_url)
         self.iterations = IterationService(base_url, usrname, apikey)
         self.username = usrname
         self.apikey = apikey
+        self.http_headers = http_headers
+        self.base_url = base_url
 
     def disable_ssl_cert_validation(self):
         self.restclient.disable_ssl_cert_validation()
@@ -57,7 +59,7 @@ class ProjectService:
         List the Project Resources on the Zanata server
         @return: list of Project object
         """
-        res, content = self.restclient.request_get('/seam/resource/restv1/projects')
+        res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects',"get",None,self.http_headers)
 
         if res['status'] == '200':
             projects = []

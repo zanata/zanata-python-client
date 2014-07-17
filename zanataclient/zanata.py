@@ -378,12 +378,12 @@ def process_url(project_config, command_options):
     return url
 
 def read_user_config(url, command_options):
+    print "read user config"
     user_name = ""
     apikey = ""
     config = ZanataConfig()
     #Try to read user-config file
     user_config = [os.path.join(os.path.expanduser("~") + '/.config', filename) for filename in ['zanata.ini', 'flies.ini']]
-
     if command_options.has_key('user_config'):
         user_config.append(command_options['user_config'][0]['value'])
 
@@ -419,7 +419,7 @@ def read_user_config(url, command_options):
 
     return (user_name, apikey)
 
-def get_version(url, command_options):
+def get_version(url, command_options,headers=None):
     #Retrieve the version of client
     version_number = ""
     path = os.path.dirname(os.path.realpath(__file__))
@@ -435,7 +435,7 @@ def get_version(url, command_options):
         version_number = "UNKNOWN"
 
     #Retrieve the version of the zanata server
-    version = VersionService(url)
+    version = VersionService(url,headers)
 
     if command_options.has_key('disablesslcert'):
         version.disable_ssl_cert_validation()
@@ -483,14 +483,22 @@ def list_project(command_options, args):
     """
     project_config = read_project_config(command_options)
     url = process_url(project_config, command_options)
-    get_version(url, command_options)
-
-    zanatacmd = ZanataCommand(url)
-
+    username, apikey = read_user_config(url, command_options)
+    headers = http_headers(username,apikey,'application/json')
+    zanatacmd = ZanataCommand(url,username,apikey,headers)
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
-
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
+    get_version(url, command_options,headers)
     zanatacmd.list_projects()
+
+def http_headers(user_name,user_pass,accept_format):
+    headers = {
+        'X-Auth-User':user_name,
+        'X-Auth-Token':user_pass,
+        'Accept': accept_format
+    }
+    return headers
 
 def project_info(command_options, args):
     """

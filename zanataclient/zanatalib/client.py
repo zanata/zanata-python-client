@@ -30,9 +30,9 @@ from projectservice import ProjectService
 from versionservice import VersionService
 
 class ZanataResource:
-    def __init__(self, base_url, username = None, apikey = None):
+    def __init__(self, base_url, username = None, apikey = None,http_headers=None):
         self.base_url = base_url
-        self.projects = ProjectService(base_url, username, apikey)
+        self.projects = ProjectService(base_url, username, apikey,http_headers)
         self.documents = DocumentService(self.projects)
         self.version = VersionService(base_url)
 

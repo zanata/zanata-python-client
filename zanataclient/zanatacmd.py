@@ -42,9 +42,9 @@ from zanatalib.error import UnavailableServiceError
 from zanatalib.error import InternalServerError
 
 class ZanataCommand:
-    def __init__(self, url, username = None, apikey = None):
+    def __init__(self, url, username = None, apikey = None,http_headers=None):
         self.log = Logger()
-        self.zanata_resource = ZanataResource(url, username, apikey)
+        self.zanata_resource = ZanataResource(url, username, apikey,http_headers)
 
     def disable_ssl_cert_validation(self):
         self.zanata_resource.disable_ssl_cert_validation()
@@ -194,7 +194,7 @@ class ZanataCommand:
         for project in projects:
             print ("\nProject ID:          %s")%project.id
             print ("Project Name:        %s")%project.name
-            print ("Project Type:        %s")%project.type
+            #print ("Project Type:        %s")%project.type
             print ("Project Links:       %s\n")%[{'href':link.href, 'type':link.type, 'rel':link.rel} for link in project.links]
 
         return projects
