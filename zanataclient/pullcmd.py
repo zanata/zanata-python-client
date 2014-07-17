@@ -32,7 +32,7 @@ log = Logger()
 class GenericPull(Push):
     def process_transdir(self, command_options, src_folder):
         trans_folder = ""
-
+        
         if command_options.has_key('transdir'):
             trans_folder = command_options['transdir'][0]['value']
         elif src_folder:
@@ -57,14 +57,14 @@ class GenericPull(Push):
 
         return output
 
-    def run(self, command_options, args, project_type):
+    def run(self, command_options, args, project_type,http_header=None):
         dir_option = False
         skeletons = True
         filelist = []
         output_folder = None
 
         url, project_id, version_id, project_config = self.get_projectinfo(command_options)
-        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options)
+        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options,http_header)
         version_info = self.create_versioninfo(client_version, server_version)
         log.info("zanata server: %s" % url)
         log.info(version_info)
@@ -74,7 +74,7 @@ class GenericPull(Push):
         zanatacmd.verify_project(project_id, version_id)
 
         lang_list = self.get_lang_list(command_options, project_config)
-
+        
         #list the files in project
         try:
             filelist = zanatacmd.get_file_list(project_id, version_id)
@@ -86,7 +86,7 @@ class GenericPull(Push):
             locale_map = project_config['locale_map']
         else:
             locale_map = None
-
+        
         if project_type:
             command_type = project_type
             dir_option = True

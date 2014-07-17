@@ -46,6 +46,7 @@ class ZanataCommand:
         self.log = Logger()
         self.zanata_resource = ZanataResource(url, username, apikey,http_headers)
 
+
     def disable_ssl_cert_validation(self):
         self.zanata_resource.disable_ssl_cert_validation()
 
@@ -461,6 +462,7 @@ class ZanataCommand:
                     else:
                         lang = item
 
+                save_name = item.replace('-','_')
                 if project_type == "podir":
                     outpath = os.path.join(output, item) 
                     if not os.path.isdir(outpath):
@@ -468,7 +470,6 @@ class ZanataCommand:
                     save_name = name
                 elif project_type == "gettext":
                     outpath = output
-                    save_name = item.replace('-','_')
 
                 if folder:
                     subdirectory = os.path.join(outpath, folder)
@@ -476,7 +477,7 @@ class ZanataCommand:
                         os.makedirs(subdirectory)
                     pofile = os.path.join(subdirectory, save_name+'.po') 
                 else:
-                    pofile = os.path.join(outpath, save_name+'.po')
+                    pofile = os.path.join(output, save_name+'.po')
 
                 self.log.info("Retrieving %s translation from server:"%item)
 

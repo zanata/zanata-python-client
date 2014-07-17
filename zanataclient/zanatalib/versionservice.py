@@ -43,6 +43,7 @@ class VersionService:
         self.restclient.disable_ssl_cert_validation()
         
     def get_server_version(self):
+        print self.http_headers
         res, content = self.restclient.request_version('/seam/resource/restv1/version',self.http_headers)
         
         if res['status'] == '200' or res['status'] == '304':

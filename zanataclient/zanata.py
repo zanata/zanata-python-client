@@ -824,8 +824,12 @@ def pull(command_options, args, project_type = None):
         --noskeletons: omit po files when translations not found
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
+    project_config = read_project_config(command_options)
+    url = process_url(project_config, command_options)
+    username, apikey = read_user_config(url, command_options)
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
     command = GenericPull()
-    command.run(command_options, args, project_type)
+    command.run(command_options, args, project_type,headers)
 
 def glossary_push(command_options, args):
     """

@@ -148,9 +148,9 @@ class Push:
 
         return merge
 
-    def generate_zanatacmd(self, url, username, apikey):
+    def generate_zanatacmd(self, url, username, apikey,headers=None):
         if username and apikey:
-            return ZanataCommand(url, username, apikey)
+            return ZanataCommand(url, username, apikey,headers)
         else:
             log.error("Please specify username and apikey in zanata.ini or with '--username' and '--apikey' options")
             sys.exit(1)
@@ -332,19 +332,14 @@ class Push:
 
         return project_type
 
-    def create_zanatacmd(self, url, command_options):
+    def create_zanatacmd(self, url, command_options,http_headers=None):
         server_version = ""
-
         username, apikey = self.read_user_config(url, command_options)
-
-        zanatacmd = self.generate_zanatacmd(url, username, apikey)
-
+        zanatacmd = self.generate_zanatacmd(url, username, apikey,http_headers)
         if command_options.has_key('disablesslcert'):
             zanatacmd.disable_ssl_cert_validation()
-
         client_version = self.get_client_version(command_options)
         server_version = zanatacmd.get_server_version(url)
-
         return zanatacmd, username, client_version, server_version
 
     def create_versioninfo(self, client_version, server_version):
