@@ -559,9 +559,11 @@ def version_info(command_options, args):
         iteration_id = project_config['project_version']
 
     url = process_url(project_config, command_options)
-
-    get_version(url, command_options)
-
+    username, apikey = read_user_config(url, command_options)
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
+    get_version(url, command_options,headers)
+    
+    
     if command_options.has_key('project_id'):
         project_id = command_options['project_id'][0]['value']
 
@@ -571,8 +573,8 @@ def version_info(command_options, args):
     if not iteration_id or not project_id:
         log.error("Please use zanata version info --project-id=project_id --project-version=project_version to retrieve the version")
         sys.exit(1)
-
-    zanatacmd = ZanataCommand(url)
+    headers = http_headers(username,apikey,'application/json')    
+    zanatacmd = ZanataCommand(url,headers=headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
