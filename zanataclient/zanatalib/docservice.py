@@ -68,7 +68,7 @@ class DocumentService:
 
         ext = "?ext=gettext&ext=comment&copyTrans=%s"%copytrans
         res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid,iterationid,file_id), args=resources, headers=self.http_headers, extension=ext)
-        print res 
+
         if res['status'] == '201' or res['status'] == '200' or res['status'] == '301':
             return True
         elif res['status'] == '401':

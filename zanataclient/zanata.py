@@ -378,7 +378,6 @@ def process_url(project_config, command_options):
     return url
 
 def read_user_config(url, command_options):
-    print "read user config"
     user_name = ""
     apikey = ""
     config = ZanataConfig()
@@ -728,8 +727,12 @@ def po_push(command_options, args):
         --lang: language list
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
+    project_config = read_project_config(command_options)
+    url = process_url(project_config, command_options)
+    username, apikey = read_user_config(url, command_options)
+    headers = http_headers(username,apikey,'application/json')
     command = PoPush()
-    command.run(command_options, args)
+    command.run(command_options, args,headers)
     
 def publican_pull(command_options, args):
     """
