@@ -814,8 +814,12 @@ def push(command_options, args):
         --lang: language list (defaults to zanata.xml locales)
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
+    project_config = read_project_config(command_options)
+    url = process_url(project_config, command_options)
+    username, apikey = read_user_config(url, command_options)
+    headers = http_headers(username,apikey,'application/json')
     command = GenericPush()
-    command.run(command_options, args)
+    command.run(command_options, args,headers)
 
 def pull(command_options, args, project_type = None):
     """
@@ -861,10 +865,11 @@ def glossary_push(command_options, args):
 
     optionsutil = OptionsUtil(command_options)
     url, username, apikey = optionsutil.apply_configfiles()
-    get_version(url, command_options)
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
+    get_version(url, command_options,headers)
     log.info("Username: %s" % username)
-
-    zanatacmd = ZanataCommand(url, username, apikey)
+    headers = http_headers(username,apikey,'application/json')
+    zanatacmd = ZanataCommand(url, username, apikey,headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
@@ -912,7 +917,8 @@ def glossary_delete(command_options, args):
     lang = None
     optionsutil = OptionsUtil(command_options)
     url, username, apikey = optionsutil.apply_configfiles()
-    get_version(url, command_options)
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
+    get_version(url, command_options,headers)
     log.info("Username: %s" % username)
 
     zanatacmd = ZanataCommand(url, username, apikey)

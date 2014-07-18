@@ -359,7 +359,7 @@ class Push:
         log.info("Source language: en-US")
 
 class GenericPush(Push):
-    def run(self, command_options, args):
+    def run(self, command_options, args,headers):
         copytrans = True
         pushtrans = None
         push_trans_only = False
@@ -371,7 +371,7 @@ class GenericPush(Push):
         filelist = []
 
         url, project_id, version_id, project_config = self.get_projectinfo(command_options)
-        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options)
+        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options,headers)
         plural_support = self.check_plural_support(server_version)
         version_info = self.create_versioninfo(client_version, server_version)
         self.log_message(url, version_info, project_id, version_id, username)
