@@ -38,12 +38,16 @@ from error import UnavailableServiceError
 from error import UnexpectedStatusException
 
 class DocumentService:    
-    def __init__(self, projects):
+    def __init__(self,projects,base_url=None,headers=None):
         self.projects = projects
+        self.http_headers = headers
+        self.base_url = base_url 
     
     def get_file_list(self, projectid, iterationid):
-        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid, iterationid))
-
+        #res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid, iterationid))
+        if self.http_headers:
+            self.http_headers['Accept'] = 'application/json'
+        res, content = self.projects.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s/iterations/i/%s/r'%(projectid, iterationid),"get",None,self.http_headers)
         if res['status'] == '200' or res['status'] == '304':
             files = json.loads(content)
             filelist = [item.get('name') for item in files]
@@ -56,14 +60,15 @@ class DocumentService:
             raise UnexpectedStatusException('Error', 'Unexpected Status, failed to get file list')
     
     def update_template(self, projectid, iterationid, file_id, resources, copytrans):
-        headers = {}
-        headers['X-Auth-User'] = self.projects.username
-        headers['X-Auth-Token'] = self.projects.apikey        
-        
+        #headers = {}
+        #headers['X-Auth-User'] = self.projects.username
+        #headers['X-Auth-Token'] = self.projects.apikey        
+        #if self.http_headers:
+        #    self.http_headers['Accept'] = 'application/json'
+
         ext = "?ext=gettext&ext=comment&copyTrans=%s"%copytrans
- 
-        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid,iterationid,file_id), args=resources, headers=headers, extension=ext)
-         
+        res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid,iterationid,file_id), args=resources, headers=self.http_headers, extension=ext)
+
         if res['status'] == '201' or res['status'] == '200' or res['status'] == '301':
             return True
         elif res['status'] == '401':
@@ -137,11 +142,15 @@ class DocumentService:
 
     def retrieve_template(self, projectid, iterationid, file_id):
         ext = "?ext=gettext&ext=comment"
+        if self.http_headers:
+            self.http_headers['Accept'] = 'application/json'
 
-        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file_id), extension=ext)
-        headers = {}
-        headers['X-Auth-User'] = self.projects.username
-        headers['X-Auth-Token'] = self.projects.apikey 
+        #res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file_id), extension=ext)
+        res, content = self.projects.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file_id), "get",None,self.http_headers)
+
+        #headers = {}
+        #headers['X-Auth-User'] = self.projects.username
+        #headers['X-Auth-Token'] = self.projects.apikey 
         
         if res['status'] == '200' or res['status'] == '304':
             return content
@@ -167,15 +176,19 @@ class DocumentService:
         @raise UnAvaliableResourceException:
         @raise UnAuthorizedException: 
         """
-        headers = {}
-        headers['X-Auth-User'] = self.projects.username
-        headers['X-Auth-Token'] = self.projects.apikey 
+        #headers = {}
+        #headers['X-Auth-User'] = self.projects.username
+        #headers['X-Auth-Token'] = self.projects.apikey 
+        if self.http_headers:
+            self.http_headers['Accept'] = 'application/json'
         ext = "?ext=gettext&ext=comment"
 
         if skeletons:
             ext = ext+"&skeletons=true"
 
-        res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file_id, lang), extension=ext)
+         #res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file_id, lang), extension=ext)
+
+        res, content = self.projects.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file_id, lang),"get",None,self.http_headers)
        
         if res['status'] == '200' or res['status'] == '304':
             return content

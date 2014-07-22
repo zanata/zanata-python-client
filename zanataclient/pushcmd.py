@@ -148,9 +148,9 @@ class Push:
 
         return merge
 
-    def generate_zanatacmd(self, url, username, apikey):
+    def generate_zanatacmd(self, url, username, apikey,headers=None):
         if username and apikey:
-            return ZanataCommand(url, username, apikey)
+            return ZanataCommand(url, username, apikey,headers)
         else:
             log.error("Please specify username and apikey in zanata.ini or with '--username' and '--apikey' options")
             sys.exit(1)
@@ -332,19 +332,14 @@ class Push:
 
         return project_type
 
-    def create_zanatacmd(self, url, command_options):
+    def create_zanatacmd(self, url, command_options,http_headers=None):
         server_version = ""
-
         username, apikey = self.read_user_config(url, command_options)
-
-        zanatacmd = self.generate_zanatacmd(url, username, apikey)
-
+        zanatacmd = self.generate_zanatacmd(url, username, apikey,http_headers)
         if command_options.has_key('disablesslcert'):
             zanatacmd.disable_ssl_cert_validation()
-
         client_version = self.get_client_version(command_options)
         server_version = zanatacmd.get_server_version(url)
-
         return zanatacmd, username, client_version, server_version
 
     def create_versioninfo(self, client_version, server_version):
@@ -364,7 +359,7 @@ class Push:
         log.info("Source language: en-US")
 
 class GenericPush(Push):
-    def run(self, command_options, args):
+    def run(self, command_options, args,headers):
         copytrans = True
         pushtrans = None
         push_trans_only = False
@@ -376,7 +371,7 @@ class GenericPush(Push):
         filelist = []
 
         url, project_id, version_id, project_config = self.get_projectinfo(command_options)
-        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options)
+        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options,headers)
         plural_support = self.check_plural_support(server_version)
         version_info = self.create_versioninfo(client_version, server_version)
         self.log_message(url, version_info, project_id, version_id, username)
@@ -485,7 +480,7 @@ class GenericPush(Push):
             zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support)
 
 class PublicanPush(Push):
-    def run(self, command_options, args):
+    def run(self, command_options, args,http_headers=None):
         copytrans = True
         importpo = False
         force = False
@@ -495,7 +490,7 @@ class PublicanPush(Push):
         filelist = []
 
         url, project_id, version_id, project_config = self.get_projectinfo(command_options)
-        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options)
+        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options,http_headers)
         plural_support = self.check_plural_support(server_version)
         version_info = self.create_versioninfo(client_version, server_version)
         self.log_message(url, version_info, project_id, version_id, username)
@@ -544,7 +539,7 @@ class PublicanPush(Push):
             zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support)
 
 class PoPush(Push):
-    def run(self, command_options, args):
+    def run(self, command_options, args,http_headers):
         copytrans = True
         importpo = False
         force = False
@@ -553,7 +548,7 @@ class PoPush(Push):
         filelist = []
 
         url, project_id, version_id, project_config = self.get_projectinfo(command_options)
-        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options)
+        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options,http_headers)
         plural_support = self.check_plural_support(server_version)
         version_info = self.create_versioninfo(client_version, server_version)
         self.log_message(url, version_info, project_id, version_id, username)

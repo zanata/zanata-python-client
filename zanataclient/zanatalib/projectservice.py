@@ -42,11 +42,13 @@ class ProjectService:
     """
     Provides services to interact with Project, handle operaions of list, create and retrieve Project Resources  
     """
-    def __init__(self, base_url, usrname, apikey):
+    def __init__(self, base_url, usrname, apikey,http_headers=None):
+        self.http_headers = http_headers
         self.restclient = RestClient(base_url)
-        self.iterations = IterationService(base_url, usrname, apikey)
+        self.iterations = IterationService(base_url, usrname, apikey,self.http_headers)
         self.username = usrname
         self.apikey = apikey
+        self.base_url = base_url
 
     def disable_ssl_cert_validation(self):
         self.restclient.disable_ssl_cert_validation()
@@ -57,7 +59,7 @@ class ProjectService:
         List the Project Resources on the Zanata server
         @return: list of Project object
         """
-        res, content = self.restclient.request_get('/seam/resource/restv1/projects')
+        res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects',"get",None,self.http_headers)
 
         if res['status'] == '200':
             projects = []
@@ -74,7 +76,11 @@ class ProjectService:
         @return: Project object
         @raise NoSuchProjectException:
         """
-        res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s'%projectid)
+        #res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s'%projectid)
+        
+        if self.http_headers:
+            self.http_headers['Accept'] = 'application/json'
+        res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s'%projectid,"get",None,self.http_headers)
         if res['status'] == '200' or res['status'] == '304':
             # pylint: disable=E1103
             server_return = json.loads(content)
@@ -97,12 +103,16 @@ class ProjectService:
         @raise UnAuthorizedException:
         @raise BadRequestException:
         """
-        headers = {}
-        headers['X-Auth-User'] = self.username
-        headers['X-Auth-Token'] = self.apikey
+        #headers = {}
+        #headers['X-Auth-User'] = self.username
+        #headers['X-Auth-Token'] = self.apikey
+        if self.http_headers:
+            self.http_headers['Accept'] = 'application/json'
         body ='''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(project.name,project.id,project.desc)
-        res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s'%project.id, args=body, headers=headers)
 
+        res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s'%project.id, args=body, headers=self.http_headers)
+        #res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s'%project.id,"put", body,self.http_headers)
+        
         if res['status'] == '201':
             return "Success"
         elif res['status'] == '200':
@@ -124,10 +134,12 @@ class IterationService:
     """
     Provides services to interact with Project iteration, handle operaions of list, create and retrieve iteration Resources
     """
-    def __init__(self, base_url, usrname = None, apikey = None):
+    def __init__(self, base_url, usrname = None, apikey = None, http_headers = None):
+        self.base_url = base_url
         self.restclient = RestClient(base_url)
         self.username = usrname
         self.apikey = apikey
+        self.headers = http_headers  
 
     def disable_ssl_cert_validation(self):
         self.restclient.disable_ssl_cert_validation()
@@ -140,8 +152,10 @@ class IterationService:
         @return: Iteration object
         @raise NoSuchProjectException:
         """
-        res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
-
+        #res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
+        if self.headers:
+            self.headers['Accept'] = 'application/json'
+        res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid),"get",None,self.headers)
         if res['status'] == '200' or res['status'] == '304':
             # pylint: disable=E1103
             server_return = json.loads(content)

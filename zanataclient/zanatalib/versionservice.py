@@ -35,14 +35,15 @@ from error import UnavailableServiceError
 
 
 class VersionService:
-    def __init__(self, base_url):
+    def __init__(self, base_url,headers=None):
         self.restclient = RestClient(base_url)
+        self.http_headers = headers
 
     def disable_ssl_cert_validation(self):
         self.restclient.disable_ssl_cert_validation()
         
     def get_server_version(self):
-        res, content = self.restclient.request_version('/seam/resource/restv1/version')
+        res, content = self.restclient.request_version('/seam/resource/restv1/version',self.http_headers)
         
         if res['status'] == '200' or res['status'] == '304':
             version = json.loads(content)

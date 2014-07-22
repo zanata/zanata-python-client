@@ -32,10 +32,10 @@ warnings.simplefilter("ignore", DeprecationWarning)
 import httplib2
 
 class RestClient(object):
-    def __init__(self, base_url):
+    def __init__(self, base_url,disable_ssl_certificate_validation=True):
         self.base_url = base_url
         self.url = urlparse.urlparse(base_url)
-        self.http_client = httplib2.Http()
+        self.http_client = httplib2.Http(disable_ssl_certificate_validation=True)
 
     def disable_ssl_cert_validation(self):
         params = dir(self.http_client)
@@ -85,9 +85,9 @@ class RestClient(object):
         resource = self.set_resource(resource, extension)
         return self.request(resource, "delete", body, headers)
 
-    def request_version(self, resource):
+    def request_version(self, resource,http_headers):
         resource = self.set_resource(resource)
-        return self.request(resource, "get")
+        return self.request(resource, "get",None,http_headers)
 
     def request(self, resource, method = "get", body = None, headers = None):
         if body is not None:

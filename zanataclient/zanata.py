@@ -383,7 +383,6 @@ def read_user_config(url, command_options):
     config = ZanataConfig()
     #Try to read user-config file
     user_config = [os.path.join(os.path.expanduser("~") + '/.config', filename) for filename in ['zanata.ini', 'flies.ini']]
-
     if command_options.has_key('user_config'):
         user_config.append(command_options['user_config'][0]['value'])
 
@@ -419,7 +418,7 @@ def read_user_config(url, command_options):
 
     return (user_name, apikey)
 
-def get_version(url, command_options):
+def get_version(url, command_options,headers=None):
     #Retrieve the version of client
     version_number = ""
     path = os.path.dirname(os.path.realpath(__file__))
@@ -435,7 +434,7 @@ def get_version(url, command_options):
         version_number = "UNKNOWN"
 
     #Retrieve the version of the zanata server
-    version = VersionService(url)
+    version = VersionService(url,headers)
 
     if command_options.has_key('disablesslcert'):
         version.disable_ssl_cert_validation()
@@ -453,9 +452,9 @@ def get_version(url, command_options):
         log.error("Service Temporarily Unavailable, stop processing!")
         sys.exit(1)
         
-def generate_zanatacmd(url, username, apikey):
+def generate_zanatacmd(url, username, apikey,headers=None):
     if username and apikey:
-        return ZanataCommand(url, username, apikey)
+        return ZanataCommand(url, username, apikey,headers)
     else:
         log.error("Please specify username and apikey in zanata.ini or with '--username' and '--apikey' options")
         sys.exit(1)
@@ -483,14 +482,22 @@ def list_project(command_options, args):
     """
     project_config = read_project_config(command_options)
     url = process_url(project_config, command_options)
-    get_version(url, command_options)
-
-    zanatacmd = ZanataCommand(url)
-
+    username, apikey = read_user_config(url, command_options)
+    headers = http_headers(username,apikey,'application/json')
+    zanatacmd = ZanataCommand(url,username,apikey,headers)
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
-
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
+    get_version(url, command_options,headers)
     zanatacmd.list_projects()
+
+def http_headers(user_name,user_pass,accept_format):
+    headers = {
+        'X-Auth-User':user_name,
+        'X-Auth-Token':user_pass,
+        'Accept': accept_format
+    }
+    return headers
 
 def project_info(command_options, args):
     """
@@ -551,9 +558,11 @@ def version_info(command_options, args):
         iteration_id = project_config['project_version']
 
     url = process_url(project_config, command_options)
-
-    get_version(url, command_options)
-
+    username, apikey = read_user_config(url, command_options)
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
+    get_version(url, command_options,headers)
+    
+    
     if command_options.has_key('project_id'):
         project_id = command_options['project_id'][0]['value']
 
@@ -563,8 +572,8 @@ def version_info(command_options, args):
     if not iteration_id or not project_id:
         log.error("Please use zanata version info --project-id=project_id --project-version=project_version to retrieve the version")
         sys.exit(1)
-
-    zanatacmd = ZanataCommand(url)
+    headers = http_headers(username,apikey,'application/json')    
+    zanatacmd = ZanataCommand(url,headers=headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
@@ -594,7 +603,8 @@ def create_project(command_options, args):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    get_version(url, command_options)
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
+    get_version(url, command_options,headers)
 
     if args:
         project_id = args[0]
@@ -611,7 +621,7 @@ def create_project(command_options, args):
     if command_options.has_key('project_desc'):
         project_desc = command_options['project_desc'][0]['value']
 
-    zanatacmd = generate_zanatacmd(url, username, apikey)
+    zanatacmd = generate_zanatacmd(url, username, apikey,headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
@@ -717,8 +727,12 @@ def po_push(command_options, args):
         --lang: language list
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
+    project_config = read_project_config(command_options)
+    url = process_url(project_config, command_options)
+    username, apikey = read_user_config(url, command_options)
+    headers = http_headers(username,apikey,'application/json')
     command = PoPush()
-    command.run(command_options, args)
+    command.run(command_options, args,headers)
     
 def publican_pull(command_options, args):
     """
@@ -765,8 +779,12 @@ def publican_push(command_options, args):
         --lang: language list
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
+    project_config = read_project_config(command_options)
+    url = process_url(project_config, command_options)
+    username, apikey = read_user_config(url, command_options)
+    headers = http_headers(username,apikey,'application/json')
     command = PublicanPush()
-    command.run(command_options, args)
+    command.run(command_options, args,headers)
 
 def push(command_options, args):
     """
@@ -796,8 +814,12 @@ def push(command_options, args):
         --lang: language list (defaults to zanata.xml locales)
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
+    project_config = read_project_config(command_options)
+    url = process_url(project_config, command_options)
+    username, apikey = read_user_config(url, command_options)
+    headers = http_headers(username,apikey,'application/json')
     command = GenericPush()
-    command.run(command_options, args)
+    command.run(command_options, args,headers)
 
 def pull(command_options, args, project_type = None):
     """
@@ -816,8 +838,12 @@ def pull(command_options, args, project_type = None):
         --noskeletons: omit po files when translations not found
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
+    project_config = read_project_config(command_options)
+    url = process_url(project_config, command_options)
+    username, apikey = read_user_config(url, command_options)
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
     command = GenericPull()
-    command.run(command_options, args, project_type)
+    command.run(command_options, args, project_type,headers)
 
 def glossary_push(command_options, args):
     """
@@ -839,10 +865,11 @@ def glossary_push(command_options, args):
 
     optionsutil = OptionsUtil(command_options)
     url, username, apikey = optionsutil.apply_configfiles()
-    get_version(url, command_options)
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
+    get_version(url, command_options,headers)
     log.info("Username: %s" % username)
-
-    zanatacmd = ZanataCommand(url, username, apikey)
+    headers = http_headers(username,apikey,'application/json')
+    zanatacmd = ZanataCommand(url, username, apikey,headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
@@ -890,7 +917,8 @@ def glossary_delete(command_options, args):
     lang = None
     optionsutil = OptionsUtil(command_options)
     url, username, apikey = optionsutil.apply_configfiles()
-    get_version(url, command_options)
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
+    get_version(url, command_options,headers)
     log.info("Username: %s" % username)
 
     zanatacmd = ZanataCommand(url, username, apikey)
