@@ -373,6 +373,7 @@ def process_url(project_config, command_options):
     url = url.strip()
 
     if url[-1] == "/":
+        log.info("Warning, the url %s, contains / at end,please check your URL in zanata.xml" % url)
         url = url[:-1]
     
     return url
@@ -406,7 +407,7 @@ def read_user_config(url, command_options):
 
     if not (user_name, apikey):
         log.info("Can not find user-config file in home folder, current path or path in 'user-config' option")
-
+        
     log.info("zanata server: %s" % url)
 
     #The value in commandline options will overwrite the value in user-config file
