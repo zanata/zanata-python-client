@@ -41,6 +41,7 @@ class GlossaryService:
         headers = {}
         headers['X-Auth-User'] = username
         headers['X-Auth-Token'] = apikey
+        headers['Accept'] = 'application/vnd.zanata.glossary+json'
 
         res, content = self.restclient.request_put('/seam/resource/restv1/glossary', args=resources, headers=headers)
 

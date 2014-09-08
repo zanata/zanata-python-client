@@ -90,8 +90,8 @@ class CSVConverter:
             entry = {'srcLang': 'en-US', 'glossaryTerms': terms, 'sourcereference': ''}
             entries.append(entry)
 
-        glossary = {'sourceLocales':srclocales, 'glossaryEntries':entries, 'targetLocales':targetlocales}
-
+        #glossary = {'sourceLocales':srclocales, 'glossaryEntries':entries, 'targetLocales':targetlocales}
+        glossary = {'source-locales':srclocales, 'glossary-entries':entries, 'target-locales':targetlocales}
         return json.dumps(glossary)
     
 if __name__ == "__main__":
