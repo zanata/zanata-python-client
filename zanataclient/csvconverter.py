@@ -25,6 +25,7 @@ __all__ = (
           )
 
 import csv
+import sys
 
 try:
     import json
@@ -60,38 +61,53 @@ class CSVConverter:
         
         return data
 
+    def read_csv_file(self, csv_file):
+        data = []
+        try:
+            reader = csv.reader(open(csv_file, 'rb'))
+            data = [ line for line in reader]
+        except IOError:
+            self.log.error("Can not find csv file: %s"%csv_file)
+        return data
+
     def convert_to_json(self, filepath, locale_map, comments_header):
-        data = self.read_data(filepath)
+        data = self.read_csv_file(filepath)
         srclocales = []
-        srclocales.append('en-US')
+        #srclocales.append('en-US')
         entries = []
         targetlocales = []
-        for item in data:
-            comments = []
+        csv_locales = []
+        comments = []
+        for index,item in enumerate(data):
             terms = []
-
-            for header in comments_header:
-                if item.has_key(header):                
-                    comments.append(item.pop(header))
-            
-            for key in item.keys():
-                if key == 'en':
-                    term = {'locale':'en-US', 'content':item[key], 'comments':comments}
-                else:
-                    if key in locale_map:
-                        locale = locale_map[key]
+            if index == 0:
+                # Assuming last two names refers to column names,for example consider following csv file
+                # en-US,es,ko,ru,pos,description
+                # Hello,Hola,test,111,noun,Greeting
+                # first line always contains locales and last two specifies column names
+                comments = [ comm for comm in item[-2:] ]
+                csv_locales = [  lc for lc in item[:-2]]
+                continue
+            else:
+                glossary_len = len(item)
+                csv_locales_len = len(csv_locales)
+                comments_len = len(comments)
+                if glossary_len != csv_locales_len + comments_len:
+                    print "Wrong entries in csv file, please check your csv file"
+                    print "Entry in csv file",item
+                    sys.exit(1)    
+                glossary_comments = item[-2:]
+                for j in range(csv_locales_len):
+                    if j == 0:
+                        term = {'locale':csv_locales[j], 'content':item[j], 'comments':glossary_comments}
                     else:
-                        locale = key
-                    term = {'locale':locale, 'content':item[key], 'comments':[]}
-                    if key not in targetlocales:
-                        targetlocales.append(key)
-                terms.append(term)
-
-            entry = {'srcLang': 'en-US', 'glossaryTerms': terms, 'sourcereference': ''}
+                        term = {'locale':csv_locales[j], 'content':item[j], 'comments':[]}
+                    terms.append(term)
+            entry = {'srcLang': 'en-US', 'glossaryTerms': terms}
             entries.append(entry)
 
-        #glossary = {'sourceLocales':srclocales, 'glossaryEntries':entries, 'targetLocales':targetlocales}
-        glossary = {'source-locales':srclocales, 'glossary-entries':entries, 'target-locales':targetlocales}
+        glossary = {'sourceLocales':srclocales, 'glossaryEntries':entries, 'targetLocales':targetlocales}
+        #glossary = {'source-locales':srclocales, 'glossary-entries':entries, 'target-locales':targetlocales}
         return json.dumps(glossary)
     
 if __name__ == "__main__":
