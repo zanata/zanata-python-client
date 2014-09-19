@@ -367,7 +367,8 @@ class PublicanUtility:
         @param pot: the json object of the pot retrieved from server
         """
         po = polib.POFile(fpath=path)
-
+        
+        
         potcontent = json.loads(pot)
         # pylint: disable=E1103
         textflows = potcontent.get('textFlows')
@@ -383,10 +384,11 @@ class PublicanUtility:
                 re.sub(pattern, "charset=UTF-8", po.metadata['Content-Type'])
             else:
                 po.metadata['Content-Type']="text/plain; charset=UTF-8"
-
+                
         for textflow in textflows:
+            poentry = polib.POEntry(occurrences=None)
+            poentry.msgid = textflow.get('content')
             if textflow.get('extensions'):
-                poentry = polib.POEntry(occurrences=None)
                 entry_list = textflow.get('extensions')
                 for entry in entry_list:
                     if entry.get('object-type') == 'pot-entry-header':
@@ -415,15 +417,14 @@ class PublicanUtility:
                     if entry.get('object-type') == 'comment':
                         #SimpleComment
                         poentry.comment = entry.get('value')
-
-                poentry.msgid = textflow.get('content')
-                if textflow.get('contents'):
-                    poentry.msgid = textflow.get('contents')[0]
-                    poentry.msgid_plural = textflow.get('contents')[1]
-                    poentry.msgstr_plural[0] = ''
-                else:
-                    poentry.msgstr = ''
-                po.append(poentry)
+                
+            if textflow.get('contents'):
+                poentry.msgid = textflow.get('contents')[0]
+                poentry.msgid_plural = textflow.get('contents')[1]
+                poentry.msgstr_plural[0] = ''
+            else:
+                poentry.msgstr = ''
+            po.append(poentry)
 
         #If the translation is exist, read the content of the po file
         if translations:
@@ -452,7 +453,6 @@ class PublicanUtility:
                 translationsByResId[resId] = translation
 
             #"extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
-
             # copy any other stuff you need to transfer
             for poentry in po:
                 resId = self.get_resId(poentry)
