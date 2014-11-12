@@ -349,7 +349,12 @@ class ZanataCommand:
                     else:
                         name = filename+'.pot'
                     filepath = publicanutil.get_pofile_path(folder, name)
-                    pofile = filepath[0:filepath.rfind('/')+1]+pofile_name
+                    try:
+                        pofile = filepath[0:filepath.rfind('/')+1]+pofile_name
+                    except :
+                        pofile = None
+                        print "Can not find "+ name  
+                        
                 elif project_type == "podir":
                     if '/' in filename:
                         name = filename[filename.rfind('/')+1:]+'.po'

@@ -373,6 +373,7 @@ def process_url(project_config, command_options):
     url = url.strip()
 
     if url[-1] == "/":
+        log.info("Warning, the url %s, contains / at end,please check your URL in zanata.xml" % url)
         url = url[:-1]
     
     return url
@@ -406,7 +407,7 @@ def read_user_config(url, command_options):
 
     if not (user_name, apikey):
         log.info("Can not find user-config file in home folder, current path or path in 'user-config' option")
-
+        
     log.info("zanata server: %s" % url)
 
     #The value in commandline options will overwrite the value in user-config file
@@ -464,6 +465,19 @@ def generate_zanatacmd(url, username, apikey,headers=None):
 # Command Handler
 #
 #################################
+
+def command(cmd,return_type):
+    def command_decorator(func):
+        def run_func(command_options, args, project_type = None):
+            project_config = read_project_config(command_options)
+            url = process_url(project_config, command_options)
+            username, apikey = read_user_config(url, command_options)
+            headers = http_headers(username,apikey,return_type)
+            command = cmd()
+            command.run(command_options, args, project_type,headers)
+        return run_func
+    return command_decorator
+
 def help_info(command_options, args):
     if args:
         process_command(args)
@@ -704,6 +718,7 @@ def po_pull(command_options, args):
     """
     pull(command_options, args, "gettext")
 
+@command(PoPush,'application/json')
 def po_push(command_options, args):
     """
     Usage: zanata po push [OPTIONS] {documents}
@@ -727,13 +742,8 @@ def po_push(command_options, args):
         --lang: language list
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
-    project_config = read_project_config(command_options)
-    url = process_url(project_config, command_options)
-    username, apikey = read_user_config(url, command_options)
-    headers = http_headers(username,apikey,'application/json')
-    command = PoPush()
-    command.run(command_options, args,headers)
-    
+    pass
+
 def publican_pull(command_options, args):
     """
     Usage: zanata publican pull [OPTIONS] {documents} {lang}
@@ -754,6 +764,7 @@ def publican_pull(command_options, args):
     """
     pull(command_options, args, "podir")
 
+@command(PublicanPush,'application/json')
 def publican_push(command_options, args):
     """
     Usage: zanata publican push OPTIONS {documents}
@@ -779,13 +790,9 @@ def publican_push(command_options, args):
         --lang: language list
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
-    project_config = read_project_config(command_options)
-    url = process_url(project_config, command_options)
-    username, apikey = read_user_config(url, command_options)
-    headers = http_headers(username,apikey,'application/json')
-    command = PublicanPush()
-    command.run(command_options, args,headers)
+    pass
 
+@command(GenericPush,'application/json')
 def push(command_options, args):
     """
     Usage: zanata push OPTIONS {documents}
@@ -814,14 +821,10 @@ def push(command_options, args):
         --lang: language list (defaults to zanata.xml locales)
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
-    project_config = read_project_config(command_options)
-    url = process_url(project_config, command_options)
-    username, apikey = read_user_config(url, command_options)
-    headers = http_headers(username,apikey,'application/json')
-    command = GenericPush()
-    command.run(command_options, args,headers)
+    pass
 
-def pull(command_options, args, project_type = None):
+@command(GenericPull,'application/vnd.zanata.Version+json')
+def pull(command_options,args,project_type = None):
     """
     Usage: zanata pull [OPTIONS] {documents} {lang}
 
@@ -838,12 +841,9 @@ def pull(command_options, args, project_type = None):
         --noskeletons: omit po files when translations not found
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
-    project_config = read_project_config(command_options)
-    url = process_url(project_config, command_options)
-    username, apikey = read_user_config(url, command_options)
-    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
-    command = GenericPull()
-    command.run(command_options, args, project_type,headers)
+    pass
+
+
 
 def glossary_push(command_options, args):
     """

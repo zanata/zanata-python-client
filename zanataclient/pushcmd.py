@@ -359,7 +359,7 @@ class Push:
         log.info("Source language: en-US")
 
 class GenericPush(Push):
-    def run(self, command_options, args,headers):
+    def run(self, command_options, args,project_type=None,headers=None):
         copytrans = True
         pushtrans = None
         push_trans_only = False
@@ -480,7 +480,7 @@ class GenericPush(Push):
             zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support)
 
 class PublicanPush(Push):
-    def run(self, command_options, args,http_headers=None):
+    def run(self, command_options, args,project_type=None,http_headers=None):
         copytrans = True
         importpo = False
         force = False
@@ -539,7 +539,7 @@ class PublicanPush(Push):
             zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support)
 
 class PoPush(Push):
-    def run(self, command_options, args,http_headers):
+    def run(self, command_options, args,project_type=None,http_headers=None):
         copytrans = True
         importpo = False
         force = False

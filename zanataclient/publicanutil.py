@@ -249,7 +249,8 @@ class PublicanUtility:
                 pofile_path = self.get_pofile_path(full_path, file_name)
                 if pofile_path:
                     return pofile_path
-
+        
+        
     def get_resId(self, message):
         """
         Calculate the hash of msgid and msgctxt
