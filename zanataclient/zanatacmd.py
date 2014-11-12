@@ -209,7 +209,7 @@ class ZanataCommand:
             # pylint: disable=E1101
             print ("Project ID:          %s")%p.id
             print ("Project Name:        %s")%p.name 
-            print ("Project Type:        %s")%p.type
+            #print ("Project Type:        %s")%p.type
             print ("Project Description: %s")%p.description
         except NoSuchProjectException, e:
             self.log.error(str(e))

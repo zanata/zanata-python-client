@@ -530,7 +530,9 @@ def project_info(command_options, args):
         log.info("Can not find zanata.xml, please specify the path of zanata.xml")
     
     url = process_url(project_config, command_options)
-    get_version(url, command_options)
+    username, apikey = read_user_config(url, command_options)
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
+    get_version(url, command_options,headers)
 
     if command_options.has_key('project_id'):
         project_id = command_options['project_id'][0]['value']
@@ -541,8 +543,7 @@ def project_info(command_options, args):
     if not project_id:
         log.error('Please use zanata project info --project-id=project_id or zanata.xml to specify the project id')
         sys.exit(1)
-
-    zanatacmd = ZanataCommand(url)
+    zanatacmd = generate_zanatacmd(url, username, apikey,headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
@@ -666,7 +667,8 @@ def create_version(command_options, args):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    server_version = get_version(url, command_options)
+    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
+    server_version = get_version(url, command_options,headers)
 
     if command_options.has_key('project_id'):
         project_id = command_options['project_id'][0]['value']
