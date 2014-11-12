@@ -24,21 +24,12 @@ __all__ = (
         "ProjectService",
    )
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
 from rest.client import RestClient
 from project import Project
 from project import Iteration
-from error import ProjectExistException
-from error import NoSuchProjectException
-from error import UnAuthorizedException
-from error import BadRequestException
-from error import NotAllowedException
+from service import Service
 
-
-class ProjectService:
+class ProjectService(Service):
     """
     Provides services to interact with Project, handle operaions of list, create and retrieve Project Resources  
     """
@@ -59,15 +50,15 @@ class ProjectService:
         List the Project Resources on the Zanata server
         @return: list of Project object
         """
-        res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects',"get",None,self.http_headers)
-
-        if res['status'] == '200':
-            projects = []
-            projects_json = json.loads(content)
-
-            for p in projects_json:
-                projects.append(Project(p))
-            return projects
+        res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects',
+                                               "get",
+                                               None,
+                                               self.http_headers)
+        projects = []
+        projects_json = self.messages(res,content)
+        for p in projects_json:
+            projects.append(Project(p))
+        return projects
 
     def get(self, projectid):
         """
@@ -80,18 +71,16 @@ class ProjectService:
         
         if self.http_headers:
             self.http_headers['Accept'] = 'application/json'
+
         res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s'%projectid,"get",None,self.http_headers)
-        if res['status'] == '200' or res['status'] == '304':
-            # pylint: disable=E1103
-            server_return = json.loads(content)
-            if server_return.has_key('status'):
-                if server_return['status'] == "Retired":
-                    print "Warning: The project %s is retired!" % projectid
-            project = Project(server_return)
-            project.set_iteration(self.iterations)
-            return project
-        elif res['status'] == '404':
-            raise NoSuchProjectException('Error 404', content)
+        server_return = self.messages(res,content)
+        if server_return.has_key('status'):
+            if server_return['status'] == "Retired":
+                print "Warning: The project %s is retired!" % projectid
+
+        project = Project(server_return)
+        project.set_iteration(self.iterations)
+        return project
 
     def create(self, project):
         """
@@ -103,26 +92,13 @@ class ProjectService:
         @raise UnAuthorizedException:
         @raise BadRequestException:
         """
-        #headers = {}
-        #headers['X-Auth-User'] = self.username
-        #headers['X-Auth-Token'] = self.apikey
         if self.http_headers:
             self.http_headers['Accept'] = 'application/json'
         body ='''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(project.name,project.id,project.desc)
 
         res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s'%project.id, args=body, headers=self.http_headers)
         #res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s'%project.id,"put", body,self.http_headers)
-        
-        if res['status'] == '201':
-            return "Success"
-        elif res['status'] == '200':
-            raise ProjectExistException('Status 200', "The project is already exist on server")
-        elif res['status'] == '404':
-            raise NoSuchProjectException('Error 404', content)
-        elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
-        elif res['status'] == '400':
-            raise BadRequestException('Error 400', content)
+        self.messages(res,content,"The project is already exist on server")
 
     def delete(self):
         pass
@@ -130,7 +106,7 @@ class ProjectService:
     def status(self):
         pass
 
-class IterationService:
+class IterationService(Service):
     """
     Provides services to interact with Project iteration, handle operaions of list, create and retrieve iteration Resources
     """
@@ -156,15 +132,11 @@ class IterationService:
         if self.headers:
             self.headers['Accept'] = 'application/json'
         res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid),"get",None,self.headers)
-        if res['status'] == '200' or res['status'] == '304':
-            # pylint: disable=E1103
-            server_return = json.loads(content)
-            if server_return.has_key('status'):
-                if server_return['status'] == "Retired":
-                    print "Warning: The version %s is retired!"%iterationid
-            return Iteration(server_return)
-        elif res['status'] == '404':
-            raise NoSuchProjectException('Error 404', content)
+        server_return = self.messages(res,content)
+        if server_return.has_key('status'):
+            if server_return['status'] == "Retired":
+                print "Warning: The project %s is retired!" %iterationid
+        return Iteration(server_return)
 
     def create(self, projectid, iteration):
         """
@@ -183,17 +155,7 @@ class IterationService:
          
         body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iteration.name, iteration.id, iteration.desc)
         res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iteration.id), args=body, headers=headers)
-         
-        if res['status'] == '201':
-            return "Success"
-        elif res['status'] == '200':
-            raise ProjectExistException('Status 200', "The version is already exist on server")
-        elif res['status'] == '404':
-            raise NoSuchProjectException('Error 404', content)
-        elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
-        elif res['status'] == '405':
-            raise NotAllowedException('Error 405', 'The requested method is not allowed')
+        self.messages(res,content,"The Version is already exist on server")
 
     def delete(self):
         pass

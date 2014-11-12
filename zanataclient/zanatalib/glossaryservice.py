@@ -26,14 +26,9 @@ __all__ = (
    )
 
 from rest.client import RestClient
-from error import UnAuthorizedException
-from error import BadRequestBodyException
-from error import UnavailableServiceError
-from error import UnexpectedStatusException
-from error import InternalServerError   
-from error import UnAvaliableResourceException
+from service import Service 
 
-class GlossaryService:
+class GlossaryService(Service):
     def __init__(self, base_url):
         self.restclient = RestClient(base_url)
 
@@ -41,48 +36,29 @@ class GlossaryService:
         headers = {}
         headers['X-Auth-User'] = username
         headers['X-Auth-Token'] = apikey
+
         headers['Accept'] = 'application/vnd.zanata.glossary+json'
 
         res, content = self.restclient.request_put('/seam/resource/restv1/glossary', args=resources, headers=headers)
 
-        if res['status'] == '201':
-            return True
-        elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
-        elif res['status'] == '400':
-            raise BadRequestBodyException('Error 400', content)
-        elif res['status'] == '500':
-            raise InternalServerError('Error 500', content)
-        elif res['status'] == '503':
-            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable, stop processing!')
-        else:
-            raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push')
+        res, content = self.restclient.request_put('/seam/resource/restv1/glossary',
+                                                   args=resources, 
+                                                   headers=headers)
+        return self.messages(res,content)
+
 
     def delete(self, username, apikey, lang = None):
         headers = {}
         headers['X-Auth-User'] = username
         headers['X-Auth-Token'] = apikey
-
         resource = '/seam/resource/restv1/glossary'
 
         if lang:
             resource =  resource + '/'+lang
 
         res, content = self.restclient.request_delete(resource, headers=headers)
+        return self.messages(res,content)
 
-        if res['status'] == '200':
-            return True
-        elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 'This operation is not authorized, please check username and apikey')
-        elif res['status'] == '400':
-            raise BadRequestBodyException('Error 400', content)
-        elif res['status'] == '404':
-            raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')
-        elif res['status'] == '500':
-            raise InternalServerError('Error 500', content)
-        elif res['status'] == '503':
-            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable, stop processing!')
-        else:
-            raise UnexpectedStatusException('Error', 'Unexpected Status, failed to push')
+
 
  
