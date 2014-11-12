@@ -25,16 +25,10 @@ __all__ = (
         "VersionService",
    )
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
 from rest.client import RestClient
-from error import UnAvaliableResourceException
-from error import UnavailableServiceError
+from service import Service 
 
-
-class VersionService:
+class VersionService(Service):
     def __init__(self, base_url,headers=None):
         self.restclient = RestClient(base_url)
         self.http_headers = headers
@@ -43,12 +37,7 @@ class VersionService:
         self.restclient.disable_ssl_cert_validation()
         
     def get_server_version(self):
-        res, content = self.restclient.request_version('/seam/resource/restv1/version',self.http_headers)
-        
-        if res['status'] == '200' or res['status'] == '304':
-            version = json.loads(content)
-            return version
-        elif res['status'] == '404':
-            raise UnAvaliableResourceException('Error 404', 'The requested resource is not available')
-        elif res['status'] == '503':
-            raise UnavailableServiceError('Error 503', 'Service Temporarily Unavailable')
+        res, content = self.restclient.request_version('/seam/resource/restv1/version',
+                                                       self.http_headers)
+        return self.messages(res,content)
+
