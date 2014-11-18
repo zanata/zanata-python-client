@@ -24,7 +24,7 @@ __all__ = (
         "ProjectService",
    )
 
-from rest.client import RestClient
+
 from project import Project
 from project import Iteration
 from service import Service
@@ -33,13 +33,12 @@ class ProjectService(Service):
     """
     Provides services to interact with Project, handle operaions of list, create and retrieve Project Resources  
     """
-    def __init__(self, base_url, usrname, apikey,http_headers=None):
-        self.http_headers = http_headers
-        self.restclient = RestClient(base_url)
-        self.iterations = IterationService(base_url, usrname, apikey,self.http_headers)
-        self.username = usrname
-        self.apikey = apikey
-        self.base_url = base_url
+    _fields = ['base_url','username','apikey','http_headers']
+
+    def __init__(self, *args,**kargs):
+        super(ProjectService,self).__init__(*args,**kargs)
+        self.iterations = IterationService(
+            self.base_url, self.username, self.apikey,self.http_headers)
 
     def disable_ssl_cert_validation(self):
         self.restclient.disable_ssl_cert_validation()
@@ -54,10 +53,8 @@ class ProjectService(Service):
                                                "get",
                                                None,
                                                self.http_headers)
-        projects = []
         projects_json = self.messages(res,content)
-        for p in projects_json:
-            projects.append(Project(p))
+        projects = [ Project(p) for p in projects_json]
         return projects
 
     def get(self, projectid):
@@ -67,12 +64,11 @@ class ProjectService(Service):
         @return: Project object
         @raise NoSuchProjectException:
         """
-        #res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s'%projectid)
-        
         if self.http_headers:
             self.http_headers['Accept'] = 'application/json'
 
         res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s'%projectid,"get",None,self.http_headers)
+        
         server_return = self.messages(res,content)
         if server_return.has_key('status'):
             if server_return['status'] == "Retired":
@@ -94,10 +90,11 @@ class ProjectService(Service):
         """
         if self.http_headers:
             self.http_headers['Accept'] = 'application/json'
+
         body ='''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}'''%(project.name,project.id,project.desc)
 
         res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s'%project.id, args=body, headers=self.http_headers)
-        #res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s'%project.id,"put", body,self.http_headers)
+
         self.messages(res,content,"The project is already exist on server")
 
     def delete(self):
@@ -110,12 +107,10 @@ class IterationService(Service):
     """
     Provides services to interact with Project iteration, handle operaions of list, create and retrieve iteration Resources
     """
-    def __init__(self, base_url, usrname = None, apikey = None, http_headers = None):
-        self.base_url = base_url
-        self.restclient = RestClient(base_url)
-        self.username = usrname
-        self.apikey = apikey
-        self.headers = http_headers  
+    _fields = ['base_url','username','apikey','http_headers']
+
+    def __init__(self, *args,**kargs):
+        super(IterationService,self).__init__(*args,**kargs)
 
     def disable_ssl_cert_validation(self):
         self.restclient.disable_ssl_cert_validation()
@@ -128,10 +123,7 @@ class IterationService(Service):
         @return: Iteration object
         @raise NoSuchProjectException:
         """
-        #res, content = self.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid))
-        if self.headers:
-            self.headers['Accept'] = 'application/json'
-        res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid),"get",None,self.headers)
+        res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iterationid),"get",None,self.http_headers)
         server_return = self.messages(res,content)
         if server_return.has_key('status'):
             if server_return['status'] == "Retired":
@@ -149,12 +141,9 @@ class IterationService(Service):
         @raise UnAuthorizedException:
         @raise BadRequestException:
         """ 
-        headers = {}
-        headers['X-Auth-User'] = self.username
-        headers['X-Auth-Token'] = self.apikey
-         
+                 
         body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iteration.name, iteration.id, iteration.desc)
-        res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iteration.id), args=body, headers=headers)
+        res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iteration.id), args=body, headers=http_headers)
         self.messages(res,content,"The Version is already exist on server")
 
     def delete(self):

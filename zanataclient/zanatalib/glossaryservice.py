@@ -25,12 +25,15 @@ __all__ = (
         "GlossaryService",
    )
 
-from rest.client import RestClient
+
 from service import Service 
 
 class GlossaryService(Service):
-    def __init__(self, base_url):
-        self.restclient = RestClient(base_url)
+    _fields = ['base_url']
+
+    def __init__(self, *args,**kargs):
+        super(GlossaryService,self).__init__(*args,**kargs)
+
 
     def commit_glossary(self, username, apikey, resources):
         headers = {}

@@ -8,6 +8,7 @@ from error import UnAvaliableResourceException
 from error import ProjectExistException
 from error import NotAllowedException
 from error import SameNameDocumentException
+from rest.client import RestClient
 
 import json
 
@@ -15,13 +16,25 @@ __all__ = (
         "Service",
    )
 
-class Service:
+class Service(object):
+    _fields = []
+
+    def __init__(self,*args,**kargs):
+        for name,val in zip(self._fields,args):
+            setattr(self,name,val)
+        for key, value in kargs.iteritems():
+            setattr(self,key,value)
+        self.restclient = RestClient(self.base_url)
 
     def messages(self,res,content,extra_msg=None):
         if res['status'] == '200' or res['status'] == '304':
             if extra_msg!=None:
                 raise ProjectExistException('Status 200', extra_msg)
-            rst = json.loads(content)
+            try:
+                rst = json.loads(content)
+            except ValueError, e:
+                print "Exception while decoding", e ,"its may due to file already exists on the server or not a PO file "
+                return res
             return rst
         elif res['status'] == '201':
             return True
