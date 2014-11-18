@@ -28,11 +28,11 @@ __all__ = (
 from service import Service
 
 class DocumentService(Service):    
-    def __init__(self,projects,base_url=None,headers=None):
-        self.projects = projects
-        self.http_headers = headers
-        self.base_url = base_url 
-    
+    _fields = ['projects','base_url','http_headers']
+
+    def __init__(self, *args,**kargs):
+        super(DocumentService,self).__init__(*args,**kargs)
+
     def get_file_list(self, projectid, iterationid):
         if self.http_headers:
             self.http_headers['Accept'] = 'application/json'

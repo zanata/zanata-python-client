@@ -25,19 +25,24 @@ __all__ = (
         "VersionService",
    )
 
-from rest.client import RestClient
 from service import Service 
 
 class VersionService(Service):
-    def __init__(self, base_url,headers=None):
-        self.restclient = RestClient(base_url)
-        self.http_headers = headers
+    _fields = ['base_url','http_headers']
+
+    def __init__(self, *args,**kargs):
+        super(VersionService,self).__init__(*args,**kargs)
 
     def disable_ssl_cert_validation(self):
         self.restclient.disable_ssl_cert_validation()
         
     def get_server_version(self):
-        res, content = self.restclient.request_version('/seam/resource/restv1/version',
-                                                       self.http_headers)
+        self.http_headers.update(
+            {'Accept':'application/vnd.zanata.Version+json'}
+        )
+        res, content = self.restclient.request_version(
+            '/seam/resource/restv1/version',
+            self.http_headers
+        )
         return self.messages(res,content)
 
