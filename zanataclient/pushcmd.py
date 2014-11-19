@@ -34,7 +34,21 @@ from zanatalib.logger import Logger
 
 log = Logger()
 
-class Push:
+class Push(object):
+    _fields = ['command_options','args','project_type','http_headers']
+
+    def __init__(self,*args,**kargs):
+        for name,val in zip(self._fields,args):
+            setattr(self,name,val)
+        for key, value in kargs.iteritems():
+            setattr(self,key,value)
+        url, self.project_id, self.version_id, self.project_config =self.get_projectinfo(self.command_options)
+        self.zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, self.command_options,self.http_headers)
+        self.plural_support = self.check_plural_support(server_version)
+        version_info = self.create_versioninfo(client_version, server_version)
+        self.log_message(url, version_info, self.project_id, self.version_id, username)
+        self.zanatacmd.verify_project(self.project_id, self.version_id)
+
     def read_project_config(self, command_options):
         project_config = {}
         config = ZanataConfig()
@@ -359,7 +373,11 @@ class Push:
         log.info("Source language: en-US")
 
 class GenericPush(Push):
-    def run(self, command_options, args,project_type=None,headers=None):
+
+    def __init__(self,*args,**kargs):
+        super(GenericPush,self).__init__(*args,**kargs)
+    
+    def run(self):
         copytrans = True
         pushtrans = None
         push_trans_only = False
@@ -370,19 +388,12 @@ class GenericPush(Push):
         tmlfolder = ""
         filelist = []
 
-        url, project_id, version_id, project_config = self.get_projectinfo(command_options)
-        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options,headers)
-        plural_support = self.check_plural_support(server_version)
-        version_info = self.create_versioninfo(client_version, server_version)
-        self.log_message(url, version_info, project_id, version_id, username)
-        zanatacmd.verify_project(project_id, version_id)
-
-        if command_options.has_key('nocopytrans'):
+        if self.command_options.has_key('nocopytrans'):
             copytrans = False
 
         log.info("Reuse previous translation on server:%s" %copytrans)
 
-        project_type = self.get_projecttype(command_options, project_config)
+        project_type = self.get_projecttype(self.command_options, self.project_config)
 
         if not project_type:
             log.error("The project type is unknown")
@@ -391,23 +402,23 @@ class GenericPush(Push):
             log.error("The project type is not correct, please use 'podir' and 'gettext' as project type")
             sys.exit(1)
 
-        if command_options.has_key('srcfile'):
+        if self.command_options.has_key('srcfile'):
             if project_type == 'gettext':
-                tmlfolder, import_file = self.process_srcfile(command_options)
+                tmlfolder, import_file = self.process_srcfile(self.command_options)
                 filelist.append(import_file)
             else:
                 log.warn("srcfile option is not used for podir type project, ignored")
 
         #Disable dir option for generic push command
-        if command_options.has_key('dir'):
+        if self.command_options.has_key('dir'):
             log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")
 
-        if command_options.has_key('pushtrans'):
+        if self.command_options.has_key('pushtrans'):
             log.warn("--push-trans is deprecated, please use '--push-type both' instead")
             pushtrans = True
 
-        if command_options.has_key('pushtype'):
-            push_type = command_options['pushtype'][0]['value']
+        if self.command_options.has_key('pushtype'):
+            push_type = self.command_options['pushtype'][0]['value']
             if push_type == "source":
                 pushtrans = False
             elif push_type == "target":
@@ -415,32 +426,32 @@ class GenericPush(Push):
             elif push_type == "both":
                 pushtrans = True
 
-        if command_options.has_key('pushtransonly'):
+        if self.command_options.has_key('pushtransonly'):
             push_trans_only = True
 
         if push_trans_only:
             transfolder = self.process_transdir(command_options, "")
             merge = self.process_merge(command_options)
-            lang_list = self.get_lang_list(command_options, project_config)
+            lang_list = self.get_lang_list(self.command_options, project_config)
 
-            if project_config.has_key('locale_map'):
-                locale_map = project_config['locale_map']
+            if self.project_config.has_key('locale_map'):
+                locale_map = self.project_config['locale_map']
             else:
                 locale_map = None
 
-            zanatacmd.push_trans_command(transfolder, project_id, version_id, lang_list, locale_map, project_type, merge)
+            self.zanatacmd.push_trans_command(transfolder, self.project_id, self.version_id, lang_list, locale_map, project_type, merge)
             sys.exit(0)
 
         if tmlfolder == "":
-            tmlfolder = self.process_srcdir(command_options)
+            tmlfolder = self.process_srcdir(self.command_options)
 
         if not os.path.isdir(tmlfolder):
             log.error("Can not find source folder, please specify the source folder with '--srcdir' or using zanata.xml")
             sys.exit(1)
 
-        if args:
+        if self.args:
             try:
-                full_path = self.search_file(tmlfolder, args[0])
+                full_path = self.search_file(tmlfolder, self.args[0])
                 filelist.append(full_path)
             except NoSuchFileException, e:
                 log.error(e.msg)
@@ -455,7 +466,7 @@ class GenericPush(Push):
                 sys.exit(1)
             deletefiles = True
 
-        if command_options.has_key('force'):
+        if self.command_options.has_key('force'):
             force = True
 
         if project_type == 'podir':
@@ -466,21 +477,24 @@ class GenericPush(Push):
             folder = tmlfolder
 
         if pushtrans is None:
-            pushtrans = self.get_pushtrans(command_options)
+            pushtrans = self.get_pushtrans(self.command_options)
 
         if deletefiles:
-            zanatacmd.del_server_content(tmlfolder, project_id, version_id, filelist, force, project_type)
+            self.zanatacmd.del_server_content(tmlfolder, self.project_id, self.version_id, filelist, force, project_type)
 
         if pushtrans:
             log.info("Send local translation: True")
             import_param = self.get_importparam(project_type, command_options,  project_config, folder)
-            zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support, import_param)
+            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, copytrans, self.plural_support, import_param)
         else:
             log.info("Send local translation: False")
-            zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support)
+            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, copytrans, self.plural_support)
 
 class PublicanPush(Push):
-    def run(self, command_options, args,project_type=None,http_headers=None):
+    def __init__(self,*args,**kargs):
+        super(PublicanPush,self).__init__(*args,**kargs)
+
+    def run(self):
         copytrans = True
         importpo = False
         force = False
@@ -488,24 +502,17 @@ class PublicanPush(Push):
         plural_support = False
         tmlfolder = ""
         filelist = []
-
-        url, project_id, version_id, project_config = self.get_projectinfo(command_options)
-        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options,http_headers)
-        plural_support = self.check_plural_support(server_version)
-        version_info = self.create_versioninfo(client_version, server_version)
-        self.log_message(url, version_info, project_id, version_id, username)
-        zanatacmd.verify_project(project_id, version_id)
-
-        if command_options.has_key('nocopytrans'):
+        
+        if self.command_options.has_key('nocopytrans'):
             copytrans = False
 
         log.info("Reuse previous translation on server:%s" %copytrans)
 
-        tmlfolder = self.process_srcdir_withsub(command_options)
+        tmlfolder = self.process_srcdir_withsub(self.command_options)
 
-        if args:
+        if self.args:
             try:
-                full_path = self.search_file(tmlfolder, args[0])
+                full_path = self.search_file(tmlfolder, self.args[0])
                 filelist.append(full_path)
             except NoSuchFileException, e:
                 log.error(e.msg)
@@ -521,25 +528,28 @@ class PublicanPush(Push):
 
             deletefiles = True
 
-        if command_options.has_key('force'):
+        if self.command_options.has_key('force'):
             force = True
 
         log.info("POT directory (originals):%s" % tmlfolder)
 
-        importpo = self.get_importpo(command_options)
+        importpo = self.get_importpo(self.command_options)
 
         if deletefiles:
-            zanatacmd.del_server_content(tmlfolder, project_id, version_id, filelist, force, "podir")
+            self.zanatacmd.del_server_content(tmlfolder, self.project_id, self.version_id, filelist, force, "podir")
 
         if importpo:
-            import_param = self.get_importparam("podir", command_options,  project_config, tmlfolder)
-            zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support, import_param)
+            import_param = self.get_importparam("podir", self.command_options,  self.project_config, tmlfolder)
+            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, copytrans, self.plural_support, import_param)
         else:
             log.info("Importing source documents only")
-            zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support)
+            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, copytrans, self.plural_support)
 
 class PoPush(Push):
-    def run(self, command_options, args,project_type=None,http_headers=None):
+    def __init__(self,*args,**kargs):
+        super(PoPush,self).__init__(*args,**kargs)
+
+    def run(self):
         copytrans = True
         importpo = False
         force = False
@@ -547,23 +557,16 @@ class PoPush(Push):
         plural_support = False
         filelist = []
 
-        url, project_id, version_id, project_config = self.get_projectinfo(command_options)
-        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options,http_headers)
-        plural_support = self.check_plural_support(server_version)
-        version_info = self.create_versioninfo(client_version, server_version)
-        self.log_message(url, version_info, project_id, version_id, username)
-        zanatacmd.verify_project(project_id, version_id)
-
-        if command_options.has_key('nocopytrans'):
+        if self.command_options.has_key('nocopytrans'):
             copytrans = False
 
         log.info("Reuse previous translation on server:%s" %copytrans)
 
-        if command_options.has_key('srcfile'):
-            tmlfolder, import_file = self.process_srcfile(command_options)
+        if self.command_options.has_key('srcfile'):
+            tmlfolder, import_file = self.process_srcfile(self.command_options)
             filelist.append(import_file)
 
-        tmlfolder = self.process_srcdir_withsub(command_options)
+        tmlfolder = self.process_srcdir_withsub(self.command_options)
 
         if not os.path.isdir(tmlfolder):
             log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
@@ -571,23 +574,23 @@ class PoPush(Push):
 
         log.info("PO directory (originals):%s" % tmlfolder)
 
-        importpo = self.get_importpo(command_options)
+        importpo = self.get_importpo(self.command_options)
 
         if importpo:
             log.info("Importing translation")
-            import_param = self.get_importparam("gettext", command_options,  project_config, tmlfolder)
+            import_param = self.get_importparam("gettext", self.command_options,  self.project_config, tmlfolder)
         else:
             log.info("Importing source documents only")
 
-        if args:
+        if self.args:
             try:
-                full_path = self.search_file(tmlfolder, args[0])
+                full_path = self.search_file(tmlfolder, self.args[0])
                 filelist.append(full_path)
             except NoSuchFileException, e:
                 log.error(e.msg)
                 sys.exit(1)
         else:
-            if not command_options.has_key('srcfile'):
+            if not self.command_options.has_key('srcfile'):
                 #get all the pot files from the template folder
                 publicanutil = PublicanUtility()
                 filelist = publicanutil.get_file_list(tmlfolder, ".pot")
@@ -596,12 +599,12 @@ class PoPush(Push):
                     log.error("The template folder is empty")
                     sys.exit(1)
 
-            if command_options.has_key('force'):
+            if self.command_options.has_key('force'):
                 force = True
-            zanatacmd.del_server_content(tmlfolder, project_id, version_id, filelist, force, "gettext")
+            self.zanatacmd.del_server_content(tmlfolder, self.project_id, self.version_id, filelist, force, "gettext")
 
         if importpo:
-            zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support, import_param)
+            self.zanatacmd.push_command(filelist, tmlfolder,self.project_id, self.version_id, copytrans, self.plural_support, import_param)
         else:
-            zanatacmd.push_command(filelist, tmlfolder, project_id, version_id, copytrans, plural_support)
+            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, copytrans, self.plural_support)
 
