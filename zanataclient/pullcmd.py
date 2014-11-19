@@ -30,6 +30,9 @@ from pushcmd import Push
 log = Logger()
 
 class GenericPull(Push):
+    def __init__(self,*args,**kargs):
+        super(GenericPull,self).__init__(*args,**kargs)
+
     def process_transdir(self, command_options, src_folder):
         trans_folder = ""
         
@@ -57,66 +60,56 @@ class GenericPull(Push):
 
         return output
 
-    def run(self, command_options, args, project_type,http_header=None):
+    def run(self):
         dir_option = False
         skeletons = True
         filelist = []
         output_folder = None
 
-        url, project_id, version_id, project_config = self.get_projectinfo(command_options)
-        zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, command_options,http_header)
-        version_info = self.create_versioninfo(client_version, server_version)
-        log.info("zanata server: %s" % url)
-        log.info(version_info)
-        log.info("Project: %s" % project_id)
-        log.info("Version: %s" % version_id)        
-        log.info("Username: %s" % username)
-        zanatacmd.verify_project(project_id, version_id)
-
-        lang_list = self.get_lang_list(command_options, project_config)
+        lang_list = self.get_lang_list(self.command_options, self.project_config)
         
         #list the files in project
         try:
-            filelist = zanatacmd.get_file_list(project_id, version_id)
+            filelist = self.zanatacmd.get_file_list(self.project_id, self.version_id)
         except Exception, e:
             log.error(str(e))
             sys.exit(1)
 
-        if project_config.has_key('locale_map'):
-            locale_map = project_config['locale_map']
+        if self.project_config.has_key('locale_map'):
+            locale_map = self.project_config['locale_map']
         else:
             locale_map = None
         
-        if project_type:
+        if self.project_type:
             command_type = project_type
             dir_option = True
-        elif command_options.has_key('project_type'):
-            command_type = command_options['project_type'][0]['value']
-        elif project_config['project_type']:
-            command_type = project_config['project_type']
+        elif self.command_options.has_key('project_type'):
+            command_type = self.command_options['project_type'][0]['value']
+        elif self.project_config['project_type']:
+            command_type = self.project_config['project_type']
         else:
             log.error("The project type is unknown")
             sys.exit(1)
 
         if dir_option:
             #Keep dir option for publican/po pull
-            if command_options.has_key('dir'):
-                output_folder = command_options['dir'][0]['value']
+            if self.command_options.has_key('dir'):
+                output_folder = self.command_options['dir'][0]['value']
 
-            if command_options.has_key('dstdir'):
-                output_folder = command_options['dstdir'][0]['value']
+            if self.command_options.has_key('dstdir'):
+                output_folder = self.command_options['dstdir'][0]['value']
         else:
             #Disable dir option for generic pull command
-            if command_options.has_key('dir'):
+            if self.command_options.has_key('dir'):
                 log.warn("dir option is disabled in pull command, please use --transdir, or specify value in zanata.xml")
 
-            if command_options.has_key('dstdir'):
+            if self.command_options.has_key('dstdir'):
                 log.warn("dstdir option is changed to transdir option for generic pull command")
-                output_folder = command_options['dstdir'][0]['value']
+                output_folder = self.command_options['dstdir'][0]['value']
 
-        if command_options.has_key('noskeletons'):
+        if self.command_options.has_key('noskeletons'):
             skeletons = False
 
-        outpath = self.create_outpath(command_options, output_folder)
+        outpath = self.create_outpath(self.command_options, output_folder)
 
-        zanatacmd.pull_command(locale_map, project_id, version_id, filelist, lang_list, outpath, command_type, skeletons)
+        self.zanatacmd.pull_command(locale_map, self.project_id, self.version_id, filelist, lang_list, outpath, command_type, skeletons)

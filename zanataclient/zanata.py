@@ -473,8 +473,8 @@ def command(cmd,return_type):
             url = process_url(project_config, command_options)
             username, apikey = read_user_config(url, command_options)
             headers = http_headers(username,apikey,return_type)
-            command = cmd()
-            command.run(command_options, args, project_type,headers)
+            command = cmd(command_options, args, project_type,headers)
+            command.run()
         return run_func
     return command_decorator
 
