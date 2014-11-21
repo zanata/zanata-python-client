@@ -74,7 +74,7 @@ class Push(object):
                 log.warn("srcfile option is not used for podir type project, ignored")
 
         if tmlfolder == "":
-            tmlfolder = self.process_srcdir(self.command_options)
+            tmlfolder = self.process_srcdir_withsub(self.command_options)
 
         if self.args:
             try:
