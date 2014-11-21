@@ -48,6 +48,51 @@ class Push(object):
         version_info = self.create_versioninfo(client_version, server_version)
         self.log_message(url, version_info, self.project_id, self.version_id, username)
         self.zanatacmd.verify_project(self.project_id, self.version_id)
+        self.copytrans = True
+        if self.command_options.has_key('nocopytrans'):
+            copytrans = False
+
+    # Functions in PoPush and GenericPush get tmlfile,file list
+    def get_files(self):
+        deletefiles = False
+        filelist = []
+        tmlfolder = ""
+        project_type = self.get_projecttype(self.command_options, self.project_config)
+
+        if not project_type:
+            log.error("The project type is unknown")
+            sys.exit(1)
+        elif project_type != 'podir' and project_type != 'gettext':
+            log.error("The project type is not correct, please use 'podir' and 'gettext' as project type")
+            sys.exit(1)
+
+        if self.command_options.has_key('srcfile'):
+            if project_type == 'gettext':
+                tmlfolder, import_file = self.process_srcfile(self.command_options)
+                filelist.append(import_file)
+            else:
+                log.warn("srcfile option is not used for podir type project, ignored")
+
+        if tmlfolder == "":
+            tmlfolder = self.process_srcdir(self.command_options)
+
+        if self.args:
+            try:
+                full_path = self.search_file(tmlfolder, self.args[0])
+                filelist.append(full_path)
+            except NoSuchFileException, e:
+                log.error(e.msg)
+                sys.exit(1)
+        else:
+            #get all the pot files from the template folder
+            publicanutil = PublicanUtility()
+            filelist = publicanutil.get_file_list(tmlfolder, ".pot")
+
+            if not filelist:
+                log.error("The template folder is empty")
+                sys.exit(1)
+            deletefiles = True
+        return project_type,deletefiles,tmlfolder,filelist
 
     def read_project_config(self, command_options):
         project_config = {}
@@ -64,7 +109,6 @@ class Push(object):
                 log.info("Loading zanata project config from: %s" % path)
                 project_config = config.read_project_config(path)
                 break
-
         return project_config
 
     def process_url(self, project_config, command_options):
@@ -378,37 +422,10 @@ class GenericPush(Push):
         super(GenericPush,self).__init__(*args,**kargs)
     
     def run(self):
-        copytrans = True
         pushtrans = None
         push_trans_only = False
         force = False
-        deletefiles = False
-        plural_support = False
-        project_type = ''
-        tmlfolder = ""
-        filelist = []
-
-        if self.command_options.has_key('nocopytrans'):
-            copytrans = False
-
-        log.info("Reuse previous translation on server:%s" %copytrans)
-
-        project_type = self.get_projecttype(self.command_options, self.project_config)
-
-        if not project_type:
-            log.error("The project type is unknown")
-            sys.exit(1)
-        elif project_type != 'podir' and project_type != 'gettext':
-            log.error("The project type is not correct, please use 'podir' and 'gettext' as project type")
-            sys.exit(1)
-
-        if self.command_options.has_key('srcfile'):
-            if project_type == 'gettext':
-                tmlfolder, import_file = self.process_srcfile(self.command_options)
-                filelist.append(import_file)
-            else:
-                log.warn("srcfile option is not used for podir type project, ignored")
-
+        project_type,deletefiles,tmlfolder,filelist = self.get_files()
         #Disable dir option for generic push command
         if self.command_options.has_key('dir'):
             log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")
@@ -442,29 +459,9 @@ class GenericPush(Push):
             self.zanatacmd.push_trans_command(transfolder, self.project_id, self.version_id, lang_list, locale_map, project_type, merge)
             sys.exit(0)
 
-        if tmlfolder == "":
-            tmlfolder = self.process_srcdir(self.command_options)
-
         if not os.path.isdir(tmlfolder):
             log.error("Can not find source folder, please specify the source folder with '--srcdir' or using zanata.xml")
             sys.exit(1)
-
-        if self.args:
-            try:
-                full_path = self.search_file(tmlfolder, self.args[0])
-                filelist.append(full_path)
-            except NoSuchFileException, e:
-                log.error(e.msg)
-                sys.exit(1)
-        else:
-            #get all the pot files from the template folder
-            publicanutil = PublicanUtility()
-            filelist = publicanutil.get_file_list(tmlfolder, ".pot")
-
-            if not filelist:
-                log.error("The template folder is empty")
-                sys.exit(1)
-            deletefiles = True
 
         if self.command_options.has_key('force'):
             force = True
@@ -485,48 +482,21 @@ class GenericPush(Push):
         if pushtrans:
             log.info("Send local translation: True")
             import_param = self.get_importparam(project_type, command_options,  project_config, folder)
-            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, copytrans, self.plural_support, import_param)
+            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support, import_param)
         else:
             log.info("Send local translation: False")
-            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, copytrans, self.plural_support)
+            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support)
 
 class PublicanPush(Push):
     def __init__(self,*args,**kargs):
         super(PublicanPush,self).__init__(*args,**kargs)
 
     def run(self):
-        copytrans = True
         importpo = False
         force = False
-        deletefiles = False
-        plural_support = False
-        tmlfolder = ""
-        filelist = []
-        
-        if self.command_options.has_key('nocopytrans'):
-            copytrans = False
-
-        log.info("Reuse previous translation on server:%s" %copytrans)
-
-        tmlfolder = self.process_srcdir_withsub(self.command_options)
-
-        if self.args:
-            try:
-                full_path = self.search_file(tmlfolder, self.args[0])
-                filelist.append(full_path)
-            except NoSuchFileException, e:
-                log.error(e.msg)
-                sys.exit(1)
-        else:
-            #get all the pot files from the template folder
-            publicanutil = PublicanUtility()
-            filelist = publicanutil.get_file_list(tmlfolder, ".pot")
-
-            if not filelist:
-                log.error("The template folder is empty")
-                sys.exit(1)
-
-            deletefiles = True
+        project_type,deletefiles,tmlfolder,filelist = self.get_files()
+       
+        log.info("Reuse previous translation on server:%s" %self.copytrans)
 
         if self.command_options.has_key('force'):
             force = True
@@ -540,40 +510,20 @@ class PublicanPush(Push):
 
         if importpo:
             import_param = self.get_importparam("podir", self.command_options,  self.project_config, tmlfolder)
-            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, copytrans, self.plural_support, import_param)
+            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support, import_param)
         else:
             log.info("Importing source documents only")
-            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, copytrans, self.plural_support)
+            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support)
 
 class PoPush(Push):
     def __init__(self,*args,**kargs):
         super(PoPush,self).__init__(*args,**kargs)
 
     def run(self):
-        copytrans = True
         importpo = False
         force = False
-        tmlfolder = ""
-        plural_support = False
-        filelist = []
-
-        if self.command_options.has_key('nocopytrans'):
-            copytrans = False
-
-        log.info("Reuse previous translation on server:%s" %copytrans)
-
-        if self.command_options.has_key('srcfile'):
-            tmlfolder, import_file = self.process_srcfile(self.command_options)
-            filelist.append(import_file)
-
-        tmlfolder = self.process_srcdir_withsub(self.command_options)
-
-        if not os.path.isdir(tmlfolder):
-            log.error("Can not find source folder, please specify the source folder with '--srcdir' or 'dir' option")
-            sys.exit(1)
-
-        log.info("PO directory (originals):%s" % tmlfolder)
-
+        project_type,deletefiles,tmlfolder,filelist = self.get_files()
+        log.info("Reuse previous translation on server:%s" %self.copytrans)
         importpo = self.get_importpo(self.command_options)
 
         if importpo:
@@ -582,29 +532,13 @@ class PoPush(Push):
         else:
             log.info("Importing source documents only")
 
-        if self.args:
-            try:
-                full_path = self.search_file(tmlfolder, self.args[0])
-                filelist.append(full_path)
-            except NoSuchFileException, e:
-                log.error(e.msg)
-                sys.exit(1)
-        else:
-            if not self.command_options.has_key('srcfile'):
-                #get all the pot files from the template folder
-                publicanutil = PublicanUtility()
-                filelist = publicanutil.get_file_list(tmlfolder, ".pot")
-
-                if not filelist:
-                    log.error("The template folder is empty")
-                    sys.exit(1)
-
-            if self.command_options.has_key('force'):
-                force = True
+        if self.command_options.has_key('force'):
+            force = True
+        if deletefiles == True:
             self.zanatacmd.del_server_content(tmlfolder, self.project_id, self.version_id, filelist, force, "gettext")
 
         if importpo:
-            self.zanatacmd.push_command(filelist, tmlfolder,self.project_id, self.version_id, copytrans, self.plural_support, import_param)
+            self.zanatacmd.push_command(filelist, tmlfolder,self.project_id, self.version_id, self.copytrans, self.plural_support, import_param)
         else:
-            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, copytrans, self.plural_support)
+            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support)
 
