@@ -40,6 +40,7 @@ class VersionService(Service):
         self.http_headers.update(
             {'Accept':'application/vnd.zanata.Version+json'}
         )
+
         res, content = self.restclient.request_version(
             '/seam/resource/restv1/version',
             self.http_headers

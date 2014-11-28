@@ -66,6 +66,7 @@ class ProjectService(Service):
         """
         if self.http_headers:
             self.http_headers['Accept'] = 'application/json'
+        
 
         res, content = self.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s'%projectid,"get",None,self.http_headers)
         
@@ -73,7 +74,6 @@ class ProjectService(Service):
         if server_return.has_key('status'):
             if server_return['status'] == "Retired":
                 print "Warning: The project %s is retired!" % projectid
-
         project = Project(server_return)
         project.set_iteration(self.iterations)
         return project
@@ -143,7 +143,7 @@ class IterationService(Service):
         """ 
                  
         body = '''{"name":"%s","id":"%s","description":"%s"}'''%(iteration.name, iteration.id, iteration.desc)
-        res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iteration.id), args=body, headers=http_headers)
+        res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s'%(projectid,iteration.id), args=body, headers=self.http_headers)
         self.messages(res,content,"The Version is already exist on server")
 
     def delete(self):

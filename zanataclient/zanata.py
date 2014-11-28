@@ -390,10 +390,8 @@ def read_user_config(url, command_options):
     for path in user_config:
         if os.path.exists(path):
             log.info("Loading zanata user config from: %s" % path)
-
             #Read the user-config file
             config.set_userconfig(path)
-
             try:
                 server = config.get_server(url)
                 if server:
@@ -693,7 +691,7 @@ def create_version(command_options, args):
         version_desc = command_options['version_desc'][0]['value']
         log.warn("This option is deprecated, it should not be used on new zanata server")
 
-    zanatacmd = generate_zanatacmd(url, username, apikey)
+    zanatacmd = generate_zanatacmd(url, username, apikey,headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()

@@ -114,6 +114,7 @@ class ZanataCommand:
         except ZanataException, e:
             self.log.error(str(e))
 
+
     def update_template(self, project_id, iteration_id, filename, body, copytrans):
         if '/' in filename:
             request_name = filename.replace('/', ',')
