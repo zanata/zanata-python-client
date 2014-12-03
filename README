@@ -8,14 +8,7 @@ It also provides support for creating projects/versions in Zanata and retrieving
 information about projects.
 
 Install:
-You can install the zanata-python-client with 'yum install
-zanata-python-client' (review pending), or you can download the rpm package
-from http://jamesni.fedorapeople.org/zanata-python-client/ and install it
-yourself.
-
-Currently, the external dependency for the zanata-python-client
-is a python library named python-polib. You need to install the
-dependency before running the zanata-python-client.
+You can install the zanata-python-client with 'yum install zanata-python-client' 
 
 To install from source:
    make install
@@ -27,21 +20,13 @@ make lint: runs pylint against the source code.
 make test: runs unit tests.  Note: To run the unit tests, you will also need minimock: 'yum install python-minimock'
 
 Configuration:
-After you install the zanata-python-client, you need to create a global
-configuration file $HOME/.config/zanata.ini that contain user-specific
-configuration. python-client uses the same configuration file as maven
-client, please refer to http://code.google.com/p/flies/wiki/ClientConfiguration.
-You can override the location of user configuration file with the 
-command line option '--user-config',
+After you install the zanata-python-client, you need to create a global configuration file $HOME/.config/zanata.ini that contain user-specific configuration. 
+For creation of zanata.ini can be found on http://zanata.org/help/cli/cli-configuration/
 
-For each project, you also have to write a project-specific
-configuration file named zanata.xml, which is also as same as
-zanata.xml used by maven client, again, see
-http://code.google.com/p/flies/wiki/ClientConfiguration. You can set the path
-of project configuration file with command line option '--project-config'.
+For each project, you also have to write a project-specific configuration file named zanata.xml.
+Sample zanata.xml file can be found on https://github.com/zanata/zanata-server/blob/master/zanata.xml
 
 You can also override the URL of the server with the command line option '--url'. 
-
 There are also command line options '--username' for user name and '--apikey' for api key of user. 
 
 Command List:
