@@ -89,7 +89,10 @@ class RestClient(object):
         resource = self.set_resource(resource)
         return self.request(resource, "get",None,http_headers)
 
-    def request(self, resource, method = "get", body = None, headers = None):
+    def request(self, resource, method = "get", body = None, headers = None,extension = None):
+        if extension:
+            resource = resource+extension
+
         if body is not None:
             thelen = str(len(body))
             headers['Content-Length'] = thelen

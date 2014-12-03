@@ -393,7 +393,6 @@ class ZanataCommand:
                 self.log.error("The plural is only supported in zanata server >= 1.6, this file will be ignored")
                 break
             body, filename = publicanutil.potfile_to_json(filepath, srcfolder)
-
             try:
                 result = self.update_template(project_id, iteration_id, filename, body, copytrans)
                 if result:

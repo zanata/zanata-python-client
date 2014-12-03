@@ -360,7 +360,7 @@ class PublicanUtility:
 
         return jsons
 
-    def save_to_pofile(self, path, translations, pot, create_skeletons, locale, doc_name):
+    def save_to_pofile(self, path, translations, potcontent, create_skeletons, locale, doc_name):
         """
         Save PO file to path, based on json objects of pot and translations 
         @param translations: the json object of the content retrieved from server
@@ -368,9 +368,7 @@ class PublicanUtility:
         @param pot: the json object of the pot retrieved from server
         """
         po = polib.POFile(fpath=path)
-        
-        
-        potcontent = json.loads(pot)
+        #potcontent = json.loads(pot)
         # pylint: disable=E1103
         textflows = potcontent.get('textFlows')
 
@@ -429,7 +427,7 @@ class PublicanUtility:
 
         #If the translation is exist, read the content of the po file
         if translations:
-            content = json.loads(translations)
+            content = translations
             #"extensions":[{"object-type":"po-target-header", "comment":"comment_value", "entries":
             #[{"key":"ht","value":"vt1"}]}]
 
