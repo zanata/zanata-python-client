@@ -481,7 +481,7 @@ class GenericPush(Push):
 
         if pushtrans:
             log.info("Send local translation: True")
-            import_param = self.get_importparam(project_type, command_options,  project_config, folder)
+            import_param = self.get_importparam(project_type, self.command_options,  self.project_config, folder)
             self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support, import_param)
         else:
             log.info("Send local translation: False")

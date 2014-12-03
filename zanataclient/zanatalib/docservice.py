@@ -115,7 +115,7 @@ class DocumentService(Service):
         ext = "?ext=gettext&ext=comment&merge=%s"%merge
 
         res, content = self.projects.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid,iterationid,fileid,localeid), args=resources, headers=headers, extension=ext)
-        return self.messages(res,content,"Try running publican update_po (or msgmerge) to ensure your PO files are in sync with your POT files")
+        return self.messages(res,content)
 
 
 

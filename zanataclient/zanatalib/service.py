@@ -28,13 +28,16 @@ class Service(object):
 
     def messages(self,res,content,extra_msg=None):
         if res['status'] == '200' or res['status'] == '304':
-            if extra_msg!=None:
+            rst = None
+            if extra_msg:
                 raise ProjectExistException('Status 200', extra_msg)
             try:
                 rst = json.loads(content)
             except ValueError, e:
+                if content.strip() == "":
+                    return rst
                 print "Exception while decoding", e ,"its may due to file already exists on the server or not a PO file "
-                return res
+                return rst
             return rst
         elif res['status'] == '201':
             return True
