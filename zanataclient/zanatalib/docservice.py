@@ -81,8 +81,7 @@ class DocumentService(Service):
         ext = "?ext=gettext&ext=comment"
         if self.http_headers:
             self.http_headers['Accept'] = 'application/json'
-
-        res, content = self.projects.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file_id), "get",None,self.http_headers)
+        res, content = self.projects.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s'%(projectid, iterationid, file_id), "get",None,self.http_headers,extension=ext)
         return self.messages(res,content)
 
     def retrieve_translation(self, lang, projectid, iterationid, file_id, skeletons):
@@ -104,8 +103,8 @@ class DocumentService(Service):
             ext = ext+"&skeletons=true"
 
          #res, content = self.projects.restclient.request_get('/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file_id, lang), extension=ext)
-
-        res, content = self.projects.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file_id, lang),"get",None,self.http_headers)
+        
+        res, content = self.projects.restclient.request(self.base_url+'/seam/resource/restv1/projects/p/%s/iterations/i/%s/r/%s/translations/%s'%(projectid, iterationid, file_id, lang),"get",None,self.http_headers,ext)
         return self.messages(res,content)
 
     def commit_translation(self, projectid, iterationid, fileid, localeid, resources, merge):

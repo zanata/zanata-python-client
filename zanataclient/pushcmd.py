@@ -525,7 +525,6 @@ class PoPush(Push):
         project_type,deletefiles,tmlfolder,filelist = self.get_files()
         log.info("Reuse previous translation on server:%s" %self.copytrans)
         importpo = self.get_importpo(self.command_options)
-
         if importpo:
             log.info("Importing translation")
             import_param = self.get_importparam("gettext", self.command_options,  self.project_config, tmlfolder)
