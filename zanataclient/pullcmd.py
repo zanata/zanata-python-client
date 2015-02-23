@@ -81,7 +81,7 @@ class GenericPull(Push):
             locale_map = None
         
         if self.project_type:
-            command_type = project_type
+            command_type = self.project_type
             dir_option = True
         elif self.command_options.has_key('project_type'):
             command_type = self.command_options['project_type'][0]['value']
