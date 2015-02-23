@@ -2,7 +2,7 @@
 """
 Build script for zanata-python-client
 """
-from setuptools import setup, find_packages
+from setuptools import setup
 import os
 import subprocess
 
@@ -42,7 +42,7 @@ EOF
 
 setup (name = "zanata-python-client",
     version = get_client_version(),
-    packages = find_packages(),
+    packages = ['zanataclient'],
     include_package_data = True,
     install_requires=[
         'polib' ,
