@@ -61,4 +61,4 @@ class Service(object):
                                           'Service Temporarily Unavailable, stop processing!')
         else:
             raise UnexpectedStatusException('Error', 
-                                            'Unexpected Status, failed to push')
+                                            'Unexpected Status (%s), failed to push: %s' % (res['status'], extra_msg or ""))
