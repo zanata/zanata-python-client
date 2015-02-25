@@ -420,7 +420,7 @@ class GenericPush(Push):
 
     def __init__(self,*args,**kargs):
         super(GenericPush,self).__init__(*args,**kargs)
-    
+
     def run(self):
         pushtrans = None
         push_trans_only = False
@@ -447,9 +447,9 @@ class GenericPush(Push):
             push_trans_only = True
 
         if push_trans_only:
-            transfolder = self.process_transdir(command_options, "")
-            merge = self.process_merge(command_options)
-            lang_list = self.get_lang_list(self.command_options, project_config)
+            transfolder = self.process_transdir(self.command_options, "")
+            merge = self.process_merge(self.command_options)
+            lang_list = self.get_lang_list(self.command_options, self.project_config)
 
             if self.project_config.has_key('locale_map'):
                 locale_map = self.project_config['locale_map']
