@@ -2,7 +2,7 @@
 """
 Build script for zanata-python-client
 """
-from setuptools import setup
+from setuptools import setup,find_packages
 import os
 import subprocess
 
@@ -42,15 +42,15 @@ EOF
 
 setup (name = "zanata-python-client",
     version = get_client_version(),
-    packages = ['zanataclient'],
+    packages = find_packages(),
     include_package_data = True,
     install_requires=[
         'polib' ,
         'httplib2'
     ],
     description = "Zanata Python Client.",
-    author = 'Jian Ni, Ding-Yi Chen',
-    author_email = 'jni@redhat.com, dchen@redhat.com',
+    author = 'Jian Ni, Ding-Yi Chen,Anish Patil',
+    author_email = 'jni@redhat.com, dchen@redhat.com,apatil@redhat.com',
     license = 'LGPLv2+',
     platforms=["Linux"],
     scripts = ["zanata","flies"],
