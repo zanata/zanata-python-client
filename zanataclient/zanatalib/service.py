@@ -8,9 +8,11 @@ from error import UnAvaliableResourceException
 from error import ProjectExistException
 from error import NotAllowedException
 from error import SameNameDocumentException
+from error import ForbiddenException
 from rest.client import RestClient
 
 import json
+import sys
 
 __all__ = (
         "Service",
@@ -59,6 +61,13 @@ class Service(object):
         elif res['status'] == '503':
             raise UnavailableServiceError('Error 503', 
                                           'Service Temporarily Unavailable, stop processing!')
+        elif res['status'] == '403':
+            try:
+               raise ForbiddenException('Error 403', 'You are authenticated but do not have the permission for the requested resource.')
+            except ForbiddenException as e:
+                print '', e
+            finally:
+                sys.exit(1)
         else:
             raise UnexpectedStatusException('Error', 
                                             'Unexpected Status (%s), failed to push: %s' % (res['status'], extra_msg or ""))
