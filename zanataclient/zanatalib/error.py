@@ -28,7 +28,7 @@ __all__ = (
         "ProjectExistException", "UnAvaliableResourceException",
         "UnAvaliablePOTException", "BadRequestBodyException",
         "SameNameDocumentException","InternalServerError",
-        "NotAllowedException", "UnavailableServiceError",
+        "NotAllowedException", "UnavailableServiceError", "ForbiddenException",
         "UnexpectedStatusException"
 )
 class ZanataException(Exception):
@@ -78,6 +78,9 @@ class SameNameDocumentException(ZanataException):
     pass
 
 class NotAllowedException(ZanataException):
+    pass
+
+class ForbiddenException(ZanataException):
     pass
 
 class UnexpectedStatusException(ZanataException):
