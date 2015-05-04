@@ -1,3 +1,46 @@
+* Tue Mar 03 2015 Anish Patil <apatil@redhat.com> - 1.3.21
+- Changed setup.py, fixed installation issue
+- Fix GenericPush.run references to self for push_trans_only
+- Show result code and extra_msg on Unexpected errors
+- Hardcode the package list in setup.py
+
+* Mon Feb 23 2015 Anish Patil <apatil@redhat.com> - 1.3.19
+- Bug 1194987 - NameError: global name 'project_type' is not defined
+- Updated README file
+
+* Wed Dec 03 2014 Anish Patil <apatil@redhat.com> - 1.3.18
+- Improved error message logging,fixed code issues
+- Issue:- zanata pull command pulls po file but don't show command header
+- Issue:- create version don't work 
+- Instead of self.process_srcdir function used self.process_srcdir_withsub
+- Classes PoPush,Generic Push and Publican Push have common code.
+- Refactored classes GenericPush,PublicanPush,PoPush,GenericPull. 
+- Added __init__ function in base class to avoid code repetition
+- Code refactor, added a new base class for all the services
+- Better to use decorators so that we can avoid repetition of code
+- Fixed Bug:- AttributeError: 'NoneType' object has no attribute
+
+* Fri Sep 19 2014 Anish Patil <apatil@redhat.com> - 1.3.16
+- Fix bug:- Po File pull does not show any translated text from server
+- Fixed FSF address in flies file 
+- Fixed glossary support for zanata python client 
+- For bug:- https://bugzilla.redhat.com/show_bug.cgi?id=826830
+- Fixed issue :- https://bugzilla.redhat.com/show_bug.cgi?id=747839
+
+* Tue Jul 22 2014 Anish Patil <apatil@redhat.com> - 1.3.14
+- Added support for zanata po push --project-id="" --project-version=""
+- Made chages to support zanata publican push command
+- Added support for zanata version update command
+- Added support for command zanata create project
+- Added http heders support so that zanata pull command would work
+- To support python-zanata client, to see all the projects on server by
+- TypeError: 'NoneType' object is not iterable 
+
+* Wed Nov 21 2012 Sean Flanigan <sflaniga@redhat.com> - 1.3.13
+- Use dict instead of nested loop
+- Ensure that msgstr_plural is always set for plural strings
+- Rename message to poentry for consistency
+
 * Thu Nov 15 2012 Sean Flanigan <sflaniga@redhat.com> - 1.3.12
 - Revised test files
 - Use PUT instead of POST/PUT when pushing source documents
