@@ -61,7 +61,7 @@ Basic Usage: ``zanata COMMAND [ARGS] [COMMAND_OPTIONS]``
 
 Listing/Querying for Projects::
 
-    $ zanata list
+    $ zanata list --url
 
 Creating a project::
 
