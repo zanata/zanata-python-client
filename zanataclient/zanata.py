@@ -373,7 +373,7 @@ def process_url(project_config, command_options):
     url = url.strip()
 
     if url[-1] == "/":
-        log.info("Warning, the url %s, contains / at end,please check your URL in zanata.xml" % url)
+        #log.info("Warning, the url %s, contains / at end,please check your URL in zanata.xml" % url)
         url = url[:-1]
     
     return url
