@@ -28,6 +28,14 @@ class Service(object):
             setattr(self,key,value)
         self.restclient = RestClient(self.base_url)
 
+    def excption_handler(self,exception_class,error,error_msg):
+        try:
+            raise exception_class(error, error_msg)
+        except exception_class as e:
+            print '', e
+        finally:
+            sys.exit(1)
+
     def messages(self,res,content,extra_msg=None):
         if res['status'] == '200' or res['status'] == '304':
             rst = None
@@ -44,30 +52,32 @@ class Service(object):
         elif res['status'] == '201':
             return True
         elif res['status'] == '401':
-            raise UnAuthorizedException('Error 401', 
-                                        'This operation is not authorized, please check username and apikey')
+            self.excption_handler(UnAuthorizedException,
+                                  'Error 401','This operation is not authorized, please check username and apikey')
         elif res['status'] == '400':
-            raise BadRequestBodyException('Error 400', content)
+            self.excption_handler(BadRequestBodyException,
+                                  'Error 400',content)
         elif res['status'] == '404':
-            raise UnAvaliableResourceException('Error 404', 
-                                               'The requested resource/project is not available')
+            self.excption_handler(UnAvaliableResourceException,
+                                  'Error 404','The requested resource/project is not available')
         elif res['status'] == '405':
-            raise NotAllowedException('Error 405', 
-                                      'The requested method is not allowed')
+            self.excption_handler(NotAllowedException,
+                                  'Error 405','The requested method is not allowed')
         elif res['status'] == '409':
-            raise SameNameDocumentException('Error 409', 'A document with same name already exists.')
+            self.excption_handler(SameNameDocumentException,
+                                  'Error 409','A document with same name already exists')
         elif res['status'] == '500':
-            raise InternalServerError('Error 500', content)
+            self.excption_handler(InternalServerError,
+                                  'Error 500',content)
         elif res['status'] == '503':
-            raise UnavailableServiceError('Error 503', 
-                                          'Service Temporarily Unavailable, stop processing!')
+            self.excption_handler(UnavailableServiceError,
+                                  'Error 503','Service Temporarily Unavailable, stop processing')
         elif res['status'] == '403':
-            try:
-               raise ForbiddenException('Error 403', 'You are authenticated but do not have the permission for the requested resource.')
-            except ForbiddenException as e:
-                print '', e
-            finally:
-                sys.exit(1)
+            self.excption_handler(ForbiddenException,
+                                  'Error 403','You are authenticated but do not have the permission for the requested resource')
         else:
-            raise UnexpectedStatusException('Error', 
-                                            'Unexpected Status (%s), failed to push: %s' % (res['status'], extra_msg or ""))
+            self.excption_handler(UnexpectedStatusException,
+                                  'Error','Unexpected Status (%s), failed to push: %s' % (res['status'], extra_msg or ""))
+
+
+        
