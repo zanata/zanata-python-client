@@ -48,9 +48,11 @@ class Push(object):
         version_info = self.create_versioninfo(client_version, server_version)
         self.log_message(url, version_info, self.project_id, self.version_id, username)
         self.zanatacmd.verify_project(self.project_id, self.version_id)
-        self.copytrans = True
-        if self.command_options.has_key('nocopytrans'):
-            copytrans = False
+        self.copytrans = False
+        if self.command_options.has_key('copytrans'):
+            copytrans = True
+        elif not self.command_options.has_key('nocopytrans'):
+            log.warn("copytrans is now disabled by default")
 
     # Functions in PoPush and GenericPush get tmlfile,file list
     def get_files(self):

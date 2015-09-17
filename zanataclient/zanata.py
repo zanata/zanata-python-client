@@ -208,6 +208,12 @@ option_sets = {
             long=['--import-po']
         ),
     ],
+    'copytrans': [
+        dict(
+            type='command',
+            long=['--copytrans'],
+        ),
+    ],
     'nocopytrans': [
         dict(
             type='command',
@@ -738,7 +744,8 @@ def po_push(command_options, args):
         --transdir: the path of the folder that contains po files(e.g. ./po)
         --import-po: push local translations to server
         --merge: override merge algorithm: auto (default) or import
-        --no-copytrans: prevent server from copying translations from other versions
+        --copytrans: ask server to copy translations from other versions
+        --no-copytrans: no effect; option kept for backward compatibility
         --lang: language list
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
@@ -786,7 +793,8 @@ def publican_push(command_options, args):
                     (e.g. ./myproject)
         --import-po: push local translations to server
         --merge: override merge algorithm: auto (default) or import
-        --no-copytrans: prevent server from copying translations from other versions
+        --copytrans: ask server to copy translations from other versions
+        --no-copytrans: no effect; option kept for backward compatibility
         --lang: language list
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
