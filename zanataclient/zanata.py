@@ -745,7 +745,8 @@ def po_push(command_options, args):
         --import-po: push local translations to server
         --merge: override merge algorithm: auto (default) or import
         --copytrans: ask server to copy translations from other versions
-        --no-copytrans: no effect; option kept for backward compatibility
+        --no-copytrans: no effect (kept for backward compatibility). Incompatible
+                        with --copytrans option.
         --lang: language list
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
@@ -778,7 +779,7 @@ def publican_push(command_options, args):
 
     Push publican content to server for translation.
 
-    Argumensts: documents
+    Arguments: documents
 
     Options:
         -f: force to remove content on server side
@@ -794,7 +795,8 @@ def publican_push(command_options, args):
         --import-po: push local translations to server
         --merge: override merge algorithm: auto (default) or import
         --copytrans: ask server to copy translations from other versions
-        --no-copytrans: no effect; option kept for backward compatibility
+        --no-copytrans: no effect (kept for backward compatibility). Incompatible
+                        with --copytrans option.
         --lang: language list
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
@@ -807,7 +809,7 @@ def push(command_options, args):
 
     Generic push command to push content to server for translation.
 
-    Argumensts: documents
+    Arguments: documents
 
     Options:
         -f: force to remove content on server side

@@ -23,15 +23,21 @@ To install from source::
 Compiling
 =========
 
+Required package for compilation::
+
+    yum install python-polib
+
+Required package for unit tests::
+
+    yum install python-minimock
+
 To run pylint against the source code::
 
     $ make lint
 
-To do unit tests::
+To run unit tests::
 
     $ make test
-
-.. Note:: To run the unit tests, you will also need minimock: ``yum install python-minimock``
 
 Configuration
 =============
