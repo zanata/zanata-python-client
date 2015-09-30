@@ -48,9 +48,18 @@ class Push(object):
         version_info = self.create_versioninfo(client_version, server_version)
         self.log_message(url, version_info, self.project_id, self.version_id, username)
         self.zanatacmd.verify_project(self.project_id, self.version_id)
-        self.copytrans = True
-        if self.command_options.has_key('nocopytrans'):
-            copytrans = False
+        if self.command_options.has_key('copytrans'):
+            if self.command_options.has_key('nocopytrans'):
+                log.error("--copytrans option cannot be used with --no-copytrans. Aborting.")
+                sys.exit(1)
+            else:
+                copytrans = True
+        # TODO GenericPull should extend a common parent class (PushPull?), not Push
+        # This warning makes no sense for pull commands.
+        #elif not self.command_options.has_key('nocopytrans'):
+        #    log.warn("copytrans is now disabled by default")
+        else:
+            self.copytrans = False
 
     # Functions in PoPush and GenericPush get tmlfile,file list
     def get_files(self):

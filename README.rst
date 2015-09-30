@@ -23,15 +23,21 @@ To install from source::
 Compiling
 =========
 
+Required package for compilation::
+
+    yum install python-polib
+
+Required package for unit tests::
+
+    yum install python-minimock
+
 To run pylint against the source code::
 
     $ make lint
 
-To do unit tests::
+To run unit tests::
 
     $ make test
-
-.. Note:: To run the unit tests, you will also need minimock: ``yum install python-minimock``
 
 Configuration
 =============
@@ -111,11 +117,12 @@ to push to the zanata server by ``lang`` option::
 
     $ zanata publican push --import-po --trandir={path of parent folder contains locale folders} --lang=lang1,lang2,..
 
-By default, the server will try to find closest equivalent translation from
-other versions in the same project and copy to version you specified. You can
-set no-copytrans to disable that function::
+When pushing source files, the server can try to fill in equivalent
+translations for those files, from this project or other projects (depending
+on the project options on the server). In previous versions, this was enabled
+by default. You can set the `--copytrans` option to enable this function::
 
-    $ zanata publican push --no-copytrans
+    $ zanata publican push --copytrans
 
 Retrieving translated Documents from zanata.
 
@@ -169,11 +176,12 @@ you can specify the language that you want to push to the zanata server by
 
     $ zanata po push --import-po --trandir={path of parent folder contains translation files, such as zh-CN.po} --lang=lang1,lang2,..
 
-By default the server will try to find closest equivalent translation from oter
-versions in the same project and copy to the version you specified. you can set
-``--no-copytrans`` option to disable this function::
+When pushing source files, the server can try to fill in equivalent
+translations for those files, from this project or other projects (depending
+on the project options on the server). In previous versions, this was enabled
+by default. You can set the `--copytrans` option to enable this function::
 
-    $ zanata po push --no-copytrans
+    $ zanata po push --copytrans
 
 Retrieving Software project translation from zanata
 
