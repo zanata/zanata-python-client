@@ -1,5 +1,5 @@
-#vim:set et sts=4 sw=4: 
-# 
+# vim:set et sts=4 sw=4:
+#
 # Zanata Python Client
 #
 # Copyright (c) 2011 Jian Ni <jni@redhat.com>
@@ -23,6 +23,7 @@ __all__ = (
     "Logger",
 )
 
+
 class Logger:
     def __init__(self):
         self.enable_infoprefix = False
@@ -34,19 +35,18 @@ class Logger:
 
     def info(self, message):
         if self.enable_infoprefix:
-            print self.info_prefix+message
+            print self.info_prefix + message
         else:
             print message
 
     def warn(self, message):
         if self.enable_warnprefix:
-            print self.warn_prefix+message
+            print self.warn_prefix + message
         else:
             print message
 
     def error(self, message):
         if self.enable_errprefix:
-            print self.error_prefix+message
+            print self.error_prefix + message
         else:
             print message
-    

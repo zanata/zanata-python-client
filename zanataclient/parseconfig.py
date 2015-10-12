@@ -1,4 +1,4 @@
-# 
+#
 # Zanata Python Client
 #
 # Copyright (c) 2011 Jian Ni <jni@redhat.com>
@@ -20,30 +20,32 @@
 # Boston, MA  02110-1301, USA.
 
 __all__ = (
-        "ZanataConfig",
-    )
+    "ZanataConfig",
+)
 
 import ConfigParser
 import os.path
 from zanatalib.logger import Logger
-from xml.dom import minidom 
+from xml.dom import minidom
 
-project_config = {'project_url':'', 'project_id':'', 'project_version':'', 'project_type':'', 'locale_map':{}}
+
+project_config = {'project_url': '', 'project_id': '', 'project_version': '', 'project_type': '', 'locale_map': {}}
+
 
 class ZanataConfig:
     def __init__(self):
         self.configparser = ""
         self._config = ""
-        
+
     def set_userconfig(self, path):
         self.configparser = ConfigParser.ConfigParser()
         self._config = self.configparser.read(['zanata.ini', path])
-        
+
     def get_server(self, url):
         if self._config:
             try:
                 item_list = self.configparser.items('servers')
-                server = ""                
+                server = ""
                 for item in item_list:
                     if item[1][-1] == "/":
                         address = item[1][:-1]
@@ -56,12 +58,12 @@ class ZanataConfig:
             except ConfigParser.NoOptionError, ConfigParser.NoSectionError:
                 raise
         else:
-            return None       
-             
+            return None
+
     def get_config_value(self, name, section, server):
         if self._config:
             try:
-                value = self.configparser.get(section, server+'.'+name)
+                value = self.configparser.get(section, server + '.' + name)
                 return value
             except ConfigParser.NoOptionError, ConfigParser.NoSectionError:
                 raise
@@ -77,27 +79,27 @@ class ZanataConfig:
 
         xmldoc = minidom.parse(filename)
 
-        #Read the project url
+        # Read the project url
         if xmldoc.getElementsByTagName("url"):
             node = xmldoc.getElementsByTagName("url")[0]
             project_config['project_url'] = getCombinedTextChildren(node)
 
-        #Read the project id
+        # Read the project id
         if xmldoc.getElementsByTagName("project"):
             node = xmldoc.getElementsByTagName("project")[0]
             project_config['project_id'] = getCombinedTextChildren(node)
-        
-        #Read the project-version
+
+        # Read the project-version
         if xmldoc.getElementsByTagName("project-version"):
             node = xmldoc.getElementsByTagName("project-version")[0]
             project_config['project_version'] = getCombinedTextChildren(node)
 
-        #Read the project-type
+        # Read the project-type
         if xmldoc.getElementsByTagName("project-type"):
             node = xmldoc.getElementsByTagName("project-type")[0]
             project_config['project_type'] = getCombinedTextChildren(node)
 
-        #Read the locale map
+        # Read the locale map
         if xmldoc.getElementsByTagName("locales"):
             locales = xmldoc.getElementsByTagName("locales")[0]
             localelist = locales.getElementsByTagName("locale")
@@ -106,21 +108,19 @@ class ZanataConfig:
                 for node in locale.childNodes:
                     if node.nodeType == node.TEXT_NODE:
                         if locale.getAttribute("map-from"):
-                            locale_map = {str(locale.getAttribute("map-from")):str(node.data)}
+                            locale_map = {str(locale.getAttribute("map-from")): str(node.data)}
                         else:
-                            locale_map = {str(node.data):str(node.data)}
+                            locale_map = {str(node.data): str(node.data)}
                         project_config['locale_map'].update(locale_map)
-        
+
         return project_config
-    
 
 
 def getCombinedTextChildren(node):
     """Combine all TEXT_NODE and CDATA_SECTION_NODE children"""
-    
+
     rc = ""
     for node in node.childNodes:
-        if node.nodeType in ( node.TEXT_NODE, node.CDATA_SECTION_NODE):
+        if node.nodeType in (node.TEXT_NODE, node.CDATA_SECTION_NODE):
             rc = rc + node.data
     return rc
-

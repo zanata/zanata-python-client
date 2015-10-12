@@ -1,6 +1,6 @@
-# vim: set et sts=4 sw=4: 
-# 
-# Zanata Python Client
+# vim: set et sts=4 sw=4:
+#
+#  Zanata Python Client
 #
 # Copyright (c) 2011 Jian Ni <jni@redhat.com>
 # Copyright (c) 2011 Red Hat, Inc.
@@ -21,8 +21,8 @@
 # Boston, MA  02110-1301, USA.
 
 __all__ = (
-            "PublicanUtility",
-          )
+    "PublicanUtility",
+)
 
 import polib
 import hashlib
@@ -36,6 +36,7 @@ except ImportError:
 import sys
 
 from zanatalib.logger import Logger
+
 
 class PublicanUtility:
     def __init__(self):
@@ -69,7 +70,7 @@ class PublicanUtility:
             extracted_comment = entry.comment
             references = entry.occurrences
             for ref in references:
-                node = ref[0]+":"+ref[1]
+                node = ref[0] + ":" + ref[1]
                 reflist.append(node)
             flags = entry.flags
 
@@ -79,14 +80,18 @@ class PublicanUtility:
                 content = entry.msgid
 
             if context is not None:
-                extensions=[{'object-type':'comment', 'value': extracted_comment, 'space': 'preserve'}, {"object-type": "pot-entry-header", "context": context, "references": reflist, "extractedComment": '', "flags": flags}]
+                extensions = [{'object-type': 'comment', 'value': extracted_comment, 'space': 'preserve'},
+                              {"object-type": "pot-entry-header", "context": context, "references": reflist,
+                               "extractedComment": '', "flags": flags}]
             else:
-                extensions=[{'object-type':'comment', 'value': extracted_comment, 'space': 'preserve'}, {"object-type": "pot-entry-header", "references": reflist, "extractedComment": '', "flags": flags}]
+                extensions = [{'object-type': 'comment', 'value': extracted_comment, 'space': 'preserve'},
+                              {"object-type": "pot-entry-header", "references": reflist, "extractedComment": '',
+                               "flags": flags}]
 
             if entry.msgid_plural:
-                textflow = {'id': textflowId, 'lang':'en-US', 'contents': content, 'plural':'true', 'extensions':extensions}
+                textflow = {'id': textflowId, 'lang': 'en-US', 'contents': content, 'plural': 'true', 'extensions': extensions}
             else:
-                textflow = {'id': textflowId, 'lang':'en-US', 'content':content, 'plural':'false', 'extensions':extensions}
+                textflow = {'id': textflowId, 'lang': 'en-US', 'content': content, 'plural': 'false', 'extensions': extensions}
 
             textflows.append(textflow)
         return textflows
@@ -138,7 +143,7 @@ class PublicanUtility:
         Convert the content of the po file to a list of textflowtarget.
         @return: the dictionary object of textflow
         """
-        obs_list=pofile.obsolete_entries()
+        obs_list = pofile.obsolete_entries()
         textflowtargets = []
         content = ""
 
@@ -158,8 +163,8 @@ class PublicanUtility:
 
             state = self.get_contentstate(entry)
 
-            #create extensions
-            extensions = [{"object-type":"comment","value":translator_comment,"space":"preserve"}]
+            # create extensions
+            extensions = [{"object-type": "comment", "value": translator_comment, "space": "preserve"}]
 
             if entry.msgid_plural:
                 content = []
@@ -167,10 +172,10 @@ class PublicanUtility:
                 keys.sort()
                 for key in keys:
                     content.append(entry.msgstr_plural[key])
-                textflowtarget = {'resId': textflowId, 'state': state, 'contents':content,'extensions':extensions}
+                textflowtarget = {'resId': textflowId, 'state': state, 'contents': content, 'extensions': extensions}
             else:
                 content = entry.msgstr
-                textflowtarget = {'resId': textflowId, 'state': state, 'content':content,'extensions':extensions}
+                textflowtarget = {'resId': textflowId, 'state': state, 'content': content, 'extensions': extensions}
 
             textflowtargets.append(textflowtarget)
 
@@ -200,13 +205,13 @@ class PublicanUtility:
         entries = []
         metadatas = pofile.ordered_metadata()
         for item in metadatas:
-            entry = {"key":item[0], "value":item[1]}
+            entry = {"key": item[0], "value": item[1]}
             entries.append(entry)
 
         if pofile.metadata.has_key('Content-Type'):
             self.validate_content_type(pofile.metadata['Content-Type'], object_type)
 
-        extensions = [{"object-type":object_type,"comment":pofile.header, "entries":entries}]
+        extensions = [{"object-type": object_type, "comment": pofile.header, "entries": entries}]
         return extensions
 
     def create_pofile(self, path):
@@ -232,7 +237,7 @@ class PublicanUtility:
             if full_path.endswith(file_type):
                 final_file_list.append(full_path)
             if os.path.isdir(full_path):
-                final_file_list+=self.get_file_list(full_path, file_type)
+                final_file_list += self.get_file_list(full_path, file_type)
 
         return final_file_list
 
@@ -249,8 +254,7 @@ class PublicanUtility:
                 pofile_path = self.get_pofile_path(full_path, file_name)
                 if pofile_path:
                     return pofile_path
-        
-        
+
     def get_resId(self, message):
         """
         Calculate the hash of msgid and msgctxt
@@ -268,7 +272,7 @@ class PublicanUtility:
 
     def strip_path(self, full_path, root_path, suffix):
         if root_path[-1] != "/":
-            root_path = root_path+'/'
+            root_path += '/'
 
         # strip root path from the front of full_path
         filename = full_path[len(root_path):]
@@ -295,7 +299,7 @@ class PublicanUtility:
         pofile = self.create_pofile(filepath)
         textflows = self.create_txtflow(pofile)
         extensions = self.create_extensions(pofile, "po-header")
-        items = {'name':filename, 'contentType':'application/x-gettext', 'lang':'en-US', 'extensions':extensions, 'textFlows':textflows}
+        items = {'name': filename, 'contentType': 'application/x-gettext', 'lang': 'en-US', 'extensions': extensions, 'textFlows': textflows}
 
         return json.dumps(items), filename
 
@@ -306,9 +310,9 @@ class PublicanUtility:
         """
         pofile = self.create_pofile(filepath)
         textflowtargets = self.create_txtflowtarget(pofile)
-        #the function for extensions have not implemented yet
+        # the function for extensions have not implemented yet
         extensions = self.create_extensions(pofile, "po-target-header")
-        items = {'links':[],'extensions':extensions, 'textFlowTargets':textflowtargets}
+        items = {'links': [], 'extensions': extensions, 'textFlowTargets': textflowtargets}
 
         return json.dumps(items)
 
@@ -323,52 +327,52 @@ class PublicanUtility:
         i = 0
 
         while i < len(pofile):
-            entry= {'srcLang':'en-US','glossaryTerms':'', 'sourcereference':''}
-            target_comments=[]
-            source_comments=[]
-            comments=''
+            entry = {'srcLang': 'en-US', 'glossaryTerms': '', 'sourcereference': ''}
+            target_comments = []
+            source_comments = []
+            comments = ''
             reflist = []
             item = pofile[i]
             references = item.occurrences
 
             for ref in references:
-                node = ref[0]+":"+ref[1]
+                node = ref[0] + ":" + ref[1]
                 reflist.append(node)
 
             if sourcecomments:
-                target_comments = target_comments+reflist
+                target_comments = target_comments + reflist
                 target_comments.append(item.comment)
             else:
                 if entry['sourcereference']:
-                    comments = comments+entry['sourcereference']
+                    comments = comments + entry['sourcereference']
                 if reflist:
                     ref = '\n'.join(str(n) for n in reflist)
-                    comments = comments+ref
-                entry['sourcereference'] = comments    
+                    comments = comments + ref
+                entry['sourcereference'] = comments
                 source_comments.append(item.comment)
 
-            terms = [{'locale':lang, 'content':item.msgstr, 'comments':target_comments}, {'locale':'en-US', 'content':item.msgid, 'comments':source_comments}]
+            terms = [{'locale': lang, 'content': item.msgstr, 'comments': target_comments}, {'locale': 'en-US', 'content': item.msgid, 'comments': source_comments}]
             entry['glossaryTerms'] = terms
             entries.append(entry)
 
-            if len(entries) == 300 or i == len(pofile)-1:
-                glossary = {'sourceLocales':srclocales, 'glossaryEntries':entries, 'targetLocales':targetlocales}
+            if len(entries) == 300 or i == len(pofile) - 1:
+                glossary = {'sourceLocales': srclocales, 'glossaryEntries': entries, 'targetLocales': targetlocales}
                 jsons.append(json.dumps(glossary))
                 entries = []
 
-            i+=1
+            i += 1
 
         return jsons
 
     def save_to_pofile(self, path, translations, potcontent, create_skeletons, locale, doc_name):
         """
-        Save PO file to path, based on json objects of pot and translations 
+        Save PO file to path, based on json objects of pot and translations
         @param translations: the json object of the content retrieved from server
         @param path: the po folder for output
         @param pot: the json object of the pot retrieved from server
         """
         po = polib.POFile(fpath=path)
-        #potcontent = json.loads(pot)
+        # potcontent = json.loads(pot)
         # pylint: disable=E1103
         textflows = potcontent.get('textFlows')
 
@@ -376,14 +380,14 @@ class PublicanUtility:
             extensions = potcontent.get('extensions')[0]
             po.header = extensions.get('comment')
             for item in extensions.get('entries'):
-                po.metadata[item['key']]=item['value']
-            #specify Content-Type charset to UTF-8
+                po.metadata[item['key']] = item['value']
+            # specify Content-Type charset to UTF-8
             pattern = r'charset=[^;]*'
             if po.metadata.has_key('Content-Type'):
                 re.sub(pattern, "charset=UTF-8", po.metadata['Content-Type'])
             else:
-                po.metadata['Content-Type']="text/plain; charset=UTF-8"
-                
+                po.metadata['Content-Type'] = "text/plain; charset=UTF-8"
+
         for textflow in textflows:
             poentry = polib.POEntry(occurrences=None)
             poentry.msgid = textflow.get('content')
@@ -391,12 +395,12 @@ class PublicanUtility:
                 entry_list = textflow.get('extensions')
                 for entry in entry_list:
                     if entry.get('object-type') == 'pot-entry-header':
-                        #PotEntryHeader
-                        #Check the references is not empty
+                        # PotEntryHeader
+                        # Check the references is not empty
                         if entry.get('references') != [u'']:
                             ref_list = []
                             for item in entry.get('references'):
-                                #in some cases, entry contains more than one reference
+                                # in some cases, entry contains more than one reference
                                 if ' ' in item:
                                     reference = item.split(' ')
                                     for i in reference:
@@ -414,9 +418,9 @@ class PublicanUtility:
                             poentry.msgctxt = entry.get('context')
 
                     if entry.get('object-type') == 'comment':
-                        #SimpleComment
+                        # SimpleComment
                         poentry.comment = entry.get('value')
-                
+
             if textflow.get('contents'):
                 poentry.msgid = textflow.get('contents')[0]
                 poentry.msgid_plural = textflow.get('contents')[1]
@@ -425,11 +429,11 @@ class PublicanUtility:
                 poentry.msgstr = ''
             po.append(poentry)
 
-        #If the translation is exist, read the content of the po file
+        # If the translation is exist, read the content of the po file
         if translations:
             content = translations
-            #"extensions":[{"object-type":"po-target-header", "comment":"comment_value", "entries":
-            #[{"key":"ht","value":"vt1"}]}]
+            # "extensions":[{"object-type":"po-target-header", "comment":"comment_value", "entries":
+            # [{"key":"ht","value":"vt1"}]}]
 
             if content.get('extensions'):
                 ext = content.get('extensions')[0]
@@ -437,13 +441,13 @@ class PublicanUtility:
                 if header_comment:
                     po.header = header_comment
                 for item in ext.get('entries'):
-                    po.metadata[item['key']]=item['value']
+                    po.metadata[item['key']] = item['value']
 
             targets = content.get('textFlowTargets')
 
             if not create_skeletons:
                 if not targets:
-                    self.log.warn("No translations found in %s for document %s"%(locale, doc_name))
+                    self.log.warn("No translations found in %s for document %s" % (locale, doc_name))
                     return
 
             translationsByResId = {}
@@ -451,7 +455,7 @@ class PublicanUtility:
                 resId = translation.get('resId')
                 translationsByResId[resId] = translation
 
-            #"extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
+            # "extensions":[{"object-type":"comment","value":"testcomment","space":"preserve"}]
             # copy any other stuff you need to transfer
             for poentry in po:
                 resId = self.get_resId(poentry)
@@ -471,7 +475,7 @@ class PublicanUtility:
                             i = 0
                             for msg in contents:
                                 poentry.msgstr_plural[i] = msg
-                                i = i+1
+                                i = i + 1
                         elif content:
                             poentry.msgstr_plural[0] = content
                     else:
@@ -490,4 +494,4 @@ class PublicanUtility:
         # finally save resulting po to outpath as lang/myfile.po
         po.save()
         # pylint: disable=E1103
-        self.log.info("Writing po file to %s"%(path))
+        self.log.info("Writing po file to %s" % (path))

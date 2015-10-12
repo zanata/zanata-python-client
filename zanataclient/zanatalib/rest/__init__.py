@@ -21,4 +21,3 @@
 
 
 from client import RestClient
-

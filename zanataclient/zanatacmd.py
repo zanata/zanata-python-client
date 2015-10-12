@@ -41,20 +41,20 @@ from zanatalib.error import UnexpectedStatusException
 from zanatalib.error import UnavailableServiceError
 from zanatalib.error import InternalServerError
 
-class ZanataCommand:
-    def __init__(self, url, username = None, apikey = None,http_headers=None):
-        self.log = Logger()
-        self.zanata_resource = ZanataResource(url, username, apikey,http_headers)
 
+class ZanataCommand:
+    def __init__(self, url, username=None, apikey=None, http_headers=None):
+        self.log = Logger()
+        self.zanata_resource = ZanataResource(url, username, apikey, http_headers)
 
     def disable_ssl_cert_validation(self):
         self.zanata_resource.disable_ssl_cert_validation()
 
     ##############################################
-    ##
-    ## Commands for interaction with zanata server 
-    ##
-    ############################################## 
+    #
+    # Commands for interaction with zanata server
+    #
+    ##############################################
     def get_file_list(self, projectid, iterationid):
         return self.zanata_resource.documents.get_file_list(projectid, iterationid)
 
@@ -68,20 +68,20 @@ class ZanataCommand:
             self.log.error("Can not retrieve the server version, server may not support the version service")
         except UnavailableServiceError:
             self.log.error("Service Temporarily Unavailable, stop processing!")
-            sys.exit(1)    
+            sys.exit(1)
 
     """
     def check_project(self, command_options, project_config):
         project_id = ''
         iteration_id = ''
         if command_options.has_key('project_id'):
-            project_id =  command_options['project_id'][0]['value'] 
+            project_id =  command_options['project_id'][0]['value']
         else:
             if project_config.has_key('project_id'):
                 project_id = project_config['project_id']
 
         if command_options.has_key('project_version'):
-            iteration_id = command_options['project_version'][0]['value'] 
+            iteration_id = command_options['project_version'][0]['value']
         else:
             if project_config.has_key('project_version'):
                 iteration_id = project_config['project_version']
@@ -114,7 +114,6 @@ class ZanataCommand:
         except ZanataException, e:
             self.log.error(str(e))
 
-
     def update_template(self, project_id, iteration_id, filename, body, copytrans):
         if '/' in filename:
             request_name = filename.replace('/', ',')
@@ -124,7 +123,7 @@ class ZanataCommand:
         try:
             result = self.zanata_resource.documents.update_template(project_id, iteration_id, request_name, body, copytrans)
             if result:
-                self.log.info("Successfully updated template %s on the server"%filename)
+                self.log.info("Successfully updated template %s on the server" % filename)
         except ZanataException, e:
             self.log.error(str(e))
 
@@ -133,12 +132,12 @@ class ZanataCommand:
             result = self.zanata_resource.documents.commit_translation(project_id, iteration_id, request_name, lang, body, merge)
             if result:
                 self.log.warn(result)
-            self.log.info("Successfully pushed translation %s to the Zanata server"%pofile)
+            self.log.info("Successfully pushed translation %s to the Zanata server" % pofile)
         except ZanataException, e:
             self.log.error(str(e))
 
     def del_server_content(self, tmlfolder, project_id, iteration_id, push_files, force, project_type):
-        #Get the file list of this version of project
+        # Get the file list of this version of project
         try:
             filelist = self.zanata_resource.documents.get_file_list(project_id, iteration_id)
         except Exception, e:
@@ -165,7 +164,7 @@ class ZanataCommand:
                 if ".pot" in name:
                     path = os.path.join(tmlfolder, name)
                 else:
-                    path = os.path.join(tmlfolder, name+".pot")
+                    path = os.path.join(tmlfolder, name + ".pot")
 
                 if project_type == "gettext":
                     if push_files:
@@ -176,7 +175,7 @@ class ZanataCommand:
                         delete = True
 
                 if delete:
-                    self.log.info("Deleting the %s"%name)
+                    self.log.info("Deleting the %s" % name)
 
                     try:
                         self.zanata_resource.documents.delete_template(project_id, iteration_id, request)
@@ -194,10 +193,10 @@ class ZanataCommand:
             self.log.error("There is no projects on the server or the server not working")
             sys.exit(1)
         for project in projects:
-            print ("\nProject ID:          %s")%project.id
-            print ("Project Name:        %s")%project.name
-            #print ("Project Type:        %s")%project.type
-            print ("Project Links:       %s\n")%[{'href':link.href, 'type':link.type, 'rel':link.rel} for link in project.links]
+            print ("\nProject ID:          %s") % project.id
+            print ("Project Name:        %s") % project.name
+            # print ("Project Type:        %s") % project.type
+            print ("Project Links:       %s\n") % [{'href': link.href, 'type': link.type, 'rel': link.rel} for link in project.links]
 
         return projects
 
@@ -206,12 +205,12 @@ class ZanataCommand:
         Retrieve the information of a project
         """
         try:
-            p = self.zanata_resource.projects.get(project_id) 
+            p = self.zanata_resource.projects.get(project_id)
             # pylint: disable=E1101
-            print ("Project ID:          %s")%p.id
-            print ("Project Name:        %s")%p.name 
-            #print ("Project Type:        %s")%p.type
-            print ("Project Description: %s")%p.description
+            print ("Project ID:          %s") % p.id
+            print ("Project Name:        %s") % p.name
+            # print ("Project Type:        %s") % p.type
+            print ("Project Description: %s") % p.description
         except NoSuchProjectException, e:
             self.log.error(str(e))
         except InvalidOptionException:
@@ -224,11 +223,11 @@ class ZanataCommand:
         try:
             project = self.zanata_resource.projects.get(project_id)
             iteration = project.get_iteration(iteration_id)
-            print ("Version ID:          %s")%iteration.id
+            print ("Version ID:          %s") % iteration.id
             if hasattr(iteration, 'name'):
-                print ("Version Name:        %s")%iteration.name
+                print ("Version Name:        %s") % iteration.name
             if hasattr(iteration, 'description'):
-                print ("Version Description: %s")%iteration.description
+                print ("Version Description: %s") % iteration.description
         except NoSuchProjectException, e:
             self.log.error(str(e))
 
@@ -238,25 +237,25 @@ class ZanataCommand:
         @param args: project id
         """
         try:
-            item = {'id':project_id, 'name':project_name, 'desc':project_desc}
+            item = {'id': project_id, 'name': project_name, 'desc': project_desc}
             p = Project(item)
             result = self.zanata_resource.projects.create(p)
             if result == "Success":
-                self.log.info("Successfully created project: %s"%project_id)
+                self.log.info("Successfully created project: %s" % project_id)
         except ZanataException, e:
             self.log.error(str(e))
 
     def create_version(self, project_id, version_id, version_name=None, version_desc=None):
         """
-        Create version with the version id, version name and version description 
+        Create version with the version id, version name and version description
         @param args: version id
         """
         try:
-            item = {'id':version_id, 'name':version_name, 'desc':version_desc}
+            item = {'id': version_id, 'name': version_name, 'desc': version_desc}
             iteration = Iteration(item)
             result = self.zanata_resource.projects.iterations.create(project_id, iteration)
             if result == "Success":
-                self.log.info("Successfully created version: %s"%version_id)
+                self.log.info("Successfully created version: %s" % version_id)
         except ZanataException, e:
             self.log.error(str(e))
 
@@ -278,7 +277,7 @@ class ZanataCommand:
             else:
                 request_name = potfile
 
-            self.log.info("Pushing %s translation for %s to server:"%(item, potfile))
+            self.log.info("Pushing %s translation for %s to server:" % (item, potfile))
 
             if project_type == "podir":
                 folder = os.path.join(trans_folder, item)
@@ -287,10 +286,10 @@ class ZanataCommand:
                     self.log.error("Can not find translation, please specify path of the translation folder")
                     continue
 
-                pofile = os.path.join(folder, potfile+'.po') 
+                pofile = os.path.join(folder, potfile + '.po')
 
             elif project_type == "gettext":
-                filename = item.replace('-','_')+'.po'
+                filename = item.replace('-', '_') + '.po'
                 if sub_dir:
                     path = os.path.join(trans_folder, sub_dir)
                 else:
@@ -298,13 +297,13 @@ class ZanataCommand:
                 pofile = os.path.join(path, filename)
 
             if not os.path.isfile(pofile):
-                self.log.error("Can not find the %s translation for %s"%(item, potfile))
+                self.log.error("Can not find the %s translation for %s" % (item, potfile))
                 continue
 
             body = publicanutil.pofile_to_json(pofile)
 
             if not body:
-                self.log.error("No content or all entries are obsolete in %s"%pofile)
+                self.log.error("No content or all entries are obsolete in %s" % pofile)
                 sys.exit(1)
 
             self.commit_translation(project_id, iteration_id, request_name, pofile, lang, body, merge)
@@ -332,41 +331,41 @@ class ZanataCommand:
                 else:
                     lang = item
 
-            self.log.info("\nPushing %s translation for %s to server:"%(item, project_id))
+            self.log.info("\nPushing %s translation for %s to server:" % (item, project_id))
 
             if project_type == "podir":
                 folder = os.path.join(transfolder, item)
                 if not os.path.exists(folder):
-                    self.log.error("The folder %s is not exist"%os.path.abspath(folder))
+                    self.log.error("The folder %s is not exist" % os.path.abspath(folder))
                     continue
             elif project_type == "gettext":
                 folder = transfolder
 
             for filename in filelist:
                 if project_type == "gettext":
-                    pofile_name = item.replace('-','_')+'.po'
+                    pofile_name = item.replace('-', '_') + '.po'
                     if '/' in filename:
-                        name = filename[filename.rfind('/')+1:]+'.pot'
+                        name = filename[filename.rfind('/') + 1:] + '.pot'
                     else:
-                        name = filename+'.pot'
+                        name = filename + '.pot'
                     filepath = publicanutil.get_pofile_path(folder, name)
                     try:
-                        pofile = filepath[0:filepath.rfind('/')+1]+pofile_name
-                    except :
+                        pofile = filepath[0:filepath.rfind('/') + 1] + pofile_name
+                    except:
                         pofile = None
-                        print "Can not find "+ name  
-                        
+                        print "Can not find " + name
+
                 elif project_type == "podir":
                     if '/' in filename:
-                        name = filename[filename.rfind('/')+1:]+'.po'
+                        name = filename[filename.rfind('/') + 1:] + '.po'
                     else:
-                        name = filename+'.po'
+                        name = filename + '.po'
                     pofile = publicanutil.get_pofile_path(folder, name)
- 
-                self.log.info("\nPushing the %s translation of %s to server:"%(item, filename))
+
+                self.log.info("\nPushing the %s translation of %s to server:" % (item, filename))
 
                 if not pofile or not os.path.isfile(pofile):
-                    self.log.error("Can not find the %s translation for %s"%(item, filename))
+                    self.log.error("Can not find the %s translation for %s" % (item, filename))
                     continue
 
                 request_name = filename.replace('/', ',')
@@ -374,12 +373,12 @@ class ZanataCommand:
                 body = publicanutil.pofile_to_json(pofile)
 
                 if not body:
-                    self.log.error("No content or all entries are obsolete in %s"%filepath)
+                    self.log.error("No content or all entries are obsolete in %s" % filepath)
                     sys.exit(1)
 
                 self.commit_translation(project_id, iteration_id, request_name, pofile, lang, body, merge)
 
-    def push_command(self, file_list, srcfolder, project_id, iteration_id, copytrans, plural_support = False, import_param = None):
+    def push_command(self, file_list, srcfolder, project_id, iteration_id, copytrans, plural_support=False, import_param=None):
         """
         Push the content of publican files to a Project version on Zanata server
         @param args: name of the publican file
@@ -387,7 +386,7 @@ class ZanataCommand:
         publicanutil = PublicanUtility()
 
         for filepath in file_list:
-            self.log.info("\nPushing the content of %s to server:"%filepath)
+            self.log.info("\nPushing the content of %s to server:" % filepath)
             plural_exist = publicanutil.check_plural(filepath)
             if plural_exist and not plural_support:
                 self.log.error("The plural is only supported in zanata server >= 1.6, this file will be ignored")
@@ -396,7 +395,7 @@ class ZanataCommand:
             try:
                 result = self.update_template(project_id, iteration_id, filename, body, copytrans)
                 if result:
-                    self.log.info("Successfully pushed %s to the server"%filepath)
+                    self.log.info("Successfully pushed %s to the server" % filepath)
             except UnAuthorizedException, e:
                 self.log.error(str(e))
                 break
@@ -427,13 +426,13 @@ class ZanataCommand:
         @param args: the name of publican file
         """
         publicanutil = PublicanUtility()
-        #if file no specified, retrieve all the files of project
+        # if file no specified, retrieve all the files of project
         for file_item in filelist:
             pot = ""
             result = ""
             folder = ""
 
-            if '/' in file_item: 
+            if '/' in file_item:
                 name = file_item.split('/')[-1]
                 folder = file_item[0:file_item.rfind('/')]
                 request_name = file_item.replace('/', ',')
@@ -441,7 +440,7 @@ class ZanataCommand:
                 name = file_item
                 request_name = file_item
 
-            self.log.info("\nFetching the content of %s from Zanata server: "%name)
+            self.log.info("\nFetching the content of %s from Zanata server: " % name)
 
             try:
                 pot = self.zanata_resource.documents.retrieve_template(project_id, iteration_id, request_name)
@@ -449,7 +448,7 @@ class ZanataCommand:
                 self.log.error(str(e))
                 break
             except UnAvaliableResourceException, e:
-                self.log.error("Can't find pot file for %s on server"%name)
+                self.log.error("Can't find pot file for %s on server" % name)
                 break
             except UnexpectedStatusException, e:
                 self.log.error(str(e))
@@ -467,9 +466,9 @@ class ZanataCommand:
                     else:
                         lang = item
 
-                save_name = item.replace('-','_')
+                save_name = item.replace('-', '_')
                 if project_type == "podir":
-                    outpath = os.path.join(output, item) 
+                    outpath = os.path.join(output, item)
                     if not os.path.isdir(outpath):
                         os.mkdir(outpath)
                     save_name = name
@@ -480,11 +479,11 @@ class ZanataCommand:
                     subdirectory = os.path.join(outpath, folder)
                     if not os.path.isdir(subdirectory):
                         os.makedirs(subdirectory)
-                    pofile = os.path.join(subdirectory, save_name+'.po') 
+                    pofile = os.path.join(subdirectory, save_name + '.po')
                 else:
-                    pofile = os.path.join(output, save_name+'.po')
+                    pofile = os.path.join(output, save_name + '.po')
 
-                self.log.info("Retrieving %s translation from server:"%item)
+                self.log.info("Retrieving %s translation from server:" % item)
 
                 try:
                     result = self.zanata_resource.documents.retrieve_translation(lang, project_id, iteration_id, request_name, skeletons)
@@ -493,7 +492,7 @@ class ZanataCommand:
                     self.log.error(str(e))
                     break
                 except UnAvaliableResourceException, e:
-                    self.log.info("There is no %s translation for %s"%(item, name))
+                    self.log.info("There is no %s translation for %s" % (item, name))
                 except BadRequestBodyException, e:
                     self.log.error(str(e))
                     continue
@@ -502,7 +501,6 @@ class ZanataCommand:
                 except InternalServerError, e:
                     self.log.error(str(e))
                     sys.exit(1)
-
 
     def poglossary_push(self, path, url, username, apikey, lang, sourcecomments):
         i = 0
@@ -517,14 +515,14 @@ class ZanataCommand:
 
         while i < size:
             if size > 1:
-                self.log.info("Push part %s of glossary file"%i)
+                self.log.info("Push part %s of glossary file" % i)
             try:
                 glossary.commit_glossary(username, apikey, jsons[i])
             except ZanataException, e:
                 self.log.error(str(e))
                 sys.exit(1)
 
-            i+=1
+            i += 1
 
         self.log.info("Successfully pushed glossary to the server")
 
@@ -540,7 +538,7 @@ class ZanataCommand:
         except ZanataException, e:
             self.log.error(str(e))
 
-    def delete_glossary(self, url, username, apikey, lang = None):
+    def delete_glossary(self, url, username, apikey, lang=None):
         glossary = GlossaryService(url)
 
         try:

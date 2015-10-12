@@ -1,5 +1,5 @@
-#vim:set et sts=4 sw=4: 
-# 
+# vim:set et sts=4 sw=4:
+#
 # Zanata Python Client
 #
 # Copyright (c) 2011 Jian Ni <jni@redhat.com>
@@ -22,66 +22,80 @@
 
 
 __all__ = (
-        "NoSuchProjectException", "InvalidOptionException", 
-        "NoSuchFileException",
-        "UnAuthorizedException", "BadRequestException",
-        "ProjectExistException", "UnAvaliableResourceException",
-        "UnAvaliablePOTException", "BadRequestBodyException",
-        "SameNameDocumentException","InternalServerError",
-        "NotAllowedException", "UnavailableServiceError", "ForbiddenException",
-        "UnexpectedStatusException"
+    "NoSuchProjectException", "InvalidOptionException", "NoSuchFileException",
+    "UnAuthorizedException", "BadRequestException", "ProjectExistException",
+    "UnAvaliableResourceException", "UnAvaliablePOTException", "BadRequestBodyException",
+    "SameNameDocumentException", "InternalServerError", "NotAllowedException",
+    "UnavailableServiceError", "ForbiddenException", "UnexpectedStatusException"
 )
+
+
 class ZanataException(Exception):
     def __init__(self, expr, msg):
         link = "Please take a reference in "\
                "https://github.com/zanata/zanata/wiki/Python-Client-Troubleshooting"
         self.expr = expr
-        self.msg = msg+'\n'+link
+        self.msg = msg + '\n' + link
 
-    def __str__ (self):
-        return self.expr+' - '+self.msg
+    def __str__(self):
+        return self.expr + ' - ' + self.msg
+
 
 class InternalServerError(ZanataException):
     pass
 
+
 class UnavailableServiceError(ZanataException):
     pass
+
 
 class NoSuchProjectException(ZanataException):
     pass
 
+
 class InvalidOptionException(ZanataException):
-    pass 
+    pass
+
 
 class NoSuchFileException(ZanataException):
-    pass 
+    pass
+
 
 class UnAuthorizedException(ZanataException):
-    pass 
+    pass
+
 
 class UnAvaliablePOTException(ZanataException):
-    pass 
+    pass
+
 
 class UnAvaliableResourceException(ZanataException):
     pass
 
+
 class BadRequestException(ZanataException):
     pass
+
 
 class ProjectExistException(ZanataException):
     pass
 
+
 class BadRequestBodyException(ZanataException):
     pass
+
 
 class SameNameDocumentException(ZanataException):
     pass
 
+
 class NotAllowedException(ZanataException):
     pass
 
+
 class ForbiddenException(ZanataException):
     pass
+
 
 class UnexpectedStatusException(ZanataException):
     pass

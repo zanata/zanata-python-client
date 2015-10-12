@@ -1,4 +1,4 @@
-# 
+#
 # Zanata Python Client
 #
 # Copyright (c) 2011 Jian Ni <jni@redhat.com>
@@ -20,13 +20,14 @@
 # Boston, MA  02110-1301, USA.
 
 all__ = (
-            "PublicanUtilityTest",
-        )
+    "PublicanUtilityTest",
+)
 
 import unittest
-import sys, os
+import sys
+import os
 import json
-sys.path.insert(0, os.path.abspath(__file__+"/../.."))
+sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
 
 from zanataclient.publicanutil import PublicanUtility
 
@@ -81,4 +82,3 @@ class PublicanUtilityTest(unittest.TestCase):
     """
 if __name__ == '__main__':
     unittest.main()
-

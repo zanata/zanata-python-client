@@ -20,19 +20,19 @@
 # Boston, MA  02110-1301, USA.
 
 __all__ = (
-        "RestClient",
-    )
+    "RestClient",
+)
 
 import urlparse
-import warnings
 import sys
 import warnings
 import StringIO
 warnings.simplefilter("ignore", DeprecationWarning)
 import httplib2
 
+
 class RestClient(object):
-    def __init__(self, base_url,disable_ssl_certificate_validation=True):
+    def __init__(self, base_url, disable_ssl_certificate_validation=True):
         self.base_url = base_url
         self.url = urlparse.urlparse(base_url)
         self.http_client = httplib2.Http(disable_ssl_certificate_validation=True)
@@ -47,51 +47,51 @@ class RestClient(object):
 
         if args:
             if method == "put" or method == "post":
-                headers['Content-Type'] = 'application/json' 
+                headers['Content-Type'] = 'application/json'
 
         return headers
 
-    def set_resource(self, resource, extension = None):
+    def set_resource(self, resource, extension=None):
         if extension:
             return "%s%s%s" % (self.base_url, resource, extension)
         else:
             return "%s%s" % (self.base_url, resource)
 
-    def request_get(self, resource, args = None, body = None,
-                    headers = {}, extension = None):
+    def request_get(self, resource, args=None, body=None,
+                    headers={}, extension=None):
         headers = self.set_headers(headers, "get", args)
         resource = self.set_resource(resource, extension)
         return self.request(resource, "get", body, headers)
 
-    def request_post(self, resource, args = None, body = None,
-                     headers = {}, extension = None):
+    def request_post(self, resource, args=None, body=None,
+                     headers={}, extension=None):
         headers = self.set_headers(headers, "post", args)
         if args:
             body = args
         resource = self.set_resource(resource, extension)
         return self.request(resource, "post", body, headers)
 
-    def request_put(self, resource, args = None, body = None,
-                    headers = {}, extension = None):
+    def request_put(self, resource, args=None, body=None,
+                    headers={}, extension=None):
         headers = self.set_headers(headers, "put", args)
         if args:
             body = args
-        resource = self.set_resource(resource, extension)  
+        resource = self.set_resource(resource, extension)
         return self.request(resource, "put", body, headers)
 
-    def request_delete(self, resource, args = None, body = None,
-                       headers = {}, extension = None):
+    def request_delete(self, resource, args=None, body=None,
+                       headers={}, extension=None):
         headers = self.set_headers(headers, "delete", args)
         resource = self.set_resource(resource, extension)
         return self.request(resource, "delete", body, headers)
 
-    def request_version(self, resource,http_headers):
+    def request_version(self, resource, http_headers):
         resource = self.set_resource(resource)
-        return self.request(resource, "get",None,http_headers)
+        return self.request(resource, "get", None, http_headers)
 
-    def request(self, resource, method = "get", body = None, headers = None,extension = None):
+    def request(self, resource, method="get", body=None, headers=None, extension=None):
         if extension:
-            resource = resource+extension
+            resource = resource + extension
 
         if body is not None:
             thelen = str(len(body))

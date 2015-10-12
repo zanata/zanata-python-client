@@ -1,5 +1,5 @@
-#vim:set et sts=4 sw=4: 
-# 
+# vim:set et sts=4 sw=4:
+#
 # Zanata Python Client
 #
 # Copyright (c) 2011 Jian Ni <jni@redhat.com>
@@ -22,28 +22,28 @@
 
 
 __all__ = (
-        "VersionService",
-   )
+    "VersionService",
+)
 
-from service import Service 
+from service import Service
+
 
 class VersionService(Service):
-    _fields = ['base_url','http_headers']
+    _fields = ['base_url', 'http_headers']
 
-    def __init__(self, *args,**kargs):
-        super(VersionService,self).__init__(*args,**kargs)
+    def __init__(self, *args, **kargs):
+        super(VersionService, self).__init__(*args, **kargs)
 
     def disable_ssl_cert_validation(self):
         self.restclient.disable_ssl_cert_validation()
-        
+
     def get_server_version(self):
         self.http_headers.update(
-            {'Accept':'application/vnd.zanata.Version+json'}
+            {'Accept': 'application/vnd.zanata.Version+json'}
         )
 
         res, content = self.restclient.request_version(
             '/seam/resource/restv1/version',
             self.http_headers
         )
-        return self.messages(res,content)
-
+        return self.messages(res, content)

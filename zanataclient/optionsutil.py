@@ -1,4 +1,4 @@
-# vim: set et sts=4 sw=4: 
+# vim: set et sts=4 sw=4:
 #
 # Zanata Python Client
 #
@@ -21,14 +21,15 @@
 # Boston, MA  02110-1301, USA.
 
 __all__ = (
-            "OptionsUtil",
-          )
+    "OptionsUtil",
+)
 
 import os
 import sys
 
 from zanatalib.logger import Logger
 from parseconfig import ZanataConfig
+
 
 class OptionsUtil:
     def __init__(self, options):
@@ -40,8 +41,8 @@ class OptionsUtil:
     def apply_configfiles(self):
         url = self.apply_project_config()
         username, apikey = self.apply_user_config(url)
-        
-        #The value in commandline options will overwrite the value in user-config file
+
+        # The value in commandline options will overwrite the value in user-config file
         if self.command_options.has_key('user_name'):
             username = self.command_options['user_name'][0]['value']
 
@@ -54,9 +55,9 @@ class OptionsUtil:
 
     def apply_project_config(self):
         url = ""
-        #Read the project configuration file using --project-config option
-        config_file = [os.path.join(os.getcwd(), filename) for filename\
-                    in ['zanata.xml', 'flies.xml']]
+        # Read the project configuration file using --project-config option
+        config_file = [os.path.join(os.getcwd(), filename) for filename
+                       in ['zanata.xml', 'flies.xml']]
 
         if self.command_options.has_key('project_config'):
             config_file.append(self.command_options['project_config'][0]['value'])
@@ -70,12 +71,12 @@ class OptionsUtil:
 
         if not self.project_config:
             self.log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-            
-        #process the url of server
+
+        # process the url of server
         if self.project_config.has_key('project_url'):
             url = self.project_config['project_url']
 
-        #The value in options will override the value in project-config file
+        # The value in options will override the value in project-config file
         if self.command_options.has_key('url'):
             self.log.info("Overriding url of server with command line option")
             url = self.command_options['url'][0]['value']
@@ -85,7 +86,7 @@ class OptionsUtil:
             sys.exit(1)
 
         url = self.trim_url(url)
-        
+
         return url
 
     def trim_url(self, url):
@@ -107,7 +108,7 @@ class OptionsUtil:
     def apply_user_config(self, url):
         user_name = ""
         apikey = ""
-        #Try to read user-config file
+        # Try to read user-config file
         user_config = [os.path.join(os.path.expanduser("~") + '/.config', filename) for filename in ['zanata.ini', 'flies.ini']]
 
         if self.command_options.has_key('user_config'):
@@ -117,7 +118,7 @@ class OptionsUtil:
             if os.path.exists(path):
                 self.log.info("Loading zanata user config from: %s" % path)
 
-            #Read the user-config file
+            # Read the user-config file
             self.config.set_userconfig(path)
 
             try:
@@ -128,11 +129,10 @@ class OptionsUtil:
             except Exception, e:
                 self.log.info("Processing user-config file:%s" % str(e))
                 break
-            
+
             break
 
-                
         if not (user_name, apikey):
             self.log.info("Can not find user-config file in home folder, current path or path in 'user-config' option")
 
-        return (user_name, apikey)        
+        return (user_name, apikey)

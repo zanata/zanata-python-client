@@ -1,5 +1,5 @@
-#vim:set et sts=4 sw=4: 
-#  
+# vim:set et sts=4 sw=4:
+#
 # Zanata Python Client
 #
 # Copyright (c) 2011 Jian Ni <jni@redhat.com>
@@ -27,4 +27,3 @@ from projectservice import *
 from project import *
 from versionservice import *
 from logger import *
-
