@@ -127,7 +127,7 @@ option_sets = {
         ),
     ],
     'srcfile': [
-       dict(
+        dict(
             type='command',
             long=['--srcfile'],
             metavar='SRCFILE',
@@ -169,7 +169,7 @@ option_sets = {
         ),
     ],
     'version_desc': [
-       dict(
+        dict(
             type='command',
             long=['--version-desc'],
             metavar='VERSIONDESC',
@@ -247,26 +247,26 @@ option_sets = {
             long=['--sourcecommentsastarget'],
         ),
     ],
-    'noskeletons' : [
+    'noskeletons': [
         dict(
             type='command',
             long=['--noskeletons'],
         ),
     ],
-    'pushtransonly' : [
+    'pushtransonly': [
         dict(
             type='command',
             long=['--push-trans-only'],
         ),
     ],
-    'pushtype' : [
+    'pushtype': [
         dict(
             type='command',
             long=['--push-type'],
             metavar='PUSHTYPE',
         ),
     ],
-    'disablesslcert' : [
+    'disablesslcert': [
         dict(
             type='command',
             long=['--disable-ssl-cert'],
@@ -282,10 +282,10 @@ subcmds = {
     'version': ['info', 'create', 'remove'],
     'publican': ['push', 'pull'],
     'po': ['push', 'pull'],
-    'push':[],
-    'pull':[],
-    'glossary':['push', 'delete']
-    }
+    'push': [],
+    'pull': [],
+    'glossary': ['push', 'delete']
+}
 
 usage = """Client for talking to a Zanata Server
 Usage: zanata <command> [COMMANDOPTION]...
@@ -313,6 +313,7 @@ Use 'zanata help' for the full list of commands
 Use 'zanata help <command>, zanata <command> --help or zanata <command> -h' for detail usage of commands
 """
 
+
 def process_command(args):
     command = args[0]
     if len(args) > 1:
@@ -329,25 +330,26 @@ def process_command(args):
     else:
         if command == 'project':
             print ("Command: 'zanata project info'\n"
-                    "         'zanata project create'")
+                   "         'zanata project create'")
         elif command == 'version':
             print ("Command: 'zanata version info'\n"
-                    "         'zanata version create'")
+                   "         'zanata version create'")
         elif command == 'publican':
             print ("Command: 'zanata publican push'\n"
-                    "         'zanata publican pull'")
+                   "         'zanata publican pull'")
         elif command == 'po':
             print ("Command: 'zanata po push'\n"
-                    "         'zanata po pull'")
+                   "         'zanata po pull'")
         else:
             log.error("No such command %r, Try 'zanata --help' for more information." % command.replace('_', ' '))
+
 
 def read_project_config(command_options):
     project_config = {}
     config = ZanataConfig()
-    #Read the project configuration file using --project-config option
-    config_file = [os.path.join(os.getcwd(), filename) for filename\
-                    in ['zanata.xml', 'flies.xml']]
+    # Read the project configuration file using --project-config option
+    config_file = [os.path.join(os.getcwd(), filename) for filename
+                   in ['zanata.xml', 'flies.xml']]
 
     if command_options.has_key('project_config'):
         config_file.append(command_options['project_config'][0]['value'])
@@ -360,12 +362,13 @@ def read_project_config(command_options):
 
     return project_config
 
+
 def process_url(project_config, command_options):
     url = ""
-    #process the url of server
+    # process the url of server
     if project_config.has_key('project_url'):
         url = project_config['project_url']
-    #The value in options will override the value in project-config file
+    # The value in options will override the value in project-config file
     if command_options.has_key('url'):
         log.info("Overriding url of server with command line option")
         url = command_options['url'][0]['value']
@@ -373,22 +376,23 @@ def process_url(project_config, command_options):
     if not url or url.isspace():
         log.error("Please specify valid server url in zanata.xml or with '--url' option")
         sys.exit(1)
-    
+
     if ' ' in url or '\n' in url:
         log.info("Warning, the url which contains '\\n' or whitespace is not valid, please check zanata.xml")
     url = url.strip()
 
     if url[-1] == "/":
-        #log.info("Warning, the url %s, contains / at end,please check your URL in zanata.xml" % url)
+        # log.info("Warning, the url %s, contains / at end,please check your URL in zanata.xml" % url)
         url = url[:-1]
-    
+
     return url
+
 
 def read_user_config(url, command_options):
     user_name = ""
     apikey = ""
     config = ZanataConfig()
-    #Try to read user-config file
+    # Try to read user-config file
     user_config = [os.path.join(os.path.expanduser("~") + '/.config', filename) for filename in ['zanata.ini', 'flies.ini']]
     if command_options.has_key('user_config'):
         user_config.append(command_options['user_config'][0]['value'])
@@ -396,7 +400,7 @@ def read_user_config(url, command_options):
     for path in user_config:
         if os.path.exists(path):
             log.info("Loading zanata user config from: %s" % path)
-            #Read the user-config file
+            # Read the user-config file
             config.set_userconfig(path)
             try:
                 server = config.get_server(url)
@@ -406,15 +410,15 @@ def read_user_config(url, command_options):
             except Exception, e:
                 log.info("Processing user-config file:%s" % str(e))
                 break
-            
+
             break
 
     if not (user_name, apikey):
         log.info("Can not find user-config file in home folder, current path or path in 'user-config' option")
-        
+
     log.info("zanata server: %s" % url)
 
-    #The value in commandline options will overwrite the value in user-config file
+    # The value in commandline options will overwrite the value in user-config file
     if command_options.has_key('user_name'):
         user_name = command_options['user_name'][0]['value']
 
@@ -423,8 +427,9 @@ def read_user_config(url, command_options):
 
     return (user_name, apikey)
 
-def get_version(url, command_options,headers=None):
-    #Retrieve the version of client
+
+def get_version(url, command_options, headers=None):
+    # Retrieve the version of client
     version_number = ""
     path = os.path.dirname(os.path.realpath(__file__))
     version_file = os.path.join(path, 'VERSION-FILE')
@@ -438,8 +443,8 @@ def get_version(url, command_options,headers=None):
         log.error("Please run VERSION-GEN or 'make install' to generate VERSION-FILE")
         version_number = "UNKNOWN"
 
-    #Retrieve the version of the zanata server
-    version = VersionService(url,headers)
+    # Retrieve the version of the zanata server
+    version = VersionService(url, headers)
 
     if command_options.has_key('disablesslcert'):
         version.disable_ssl_cert_validation()
@@ -456,10 +461,11 @@ def get_version(url, command_options,headers=None):
     except UnavailableServiceError:
         log.error("Service Temporarily Unavailable, stop processing!")
         sys.exit(1)
-        
-def generate_zanatacmd(url, username, apikey,headers=None):
+
+
+def generate_zanatacmd(url, username, apikey, headers=None):
     if username and apikey:
-        return ZanataCommand(url, username, apikey,headers)
+        return ZanataCommand(url, username, apikey, headers)
     else:
         log.error("Please specify username and apikey in zanata.ini or with '--username' and '--apikey' options")
         sys.exit(1)
@@ -470,23 +476,26 @@ def generate_zanatacmd(url, username, apikey,headers=None):
 #
 #################################
 
-def command(cmd,return_type):
+
+def command(cmd, return_type):
     def command_decorator(func):
-        def run_func(command_options, args, project_type = None):
+        def run_func(command_options, args, project_type=None):
             project_config = read_project_config(command_options)
             url = process_url(project_config, command_options)
             username, apikey = read_user_config(url, command_options)
-            headers = http_headers(username,apikey,return_type)
-            command = cmd(command_options, args, project_type,headers)
+            headers = http_headers(username, apikey, return_type)
+            command = cmd(command_options, args, project_type, headers)
             command.run()
         return run_func
     return command_decorator
+
 
 def help_info(command_options, args):
     if args:
         process_command(args)
     else:
         print usage
+
 
 def list_project(command_options, args):
     """
@@ -501,21 +510,23 @@ def list_project(command_options, args):
     project_config = read_project_config(command_options)
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    headers = http_headers(username,apikey,'application/json')
-    zanatacmd = ZanataCommand(url,username,apikey,headers)
+    headers = http_headers(username, apikey, 'application/json')
+    zanatacmd = ZanataCommand(url, username, apikey, headers)
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
-    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
-    get_version(url, command_options,headers)
+    headers = http_headers(username, apikey, 'application/vnd.zanata.Version+json')
+    get_version(url, command_options, headers)
     zanatacmd.list_projects()
 
-def http_headers(user_name,user_pass,accept_format):
+
+def http_headers(user_name, user_pass, accept_format):
     headers = {
-        'X-Auth-User':user_name,
-        'X-Auth-Token':user_pass,
+        'X-Auth-User': user_name,
+        'X-Auth-Token': user_pass,
         'Accept': accept_format
     }
     return headers
+
 
 def project_info(command_options, args):
     """
@@ -532,11 +543,11 @@ def project_info(command_options, args):
 
     if not project_config:
         log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-    
+
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
-    get_version(url, command_options,headers)
+    headers = http_headers(username, apikey, 'application/vnd.zanata.Version+json')
+    get_version(url, command_options, headers)
 
     if command_options.has_key('project_id'):
         project_id = command_options['project_id'][0]['value']
@@ -547,12 +558,13 @@ def project_info(command_options, args):
     if not project_id:
         log.error('Please use zanata project info --project-id=project_id or zanata.xml to specify the project id')
         sys.exit(1)
-    zanatacmd = generate_zanatacmd(url, username, apikey,headers)
+    zanatacmd = generate_zanatacmd(url, username, apikey, headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
 
     zanatacmd.project_info(project_id)
+
 
 def version_info(command_options, args):
     """
@@ -578,10 +590,9 @@ def version_info(command_options, args):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
-    get_version(url, command_options,headers)
-    
-    
+    headers = http_headers(username, apikey, 'application/vnd.zanata.Version+json')
+    get_version(url, command_options, headers)
+
     if command_options.has_key('project_id'):
         project_id = command_options['project_id'][0]['value']
 
@@ -591,13 +602,14 @@ def version_info(command_options, args):
     if not iteration_id or not project_id:
         log.error("Please use zanata version info --project-id=project_id --project-version=project_version to retrieve the version")
         sys.exit(1)
-    headers = http_headers(username,apikey,'application/json')    
-    zanatacmd = ZanataCommand(url,headers=headers)
+    headers = http_headers(username, apikey, 'application/json')
+    zanatacmd = ZanataCommand(url, headers=headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
 
     zanatacmd.version_info(project_id, iteration_id)
+
 
 def create_project(command_options, args):
     """
@@ -622,8 +634,8 @@ def create_project(command_options, args):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
-    get_version(url, command_options,headers)
+    headers = http_headers(username, apikey, 'application/vnd.zanata.Version+json')
+    get_version(url, command_options, headers)
 
     if args:
         project_id = args[0]
@@ -640,12 +652,13 @@ def create_project(command_options, args):
     if command_options.has_key('project_desc'):
         project_desc = command_options['project_desc'][0]['value']
 
-    zanatacmd = generate_zanatacmd(url, username, apikey,headers)
+    zanatacmd = generate_zanatacmd(url, username, apikey, headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
 
     zanatacmd.create_project(project_id, project_name, project_desc)
+
 
 def create_version(command_options, args):
     """
@@ -657,7 +670,7 @@ def create_version(command_options, args):
         --username: user name (defaults to zanata.ini value)
         --apikey: api key of user (defaults to zanata.ini value)
         --project-id: id of the project
-        --version-name(Deprecated): version name 
+        --version-name(Deprecated): version name
         --version-desc(Deprecated): version description
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
@@ -671,8 +684,8 @@ def create_version(command_options, args):
 
     url = process_url(project_config, command_options)
     username, apikey = read_user_config(url, command_options)
-    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
-    server_version = get_version(url, command_options,headers)
+    headers = http_headers(username, apikey, 'application/vnd.zanata.Version+json')
+    server_version = get_version(url, command_options, headers)
 
     if command_options.has_key('project_id'):
         project_id = command_options['project_id'][0]['value']
@@ -697,12 +710,13 @@ def create_version(command_options, args):
         version_desc = command_options['version_desc'][0]['value']
         log.warn("This option is deprecated, it should not be used on new zanata server")
 
-    zanatacmd = generate_zanatacmd(url, username, apikey,headers)
+    zanatacmd = generate_zanatacmd(url, username, apikey, headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
 
     zanatacmd.create_version(project_id, version_id, version_name, version_desc)
+
 
 def po_pull(command_options, args):
     """
@@ -724,7 +738,8 @@ def po_pull(command_options, args):
     """
     pull(command_options, args, "gettext")
 
-@command(PoPush,'application/json')
+
+@command(PoPush, 'application/json')
 def po_push(command_options, args):
     """
     Usage: zanata po push [OPTIONS] {documents}
@@ -752,6 +767,7 @@ def po_push(command_options, args):
     """
     pass
 
+
 def publican_pull(command_options, args):
     """
     Usage: zanata publican pull [OPTIONS] {documents} {lang}
@@ -772,7 +788,8 @@ def publican_pull(command_options, args):
     """
     pull(command_options, args, "podir")
 
-@command(PublicanPush,'application/json')
+
+@command(PublicanPush, 'application/json')
 def publican_push(command_options, args):
     """
     Usage: zanata publican push OPTIONS {documents}
@@ -802,7 +819,8 @@ def publican_push(command_options, args):
     """
     pass
 
-@command(GenericPush,'application/json')
+
+@command(GenericPush, 'application/json')
 def push(command_options, args):
     """
     Usage: zanata push OPTIONS {documents}
@@ -824,7 +842,7 @@ def push(command_options, args):
                     (e.g. ./myproject)
         --push-trans: push local translations to server
         --push-trans-only: push translations only
-        --push-type: source: push source document only, target: push translations only, same to push-trans-only 
+        --push-type: source: push source document only, target: push translations only, same to push-trans-only
                     both: push source and translations together, same to push-trans
         --merge: override merge algorithm: auto (default) or import
         --no-copytrans: prevent server from copying translations from other versions
@@ -833,8 +851,9 @@ def push(command_options, args):
     """
     pass
 
-@command(GenericPull,'application/vnd.zanata.Version+json')
-def pull(command_options,args,project_type = None):
+
+@command(GenericPull, 'application/vnd.zanata.Version+json')
+def pull(command_options, args, project_type=None):
     """
     Usage: zanata pull [OPTIONS] {documents} {lang}
 
@@ -852,7 +871,6 @@ def pull(command_options,args,project_type = None):
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     pass
-
 
 
 def glossary_push(command_options, args):
@@ -875,11 +893,11 @@ def glossary_push(command_options, args):
 
     optionsutil = OptionsUtil(command_options)
     url, username, apikey = optionsutil.apply_configfiles()
-    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
-    get_version(url, command_options,headers)
+    headers = http_headers(username, apikey, 'application/vnd.zanata.Version+json')
+    get_version(url, command_options, headers)
     log.info("Username: %s" % username)
-    headers = http_headers(username,apikey,'application/json')
-    zanatacmd = ZanataCommand(url, username, apikey,headers)
+    headers = http_headers(username, apikey, 'application/json')
+    zanatacmd = ZanataCommand(url, username, apikey, headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
@@ -887,7 +905,7 @@ def glossary_push(command_options, args):
     if args:
         path = os.path.join(os.getcwd(), args[0])
         if not os.path.isfile(path):
-            log.error("Can not find glossary file %s under current path"%args[0])
+            log.error("Can not find glossary file %s under current path" % args[0])
             sys.exit(1)
     else:
         log.info("Please specify the file name of glossary file")
@@ -897,7 +915,7 @@ def glossary_push(command_options, args):
 
     locale_map = optionsutil.get_localemap()
 
-    log.info("pushing glossary document %s to server"%args[0])
+    log.info("pushing glossary document %s to server" % args[0])
 
     if extension == '.po':
         if command_options.has_key('lang'):
@@ -920,15 +938,16 @@ def glossary_push(command_options, args):
         else:
             log.error("Please specify the comments header, otherwise processing will be fault")
             sys.exit(1)
-        
+
         zanatacmd.csvglossary_push(path, url, username, apikey, locale_map, comments_header)
+
 
 def glossary_delete(command_options, args):
     lang = None
     optionsutil = OptionsUtil(command_options)
     url, username, apikey = optionsutil.apply_configfiles()
-    headers = http_headers(username,apikey,'application/vnd.zanata.Version+json')
-    get_version(url, command_options,headers)
+    headers = http_headers(username, apikey, 'application/vnd.zanata.Version+json')
+    get_version(url, command_options, headers)
     log.info("Username: %s" % username)
 
     zanatacmd = ZanataCommand(url, username, apikey)
@@ -961,9 +980,11 @@ command_handler_factories = {
     'glossary_delete': makeHandler(glossary_delete)
 }
 
+
 def signal_handler(signal, frame):
     print '\nPressed Ctrl+C! Stop processing!'
     sys.exit(0)
+
 
 def run():
     signal.signal(signal.SIGINT, signal_handler)

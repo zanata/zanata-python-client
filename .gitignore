@@ -7,3 +7,6 @@ VERSION-FILE
 MANIFEST.in
 dist/
 *.egg-info/
+.idea/
+.project
+.pydevproject

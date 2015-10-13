@@ -1,5 +1,5 @@
-#vim:set et sts=4 sw=4: 
-# 
+# vim:set et sts=4 sw=4:
+#
 # Zanata Python Client
 #
 # Copyright (c) 2011 Jian Ni <jni@redhat.com>
@@ -22,18 +22,18 @@
 
 
 __all__ = (
-        "GlossaryService",
-   )
+    "GlossaryService",
+)
 
 
-from service import Service 
+from service import Service
+
 
 class GlossaryService(Service):
     _fields = ['base_url']
 
-    def __init__(self, *args,**kargs):
-        super(GlossaryService,self).__init__(*args,**kargs)
-
+    def __init__(self, *args, **kargs):
+        super(GlossaryService, self).__init__(*args, **kargs)
 
     def commit_glossary(self, username, apikey, resources):
         headers = {}
@@ -45,23 +45,18 @@ class GlossaryService(Service):
         res, content = self.restclient.request_put('/seam/resource/restv1/glossary', args=resources, headers=headers)
 
         res, content = self.restclient.request_put('/seam/resource/restv1/glossary',
-                                                   args=resources, 
+                                                   args=resources,
                                                    headers=headers)
-        return self.messages(res,content)
+        return self.messages(res, content)
 
-
-    def delete(self, username, apikey, lang = None):
+    def delete(self, username, apikey, lang=None):
         headers = {}
         headers['X-Auth-User'] = username
         headers['X-Auth-Token'] = apikey
         resource = '/seam/resource/restv1/glossary'
 
         if lang:
-            resource =  resource + '/'+lang
+            resource = resource + '/' + lang
 
         res, content = self.restclient.request_delete(resource, headers=headers)
-        return self.messages(res,content)
-
-
-
- 
+        return self.messages(res, content)

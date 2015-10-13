@@ -1,5 +1,5 @@
-#vim:set et sts=4 sw=4: 
-# 
+# vim:set et sts=4 sw=4:
+#
 # Zanata Python Client
 #
 # Copyright (c) 2011 Jian Ni <jni@redhat.com>
@@ -22,8 +22,8 @@
 
 
 __all__ = (
-        "Project","Iteration" 
-   )
+    "Project", "Iteration"
+)
 
 
 class Link(object):
@@ -31,15 +31,17 @@ class Link(object):
         for a, b in dict.items():
             setattr(self, str(a), b)
 
+
 class Iteration(object):
     def __init__(self, dict):
         for a, b in dict.items():
             setattr(self, str(a), b)
 
+
 class Project(object):
     def __init__(self, d):
         for a, b in d.items():
-            if not a == 'links': 
+            if not a == 'links':
                 setattr(self, str(a), b)
             else:
                 if b is not None:
