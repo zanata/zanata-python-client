@@ -26,6 +26,7 @@ __all__ = (
 
 import csv
 import sys
+from os.path import expanduser
 
 try:
     import json
@@ -71,7 +72,7 @@ class CSVConverter:
         return data
 
     def convert_to_json(self, filepath, locale_map, comments_header):
-        data = self.read_csv_file(filepath)
+        data = self.read_csv_file(expanduser(filepath))
         srclocales = []
         # srclocales.append('en-US')
         entries = []
@@ -112,4 +113,4 @@ class CSVConverter:
 
 if __name__ == "__main__":
     converter = CSVConverter()
-    converter.convert_to_json("/home/jamesni/Downloads/test_data.csv", {'es': 'es-ES'}, ["description", "pos"])
+    converter.convert_to_json("~/Downloads/test_data.csv", {'es': 'es-ES'}, ["description", "pos"])
