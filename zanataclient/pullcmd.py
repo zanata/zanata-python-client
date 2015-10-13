@@ -29,13 +29,14 @@ from pushcmd import Push
 
 log = Logger()
 
+
 class GenericPull(Push):
-    def __init__(self,*args,**kargs):
-        super(GenericPull,self).__init__(*args,**kargs)
+    def __init__(self, *args, **kargs):
+        super(GenericPull, self).__init__(*args, **kargs)
 
     def process_transdir(self, command_options, src_folder):
         trans_folder = ""
-        
+
         if command_options.has_key('transdir'):
             trans_folder = command_options['transdir'][0]['value']
         elif src_folder:
@@ -67,8 +68,8 @@ class GenericPull(Push):
         output_folder = None
 
         lang_list = self.get_lang_list(self.command_options, self.project_config)
-        
-        #list the files in project
+
+        # list the files in project
         try:
             filelist = self.zanatacmd.get_file_list(self.project_id, self.version_id)
         except Exception, e:
@@ -79,7 +80,7 @@ class GenericPull(Push):
             locale_map = self.project_config['locale_map']
         else:
             locale_map = None
-        
+
         if self.project_type:
             command_type = self.project_type
             dir_option = True
@@ -92,14 +93,14 @@ class GenericPull(Push):
             sys.exit(1)
 
         if dir_option:
-            #Keep dir option for publican/po pull
+            # Keep dir option for publican/po pull
             if self.command_options.has_key('dir'):
                 output_folder = self.command_options['dir'][0]['value']
 
             if self.command_options.has_key('dstdir'):
                 output_folder = self.command_options['dstdir'][0]['value']
         else:
-            #Disable dir option for generic pull command
+            # Disable dir option for generic pull command
             if self.command_options.has_key('dir'):
                 log.warn("dir option is disabled in pull command, please use --transdir, or specify value in zanata.xml")
 

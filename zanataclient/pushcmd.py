@@ -34,16 +34,17 @@ from zanatalib.logger import Logger
 
 log = Logger()
 
-class Push(object):
-    _fields = ['command_options','args','project_type','http_headers']
 
-    def __init__(self,*args,**kargs):
-        for name,val in zip(self._fields,args):
-            setattr(self,name,val)
+class Push(object):
+    _fields = ['command_options', 'args', 'project_type', 'http_headers']
+
+    def __init__(self, *args, **kargs):
+        for name, val in zip(self._fields, args):
+            setattr(self, name, val)
         for key, value in kargs.iteritems():
-            setattr(self,key,value)
-        url, self.project_id, self.version_id, self.project_config =self.get_projectinfo(self.command_options)
-        self.zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, self.command_options,self.http_headers)
+            setattr(self, key, value)
+        url, self.project_id, self.version_id, self.project_config = self.get_projectinfo(self.command_options)
+        self.zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, self.command_options, self.http_headers)
         self.plural_support = self.check_plural_support(server_version)
         version_info = self.create_versioninfo(client_version, server_version)
         self.log_message(url, version_info, self.project_id, self.version_id, username)
@@ -56,7 +57,7 @@ class Push(object):
                 copytrans = True
         # TODO GenericPull should extend a common parent class (PushPull?), not Push
         # This warning makes no sense for pull commands.
-        #elif not self.command_options.has_key('nocopytrans'):
+        # elif not self.command_options.has_key('nocopytrans'):
         #    log.warn("copytrans is now disabled by default")
         else:
             self.copytrans = False
@@ -93,7 +94,7 @@ class Push(object):
                 log.error(e.msg)
                 sys.exit(1)
         else:
-            #get all the pot files from the template folder
+            # get all the pot files from the template folder
             publicanutil = PublicanUtility()
             filelist = publicanutil.get_file_list(tmlfolder, ".pot")
 
@@ -101,14 +102,14 @@ class Push(object):
                 log.error("The template folder is empty")
                 sys.exit(1)
             deletefiles = True
-        return project_type,deletefiles,tmlfolder,filelist
+        return project_type, deletefiles, tmlfolder, filelist
 
     def read_project_config(self, command_options):
         project_config = {}
         config = ZanataConfig()
-        #Read the project configuration file using --project-config option
-        config_file = [os.path.join(os.getcwd(), filename) for filename\
-                        in ['zanata.xml', 'flies.xml']]
+        # Read the project configuration file using --project-config option
+        config_file = [os.path.join(os.getcwd(), filename) for filename
+                       in ['zanata.xml', 'flies.xml']]
 
         if command_options.has_key('project_config'):
             config_file.append(command_options['project_config'][0]['value'])
@@ -122,10 +123,10 @@ class Push(object):
 
     def process_url(self, project_config, command_options):
         url = ""
-        #process the url of server
+        # process the url of server
         if project_config.has_key('project_url'):
             url = project_config['project_url']
-        #The value in options will override the value in project-config file
+        # The value in options will override the value in project-config file
         if command_options.has_key('url'):
             log.info("Overriding url of server with command line option")
             url = command_options['url'][0]['value']
@@ -147,7 +148,7 @@ class Push(object):
         user_name = ""
         apikey = ""
         config = ZanataConfig()
-        #Try to read user-config file
+        # Try to read user-config file
         user_config = [os.path.join(os.path.expanduser("~") + '/.config', filename) for filename in ['zanata.ini', 'flies.ini']]
 
         if command_options.has_key('user_config'):
@@ -157,7 +158,7 @@ class Push(object):
             if os.path.exists(path):
                 log.info("Loading zanata user config from: %s" % path)
 
-                #Read the user-config file
+                # Read the user-config file
                 config.set_userconfig(path)
 
                 try:
@@ -174,7 +175,7 @@ class Push(object):
         if not (user_name, apikey):
             log.info("Can not find user-config file in home folder, current path or path in 'user-config' option")
 
-        #The value in commandline options will overwrite the value in user-config file
+        # The value in commandline options will overwrite the value in user-config file
         if command_options.has_key('user_name'):
             user_name = command_options['user_name'][0]['value']
 
@@ -184,7 +185,7 @@ class Push(object):
         return (user_name, apikey)
 
     def get_client_version(self, command_options):
-        #Retrieve the version of client
+        # Retrieve the version of client
         version_number = ""
         path = os.path.dirname(os.path.realpath(__file__))
         version_file = os.path.join(path, 'VERSION-FILE')
@@ -215,9 +216,9 @@ class Push(object):
 
         return merge
 
-    def generate_zanatacmd(self, url, username, apikey,headers=None):
+    def generate_zanatacmd(self, url, username, apikey, headers=None):
         if username and apikey:
-            return ZanataCommand(url, username, apikey,headers)
+            return ZanataCommand(url, username, apikey, headers)
         else:
             log.error("Please specify username and apikey in zanata.ini or with '--username' and '--apikey' options")
             sys.exit(1)
@@ -240,7 +241,7 @@ class Push(object):
         if command_options.has_key('srcdir'):
             tmlfolder = command_options['srcdir'][0]['value']
         elif command_options.has_key('dir'):
-            #Keep dir option for publican/po push
+            # Keep dir option for publican/po push
             tmlfolder = command_options['dir'][0]['value']
         else:
             tmlfolder = os.path.abspath(os.getcwd())
@@ -368,7 +369,7 @@ class Push(object):
         url = self.process_url(project_config, command_options)
 
         if command_options.has_key('project_id'):
-            project_id =  command_options['project_id'][0]['value']
+            project_id = command_options['project_id'][0]['value']
         else:
             if project_config.has_key('project_id'):
                 project_id = project_config['project_id']
@@ -399,10 +400,10 @@ class Push(object):
 
         return project_type
 
-    def create_zanatacmd(self, url, command_options,http_headers=None):
+    def create_zanatacmd(self, url, command_options, http_headers=None):
         server_version = ""
         username, apikey = self.read_user_config(url, command_options)
-        zanatacmd = self.generate_zanatacmd(url, username, apikey,http_headers)
+        zanatacmd = self.generate_zanatacmd(url, username, apikey, http_headers)
         if command_options.has_key('disablesslcert'):
             zanatacmd.disable_ssl_cert_validation()
         client_version = self.get_client_version(command_options)
@@ -410,10 +411,10 @@ class Push(object):
         return zanatacmd, username, client_version, server_version
 
     def create_versioninfo(self, client_version, server_version):
-        version_info =  "zanata python client version: "+client_version
+        version_info = "zanata python client version: " + client_version
 
         if server_version:
-            version_info = version_info+", zanata server API version: "+server_version
+            version_info = version_info + ", zanata server API version: " + server_version
 
         return version_info
 
@@ -425,17 +426,18 @@ class Push(object):
         log.info("Username: %s" % username)
         log.info("Source language: en-US")
 
+
 class GenericPush(Push):
 
-    def __init__(self,*args,**kargs):
-        super(GenericPush,self).__init__(*args,**kargs)
+    def __init__(self, *args, **kargs):
+        super(GenericPush, self).__init__(*args, **kargs)
 
     def run(self):
         pushtrans = None
         push_trans_only = False
         force = False
-        project_type,deletefiles,tmlfolder,filelist = self.get_files()
-        #Disable dir option for generic push command
+        project_type, deletefiles, tmlfolder, filelist = self.get_files()
+        # Disable dir option for generic push command
         if self.command_options.has_key('dir'):
             log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")
 
@@ -490,22 +492,23 @@ class GenericPush(Push):
 
         if pushtrans:
             log.info("Send local translation: True")
-            import_param = self.get_importparam(project_type, self.command_options,  self.project_config, folder)
+            import_param = self.get_importparam(project_type, self.command_options, self.project_config, folder)
             self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support, import_param)
         else:
             log.info("Send local translation: False")
             self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support)
 
+
 class PublicanPush(Push):
-    def __init__(self,*args,**kargs):
-        super(PublicanPush,self).__init__(*args,**kargs)
+    def __init__(self, *args, **kargs):
+        super(PublicanPush, self).__init__(*args, **kargs)
 
     def run(self):
         importpo = False
         force = False
-        project_type,deletefiles,tmlfolder,filelist = self.get_files()
-       
-        log.info("Reuse previous translation on server:%s" %self.copytrans)
+        project_type, deletefiles, tmlfolder, filelist = self.get_files()
+
+        log.info("Reuse previous translation on server:%s" % self.copytrans)
 
         if self.command_options.has_key('force'):
             force = True
@@ -518,25 +521,26 @@ class PublicanPush(Push):
             self.zanatacmd.del_server_content(tmlfolder, self.project_id, self.version_id, filelist, force, "podir")
 
         if importpo:
-            import_param = self.get_importparam("podir", self.command_options,  self.project_config, tmlfolder)
+            import_param = self.get_importparam("podir", self.command_options, self.project_config, tmlfolder)
             self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support, import_param)
         else:
             log.info("Importing source documents only")
             self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support)
 
+
 class PoPush(Push):
-    def __init__(self,*args,**kargs):
-        super(PoPush,self).__init__(*args,**kargs)
+    def __init__(self, *args, **kargs):
+        super(PoPush, self).__init__(*args, **kargs)
 
     def run(self):
         importpo = False
         force = False
-        project_type,deletefiles,tmlfolder,filelist = self.get_files()
-        log.info("Reuse previous translation on server:%s" %self.copytrans)
+        project_type, deletefiles, tmlfolder, filelist = self.get_files()
+        log.info("Reuse previous translation on server:%s" % self.copytrans)
         importpo = self.get_importpo(self.command_options)
         if importpo:
             log.info("Importing translation")
-            import_param = self.get_importparam("gettext", self.command_options,  self.project_config, tmlfolder)
+            import_param = self.get_importparam("gettext", self.command_options, self.project_config, tmlfolder)
         else:
             log.info("Importing source documents only")
 
@@ -546,7 +550,6 @@ class PoPush(Push):
             self.zanatacmd.del_server_content(tmlfolder, self.project_id, self.version_id, filelist, force, "gettext")
 
         if importpo:
-            self.zanatacmd.push_command(filelist, tmlfolder,self.project_id, self.version_id, self.copytrans, self.plural_support, import_param)
+            self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support, import_param)
         else:
             self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support)
-

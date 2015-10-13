@@ -2,7 +2,7 @@
 """
 Build script for zanata-python-client
 """
-from setuptools import setup,find_packages
+from setuptools import setup, find_packages
 import os
 import subprocess
 
@@ -13,7 +13,7 @@ def get_client_version():
     version_file = os.path.join(path, 'zanataclient/VERSION-FILE')
     version_gen = os.path.join(path, 'VERSION-GEN')
 
-    p = subprocess.Popen(version_gen, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  close_fds=True)
+    p = subprocess.Popen(version_gen, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
     output = p.stdout.readline()
     number = output.rstrip()[len('version: '):]
 
@@ -27,7 +27,7 @@ def get_client_version():
 EOF
     """, shell=True)
 
-    if number=='UKNOWN':
+    if number == 'UKNOWN':
         try:
             file = open(version_file, 'rb')
             client_version = file.read()
@@ -40,39 +40,42 @@ EOF
 
     return number
 
-setup (name = "zanata-python-client",
-    version = get_client_version(),
-    packages = find_packages(),
-    include_package_data = True,
+setup(
+    name="zanata-python-client",
+    version=get_client_version(),
+    packages=find_packages(),
+    include_package_data=True,
     install_requires=[
-        'polib' ,
+        'polib',
         'httplib2'
     ],
-    description = "Zanata Python Client.",
-    author = 'Jian Ni, Ding-Yi Chen,Anish Patil',
-    author_email = 'jni@redhat.com, dchen@redhat.com,apatil@redhat.com',
-    license = 'LGPLv2+',
+    description="Zanata Python Client.",
+    author='Jian Ni, Ding-Yi Chen, Anish Patil',
+    author_email='jni@redhat.com, dchen@redhat.com, apatil@redhat.com',
+    license='LGPLv2+',
     platforms=["Linux"],
-    scripts = ["zanata","flies"],
+    scripts=["zanata", "flies"],
     url='https://github.com/zanata/zanata-python-client',
 
-    #entry_points = {
-	#'console_scripts': [
-	#	'zanata = zanataclient.zanata:main',
-	#]
-    #},
-    package_data = {
+    # entry_points = {
+    # 'console_scripts': [
+    #   'zanata = zanataclient.zanata:main',
+    #  ]
+    # },
+
+    package_data={
         '': ['VERSION-FILE']
     },
 
-    data_files = [
-	('share/doc/zanata-python-client',
-	    ['CHANGELOG', 'COPYING', 'COPYING.LESSER', 'zanata.ini']
-	)
+    data_files=[
+        ('share/doc/zanata-python-client',
+         ['CHANGELOG', 'COPYING', 'COPYING.LESSER', 'zanata.ini']
+         )
     ],
 
-    classifiers=['License :: OSI Approved ::  GNU Lesser General Public License (LGPL)',
-                 'Operating System :: Unix',
-                 'Programming Language :: Python',
-                 ],
+    classifiers=[
+        'License :: OSI Approved :: GNU Lesser General Public License (LGPL)',
+        'Operating System :: Unix',
+        'Programming Language :: Python',
+    ],
 )

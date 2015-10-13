@@ -20,12 +20,13 @@
 # Boston, MA  02110-1301, USA.
 
 all__ = (
-            "ConfigTest",
-        )
+    "ConfigTest",
+)
 
 import unittest
-import sys, os
-sys.path.insert(0, os.path.abspath(__file__+"/../.."))
+import sys
+import os
+sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
 
 from zanataclient.parseconfig import ZanataConfig
 
@@ -38,7 +39,7 @@ class ConfigTest(unittest.TestCase):
         self.config.set_userconfig("./testfiles/zanata.ini")
         server = self.config.get_server("http://localhost:8080/zanata")
         user_name = self.config.get_config_value("username", 'servers', server)
-        apikey = self.config.get_config_value("key", 'servers',server)
+        apikey = self.config.get_config_value("key", 'servers', server)
         self.assertEqual(server, "local")
         self.assertEqual(user_name, "username")
         self.assertEqual(apikey, "key")

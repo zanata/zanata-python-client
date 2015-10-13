@@ -1,4 +1,4 @@
-# 
+#
 # Zanata Python Client
 #
 # Copyright (c) 2010 Jian Ni <jni@redhat.com>
@@ -20,13 +20,14 @@
 # Boston, MA  02110-1301, USA.
 
 all__ = (
-            "ZanataCmdTest",
-        )
+    "ZanataCmdTest",
+)
 
 import unittest
-import sys, os
+import sys
+import os
 from minimock import Mock
-sys.path.insert(0, os.path.abspath(__file__+"/../.."))
+sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
 
 from zanataclient.zanatacmd import ZanataCommand
 from zanataclient.zanatalib import ZanataResource
@@ -39,7 +40,7 @@ class ZanataCmdTest(unittest.TestCase):
 
     def test_list_projects(self):
         projects = []
-        project_data = {'id':"test-project", 'name':"Test Project", 'type':"IterationProject", 'links':[]}
+        project_data = {'id': "test-project", 'name': "Test Project", 'type': "IterationProject", 'links': []}
         projects.append(Project(project_data))
 
         url = "http://localhost"
