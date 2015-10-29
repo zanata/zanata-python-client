@@ -540,7 +540,7 @@ class PoPush(Push):
         importpo = self.get_importpo(self.command_options)
         if importpo:
             log.info("Importing translation")
-            import_param = self.get_importparam("gettext", self.command_options, self.project_config, tmlfolder)
+            import_param = self.get_importparam(project_type, self.command_options, self.project_config, tmlfolder)
         else:
             log.info("Importing source documents only")
 
