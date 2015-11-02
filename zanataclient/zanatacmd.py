@@ -25,7 +25,7 @@ import os
 
 from publicanutil import PublicanUtility
 from csvconverter import CSVConverter
-from zanatalib.client import ZanataResource
+from zanatalib.resource import ZanataResource
 from zanatalib.glossaryservice import GlossaryService
 from zanatalib.project import Project
 from zanatalib.project import Iteration
