@@ -190,15 +190,17 @@ class ZanataCommand:
         projects = self.zanata_resource.projects.list()
 
         if not projects:
-            self.log.error("There is no projects on the server or the server not working")
+            # As we are catching exceptions related to reaching server,
+            # we may be certain that there is NO projects created.
+            self.log.error("There is no projects on the server.")
             sys.exit(1)
+
         for project in projects:
             print ("\nProject ID:          %s") % project.id
             print ("Project Name:        %s") % project.name
-            # print ("Project Type:        %s") % project.type
-            print ("Project Links:       %s\n") % [{'href': link.href, 'type': link.type, 'rel': link.rel} for link in project.links]
-
-        return projects
+            if project.defaultType.strip():
+                print ("Project Type:        %s") % project.defaultType
+            print ("Project Links:       %s") % [{'href': link.href, 'type': link.type, 'rel': link.rel} for link in project.links]
 
     def project_info(self, project_id):
         """
@@ -206,10 +208,10 @@ class ZanataCommand:
         """
         try:
             p = self.zanata_resource.projects.get(project_id)
-            # pylint: disable=E1101
             print ("Project ID:          %s") % p.id
             print ("Project Name:        %s") % p.name
-            # print ("Project Type:        %s") % p.type
+            if p.defaultType.strip():
+                print ("Project Type:        %s") % p.defaultType
             print ("Project Description: %s") % p.description
         except NoSuchProjectException, e:
             self.log.error(str(e))

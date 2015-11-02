@@ -42,8 +42,6 @@ class GlossaryService(Service):
 
         headers['Accept'] = 'application/vnd.zanata.glossary+json'
 
-        res, content = self.restclient.request_put('/seam/resource/restv1/glossary', args=resources, headers=headers)
-
         res, content = self.restclient.request_put('/seam/resource/restv1/glossary',
                                                    args=resources,
                                                    headers=headers)
