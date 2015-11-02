@@ -102,9 +102,9 @@ class RestClient(object):
             response, content = self.http_client.request(resource, method.upper(), body, headers=headers)
             if response.previous is not None:
                 if response.previous.status == 301 or response.previous.status == 302:
-                    try:
+                    if '-x-permanent-redirect-url' in response.previous:
                         new_url = response.previous['-x-permanent-redirect-url'][:-len(resource)]
-                    except:
+                    elif 'location' in response.previous:
                         new_url = response.previous['location']
                     if new_url:
                         print "\nRedirecting to: %s" % '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse.urlparse(new_url))
