@@ -25,6 +25,9 @@ lint:
 lint-report:
 	pylint --reports=n zanata zanataclient
 
+flake8:
+	flake8 --ignore=E501,F403,W601,F841,F401,E711,E712 zanataclient test
+
 test:
 	(cd test; python test_all.py)
 
@@ -40,4 +43,4 @@ help:
 	@echo "For help on zanata itself, use 'make run'"
 
 
-.PHONY: all sdist install uninstall clean run lint lint-report test
+.PHONY: all sdist install uninstall clean run lint lint-report flake8 test

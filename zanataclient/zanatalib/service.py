@@ -19,6 +19,19 @@ __all__ = (
 )
 
 
+EXCEPTION_STATUS_DICT = {
+    '401': (UnAuthorizedException, 'Error 401', 'This operation is not authorized, please check username and apikey'),
+    '400': (BadRequestBodyException, 'Error 400', 'Request body not appropriate'),
+    '404': (UnAvaliableResourceException, 'Error 404', 'The requested resource/project is not available'),
+    '405': (NotAllowedException, 'Error 405', 'The requested method is not allowed'),
+    '409': (SameNameDocumentException, 'Error 409', 'A document with same name already exists'),
+    '500': (InternalServerError, 'Error 500', 'Internel Server Error'),
+    '503': (UnavailableServiceError, 'Error 503', 'Service Temporarily Unavailable, stop processing'),
+    '403': (ForbiddenException, 'Error 403',
+            'You are authenticated but do not have the permission for the requested resource'),
+}
+
+
 class Service(object):
     _fields = []
 
@@ -38,6 +51,7 @@ class Service(object):
             sys.exit(1)
 
     def messages(self, res, content, extra_msg=None):
+
         if res['status'] == '200' or res['status'] == '304':
             rst = None
             if extra_msg:
@@ -52,30 +66,9 @@ class Service(object):
             return rst
         elif res['status'] == '201':
             return True
-        elif res['status'] == '401':
-            self.excption_handler(UnAuthorizedException,
-                                  'Error 401', 'This operation is not authorized, please check username and apikey')
-        elif res['status'] == '400':
-            self.excption_handler(BadRequestBodyException,
-                                  'Error 400', content)
-        elif res['status'] == '404':
-            self.excption_handler(UnAvaliableResourceException,
-                                  'Error 404', 'The requested resource/project is not available')
-        elif res['status'] == '405':
-            self.excption_handler(NotAllowedException,
-                                  'Error 405', 'The requested method is not allowed')
-        elif res['status'] == '409':
-            self.excption_handler(SameNameDocumentException,
-                                  'Error 409', 'A document with same name already exists')
-        elif res['status'] == '500':
-            self.excption_handler(InternalServerError,
-                                  'Error 500', content)
-        elif res['status'] == '503':
-            self.excption_handler(UnavailableServiceError,
-                                  'Error 503', 'Service Temporarily Unavailable, stop processing')
-        elif res['status'] == '403':
-            self.excption_handler(ForbiddenException,
-                                  'Error 403', 'You are authenticated but do not have the permission for the requested resource')
+        elif res['status'] in EXCEPTION_STATUS_DICT:
+            self.excption_handler(*EXCEPTION_STATUS_DICT[res['status']])
         else:
             self.excption_handler(UnexpectedStatusException,
-                                  'Error', 'Unexpected Status (%s), failed to push: %s' % (res['status'], extra_msg or ""))
+                                  'Error', 'Unexpected Status (%s), failed to push: %s' % (res['status'],
+                                                                                           extra_msg or ""))

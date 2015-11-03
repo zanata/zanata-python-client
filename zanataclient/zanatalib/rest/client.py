@@ -102,8 +102,14 @@ class RestClient(object):
             response, content = self.http_client.request(resource, method.upper(), body, headers=headers)
             if response.previous is not None:
                 if response.previous.status == 301 or response.previous.status == 302:
-                    new_url = response.previous['-x-permanent-redirect-url'][:-len(resource)]
-                    print "HTTP redirect: redirect to %s, please update the server URL to new URL" % new_url
+                    if '-x-permanent-redirect-url' in response.previous:
+                        new_url = response.previous['-x-permanent-redirect-url'][:-len(resource)]
+                    elif 'location' in response.previous:
+                        new_url = response.previous['location']
+                    if new_url:
+                        print "\nRedirecting to: %s" % '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse.urlparse(new_url))
+                        print "HTTP Redirect: Please update the Server URL."
+                        response, content = self.http_client.request(new_url, method.upper(), body, headers=headers)
             return (response, content.decode("UTF-8"))
         except httplib2.ServerNotFoundError, e:
             print "error: %s, Maybe the Zanata server is down?" % e
