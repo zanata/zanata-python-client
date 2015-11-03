@@ -24,10 +24,12 @@ import unittest
 from test_parseconfig import ConfigTest
 from test_publicanutil import PublicanUtilityTest
 # from test_zanatacmd import ZanataCmdTest
+from test_service import ServiceTest
 
 suite = unittest.TestSuite()
 # suite.addTest(unittest.makeSuite(ZanataTest))
 suite.addTest(unittest.makeSuite(ConfigTest))
 suite.addTest(unittest.makeSuite(PublicanUtilityTest))
 # suite.addTest(unittest.makeSuite(ZanataCmdTest))
+suite.addTest(unittest.makeSuite(ServiceTest))
 results = unittest.TextTestRunner(verbosity=2).run(suite)
