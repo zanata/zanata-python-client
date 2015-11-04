@@ -51,7 +51,6 @@ class Service(object):
             sys.exit(1)
 
     def messages(self, res, content, extra_msg=None):
-
         if res['status'] == '200' or res['status'] == '304':
             rst = None
             if extra_msg:
@@ -70,5 +69,4 @@ class Service(object):
             self.excption_handler(*EXCEPTION_STATUS_DICT[res['status']])
         else:
             self.excption_handler(UnexpectedStatusException,
-                                  'Error', 'Unexpected Status (%s), failed to push: %s' % (res['status'],
-                                                                                           extra_msg or ""))
+                                  'Error', 'Unexpected Status (%s), failed to push: %s' % (res['status'], extra_msg or ""))
