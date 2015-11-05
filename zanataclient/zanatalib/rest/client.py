@@ -30,6 +30,8 @@ import StringIO
 warnings.simplefilter("ignore", DeprecationWarning)
 import httplib2
 
+from config import http_methods, ServiceConfig
+
 
 class RestClient(object):
     def __init__(self, base_url, disable_ssl_certificate_validation=True):
@@ -41,53 +43,6 @@ class RestClient(object):
         params = dir(self.http_client)
         if 'disable_ssl_certificate_validation' in params:
             self.http_client.disable_ssl_certificate_validation = True
-
-    def set_headers(self, headers, method, args):
-        headers['Accept'] = 'application/json'
-
-        if args:
-            if method == "put" or method == "post":
-                headers['Content-Type'] = 'application/json'
-
-        return headers
-
-    def set_resource(self, resource, extension=None):
-        if extension:
-            return "%s%s%s" % (self.base_url, resource, extension)
-        else:
-            return "%s%s" % (self.base_url, resource)
-
-    def request_get(self, resource, args=None, body=None,
-                    headers={}, extension=None):
-        headers = self.set_headers(headers, "get", args)
-        resource = self.set_resource(resource, extension)
-        return self.request(resource, "get", body, headers)
-
-    def request_post(self, resource, args=None, body=None,
-                     headers={}, extension=None):
-        headers = self.set_headers(headers, "post", args)
-        if args:
-            body = args
-        resource = self.set_resource(resource, extension)
-        return self.request(resource, "post", body, headers)
-
-    def request_put(self, resource, args=None, body=None,
-                    headers={}, extension=None):
-        headers = self.set_headers(headers, "put", args)
-        if args:
-            body = args
-        resource = self.set_resource(resource, extension)
-        return self.request(resource, "put", body, headers)
-
-    def request_delete(self, resource, args=None, body=None,
-                       headers={}, extension=None):
-        headers = self.set_headers(headers, "delete", args)
-        resource = self.set_resource(resource, extension)
-        return self.request(resource, "delete", body, headers)
-
-    def request_version(self, resource, http_headers):
-        resource = self.set_resource(resource)
-        return self.request(resource, "get", None, http_headers)
 
     def request(self, resource, method="get", body=None, headers=None, extension=None):
         if extension:
@@ -129,3 +84,21 @@ class RestClient(object):
             else:
                 print "error: %s" % e
                 sys.exit(2)
+
+    def process_request(self, service_name, *args, **kwargs):
+        headers = kwargs['headers'] if 'headers' in kwargs else {}
+        body = kwargs['body'] if 'body' in kwargs else None
+        extension = kwargs['extension'] if 'extension' in kwargs else None
+        service_details = ServiceConfig(service_name)
+        # set headers
+        if hasattr(service_details, 'response_media_type') and service_details.response_media_type:
+            headers['Accept'] = service_details.response_media_type
+        if hasattr(service_details, 'request_media_type') and service_details.request_media_type and body:
+            headers['Content-Type'] = service_details.request_media_type
+        # set resource
+        resource = (
+            service_details.resource.format(**dict(zip(service_details.path_params, args)))
+            if args else service_details.resource
+        )
+        # initiate service call
+        return self.request(self.base_url + resource, service_details.http_method, body, headers, extension)

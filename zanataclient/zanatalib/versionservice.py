@@ -38,12 +38,8 @@ class VersionService(Service):
         self.restclient.disable_ssl_cert_validation()
 
     def get_server_version(self):
-        self.http_headers.update(
-            {'Accept': 'application/vnd.zanata.Version+json'}
-        )
-
-        res, content = self.restclient.request_version(
-            '/seam/resource/restv1/version',
-            self.http_headers
+        res, content = self.restclient.process_request(
+            'server_version',
+            headers=self.http_headers
         )
         return self.messages(res, content)
