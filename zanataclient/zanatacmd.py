@@ -198,7 +198,7 @@ class ZanataCommand:
         for project in projects:
             print ("\nProject ID:          %s") % project.id
             print ("Project Name:        %s") % project.name
-            if project.defaultType.strip():
+            if hasattr(project, 'defaultType') and project.defaultType.strip():
                 print ("Project Type:        %s") % project.defaultType
             print ("Project Links:       %s") % [{'href': link.href, 'type': link.type, 'rel': link.rel} for link in project.links]
 
@@ -210,7 +210,11 @@ class ZanataCommand:
             p = self.zanata_resource.projects.get(project_id)
             print ("\nProject ID:          %s") % p.id
             print ("Project Name:        %s") % p.name
-            print ("Project Description: %s\n") % p.description
+            if hasattr(p, 'defaultType') and p.defaultType.strip():
+                print ("Project Type:        %s") % p.defaultType
+            if hasattr(p, 'description') and p.description.strip():
+                print ("Project Description: %s") % p.description
+            print ("\n")
         except NoSuchProjectException, e:
             self.log.error(str(e))
         except InvalidOptionException:
