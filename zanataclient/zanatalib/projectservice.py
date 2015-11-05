@@ -51,10 +51,8 @@ class ProjectService(Service):
         List the Project Resources on the Zanata server
         @return: list of Project object
         """
-        res, content = self.restclient.request(self.base_url + '/seam/resource/restv1/projects',
-                                               "get",
-                                               None,
-                                               self.http_headers)
+        res, content = self.restclient.process_request('list_projects',
+                                                       headers=self.http_headers)
         projects_json = self.messages(res, content)
         projects = [Project(p) for p in projects_json]
         return projects
@@ -66,12 +64,8 @@ class ProjectService(Service):
         @return: Project object
         @raise NoSuchProjectException:
         """
-        if self.http_headers:
-            self.http_headers['Accept'] = 'application/json'
-
-        res, content = self.restclient.request(self.base_url + '/seam/resource/restv1/projects/p/%s' % projectid,
-                                               "get", None, self.http_headers)
-
+        res, content = self.restclient.process_request('list_project', projectid,
+                                                       headers=self.http_headers)
         server_return = self.messages(res, content)
         if server_return.has_key('status'):
             if server_return['status'] == "Retired":
@@ -90,14 +84,13 @@ class ProjectService(Service):
         @raise UnAuthorizedException:
         @raise BadRequestException:
         """
-        if self.http_headers:
-            self.http_headers['Accept'] = 'application/json'
-
-        body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}''' % (project.name, project.id, project.desc)
-
-        res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s' % project.id, args=body, headers=self.http_headers)
-
-        self.messages(res, content, "The project is already exist on server")
+        body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}''' % (
+            project.name, project.id, project.desc
+        )
+        res, content = self.restclient.process_request(
+            'create_project', project.id, body=body, headers=self.http_headers
+        )
+        return self.messages(res, content, "The project is already exist on server")
 
     def delete(self):
         pass
@@ -126,8 +119,8 @@ class IterationService(Service):
         @return: Iteration object
         @raise NoSuchProjectException:
         """
-        res, content = self.restclient.request(self.base_url + '/seam/resource/restv1/projects/p/%s/iterations/i/%s' % (projectid, iterationid),
-                                               "get", None, self.http_headers)
+        res, content = self.restclient.process_request('get_iteration', projectid, iterationid,
+                                                       headers=self.http_headers)
         server_return = self.messages(res, content)
         if server_return.has_key('status'):
             if server_return['status'] == "Retired":
@@ -146,9 +139,10 @@ class IterationService(Service):
         @raise BadRequestException:
         """
         body = '''{"name":"%s","id":"%s","description":"%s"}''' % (iteration.name, iteration.id, iteration.desc)
-        res, content = self.restclient.request_put('/seam/resource/restv1/projects/p/%s/iterations/i/%s' % (projectid, iteration.id),
-                                                   args=body, headers=self.http_headers)
-        self.messages(res, content, "The Version is already exist on server")
+        res, content = self.restclient.process_request(
+            'create_iteration', projectid, iteration.id, body=body, headers=self.http_headers
+        )
+        return self.messages(res, content, "The Version is already exist on server")
 
     def delete(self):
         pass

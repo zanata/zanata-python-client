@@ -40,21 +40,18 @@ class GlossaryService(Service):
         headers['X-Auth-User'] = username
         headers['X-Auth-Token'] = apikey
 
-        headers['Accept'] = 'application/vnd.zanata.glossary+json'
-
-        res, content = self.restclient.request_put('/seam/resource/restv1/glossary',
-                                                   args=resources,
-                                                   headers=headers)
+        res, content = self.restclient.process_request(
+            'commit_glossary', body=resources, headers=headers
+        )
         return self.messages(res, content)
 
     def delete(self, username, apikey, lang=None):
         headers = {}
         headers['X-Auth-User'] = username
         headers['X-Auth-Token'] = apikey
-        resource = '/seam/resource/restv1/glossary'
 
-        if lang:
-            resource = resource + '/' + lang
-
-        res, content = self.restclient.request_delete(resource, headers=headers)
+        ext = '/' + lang if lang else ''
+        res, content = self.restclient.process_request(
+            'delete_glossary', headers=headers, extension=ext
+        )
         return self.messages(res, content)

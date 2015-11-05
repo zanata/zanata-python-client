@@ -603,7 +603,7 @@ def version_info(command_options, args):
         log.error("Please use zanata version info --project-id=project_id --project-version=project_version to retrieve the version")
         sys.exit(1)
     headers = http_headers(username, apikey, 'application/json')
-    zanatacmd = ZanataCommand(url, headers=headers)
+    zanatacmd = ZanataCommand(url, http_headers=headers)
 
     if command_options.has_key('disablesslcert'):
         zanatacmd.disable_ssl_cert_validation()
@@ -694,7 +694,7 @@ def create_version(command_options, args):
     else:
         log.error("Please specify PROJECT_ID with --project-id option or using zanata.xml")
 
-    log.info("Project id:%s" % project_id)
+    log.info("Project ID: %s" % project_id)
 
     if args:
         version_id = args[0]

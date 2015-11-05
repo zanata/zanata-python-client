@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <config xmlns="http://zanata.org/namespace/config/">
         <url>@ZANATA_SERVER@</url>
-        <project>@PROJECT_NAME@</project>
+        <project>@PROJECT_ID@</project>
         <project-version>@PROJECT_VERSION@</project-version>
         <locales>
             <locale>pt-BR</locale>

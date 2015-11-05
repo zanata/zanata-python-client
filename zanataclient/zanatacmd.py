@@ -198,7 +198,7 @@ class ZanataCommand:
         for project in projects:
             print ("\nProject ID:          %s") % project.id
             print ("Project Name:        %s") % project.name
-            if project.defaultType.strip():
+            if hasattr(project, 'defaultType') and project.defaultType.strip():
                 print ("Project Type:        %s") % project.defaultType
             print ("Project Links:       %s") % [{'href': link.href, 'type': link.type, 'rel': link.rel} for link in project.links]
 
@@ -208,11 +208,13 @@ class ZanataCommand:
         """
         try:
             p = self.zanata_resource.projects.get(project_id)
-            print ("Project ID:          %s") % p.id
+            print ("\nProject ID:          %s") % p.id
             print ("Project Name:        %s") % p.name
-            if p.defaultType.strip():
+            if hasattr(p, 'defaultType') and p.defaultType.strip():
                 print ("Project Type:        %s") % p.defaultType
-            print ("Project Description: %s") % p.description
+            if hasattr(p, 'description') and p.description.strip():
+                print ("Project Description: %s") % p.description
+            print ("\n")
         except NoSuchProjectException, e:
             self.log.error(str(e))
         except InvalidOptionException:
@@ -225,9 +227,9 @@ class ZanataCommand:
         try:
             project = self.zanata_resource.projects.get(project_id)
             iteration = project.get_iteration(iteration_id)
-            print ("Version ID:          %s") % iteration.id
+            print ("Version ID: %s") % iteration.id
             if hasattr(iteration, 'name'):
-                print ("Version Name:        %s") % iteration.name
+                print ("Version Name: %s") % iteration.name
             if hasattr(iteration, 'description'):
                 print ("Version Description: %s") % iteration.description
         except NoSuchProjectException, e:
@@ -242,7 +244,7 @@ class ZanataCommand:
             item = {'id': project_id, 'name': project_name, 'desc': project_desc}
             p = Project(item)
             result = self.zanata_resource.projects.create(p)
-            if result == "Success":
+            if result:
                 self.log.info("Successfully created project: %s" % project_id)
         except ZanataException, e:
             self.log.error(str(e))
@@ -256,7 +258,7 @@ class ZanataCommand:
             item = {'id': version_id, 'name': version_name, 'desc': version_desc}
             iteration = Iteration(item)
             result = self.zanata_resource.projects.iterations.create(project_id, iteration)
-            if result == "Success":
+            if result:
                 self.log.info("Successfully created version: %s" % version_id)
         except ZanataException, e:
             self.log.error(str(e))
