@@ -14,7 +14,8 @@
             <locale map-from="zh-TW">zh-Hant</locale>
         </locales>
         <python-client>
-            <dir>@SOURCE_DIR@</dir>
+            <src-dir>@SOURCE_DIR@</src-dir>
+            <trans-dir>@TRANS_DIR@</trans-dir>
         </python-client>
 </config>
 
