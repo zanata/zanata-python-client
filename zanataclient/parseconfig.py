@@ -29,7 +29,8 @@ from zanatalib.logger import Logger
 from xml.dom import minidom
 
 
-project_config = {'project_url': '', 'project_id': '', 'project_version': '', 'project_type': '', 'locale_map': {}}
+project_config = {'project_url': '', 'project_id': '', 'project_version': '', 'project_type': '',
+                  'locale_map': {}, 'src_dir': '', 'trans_dir': ''}
 
 
 class ZanataConfig:
@@ -112,6 +113,23 @@ class ZanataConfig:
                         else:
                             locale_map = {str(node.data): str(node.data)}
                         project_config['locale_map'].update(locale_map)
+
+        # Read other attributes
+        if xmldoc.getElementsByTagName("python-client"):
+            nodes = xmldoc.getElementsByTagName("python-client")
+            for node in nodes:
+                if node.getElementsByTagName("src-dir"):
+                    source_dir = node.getElementsByTagName("src-dir")
+                    for source_dir_childnodes in source_dir:
+                        if len(source_dir_childnodes.childNodes) > 0 and \
+                                source_dir[0].childNodes[0].nodeType == source_dir[0].childNodes[0].TEXT_NODE:
+                            project_config['src_dir'] = source_dir[0].childNodes[0].data
+                if node.getElementsByTagName("trans-dir"):
+                    trans_dir = node.getElementsByTagName("trans-dir")
+                    for trans_dir_childnodes in trans_dir:
+                        if len(trans_dir_childnodes.childNodes) > 0 and \
+                                trans_dir[0].childNodes[0].nodeType == trans_dir[0].childNodes[0].TEXT_NODE:
+                            project_config['trans_dir'] = trans_dir[0].childNodes[0].data
 
         return project_config
 

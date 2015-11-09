@@ -243,6 +243,8 @@ class Push(object):
         elif command_options.has_key('dir'):
             # Keep dir option for publican/po push
             tmlfolder = command_options['dir'][0]['value']
+        elif self.read_project_config(command_options).get('src_dir'):
+            tmlfolder = self.read_project_config(command_options).get('src_dir')
         else:
             tmlfolder = os.path.abspath(os.getcwd())
 
@@ -257,6 +259,8 @@ class Push(object):
 
         if command_options.has_key('srcdir'):
             tmlfolder = command_options['srcdir'][0]['value']
+        elif self.read_project_config(command_options).get('src_dir'):
+            tmlfolder = self.read_project_config(command_options).get('src_dir')
         else:
             tmlfolder = os.path.abspath(os.getcwd())
 
@@ -280,6 +284,8 @@ class Push(object):
             trans_folder = command_options['transdir'][0]['value']
         elif src_folder:
             trans_folder = src_folder
+        elif self.read_project_config(command_options).get('trans_dir'):
+            trans_folder = self.read_project_config(command_options).get('trans_dir')
         else:
             trans_folder = os.getcwd()
 
@@ -290,8 +296,12 @@ class Push(object):
             output = command_options['transdir'][0]['value']
         elif output_folder:
             output = output_folder
+        elif self.read_project_config(command_options).get('trans_dir'):
+            output = self.read_project_config(command_options).get('trans_dir')
         else:
             output = os.getcwd()
+
+        output = os.path.expanduser(output)
 
         if not os.path.isdir(output):
             os.mkdir(output)

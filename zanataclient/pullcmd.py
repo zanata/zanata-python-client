@@ -34,33 +34,6 @@ class GenericPull(Push):
     def __init__(self, *args, **kargs):
         super(GenericPull, self).__init__(*args, **kargs)
 
-    def process_transdir(self, command_options, src_folder):
-        trans_folder = ""
-
-        if command_options.has_key('transdir'):
-            trans_folder = command_options['transdir'][0]['value']
-        elif src_folder:
-            trans_folder = src_folder
-        else:
-            trans_folder = os.getcwd()
-
-        return trans_folder
-
-    def create_outpath(self, command_options, output_folder):
-        if command_options.has_key('transdir'):
-            output = command_options['transdir'][0]['value']
-        elif output_folder:
-            output = output_folder
-        else:
-            output = os.getcwd()
-
-        output = os.path.expanduser(output)
-
-        if not os.path.isdir(output):
-            os.mkdir(output)
-
-        return output
-
     def run(self):
         dir_option = False
         skeletons = True
