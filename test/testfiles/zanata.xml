@@ -7,8 +7,7 @@
             <locale map-from="zh-CN">zh-Hans</locale>
         </locales>
         <python-client>
-            <src-dir>/home/user/project/source</src-dir>
-            <trans-dir>/home/user/project/target</trans-dir>
+            <dir>/home/jamesni/ibus-table</dir>
         </python-client>
 </config>
 

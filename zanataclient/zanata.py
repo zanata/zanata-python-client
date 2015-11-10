@@ -299,11 +299,11 @@ project create      Create a project
 version create      Create a version within a project
 publican pull       Pull the content of publican file
 publican push       Push the content of publican file to Zanata server
-po pull             Pull the content of software project file
-po push             Push the content of software project file to Zanata server
-push                Push the content of software project/docbook project to Zanata server
-pull                Pull the content of software project/docbook project from Zanata server
-glossary push       Push the glossary files to Zanata server
+po pull       Pull the content of software project file
+po push       Push the content of software project file to Zanata server
+push          Push the content of software project/docbook project to Zanata server
+pull          Pull the content of software project/docbook project from Zanata server
+glossary push Push the glossary files to Zanata server
 
 available system options:
 --help              Display this help or detail usage of commands

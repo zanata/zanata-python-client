@@ -50,8 +50,6 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(project_config['project_id'], "test-project")
         self.assertEqual(project_config['project_version'], "1.0")
         self.assertEqual(project_config['locale_map'], {"zh-CN": "zh-Hans"})
-        self.assertEqual(project_config['src_dir'], "/home/user/project/source")
-        self.assertEqual(project_config['trans_dir'], "/home/user/project/target")
 
 if __name__ == '__main__':
     unittest.main()
