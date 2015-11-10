@@ -485,7 +485,7 @@ class ZanataCommand:
                         os.makedirs(subdirectory)
                     pofile = os.path.join(subdirectory, save_name + '.po')
                 else:
-                    pofile = os.path.join(outpath, save_name + '.po')
+                    pofile = os.path.join(output, save_name + '.po')
 
                 self.log.info("Retrieving %s translation from server:" % item)
 
