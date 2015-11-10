@@ -81,13 +81,13 @@ class GenericPull(Push):
         else:
             locale_map = None
 
-        if self.command_options.has_key('project_type'):
+        if self.project_type:
+            command_type = self.project_type
+            dir_option = True
+        elif self.command_options.has_key('project_type'):
             command_type = self.command_options['project_type'][0]['value']
         elif self.project_config['project_type']:
             command_type = self.project_config['project_type']
-        elif self.project_type:
-            command_type = self.project_type
-            dir_option = True
         else:
             log.error("The project type is unknown")
             sys.exit(1)
