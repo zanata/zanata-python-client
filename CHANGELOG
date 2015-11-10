@@ -1,3 +1,13 @@
+* Thu Nov 05 2015 Sundeep Anand <suanand@redhat.com>
+- added <src-dir> and <trans-dir> in zanata.xml
+- refactor code - added config to centralize rest resources
+- Organize exception messages, added test.
+- HTTP to HTTPS redirect - auto, if found in httplib2 response
+- In listing of projects, including project-type also, if exists.
+- Rename zanatalib/client.py to zanatalib/resource.py
+- flake8 changes and addition of: make flake8
+- added requirements.txt
+
 * Thu Sep 17 2015 Sean Flanigan <sflaniga@redhat.com> - 1.3.22
 - Disable copytrans by default (ZNTA-664)
 - Deprecate --no-copytrans option and add --copytrans
