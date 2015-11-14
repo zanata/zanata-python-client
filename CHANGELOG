@@ -1,4 +1,4 @@
-* Thu Nov 15 2015 Sundeep Anand <suanand@redhat.com>
+* Sun Nov 15 2015 Sundeep Anand <suanand@redhat.com>
 - added <src-dir> and <trans-dir> in zanata.xml
 - refactor code - added config to centralize rest resources
 - Organize exception messages, added test.
