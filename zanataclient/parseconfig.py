@@ -114,22 +114,13 @@ class ZanataConfig:
                             locale_map = {str(node.data): str(node.data)}
                         project_config['locale_map'].update(locale_map)
 
-        # Read other attributes
-        if xmldoc.getElementsByTagName("python-client"):
-            nodes = xmldoc.getElementsByTagName("python-client")
-            for node in nodes:
-                if node.getElementsByTagName("src-dir"):
-                    source_dir = node.getElementsByTagName("src-dir")
-                    for source_dir_childnodes in source_dir:
-                        if len(source_dir_childnodes.childNodes) > 0 and \
-                                source_dir[0].childNodes[0].nodeType == source_dir[0].childNodes[0].TEXT_NODE:
-                            project_config['src_dir'] = source_dir[0].childNodes[0].data
-                if node.getElementsByTagName("trans-dir"):
-                    trans_dir = node.getElementsByTagName("trans-dir")
-                    for trans_dir_childnodes in trans_dir:
-                        if len(trans_dir_childnodes.childNodes) > 0 and \
-                                trans_dir[0].childNodes[0].nodeType == trans_dir[0].childNodes[0].TEXT_NODE:
-                            project_config['trans_dir'] = trans_dir[0].childNodes[0].data
+        # Read <src-dir> and <trans-dir>
+        if xmldoc.getElementsByTagName("src-dir"):
+            node = xmldoc.getElementsByTagName("src-dir")[0]
+            project_config['src_dir'] = getCombinedTextChildren(node)
+        if xmldoc.getElementsByTagName("trans-dir"):
+            node = xmldoc.getElementsByTagName("trans-dir")[0]
+            project_config['trans_dir'] = getCombinedTextChildren(node)
 
         return project_config
 
