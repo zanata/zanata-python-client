@@ -29,7 +29,8 @@ from zanatalib.logger import Logger
 from xml.dom import minidom
 
 
-project_config = {'project_url': '', 'project_id': '', 'project_version': '', 'project_type': '', 'locale_map': {}}
+project_config = {'project_url': '', 'project_id': '', 'project_version': '', 'project_type': '',
+                  'locale_map': {}, 'src_dir': '', 'trans_dir': ''}
 
 
 class ZanataConfig:
@@ -112,6 +113,14 @@ class ZanataConfig:
                         else:
                             locale_map = {str(node.data): str(node.data)}
                         project_config['locale_map'].update(locale_map)
+
+        # Read <src-dir> and <trans-dir>
+        if xmldoc.getElementsByTagName("src-dir"):
+            node = xmldoc.getElementsByTagName("src-dir")[0]
+            project_config['src_dir'] = getCombinedTextChildren(node)
+        if xmldoc.getElementsByTagName("trans-dir"):
+            node = xmldoc.getElementsByTagName("trans-dir")[0]
+            project_config['trans_dir'] = getCombinedTextChildren(node)
 
         return project_config
 

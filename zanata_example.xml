@@ -13,8 +13,7 @@
             <locale map-from="zh-CN">zh-Hans</locale>
             <locale map-from="zh-TW">zh-Hant</locale>
         </locales>
-        <python-client>
-            <dir>@SOURCE_DIR@</dir>
-        </python-client>
+        <src-dir>@SOURCE_DIR@</src-dir>
+        <trans-dir>@TRANS_DIR@</trans-dir>
 </config>
 
