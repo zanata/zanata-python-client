@@ -35,15 +35,15 @@ from zanatalib.logger import Logger
 log = Logger()
 
 
-class Push(object):
-    _fields = ['command_options', 'args', 'project_type', 'http_headers']
+class PushPull(object):
+    _fields = ['command_options', 'args', 'project_type', 'http_headers', 'project_config']
 
     def __init__(self, *args, **kargs):
         for name, val in zip(self._fields, args):
             setattr(self, name, val)
         for key, value in kargs.iteritems():
             setattr(self, key, value)
-        url, self.project_id, self.version_id, self.project_config = self.get_projectinfo(self.command_options)
+        url, self.project_id, self.version_id = self.get_projectinfo(self.command_options)
         self.zanatacmd, username, client_version, server_version = self.create_zanatacmd(url, self.command_options, self.http_headers)
         self.plural_support = self.check_plural_support(server_version)
         version_info = self.create_versioninfo(client_version, server_version)
@@ -55,7 +55,6 @@ class Push(object):
                 sys.exit(1)
             else:
                 copytrans = True
-        # TODO GenericPull should extend a common parent class (PushPull?), not Push
         # This warning makes no sense for pull commands.
         # elif not self.command_options.has_key('nocopytrans'):
         #    log.warn("copytrans is now disabled by default")
@@ -103,23 +102,6 @@ class Push(object):
                 sys.exit(1)
             deletefiles = True
         return project_type, deletefiles, tmlfolder, filelist
-
-    def read_project_config(self, command_options):
-        project_config = {}
-        config = ZanataConfig()
-        # Read the project configuration file using --project-config option
-        config_file = [os.path.join(os.getcwd(), filename) for filename
-                       in ['zanata.xml', 'flies.xml']]
-
-        if command_options.has_key('project_config'):
-            config_file.append(command_options['project_config'][0]['value'])
-
-        for path in config_file:
-            if os.path.exists(path):
-                log.info("Loading zanata project config from: %s" % path)
-                project_config = config.read_project_config(path)
-                break
-        return project_config
 
     def process_url(self, project_config, command_options):
         url = ""
@@ -243,8 +225,8 @@ class Push(object):
         elif command_options.has_key('dir'):
             # Keep dir option for publican/po push
             tmlfolder = command_options['dir'][0]['value']
-        elif self.read_project_config(command_options).get('src_dir'):
-            tmlfolder = self.read_project_config(command_options).get('src_dir')
+        elif self.project_config.get('src_dir').strip():
+            tmlfolder = self.project_config.get('src_dir')
         else:
             tmlfolder = os.path.abspath(os.getcwd())
 
@@ -261,8 +243,8 @@ class Push(object):
 
         if command_options.has_key('srcdir'):
             tmlfolder = command_options['srcdir'][0]['value']
-        elif self.read_project_config(command_options).get('src_dir'):
-            tmlfolder = self.read_project_config(command_options).get('src_dir')
+        elif self.project_config.get('src_dir').strip():
+            tmlfolder = self.project_config.get('src_dir')
         else:
             tmlfolder = os.path.abspath(os.getcwd())
 
@@ -287,8 +269,8 @@ class Push(object):
             trans_folder = command_options['transdir'][0]['value']
         elif src_folder:
             trans_folder = src_folder
-        elif self.read_project_config(command_options).get('trans_dir'):
-            trans_folder = self.read_project_config(command_options).get('trans_dir')
+        elif self.project_config.get('trans_dir').strip():
+            trans_folder = self.project_config.get('trans_dir')
         else:
             trans_folder = os.getcwd()
 
@@ -300,8 +282,8 @@ class Push(object):
             output = command_options['transdir'][0]['value']
         elif output_folder:
             output = output_folder
-        elif self.read_project_config(command_options).get('trans_dir'):
-            output = self.read_project_config(command_options).get('trans_dir')
+        elif self.project_config.get('trans_dir').strip():
+            output = self.project_config.get('trans_dir')
         else:
             output = os.getcwd()
 
@@ -379,24 +361,19 @@ class Push(object):
         project_id = ''
         version_id = ''
 
-        project_config = self.read_project_config(command_options)
-
-        if not project_config:
-            log.info("Can not find zanata.xml, please specify the path of zanata.xml")
-
-        url = self.process_url(project_config, command_options)
+        url = self.process_url(self.project_config, command_options)
 
         if command_options.has_key('project_id'):
             project_id = command_options['project_id'][0]['value']
         else:
-            if project_config.has_key('project_id'):
-                project_id = project_config['project_id']
+            if self.project_config.has_key('project_id'):
+                project_id = self.project_config['project_id']
 
         if command_options.has_key('project_version'):
             version_id = command_options['project_version'][0]['value']
         else:
-            if project_config.has_key('project_version'):
-                version_id = project_config['project_version']
+            if self.project_config.has_key('project_version'):
+                version_id = self.project_config['project_version']
 
         if not project_id:
             log.error("Please specify a valid project id in zanata.xml or with '--project-id' option")
@@ -406,7 +383,7 @@ class Push(object):
             log.error("Please specify a valid version id in zanata.xml or with '--project-version' option")
             sys.exit(1)
 
-        return url, project_id, version_id, project_config
+        return url, project_id, version_id
 
     def get_projecttype(self, command_options, project_config):
         project_type = ""
@@ -445,7 +422,7 @@ class Push(object):
         log.info("Source language: en-US")
 
 
-class GenericPush(Push):
+class GenericPush(PushPull):
 
     def __init__(self, *args, **kargs):
         super(GenericPush, self).__init__(*args, **kargs)
@@ -517,7 +494,7 @@ class GenericPush(Push):
             self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support)
 
 
-class PublicanPush(Push):
+class PublicanPush(PushPull):
     def __init__(self, *args, **kargs):
         super(PublicanPush, self).__init__(*args, **kargs)
 
@@ -546,7 +523,7 @@ class PublicanPush(Push):
             self.zanatacmd.push_command(filelist, tmlfolder, self.project_id, self.version_id, self.copytrans, self.plural_support)
 
 
-class PoPush(Push):
+class PoPush(PushPull):
     def __init__(self, *args, **kargs):
         super(PoPush, self).__init__(*args, **kargs)
 

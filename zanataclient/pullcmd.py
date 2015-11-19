@@ -25,12 +25,12 @@ import sys
 import string
 
 from zanatalib.logger import Logger
-from pushcmd import Push
+from pushcmd import PushPull
 
 log = Logger()
 
 
-class GenericPull(Push):
+class GenericPull(PushPull):
     def __init__(self, *args, **kargs):
         super(GenericPull, self).__init__(*args, **kargs)
 

@@ -166,8 +166,8 @@ delete_glossary = resource('GlossaryResource', resource_config_dict['GlossaryRes
 list_files = resource('SourceDocResource', resource_config_dict['SourceDocResource'].keys()[0], http_methods[0])
 commit_template = resource('SourceDocResource', resource_config_dict['SourceDocResource'].keys()[0], http_methods[1])
 retrieve_template = resource('SourceDocResource', resource_config_dict['SourceDocResource'].keys()[1], http_methods[0])
-update_template = resource('SourceDocResource', resource_config_dict['SourceDocResource'].keys()[1], http_methods[0])
-delete_template = resource('SourceDocResource', resource_config_dict['SourceDocResource'].keys()[1], http_methods[0])
+update_template = resource('SourceDocResource', resource_config_dict['SourceDocResource'].keys()[1], http_methods[2])
+delete_template = resource('SourceDocResource', resource_config_dict['SourceDocResource'].keys()[1], http_methods[3])
 retrieve_translation = resource('TranslatedDocResource', resource_config_dict['TranslatedDocResource'].keys()[0],
                                 http_methods[0])
 commit_translation = resource('TranslatedDocResource', resource_config_dict['TranslatedDocResource'].keys()[0],
