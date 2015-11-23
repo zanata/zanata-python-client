@@ -99,12 +99,6 @@ class OptionsUtil:
 
         return url
 
-    def get_localemap(self):
-        if self.project_config and self.project_config.has_key('locale_map'):
-            locale_map = self.project_config['locale_map']
-
-        return locale_map
-
     def apply_user_config(self, url):
         user_name = ""
         apikey = ""
