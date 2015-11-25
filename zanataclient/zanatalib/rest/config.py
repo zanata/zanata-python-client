@@ -24,7 +24,8 @@ from collections import namedtuple
 middle_url = '/seam/resource/restv1'
 http_methods = ('GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS')
 media_types = ('application/json', 'application/vnd.zanata.projects+json', 'application/vnd.zanata.Version+json',
-               'application/vnd.zanata.project.iteration+json', 'application/vnd.zanata.glossary+json')
+               'application/vnd.zanata.project.iteration+json', 'application/vnd.zanata.glossary+json',
+               'application/vnd.zanata.project.locales+json')
 project_types = ('utf8properties', 'properties', 'gettext', 'podir', 'xliff', 'xml', 'file')
 
 # based on https://zanata.ci.cloudbees.com/job/zanata-api-site/site/zanata-common-api/rest-api-docs/index.html
@@ -49,7 +50,15 @@ resource_config_dict = {
             },
         },
     },
-    'ProjectIterationLocalesResource': {},
+    'ProjectIterationLocalesResource': {
+        '/projects/p/{projectSlug}/iterations/i/{iterationSlug}/locales': {
+            http_methods[0]: {
+                'path_params': ('projectSlug', 'iterationSlug'),
+                'query_params': None,
+                'response_media_type': media_types[5],
+            },
+        }
+    },
     'ProjectIterationResource': {
         '/projects/p/{projectSlug}/iterations/i/{iterationSlug}': {
             http_methods[0]: {
@@ -65,7 +74,15 @@ resource_config_dict = {
             },
         },
     },
-    'ProjectLocalesResource': {},
+    'ProjectLocalesResource': {
+        '/projects/p/{projectSlug}/locales': {
+            http_methods[0]: {
+                'path_params': ('projectSlug',),
+                'query_params': None,
+                'response_media_type': media_types[5],
+            },
+        }
+    },
     'ProjectResource': {
         '/projects/p/{projectSlug}': {
             http_methods[0]: {
@@ -172,6 +189,10 @@ retrieve_translation = resource('TranslatedDocResource', resource_config_dict['T
                                 http_methods[0])
 commit_translation = resource('TranslatedDocResource', resource_config_dict['TranslatedDocResource'].keys()[0],
                               http_methods[2])
+project_locales = resource('ProjectLocalesResource', resource_config_dict['ProjectLocalesResource'].keys()[0],
+                           http_methods[0])
+iteration_locales = resource('ProjectIterationLocalesResource',
+                             resource_config_dict['ProjectIterationLocalesResource'].keys()[0], http_methods[0])
 # zanata-python-client operates on services listed here
 zpc_services = {
     'server_version': server_version,
@@ -189,6 +210,8 @@ zpc_services = {
     'delete_template': delete_template,
     'retrieve_translation': retrieve_translation,
     'commit_translation': commit_translation,
+    'project_locales': project_locales,
+    'iteration_locales': iteration_locales,
 }
 
 

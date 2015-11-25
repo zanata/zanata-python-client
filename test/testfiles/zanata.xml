@@ -3,9 +3,10 @@
         <url>http://localhost:8080/zanata/</url>
         <project>test-project</project>
         <project-version>1.0</project-version>
-        <locales>
+        <project-type>gettext</project-type>
+        <!--<locales>
             <locale map-from="zh-CN">zh-Hans</locale>
-        </locales>
+        </locales>-->
         <src-dir>/home/user/project/source</src-dir>
         <trans-dir>/home/user/project/target</trans-dir>
 </config>

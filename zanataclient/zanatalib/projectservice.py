@@ -34,12 +34,12 @@ class ProjectService(Service):
     """
     Provides services to interact with Project, handle operaions of list, create and retrieve Project Resources
     """
-    _fields = ['base_url', 'username', 'apikey', 'http_headers']
+    _fields = ['base_url', 'http_headers']
 
     def __init__(self, *args, **kargs):
         super(ProjectService, self).__init__(*args, **kargs)
         self.iterations = IterationService(
-            self.base_url, self.username, self.apikey, self.http_headers
+            self.base_url, self.http_headers
         )
 
     def disable_ssl_cert_validation(self):
@@ -103,7 +103,7 @@ class IterationService(Service):
     """
     Provides services to interact with Project iteration, handle operaions of list, create and retrieve iteration Resources
     """
-    _fields = ['base_url', 'username', 'apikey', 'http_headers']
+    _fields = ['base_url', 'http_headers']
 
     def __init__(self, *args, **kargs):
         super(IterationService, self).__init__(*args, **kargs)
@@ -146,3 +146,30 @@ class IterationService(Service):
 
     def delete(self):
         pass
+
+
+class LocaleService(Service):
+    """
+    Provides services to interact with Project Locales.
+    """
+    _fields = ['base_url', 'http_headers']
+
+    def __init__(self, *args, **kargs):
+        super(LocaleService, self).__init__(*args, **kargs)
+
+    def disable_ssl_cert_validation(self):
+        self.restclient.disable_ssl_cert_validation()
+
+    def get_locales(self, projectid, iterationid=None):
+        """
+        Retrieve a specified Project Locales on Zanata server
+        @param projectid: Id of Project Resource
+        @param iterationid: Id of Iteration Resource
+        @return: service return content
+        """
+        service = 'iteration_locales' if iterationid else 'project_locales'
+        res, content = self.restclient.process_request(
+            service, projectid, iterationid, headers=self.http_headers
+        )
+        server_return = self.messages(res, content)
+        return server_return

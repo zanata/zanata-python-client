@@ -29,8 +29,7 @@ from zanatalib.logger import Logger
 from xml.dom import minidom
 
 
-project_config = {'project_url': '', 'project_id': '', 'project_version': '', 'project_type': '',
-                  'locale_map': {}, 'src_dir': '', 'trans_dir': ''}
+project_config = {}
 
 
 class ZanataConfig:
@@ -83,7 +82,7 @@ class ZanataConfig:
         # Read the project url
         if xmldoc.getElementsByTagName("url"):
             node = xmldoc.getElementsByTagName("url")[0]
-            project_config['project_url'] = getCombinedTextChildren(node)
+            project_config['url'] = getCombinedTextChildren(node)
 
         # Read the project id
         if xmldoc.getElementsByTagName("project"):
@@ -104,6 +103,7 @@ class ZanataConfig:
         if xmldoc.getElementsByTagName("locales"):
             locales = xmldoc.getElementsByTagName("locales")[0]
             localelist = locales.getElementsByTagName("locale")
+            project_config['locale_map'] = {}
 
             for locale in localelist:
                 for node in locale.childNodes:
@@ -117,10 +117,10 @@ class ZanataConfig:
         # Read <src-dir> and <trans-dir>
         if xmldoc.getElementsByTagName("src-dir"):
             node = xmldoc.getElementsByTagName("src-dir")[0]
-            project_config['src_dir'] = getCombinedTextChildren(node)
+            project_config['srcdir'] = getCombinedTextChildren(node)
         if xmldoc.getElementsByTagName("trans-dir"):
             node = xmldoc.getElementsByTagName("trans-dir")[0]
-            project_config['trans_dir'] = getCombinedTextChildren(node)
+            project_config['transdir'] = getCombinedTextChildren(node)
 
         return project_config
 

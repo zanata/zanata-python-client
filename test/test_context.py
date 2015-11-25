@@ -1,0 +1,128 @@
+#
+# Zanata Python Client
+#
+# Copyright (c) 2015 Sundeep Anand <suanand@redhat.com>
+# Copyright (c) 2015 Red Hat, Inc.
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this program; if not, write to the
+# Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+# Boston, MA  02110-1301, USA.
+
+all__ = (
+    "ProjectContextTest",
+)
+
+import unittest
+import sys
+import os
+import mock
+sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
+from zanataclient.context import ProjectContext
+
+# test data
+command_options = {'comment_cols': [{'name': '--commentcols', 'value': 'en-US,es,pos,description',
+                                     'internal': 'comment_cols', 'long': ['--commentcols'],
+                                     'type': 'command', 'metavar': 'COMMENTCOLS'}],
+                   'user_config': [{'name': '--user-config',
+                                    'value': './testfiles/zanata.ini', 'internal': 'user_config',
+                                    'long': ['--user-config'], 'type': 'command', 'metavar': 'USER-CONFIG'}],
+                   'project_config': [{'name': '--project-config', 'value': './testfiles/zanata.xml',
+                                       'internal': 'project_config', 'long': ['--project-config'],
+                                       'type': 'command', 'metavar': 'PROJECT-CONFIG'}],
+                   'project_type': [{'name': '--project-type', 'value': 'podir', 'internal': 'project_type',
+                                     'long': ['--project-type'], 'type': 'command', 'metavar': 'PROJECTTYPE'}]}
+
+version_service_return_content = {'versionNo': '3.7.3', 'buildTimeStamp': 'unknown', 'scmDescribe': 'unknown'}
+
+iteration_locales_return_content = [{'displayName': 'English (United States)', 'localeId': 'en-US'},
+                                    {'alias': 'pa-IN', 'displayName': 'Punjabi', 'localeId': 'pa'},
+                                    {'alias': 'hi-IN', 'displayName': 'Hindi', 'localeId': 'hi'},
+                                    {'displayName': 'Tamil (India)', 'localeId': 'ta-IN'},
+                                    {'displayName': 'Bengali (India)', 'localeId': 'bn-IN'}]
+
+project_locales_return_content = [{"displayName": "English (United States)", "localeId": "en-US"},
+                                  {"displayName": "Hindi", "localeId": "hi"}, {"displayName": "Croatian", "localeId": "hr"},
+                                  {"displayName": "Japanese", "localeId": "ja"}, {"displayName": "Kannada", "localeId": "kn"},
+                                  {"displayName": "Chinese (Traditional, Taiwan)", "localeId": "zh-Hant-TW"}]
+
+
+class ProjectContextTest(unittest.TestCase):
+    def setUp(self):
+        self.context = ProjectContext(command_options)
+
+    def test_command_options(self):
+        command_options_keys = ['project_type', 'comment_cols', 'user_config', 'project_config']
+        self.assertEqual(self.context.command_options.keys(), command_options_keys)
+        self.assertEqual(
+            self.context.command_dict,
+            {'project_config': './testfiles/zanata.xml', 'comment_cols': 'en-US,es,pos,description',
+             'user_config': './testfiles/zanata.ini', 'project_type': 'podir'}
+        )
+
+    def test_build_local_config(self):
+        self.context.build_local_config()
+        self.assertEqual(self.context.local_config['url'], 'http://localhost:8080/zanata')
+        self.assertEqual(self.context.local_config['project_id'], "test-project")
+        self.assertEqual(self.context.local_config['project_version'], "1.0")
+        self.assertEqual(self.context.local_config['project_type'], "gettext")
+        # self.assertEqual(self.context.local_config['locale_map'], {"zh-CN": "zh-Hans"})
+        self.assertEqual(self.context.local_config['srcdir'], "/home/user/project/source")
+        self.assertEqual(self.context.local_config['transdir'], "/home/user/project/target")
+        self.assertEqual(self.context.local_config['user_name'], 'username')
+        self.assertEqual(self.context.local_config['key'], 'key')
+        self.assertEqual(
+            self.context.local_config['http_headers'],
+            {'Accept': 'application/json', 'X-Auth-User': 'username', 'X-Auth-Token': 'key'}
+        )
+        self.assertIn('client_version', self.context.local_config,
+                      'local_config should contain client_version')
+
+    @mock.patch('zanataclient.zanatalib.projectservice.LocaleService.get_locales')
+    @mock.patch('zanataclient.zanatalib.versionservice.VersionService.get_server_version')
+    def test_build_remote_config(self, mock_get_server_version, mock_get_locales):
+        mock_get_server_version.return_value = version_service_return_content
+        mock_get_locales.return_value = iteration_locales_return_content
+        self.context.build_local_config()
+        self.context.build_remote_config()
+        self.assertEqual(self.context.remote_config['server_version'], '3.7.3')
+
+    @mock.patch('zanataclient.zanatalib.projectservice.LocaleService.get_locales')
+    @mock.patch('zanataclient.zanatalib.versionservice.VersionService.get_server_version')
+    def test_get_context_data(self, mock_get_server_version, mock_get_locales):
+        mock_get_server_version.return_value = version_service_return_content
+        mock_get_locales.return_value = project_locales_return_content
+        context_data = self.context.get_context_data()
+        self.assertEqual(context_data['project_type'], 'podir',
+                         'Command option overrides the project config project_type')
+        self.assertEqual(
+            context_data['locale_map'],
+            {'hi': 'hi', 'hr': 'hr', 'en-US': 'en-US', 'zh-Hant-TW': 'zh-Hant-TW', 'ja': 'ja', 'kn': 'kn'},
+            'context_data should contain locale_map fetched from server'
+        )
+        options_set = []
+        for optionset in (self.context.remote_config.keys(), self.context.local_config.keys(),
+                          self.context.command_dict.keys()):
+            options_set.extend(optionset)
+        options_set = list(set(options_set))
+        # Adding 1, as 'key' is being filtered out from context_data
+        self.assertEqual(len(options_set), (len(context_data.keys()) + 1),
+                         'context_data should contain all unique keys and their values')
+
+    def test_process_locales(self):
+        locale_map = self.context.process_locales(iteration_locales_return_content)
+        self.assertEqual(locale_map, {'bn-IN': 'bn-IN', 'pa-IN': 'pa', 'en-US': 'en-US',
+                                      'hi-IN': 'hi', 'ta-IN': 'ta-IN'})
+
+if __name__ == '__main__':
+    unittest.main()
