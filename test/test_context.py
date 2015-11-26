@@ -56,6 +56,12 @@ project_locales_return_content = [{"displayName": "English (United States)", "lo
                                   {"displayName": "Japanese", "localeId": "ja"}, {"displayName": "Kannada", "localeId": "kn"},
                                   {"displayName": "Chinese (Traditional, Taiwan)", "localeId": "zh-Hant-TW"}]
 
+project_config_without_locale_map = {'transdir': '/home/user/project/target', 'project_type': 'gettext',
+                                     'http_headers': {'Accept': 'application/json', 'X-Auth-User': 'username', 'X-Auth-Token': 'key'},
+                                     'url': 'http://localhost:8080/zanata', 'key': 'key', 'srcdir': '/home/user/project/source',
+                                     'project_version': '1.0', 'client_version': '1.3.12-74-g0b1d-mod', 'project_id': 'test-project',
+                                     'user_name': 'username'}
+
 
 class ProjectContextTest(unittest.TestCase):
     def setUp(self):
@@ -76,7 +82,7 @@ class ProjectContextTest(unittest.TestCase):
         self.assertEqual(self.context.local_config['project_id'], "test-project")
         self.assertEqual(self.context.local_config['project_version'], "1.0")
         self.assertEqual(self.context.local_config['project_type'], "gettext")
-        # self.assertEqual(self.context.local_config['locale_map'], {"zh-CN": "zh-Hans"})
+        self.assertEqual(self.context.local_config['locale_map'], {"zh-CN": "zh-Hans"})
         self.assertEqual(self.context.local_config['srcdir'], "/home/user/project/source")
         self.assertEqual(self.context.local_config['transdir'], "/home/user/project/target")
         self.assertEqual(self.context.local_config['user_name'], 'username')
@@ -94,22 +100,27 @@ class ProjectContextTest(unittest.TestCase):
         mock_get_server_version.return_value = version_service_return_content
         mock_get_locales.return_value = iteration_locales_return_content
         self.context.build_local_config()
+        self.assertEqual(self.context.local_config['locale_map'], {"zh-CN": "zh-Hans"})
+        # removing locale_map from local_config
+        self.context.local_config.pop('locale_map', None)
         self.context.build_remote_config()
+        self.assertEqual(
+            self.context.remote_config['locale_map'],
+            {'bn-IN': 'bn-IN', 'pa-IN': 'pa', 'en-US': 'en-US', 'hi-IN': 'hi', 'ta-IN': 'ta-IN'},
+            'if not found context will go for remote locale_map'
+        )
         self.assertEqual(self.context.remote_config['server_version'], '3.7.3')
 
     @mock.patch('zanataclient.zanatalib.projectservice.LocaleService.get_locales')
     @mock.patch('zanataclient.zanatalib.versionservice.VersionService.get_server_version')
-    def test_get_context_data(self, mock_get_server_version, mock_get_locales):
+    def test_get_context_data_local_locale_map(self, mock_get_server_version, mock_get_locales):
         mock_get_server_version.return_value = version_service_return_content
         mock_get_locales.return_value = project_locales_return_content
         context_data = self.context.get_context_data()
         self.assertEqual(context_data['project_type'], 'podir',
                          'Command option overrides the project config project_type')
-        self.assertEqual(
-            context_data['locale_map'],
-            {'hi': 'hi', 'hr': 'hr', 'en-US': 'en-US', 'zh-Hant-TW': 'zh-Hant-TW', 'ja': 'ja', 'kn': 'kn'},
-            'context_data should contain locale_map fetched from server'
-        )
+        self.assertEqual(context_data['locale_map'], {"zh-CN": "zh-Hans"},
+                         'context_data should contain locale_map from project_config')
         options_set = []
         for optionset in (self.context.remote_config.keys(), self.context.local_config.keys(),
                           self.context.command_dict.keys()):
@@ -118,6 +129,22 @@ class ProjectContextTest(unittest.TestCase):
         # Adding 1, as 'key' is being filtered out from context_data
         self.assertEqual(len(options_set), (len(context_data.keys()) + 1),
                          'context_data should contain all unique keys and their values')
+
+    @mock.patch('zanataclient.parseconfig.ZanataConfig.read_project_config')
+    @mock.patch('zanataclient.zanatalib.projectservice.LocaleService.get_locales')
+    @mock.patch('zanataclient.zanatalib.versionservice.VersionService.get_server_version')
+    def test_get_context_data_remote_locale_map(
+            self, mock_get_server_version, mock_get_locales, mock_read_project_config
+    ):
+        mock_get_server_version.return_value = version_service_return_content
+        mock_get_locales.return_value = project_locales_return_content
+        mock_read_project_config.return_value = project_config_without_locale_map
+        context_data = self.context.get_context_data()
+        self.assertEqual(
+            context_data['locale_map'],
+            {'hi': 'hi', 'hr': 'hr', 'en-US': 'en-US', 'zh-Hant-TW': 'zh-Hant-TW', 'ja': 'ja', 'kn': 'kn'},
+            'context_data should contain locale_map fetched from server'
+        )
 
     def test_process_locales(self):
         locale_map = self.context.process_locales(iteration_locales_return_content)

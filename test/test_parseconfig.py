@@ -49,7 +49,7 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(project_config['url'], "http://localhost:8080/zanata/")
         self.assertEqual(project_config['project_id'], "test-project")
         self.assertEqual(project_config['project_version'], "1.0")
-        # self.assertEqual(project_config['locale_map'], {"zh-CN": "zh-Hans"})
+        self.assertEqual(project_config['locale_map'], {"zh-CN": "zh-Hans"})
         self.assertEqual(project_config['srcdir'], "/home/user/project/source")
         self.assertEqual(project_config['transdir'], "/home/user/project/target")
 

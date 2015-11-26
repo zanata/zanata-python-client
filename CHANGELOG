@@ -1,9 +1,10 @@
-* Sun Nov 15 2015 Sundeep Anand <suanand@redhat.com>
+* Thu Nov 26 2015 Sundeep Anand <suanand@redhat.com>
+- Bug 1156236 - use locale aliases defined in the server
+- added ProjectContext, Improved help, fixed code issues
 - added <src-dir> and <trans-dir> in zanata.xml
 - refactor code - added config to centralize rest resources
 - Organize exception messages, added test.
 - HTTP to HTTPS redirect - auto, if found in httplib2 response
-- In listing of projects, including project-type also, if exists.
 - Rename zanatalib/client.py to zanatalib/resource.py
 - flake8 changes and addition of: make flake8
 - added requirements.txt
