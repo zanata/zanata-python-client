@@ -43,9 +43,9 @@ from zanatalib.error import InternalServerError
 
 
 class ZanataCommand:
-    def __init__(self, url, username=None, apikey=None, http_headers=None):
+    def __init__(self, url, http_headers):
         self.log = Logger()
-        self.zanata_resource = ZanataResource(url, username, apikey, http_headers)
+        self.zanata_resource = ZanataResource(url, http_headers)
 
     def disable_ssl_cert_validation(self):
         self.zanata_resource.disable_ssl_cert_validation()
@@ -208,12 +208,12 @@ class ZanataCommand:
         """
         try:
             p = self.zanata_resource.projects.get(project_id)
-            print ("\nProject ID:          %s") % p.id
-            print ("Project Name:        %s") % p.name
+            print ("\nProject ID:        %s") % p.id
+            print ("Project Name:      %s") % p.name
             if hasattr(p, 'defaultType') and p.defaultType.strip():
-                print ("Project Type:        %s") % p.defaultType
+                print ("Project Type:      %s") % p.defaultType
             if hasattr(p, 'description') and p.description.strip():
-                print ("Project Description: %s") % p.description
+                print ("Project Desc:      %s") % p.description
             print ("\n")
         except NoSuchProjectException, e:
             self.log.error(str(e))
@@ -506,47 +506,40 @@ class ZanataCommand:
                     self.log.error(str(e))
                     sys.exit(1)
 
-    def poglossary_push(self, path, url, username, apikey, lang, sourcecomments):
+    def poglossary_push(self, path, lang, sourcecomments):
         i = 0
         jsons = []
         publicanutil = PublicanUtility()
         jsons = publicanutil.glossary_to_json(path, lang, sourcecomments)
-        glossary = GlossaryService(url)
-
         size = len(jsons)
         if size > 1:
-            self.log.warn("The file is big, try to devide it to small parts. It may take a long time to push!")
+            self.log.warn("The file is big, try to divide it to small parts. It may take a long time to push!")
 
         while i < size:
             if size > 1:
                 self.log.info("Push part %s of glossary file" % i)
             try:
-                glossary.commit_glossary(username, apikey, jsons[i])
+                self.zanata_resource.glossary.commit_glossary(jsons[i])
             except ZanataException, e:
                 self.log.error(str(e))
                 sys.exit(1)
-
             i += 1
-
         self.log.info("Successfully pushed glossary to the server")
 
-    def csvglossary_push(self, path, url, username, apikey, locale_map, comments_header):
+    def csvglossary_push(self, path, locale_map, comments_header):
         csvconverter = CSVConverter()
         json = csvconverter.convert_to_json(path, locale_map, comments_header)
-        glossary = GlossaryService(url)
 
         try:
-            content = glossary.commit_glossary(username, apikey, json)
+            content = self.zanata_resource.glossary.commit_glossary(json)
             if content:
                 self.log.info("Successfully pushed glossary to the server")
         except ZanataException, e:
             self.log.error(str(e))
 
-    def delete_glossary(self, url, username, apikey, lang=None):
-        glossary = GlossaryService(url)
-
+    def delete_glossary(self, lang=None):
         try:
-            glossary.delete(username, apikey, lang)
+            self.zanata_resource.glossary.delete(lang)
         except ZanataException, e:
             self.log.error(str(e))
         else:

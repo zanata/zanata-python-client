@@ -30,28 +30,20 @@ from service import Service
 
 
 class GlossaryService(Service):
-    _fields = ['base_url']
+    _fields = ['base_url', 'http_headers']
 
     def __init__(self, *args, **kargs):
         super(GlossaryService, self).__init__(*args, **kargs)
 
-    def commit_glossary(self, username, apikey, resources):
-        headers = {}
-        headers['X-Auth-User'] = username
-        headers['X-Auth-Token'] = apikey
-
+    def commit_glossary(self, resources):
         res, content = self.restclient.process_request(
-            'commit_glossary', body=resources, headers=headers
+            'commit_glossary', body=resources, headers=self.http_headers
         )
         return self.messages(res, content)
 
-    def delete(self, username, apikey, lang=None):
-        headers = {}
-        headers['X-Auth-User'] = username
-        headers['X-Auth-Token'] = apikey
-
+    def delete(self, lang=None):
         ext = '/' + lang if lang else ''
         res, content = self.restclient.process_request(
-            'delete_glossary', headers=headers, extension=ext
+            'delete_glossary', headers=self.http_headers, extension=ext
         )
         return self.messages(res, content)

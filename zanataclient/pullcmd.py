@@ -35,12 +35,11 @@ class GenericPull(PushPull):
         super(GenericPull, self).__init__(*args, **kargs)
 
     def run(self):
-        dir_option = False
         skeletons = True
         filelist = []
         output_folder = None
 
-        lang_list = self.get_lang_list(self.command_options, self.project_config)
+        lang_list = self.get_lang_list()
 
         # list the files in project
         try:
@@ -49,41 +48,33 @@ class GenericPull(PushPull):
             log.error(str(e))
             sys.exit(1)
 
-        if self.project_config.has_key('locale_map'):
-            locale_map = self.project_config['locale_map']
-        else:
-            locale_map = None
+        locale_map = self.context_data.get('locale_map')
 
-        if self.command_options.has_key('project_type'):
-            command_type = self.command_options['project_type'][0]['value']
-        elif self.project_config['project_type']:
-            command_type = self.project_config['project_type']
-        elif self.project_type:
-            command_type = self.project_type
-            dir_option = True
+        if self.context_data.has_key('project_type'):
+            command_type = self.context_data.get('project_type')
         else:
             log.error("The project type is unknown")
             sys.exit(1)
 
-        if dir_option:
+        if self.context_data.get('publican_po'):
             # Keep dir option for publican/po pull
-            if self.command_options.has_key('dir'):
-                output_folder = self.command_options['dir'][0]['value']
+            if self.context_data.has_key('dir'):
+                output_folder = self.context_data.get('dir')
 
-            if self.command_options.has_key('dstdir'):
-                output_folder = self.command_options['dstdir'][0]['value']
+            if self.context_data.has_key('dstdir'):
+                output_folder = self.context_data.get('dstdir')
         else:
             # Disable dir option for generic pull command
-            if self.command_options.has_key('dir'):
+            if self.context_data.has_key('dir'):
                 log.warn("dir option is disabled in pull command, please use --transdir, or specify value in zanata.xml")
 
-            if self.command_options.has_key('dstdir'):
+            if self.context_data.has_key('dstdir'):
                 log.warn("dstdir option is changed to transdir option for generic pull command")
-                output_folder = self.command_options['dstdir'][0]['value']
+                output_folder = self.context_data.get('dstdir')
 
-        if self.command_options.has_key('noskeletons'):
+        if self.context_data.has_key('noskeletons'):
             skeletons = False
 
-        outpath = self.create_outpath(self.command_options, output_folder)
+        outpath = self.create_outpath(output_folder)
 
         self.zanatacmd.pull_command(locale_map, self.project_id, self.version_id, filelist, lang_list, outpath, command_type, skeletons)

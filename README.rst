@@ -29,7 +29,7 @@ Required package for compilation::
 
 Required package for unit tests::
 
-    yum install python-minimock
+    yum install python-minimock python-mock
 
 To run pylint against the source code::
 
