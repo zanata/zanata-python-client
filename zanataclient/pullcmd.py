@@ -76,5 +76,7 @@ class GenericPull(PushPull):
             skeletons = False
 
         outpath = self.create_outpath(output_folder)
-
-        self.zanatacmd.pull_command(locale_map, self.project_id, self.version_id, filelist, lang_list, outpath, command_type, skeletons)
+        filedict = self.zanatacmd.get_project_translation_stats(
+            self.project_id, self.version_id, self.context_data['mindocpercent'], lang_list, locale_map
+        ) if self.context_data.get('mindocpercent') else {file: lang_list for file in filelist}
+        self.zanatacmd.pull_command(locale_map, self.project_id, self.version_id, filedict, outpath, command_type, skeletons)

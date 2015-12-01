@@ -238,7 +238,7 @@ class PushPull(CommandsBase):
         project_type = self.context_data.get('project_type')
 
         if not project_type:
-            log.error("The project type is unknown")
+            log.error("Please specify PROJECT_TYPE with --project-type option or using zanata.xml")
             sys.exit(1)
         elif project_type != 'podir' and project_type != 'gettext':
             log.error("The project type is not correct, please use 'podir' and 'gettext' as project type")
@@ -425,8 +425,14 @@ class PushPull(CommandsBase):
         import_param['project_type'] = project_type
         return import_param
 
-    def log_message(self, project_id, version_id, username):
+    def log_message(self, project_id, project_version, username):
+        if not project_id:
+            log.error("Please specify PROJECT_ID with --project-id option or using zanata.xml")
+            sys.exit(1)
         log.info("Project: %s" % project_id)
-        log.info("Version: %s" % version_id)
+        if not project_version:
+            log.error("Please specify PROJECT_VERSION with --project-version option or using zanata.xml")
+            sys.exit(1)
+        log.info("Version: %s" % project_version)
         log.info("Username: %s" % username)
         log.info("Source language: en-US")

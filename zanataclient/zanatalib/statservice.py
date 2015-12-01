@@ -2,7 +2,7 @@
 #
 # Zanata Python Client
 #
-# Copyright (c) 2011 Jian Ni <jni@redhat.com>
+# Copyright (c) 2011 Sundeep Anand <suanand@redhat.com>
 # Copyright (c) 2011 Red Hat, Inc.
 #
 # This library is free software; you can redistribute it and/or
@@ -22,25 +22,25 @@
 
 
 __all__ = (
-    "ZanataResource",
+    "StatService",
 )
 
-from docservice import DocumentService
-from projectservice import ProjectService
-from versionservice import VersionService
-from glossaryservice import GlossaryService
-from statservice import StatService
+from service import Service
 
 
-class ZanataResource:
-    def __init__(self, base_url, http_headers):
-        self.base_url = base_url
-        self.projects = ProjectService(base_url, http_headers)
-        self.documents = DocumentService(self.projects, base_url, http_headers)
-        self.version = VersionService(base_url, http_headers)
-        self.glossary = GlossaryService(base_url, http_headers)
-        self.stats = StatService(base_url, http_headers)
+class StatService(Service):
+    _fields = ['base_url', 'http_headers']
+
+    def __init__(self, *args, **kargs):
+        super(StatService, self).__init__(*args, **kargs)
 
     def disable_ssl_cert_validation(self):
-        self.projects.disable_ssl_cert_validation()
-        self.version.disable_ssl_cert_validation()
+        self.restclient.disable_ssl_cert_validation()
+
+    def get_project_stats(self, project_id, project_version):
+        ext = "?detail=true&word=false"
+        res, content = self.restclient.process_request(
+            'proj_trans_stats', project_id, project_version,
+            headers=self.http_headers, extension=ext
+        )
+        return self.messages(res, content)

@@ -22,7 +22,7 @@
 
 
 __all__ = (
-    "Project", "Iteration"
+    "Project", "Iteration", "Stats"
 )
 
 
@@ -53,3 +53,28 @@ class Project(object):
     def get_iteration(self, version_id):
         project_id = getattr(self, 'id')
         return self.__iterations.get(project_id, version_id)
+
+
+class Stats(object):
+    def __init__(self, stat_dict):
+        self.detailed_stat = stat_dict.get('detailedStats')
+        self.references = stat_dict.get('refs')
+        self.stats = stat_dict.get('stats')
+
+    @property
+    def trans_percent_dict(self):
+        trans_percent = {}
+        if isinstance(self.detailed_stat, list):
+            for doc in self.detailed_stat:
+                if isinstance(doc, dict):
+                    document = doc.get('id')
+                    doc_stats = doc.get('stats')
+                    trans_percent[document] = {}
+                    if isinstance(doc_stats, list):
+                        for stat in doc_stats:
+                            if isinstance(stat, dict) and stat.get('locale'):
+                                trans_percent[document].update({
+                                    stat['locale']: int((float(stat.get('translated', 0) * 100) /
+                                                         float(stat.get('total', 0))))
+                                })
+        return trans_percent

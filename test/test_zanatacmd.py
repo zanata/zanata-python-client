@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
 
 from zanataclient.zanatacmd import ZanataCommand
 from zanataclient.zanatalib import ZanataResource
-from zanataclient.zanatalib.project import Project
+from zanataclient.zanatalib.projectutils import Project
 
 
 class ZanataCmdTest(unittest.TestCase):
