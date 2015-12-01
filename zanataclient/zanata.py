@@ -238,13 +238,6 @@ option_sets = {
             metavar='COMMENTCOLS',
         ),
     ],
-    'mindocpercent': [
-        dict(
-            type='command',
-            long=['--min-doc-percent'],
-            metavar='MINDOCPERCENT',
-        ),
-    ],
     'sourcecomments': [
         dict(
             type='command',
@@ -261,6 +254,20 @@ option_sets = {
         dict(
             type='command',
             long=['--push-trans-only'],
+        ),
+    ],
+    'pushtype': [
+        dict(
+            type='command',
+            long=['--push-type'],
+            metavar='PUSHTYPE',
+        ),
+    ],
+    'mindocpercent': [
+        dict(
+            type='command',
+            long=['--min-doc-percent'],
+            metavar='MINDOCPERCENT',
         ),
     ],
     'disablesslcert': [
