@@ -61,6 +61,12 @@ class CommandsBase(object):
                 sys.exit(1)
         return ZanataCommand(url, headers)
 
+    def check_essential(self, item, message):
+        if not item:
+            log.error(message)
+            sys.exit(1)
+        return item
+
 
 class ListProjects(CommandsBase):
     def __init__(self, *args, **kargs):
@@ -236,11 +242,7 @@ class PushPull(CommandsBase):
         filelist = []
         tmlfolder = ""
         project_type = self.context_data.get('project_type')
-
-        if not project_type:
-            log.error("Please specify PROJECT_TYPE with --project-type option or using zanata.xml")
-            sys.exit(1)
-        elif project_type != 'podir' and project_type != 'gettext':
+        if project_type != 'podir' and project_type != 'gettext':
             log.error("The project type is not correct, please use 'podir' and 'gettext' as project type")
             sys.exit(1)
 
@@ -426,13 +428,15 @@ class PushPull(CommandsBase):
         return import_param
 
     def log_message(self, project_id, project_version, username):
-        if not project_id:
-            log.error("Please specify PROJECT_ID with --project-id option or using zanata.xml")
-            sys.exit(1)
-        log.info("Project: %s" % project_id)
-        if not project_version:
-            log.error("Please specify PROJECT_VERSION with --project-version option or using zanata.xml")
-            sys.exit(1)
-        log.info("Version: %s" % project_version)
+        log.info("Project: %s" % self.check_essential(
+            project_id, "Please specify PROJECT_ID with --project-id option or using zanata.xml"
+        ))
+        log.info("Version: %s" % self.check_essential(
+            project_version, "Please specify PROJECT_VERSION with --project-version option or using zanata.xml"
+        ))
+        log.info("Project Type: %s" % self.check_essential(
+            self.context_data.get('project_type'),
+            "Please specify PROJECT_TYPE with --project-type option or using zanata.xml"
+        ))
         log.info("Username: %s" % username)
         log.info("Source language: en-US")

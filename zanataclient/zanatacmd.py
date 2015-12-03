@@ -192,8 +192,8 @@ class ZanataCommand:
 
         if not projects:
             # As we are catching exceptions related to reaching server,
-            # we may be certain that there is NO projects created.
-            self.log.info("There is no projects on the server.")
+            # we may be certain that there is NO project created.
+            self.log.info("There are no projects on this server.")
             sys.exit(1)
 
         for project in projects:
@@ -336,7 +336,7 @@ class ZanataCommand:
                 else:
                     lang = item
 
-            self.log.info("\nPushing %s translation for %s to server:" % (item, project_id))
+            self.log.info("Pushing %s translation for %s to server:" % (item, project_id))
 
             if project_type == "podir":
                 folder = os.path.join(transfolder, item)
@@ -562,8 +562,9 @@ class ZanataCommand:
                 disqualify_locales = [alias for alias, locale in locale_map.items()
                                       for lang in disqualify_locales if lang == locale]
                 if disqualify_locales:
-                    self.log.info('Translation file for document %s for locales [%s] are skipped due to '
-                                  'insufficient completed percentage' % (doc, ', '.join(map(str, disqualify_locales))))
+                    self.log.info('Translation file for document %s for locales [%s] are skipped '
+                                  'because they are less than %s%% translated (--min-doc-percent setting)' %
+                                  (doc, ', '.join(map(str, disqualify_locales)), min_doc_percent))
                 qualify_lang_set = set(lang_list) - set(disqualify_locales)
                 doc_locales_dict.update({doc: list(qualify_lang_set)})
         finally:

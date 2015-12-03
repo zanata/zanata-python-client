@@ -49,12 +49,7 @@ class GenericPull(PushPull):
             sys.exit(1)
 
         locale_map = self.context_data.get('locale_map')
-
-        if self.context_data.has_key('project_type'):
-            command_type = self.context_data.get('project_type')
-        else:
-            log.error("The project type is unknown")
-            sys.exit(1)
+        command_type = self.context_data.get('project_type')
 
         if self.context_data.get('publican_po'):
             # Keep dir option for publican/po pull
