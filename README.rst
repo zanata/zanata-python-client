@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/sundeep-co-in/zanata-python-client.svg?branch=master
+    :target: https://travis-ci.org/sundeep-co-in/zanata-python-client
+
 Introduction
 ============
 
