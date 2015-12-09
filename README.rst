@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/zanata/zanata-python-client.svg?branch=master
+    :target: https://travis-ci.org/zanata/zanata-python-client
+
 Introduction
 ============
 
