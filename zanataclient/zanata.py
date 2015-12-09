@@ -263,6 +263,13 @@ option_sets = {
             metavar='PUSHTYPE',
         ),
     ],
+    'mindocpercent': [
+        dict(
+            type='command',
+            long=['--min-doc-percent'],
+            metavar='MINDOCPERCENT',
+        ),
+    ],
     'disablesslcert': [
         dict(
             type='command',
@@ -596,6 +603,8 @@ def pull(command_options, args, project_type=None):
         --project-version   : id of the version (defaults to zanata.xml value)
         --transdir          : translations will be written to this folder
         --lang              : language list (defaults to zanata.xml locales)
+        --min-doc-percent   : Only pull translation documents that have at least this percentage of messages translated.
+                                Accepts an integer from 0 to 100.
         --noskeletons       : omit po files when translations not found
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """

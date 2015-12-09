@@ -49,12 +49,7 @@ class GenericPull(PushPull):
             sys.exit(1)
 
         locale_map = self.context_data.get('locale_map')
-
-        if self.context_data.has_key('project_type'):
-            command_type = self.context_data.get('project_type')
-        else:
-            log.error("The project type is unknown")
-            sys.exit(1)
+        command_type = self.context_data.get('project_type')
 
         if self.context_data.get('publican_po'):
             # Keep dir option for publican/po pull
@@ -76,5 +71,7 @@ class GenericPull(PushPull):
             skeletons = False
 
         outpath = self.create_outpath(output_folder)
-
-        self.zanatacmd.pull_command(locale_map, self.project_id, self.version_id, filelist, lang_list, outpath, command_type, skeletons)
+        filedict = self.zanatacmd.get_project_translation_stats(
+            self.project_id, self.version_id, self.context_data['mindocpercent'], lang_list, locale_map
+        ) if self.context_data.get('mindocpercent') else {file: lang_list for file in filelist}
+        self.zanatacmd.pull_command(locale_map, self.project_id, self.version_id, filedict, outpath, command_type, skeletons)

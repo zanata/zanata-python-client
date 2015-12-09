@@ -1,4 +1,6 @@
-* Thu Nov 26 2015 Sundeep Anand <suanand@redhat.com>
+* Wed Dec 02 2015 Sundeep Anand <suanand@redhat.com>
+- Bug 1215274 - specify minimum percentage completion on pull
+- Rename zanatalib/project.py to zanatalib/projectutils.py
 - Bug 1156236 - use locale aliases defined in the server
 - added ProjectContext, Improved help, fixed code issues
 - added <src-dir> and <trans-dir> in zanata.xml
