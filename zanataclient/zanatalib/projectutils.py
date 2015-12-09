@@ -22,7 +22,7 @@
 
 
 __all__ = (
-    "Project", "Iteration"
+    "Project", "Iteration", "Stats"
 )
 
 
@@ -53,3 +53,46 @@ class Project(object):
     def get_iteration(self, version_id):
         project_id = getattr(self, 'id')
         return self.__iterations.get(project_id, version_id)
+
+
+class Stats(object):
+    def __init__(self, stats):
+        self.stats_dict = stats
+
+    def _get_doc_trans_percent(self, doc_name, stats_dict):
+        trans_percent = {}
+        for stat in stats_dict:
+            if stat.get('locale'):
+                trans_percent.update({
+                    stat['locale']: int((float(stat.get('translated', 0) * 100) /
+                                         float(stat.get('total', 0))))
+                })
+        return {doc_name: trans_percent}
+
+    @property
+    def project_version(self):
+        return self.stats_dict.get('id')
+
+    @property
+    def trans_stats_dict(self):
+        return self.stats_dict.get('stats')
+
+    @property
+    def trans_percent_dict(self):
+        trans_percent = {}
+        detailed_stats = self.stats_dict.get('detailedStats')
+        if isinstance(detailed_stats, list):
+            for doc in detailed_stats:
+                if isinstance(doc, dict) and doc.get('id') and doc.get('stats'):
+                    trans_percent.update(self._get_doc_trans_percent(doc['id'], doc['stats']))
+        return trans_percent
+
+    @property
+    def trans_stats_detail_dict(self):
+        trans_dict = {}
+        detailed_stats = self.stats_dict.get('detailedStats')
+        if isinstance(detailed_stats, list):
+            for doc in detailed_stats:
+                if isinstance(doc, dict) and doc.get('id') and doc.get('stats'):
+                    trans_dict.update({doc['id']: doc['stats']})
+        return trans_dict

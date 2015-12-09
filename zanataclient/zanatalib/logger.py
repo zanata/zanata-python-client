@@ -26,11 +26,11 @@ __all__ = (
 
 class Logger:
     def __init__(self):
-        self.enable_infoprefix = False
+        self.enable_infoprefix = True
         self.enable_warnprefix = True
         self.enable_errprefix = True
-        self.warn_prefix = 'warning: '
-        self.error_prefix = 'error: '
+        self.warn_prefix = '[WARN] '
+        self.error_prefix = '[ERROR] '
         self.info_prefix = '[INFO] '
 
     def info(self, message):

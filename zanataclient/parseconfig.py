@@ -122,7 +122,8 @@ class ZanataConfig:
             node = xmldoc.getElementsByTagName("trans-dir")[0]
             project_config['transdir'] = getCombinedTextChildren(node)
 
-        return project_config
+        return dict((node, value.strip() if isinstance(value, str) else value)
+                    for node, value in project_config.items() if value)
 
 
 def getCombinedTextChildren(node):

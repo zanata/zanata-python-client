@@ -27,8 +27,9 @@ from publicanutil import PublicanUtility
 from csvconverter import CSVConverter
 from zanatalib.resource import ZanataResource
 from zanatalib.glossaryservice import GlossaryService
-from zanatalib.project import Project
-from zanatalib.project import Iteration
+from zanatalib.projectutils import (
+    Project, Iteration, Stats
+)
 from zanatalib.logger import Logger
 from zanatalib.error import ZanataException
 from zanatalib.error import NoSuchProjectException
@@ -191,8 +192,8 @@ class ZanataCommand:
 
         if not projects:
             # As we are catching exceptions related to reaching server,
-            # we may be certain that there is NO projects created.
-            self.log.error("There is no projects on the server.")
+            # we may be certain that there is NO project created.
+            self.log.info("There are no projects on this server.")
             sys.exit(1)
 
         for project in projects:
@@ -335,7 +336,7 @@ class ZanataCommand:
                 else:
                     lang = item
 
-            self.log.info("\nPushing %s translation for %s to server:" % (item, project_id))
+            self.log.info("Pushing %s translation for %s to server:" % (item, project_id))
 
             if project_type == "podir":
                 folder = os.path.join(transfolder, item)
@@ -366,7 +367,7 @@ class ZanataCommand:
                         name = filename + '.po'
                     pofile = publicanutil.get_pofile_path(folder, name)
 
-                self.log.info("\nPushing the %s translation of %s to server:" % (item, filename))
+                self.log.info("Pushing the %s translation of %s to server:" % (item, filename))
 
                 if not pofile or not os.path.isfile(pofile):
                     self.log.error("Can not find the %s translation for %s" % (item, filename))
@@ -390,7 +391,7 @@ class ZanataCommand:
         publicanutil = PublicanUtility()
 
         for filepath in file_list:
-            self.log.info("\nPushing the content of %s to server:" % filepath)
+            self.log.info("Pushing the content of %s to server:" % filepath)
             plural_exist = publicanutil.check_plural(filepath)
             if plural_exist and not plural_support:
                 self.log.error("The plural is only supported in zanata server >= 1.6, this file will be ignored")
@@ -422,7 +423,7 @@ class ZanataCommand:
 
                 self.import_po(filename, transdir, project_id, iteration_id, lang_list, locale_map, merge, project_type)
 
-    def pull_command(self, locale_map, project_id, iteration_id, filelist, lang_list, output, project_type, skeletons):
+    def pull_command(self, locale_map, project_id, iteration_id, filedict, output, project_type, skeletons):
         """
         Retrieve the content of documents in a Project version from Zanata server. If the name of publican
         file is specified, the content of that file will be pulled from server. Otherwise, all the document of that
@@ -431,7 +432,7 @@ class ZanataCommand:
         """
         publicanutil = PublicanUtility()
         # if file no specified, retrieve all the files of project
-        for file_item in filelist:
+        for file_item, lang_list in filedict.items():
             pot = ""
             result = ""
             folder = ""
@@ -444,7 +445,7 @@ class ZanataCommand:
                 name = file_item
                 request_name = file_item
 
-            self.log.info("\nFetching the content of %s from Zanata server: " % name)
+            self.log.info("Fetching the content of %s from Zanata server" % name)
 
             try:
                 pot = self.zanata_resource.documents.retrieve_template(project_id, iteration_id, request_name)
@@ -487,7 +488,7 @@ class ZanataCommand:
                 else:
                     pofile = os.path.join(outpath, save_name + '.po')
 
-                self.log.info("Retrieving %s translation from server:" % item)
+                self.log.info("Retrieving %s translation from server: " % item)
 
                 try:
                     result = self.zanata_resource.documents.retrieve_translation(lang, project_id, iteration_id, request_name, skeletons)
@@ -544,3 +545,27 @@ class ZanataCommand:
             self.log.error(str(e))
         else:
             self.log.info("Successfully delete the glossary terms on the server")
+
+    def get_project_translation_stats(self, project_id, project_version, min_doc_percent, lang_list, locale_map):
+        doc_locales_dict = {}
+        try:
+            server_return = self.zanata_resource.stats.get_project_stats(project_id, project_version)
+        except ZanataException, e:
+            self.log.error(str(e))
+        else:
+            percent_dict = Stats(server_return).trans_percent_dict
+            for doc, stat in percent_dict.items():
+                disqualify_locales = []
+                for locale, trans_percent in stat.items():
+                    if trans_percent < int(min_doc_percent):
+                        disqualify_locales.append(locale)
+                disqualify_locales = [alias for alias, locale in locale_map.items()
+                                      for lang in disqualify_locales if lang == locale]
+                if disqualify_locales:
+                    self.log.info('Translation file for document %s for locales [%s] are skipped '
+                                  'because they are less than %s%% translated (--min-doc-percent setting)' %
+                                  (doc, ', '.join(map(str, disqualify_locales)), min_doc_percent))
+                qualify_lang_set = set(lang_list) - set(disqualify_locales)
+                doc_locales_dict.update({doc: list(qualify_lang_set)})
+        finally:
+            return doc_locales_dict
