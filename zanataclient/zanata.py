@@ -32,7 +32,7 @@ from zanatalib.logger import Logger
 from context import ProjectContext
 from cmdbase import (
     ListProjects, ProjectInfo, VersionInfo, CreateProject,
-    CreateVersion, GlossaryPush, GlossaryDelete
+    CreateVersion, GlossaryPush, GlossaryDelete, Stats
 )
 from command import makeHandler
 from command import strip_docstring
@@ -275,6 +275,25 @@ option_sets = {
             type='command',
             long=['--disable-ssl-cert'],
         ),
+    ],
+    'detailstats': [
+        dict(
+            type='command',
+            long=['--details'],
+        ),
+    ],
+    'wordstats': [
+        dict(
+            type='command',
+            long=['--word'],
+        ),
+    ],
+    'docid': [
+        dict(
+            type='command',
+            long=['--docid'],
+            metavar='DOCID',
+        ),
     ]
 }
 
@@ -288,7 +307,8 @@ subcmds = {
     'po': ['push', 'pull'],
     'push': [],
     'pull': [],
-    'glossary': ['push', 'delete']
+    'glossary': ['push', 'delete'],
+    'stats': []
 }
 
 usage = """Client for talking to a Zanata Server
@@ -308,6 +328,7 @@ po push             Push the content of software project file to Zanata server
 push                Push the content of software project/docbook project to Zanata server
 pull                Pull the content of software project/docbook project from Zanata server
 glossary push       Push the glossary files to Zanata server
+stats               Displays translation statistics for a Zanata project version
 
 available system options:
 --help              Display this help or detail usage of commands
@@ -648,6 +669,27 @@ def glossary_delete(command_options, args):
     pass
 
 
+@command(Stats, True)
+def stats(command_options, args):
+    """
+    Usage: zanata stats [OPTIONS]
+
+    Displays translation statistics for a Zanata project version
+
+    Options:
+        --url               : URL of zanata server
+        --username          : user name (defaults to zanata.ini value)
+        --apikey            : api key of user (defaults to zanata.ini value)
+        --project-id        : id of the project (defaults to zanata.xml value)
+        --project-version   : id of the version (defaults to zanata.xml value)
+        --details           : Include statistics for lower levels (i.e., for documents in a project version)
+        --docid             : Document Id to fetch statistics for
+        --word              : Include word level statistics. By default only message level statistics are shown
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+    """
+    pass
+
+
 command_handler_factories = {
     'help': makeHandler(help_info),
     'list': makeHandler(list_project),
@@ -662,7 +704,8 @@ command_handler_factories = {
     'push': makeHandler(push),
     'pull': makeHandler(pull),
     'glossary_push': makeHandler(glossary_push),
-    'glossary_delete': makeHandler(glossary_delete)
+    'glossary_delete': makeHandler(glossary_delete),
+    'stats': makeHandler(stats)
 }
 
 

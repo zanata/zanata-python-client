@@ -569,3 +569,58 @@ class ZanataCommand:
                 doc_locales_dict.update({doc: list(qualify_lang_set)})
         finally:
             return doc_locales_dict
+
+    def _print_double_line(self, length):
+        print '=' * length
+
+    def _print_new_line_row(self, sequence, header=None):
+        pattern = (
+            " %-10s %-8s %-4s %5s %10s %14s %25s"
+            if header else
+            " %-10s %-8s %-4s %5s %10s %14s %32s"
+        )
+        print pattern % sequence
+
+    def _display_stats(self, collection, locale_map):
+        self._print_double_line(90)
+        headers = ('Locale', 'Unit', 'Total', 'Translated', 'Need Review',
+                   'Untranslated', 'Last Translated')
+        self._print_new_line_row(headers, True)
+        self._print_double_line(90)
+        for stat in collection:
+            values = (
+                [alias for alias, lang in locale_map.items() if lang == stat.get('locale')][0],
+                stat.get('unit', 'MESSAGE'), stat.get('total', '0'),
+                stat.get('translated', '0'), stat.get('needReview', '0'),
+                stat.get('untranslated', '0'), stat.get('lastTranslated', '')
+            )
+            self._print_new_line_row(values)
+        self._print_double_line(90)
+        print('\n')
+
+    def _display_doc_stats(self, doc_name, stats_dict, locale_map):
+        print ('Document: %s' % doc_name)
+        self._display_stats(stats_dict, locale_map)
+
+    def display_translation_stats(self, *args, **kwargs):
+        try:
+            project_id, project_version = args
+            server_return = self.zanata_resource.stats.get_project_stats(
+                project_id, project_version, 'wordstats' in kwargs
+            ) if not kwargs.get('docid') else \
+                self.zanata_resource.stats.get_doc_stats(
+                    project_id, project_version, kwargs['docid'], 'wordstats' in kwargs
+            )
+        except ZanataException, e:
+            self.log.error(str(e))
+        else:
+            trans_stats = Stats(server_return)
+            locale_map = kwargs.get('locale_map')
+            if kwargs.get('docid'):
+                self.log.info('Document: %s' % trans_stats.stats_id)
+            if 'detailstats' in kwargs:
+                self._display_stats(trans_stats.trans_stats_dict, locale_map)
+                for doc, stats in trans_stats.trans_stats_detail_dict.items():
+                    self._display_doc_stats(doc, stats, locale_map)
+            else:
+                self._display_stats(trans_stats.trans_stats_dict, locale_map)

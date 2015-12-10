@@ -70,7 +70,7 @@ class Stats(object):
         return {doc_name: trans_percent}
 
     @property
-    def project_version(self):
+    def stats_id(self):
         return self.stats_dict.get('id')
 
     @property
