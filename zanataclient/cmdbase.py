@@ -459,5 +459,5 @@ class PushPull(CommandsBase):
             self.context_data.get('project_type'),
             "Please specify PROJECT_TYPE with --project-type option or using zanata.xml"
         ))
-        log.info("Username: %s" % username)
+        log.info("Username: %s" % (username or 'Anonymous'))
         log.info("Source language: en-US")

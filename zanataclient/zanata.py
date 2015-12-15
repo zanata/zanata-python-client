@@ -669,7 +669,7 @@ def glossary_delete(command_options, args):
     pass
 
 
-@command(Stats, True)
+@command(Stats, False)
 def stats(command_options, args):
     """
     Usage: zanata stats [OPTIONS]
