@@ -589,7 +589,8 @@ class ZanataCommand:
         self._print_double_line(90)
         for stat in collection:
             values = (
-                [alias for alias, lang in locale_map.items() if lang == stat.get('locale')][0],
+                [alias if lang == stat.get('locale') else stat.get('locale')
+                 for alias, lang in locale_map.items()][0],
                 stat.get('unit', 'MESSAGE'), stat.get('total', '0'),
                 stat.get('translated', '0'), stat.get('needReview', '0'),
                 stat.get('untranslated', '0'), stat.get('lastTranslated', '')
