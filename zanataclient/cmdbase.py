@@ -205,6 +205,27 @@ class GlossaryDelete(CommandsBase):
         self.zanatacmd.delete_glossary(lang)
 
 
+class Stats(CommandsBase):
+    def __init__(self, *args, **kargs):
+        super(Stats, self).__init__(*args, **kargs)
+
+    def run(self):
+        log.info("Project: %s" % self.check_essential(
+            self.context_data.get('project_id'),
+            "Please specify PROJECT_ID with --project-id option or using zanata.xml"
+        ))
+        log.info("Version: %s" % self.check_essential(
+            self.context_data.get('project_version'),
+            "Please specify PROJECT_VERSION with --project-version option or using zanata.xml"
+        ))
+        id_version = (self.context_data['project_id'], self.context_data['project_version'])
+        cmd_opts = dict([(cmd, self.context_data.get(cmd, True))
+                         for cmd in ('detailstats', 'wordstats', 'docid')
+                         if cmd in self.context_data])
+        cmd_opts['locale_map'] = self.context_data.get('locale_map')
+        self.zanatacmd.display_translation_stats(*id_version, **cmd_opts)
+
+
 class PushPull(CommandsBase):
     """
     This is base class for push-pull commands
@@ -438,5 +459,5 @@ class PushPull(CommandsBase):
             self.context_data.get('project_type'),
             "Please specify PROJECT_TYPE with --project-type option or using zanata.xml"
         ))
-        log.info("Username: %s" % username)
+        log.info("Username: %s" % (username or 'Anonymous'))
         log.info("Source language: en-US")

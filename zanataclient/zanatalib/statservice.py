@@ -37,10 +37,18 @@ class StatService(Service):
     def disable_ssl_cert_validation(self):
         self.restclient.disable_ssl_cert_validation()
 
-    def get_project_stats(self, project_id, project_version):
-        ext = "?detail=true&word=false"
+    def get_project_stats(self, project_id, project_version, word=False):
+        ext = "?detail=true&word=true" if word else "?detail=true&word=false"
         res, content = self.restclient.process_request(
             'proj_trans_stats', project_id, project_version,
+            headers=self.http_headers, extension=ext
+        )
+        return self.messages(res, content)
+
+    def get_doc_stats(self, project_id, project_version, doc_id, word=False):
+        ext = "?detail=true&word=true" if word else "?detail=true&word=false"
+        res, content = self.restclient.process_request(
+            'doc_trans_stats', project_id, project_version, doc_id,
             headers=self.http_headers, extension=ext
         )
         return self.messages(res, content)

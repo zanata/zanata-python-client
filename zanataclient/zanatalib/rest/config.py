@@ -147,6 +147,13 @@ resource_config_dict = {
                 'query_params': None,
                 'response_media_type': media_types[0],
             },
+        },
+        '/stats/proj/{projectSlug}/iter/{iterationSlug}/doc/{docId}': {
+            http_methods[0]: {
+                'path_params': ('projectSlug', 'iterationSlug', 'docId'),
+                'query_params': None,
+                'response_media_type': media_types[0],
+            },
         }
     },
     'TranslatedDocResource': {
@@ -202,6 +209,7 @@ project_locales = resource('ProjectLocalesResource', resource_config_dict['Proje
 iteration_locales = resource('ProjectIterationLocalesResource',
                              resource_config_dict['ProjectIterationLocalesResource'].keys()[0], http_methods[0])
 proj_trans_stats = resource('StatisticsResource', resource_config_dict['StatisticsResource'].keys()[0], http_methods[0])
+doc_trans_stats = resource('StatisticsResource', resource_config_dict['StatisticsResource'].keys()[1], http_methods[0])
 # zanata-python-client operates on services listed here
 zpc_services = {
     'server_version': server_version,
@@ -222,6 +230,7 @@ zpc_services = {
     'project_locales': project_locales,
     'iteration_locales': iteration_locales,
     'proj_trans_stats': proj_trans_stats,
+    'doc_trans_stats': doc_trans_stats,
 }
 
 
