@@ -588,7 +588,7 @@ def push(command_options, args):
     pass
 
 
-@command(GenericPull, True)
+@command(GenericPull, False)
 def pull(command_options, args, project_type=None):
     """
     Usage: zanata pull [OPTIONS] {documents} {lang}
