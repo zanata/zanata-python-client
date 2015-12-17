@@ -27,7 +27,7 @@ def get_client_version():
 EOF
     """, shell=True)
 
-    if number == 'UKNOWN':
+    if number == 'UNKNOWN':
         try:
             file = open(version_file, 'rb')
             client_version = file.read()
@@ -35,7 +35,7 @@ EOF
             number = client_version[:-1][len('version: '):]
         except IOError:
             file = open(version_file, 'w')
-            file.write("version: UKNOWN")
+            file.write("version: UNKNOWN")
             file.close
 
     return number
