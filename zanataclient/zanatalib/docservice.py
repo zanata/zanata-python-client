@@ -58,22 +58,14 @@ class DocumentService(Service):
         @raise BadRequestBodyException:
         @raise SameNameDocumentException:
         """
-        headers = {}
-        headers['X-Auth-User'] = self.projects.username
-        headers['X-Auth-Token'] = self.projects.apikey
-
         ext = "?ext=gettext&ext=comment&copyTrans=%s" % copytrans
-
         res, content = self.projects.restclient.process_request('commit_template', projectid, iterationid,
-                                                                body=resources, headers=headers, extension=ext)
+                                                                body=resources, headers=self.http_headers, extension=ext)
         return self.messages(res, content)
 
     def delete_template(self, projectid, iterationid, file_id):
-        headers = {}
-        headers['X-Auth-User'] = self.projects.username
-        headers['X-Auth-Token'] = self.projects.apikey
         res, content = self.projects.restclient.process_request('delete_template', projectid, iterationid, file_id,
-                                                                headers=headers)
+                                                                headers=self.http_headers)
         return self.messages(res, content)
 
     def retrieve_template(self, projectid, iterationid, file_id):
@@ -101,11 +93,7 @@ class DocumentService(Service):
         return self.messages(res, content)
 
     def commit_translation(self, projectid, iterationid, fileid, localeid, resources, merge):
-        headers = {}
-        headers['X-Auth-User'] = self.projects.username
-        headers['X-Auth-Token'] = self.projects.apikey
-
         ext = "?ext=gettext&ext=comment&merge=%s" % merge
         res, content = self.projects.restclient.process_request('commit_translation', projectid, iterationid, fileid, localeid,
-                                                                body=resources, headers=headers, extension=ext)
+                                                                body=resources, headers=self.http_headers, extension=ext)
         return self.messages(res, content)
