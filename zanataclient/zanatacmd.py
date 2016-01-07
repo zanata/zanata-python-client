@@ -184,11 +184,14 @@ class ZanataCommand:
                         self.log.error(str(e))
                         sys.exit(1)
 
+    def get_projects(self):
+        return self.zanata_resource.projects.list()
+
     def list_projects(self):
         """
         List the information of all the project on the zanata server
         """
-        projects = self.zanata_resource.projects.list()
+        projects = self.get_projects()
 
         if not projects:
             # As we are catching exceptions related to reaching server,
@@ -221,6 +224,19 @@ class ZanataCommand:
         except InvalidOptionException:
             self.log.error("Options are not valid")
 
+    def get_project_versions(self, project_id):
+        try:
+            p = self.zanata_resource.projects.get(project_id)
+            project_versions = []
+            if hasattr(p, 'iterations'):
+                for iteration in p.iterations:
+                    project_versions.append(iteration.get('id'))
+            return project_versions
+        except NoSuchProjectException, e:
+            self.log.error(str(e))
+        except InvalidOptionException:
+            self.log.error("Options are not valid")
+
     def version_info(self, project_id, iteration_id):
         """
         Retrieve the information of a project iteration.
@@ -236,17 +252,19 @@ class ZanataCommand:
         except NoSuchProjectException, e:
             self.log.error(str(e))
 
-    def create_project(self, project_id, project_name, project_desc):
+    def create_project(self, project_id, project_name, project_desc, project_type):
         """
         Create project with the project id, project name and project description
         @param args: project id
         """
         try:
-            item = {'id': project_id, 'name': project_name, 'desc': project_desc}
+            item = {'id': project_id, 'name': project_name,
+                    'desc': project_desc, 'type': project_type}
             p = Project(item)
             result = self.zanata_resource.projects.create(p)
             if result:
                 self.log.info("Successfully created project: %s" % project_id)
+                return True
         except ZanataException, e:
             self.log.error(str(e))
 
@@ -261,6 +279,7 @@ class ZanataCommand:
             result = self.zanata_resource.projects.iterations.create(project_id, iteration)
             if result:
                 self.log.info("Successfully created version: %s" % version_id)
+                return True
         except ZanataException, e:
             self.log.error(str(e))
 

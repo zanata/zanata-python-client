@@ -62,10 +62,13 @@ project_config_without_locale_map = {'transdir': '/home/user/project/target', 'p
                                      'project_version': '1.0', 'client_version': '1.3.12-74-g0b1d-mod', 'project_id': 'test-project',
                                      'user_name': 'username'}
 
+mock_project_remote_config = {'url': 'http://localhost/zanata/', 'project': 'id', 'project-version': '1', 'project-type': 'podir'}
+
 
 class ProjectContextTest(unittest.TestCase):
     def setUp(self):
         self.context = ProjectContext(command_options)
+        self.init_context = ProjectContext(command_options, 'init')
 
     def test_command_options(self):
         command_options_keys = ['project_type', 'comment_cols', 'user_config', 'project_config']
@@ -96,7 +99,9 @@ class ProjectContextTest(unittest.TestCase):
 
     @mock.patch('zanataclient.zanatalib.projectservice.LocaleService.get_locales')
     @mock.patch('zanataclient.zanatalib.versionservice.VersionService.get_server_version')
-    def test_build_remote_config(self, mock_get_server_version, mock_get_locales):
+    @mock.patch('zanataclient.zanatalib.projectservice.IterationService.config')
+    def test_build_remote_config(self, mock_config, mock_get_server_version, mock_get_locales):
+        mock_config.return_value = mock_project_remote_config
         mock_get_server_version.return_value = version_service_return_content
         mock_get_locales.return_value = iteration_locales_return_content
         self.context.build_local_config()
@@ -110,10 +115,13 @@ class ProjectContextTest(unittest.TestCase):
             'if not found context will go for remote locale_map'
         )
         self.assertEqual(self.context.remote_config['server_version'], '3.7.3')
+        self.assertEqual(self.context.remote_config['project_type'], 'podir')
 
     @mock.patch('zanataclient.zanatalib.projectservice.LocaleService.get_locales')
     @mock.patch('zanataclient.zanatalib.versionservice.VersionService.get_server_version')
-    def test_get_context_data_local_locale_map(self, mock_get_server_version, mock_get_locales):
+    @mock.patch('zanataclient.zanatalib.projectservice.IterationService.config')
+    def test_get_context_data_local_locale_map(self, mock_config, mock_get_server_version, mock_get_locales):
+        mock_config.return_value = mock_project_remote_config
         mock_get_server_version.return_value = version_service_return_content
         mock_get_locales.return_value = project_locales_return_content
         context_data = self.context.get_context_data()
@@ -133,9 +141,11 @@ class ProjectContextTest(unittest.TestCase):
     @mock.patch('zanataclient.parseconfig.ZanataConfig.read_project_config')
     @mock.patch('zanataclient.zanatalib.projectservice.LocaleService.get_locales')
     @mock.patch('zanataclient.zanatalib.versionservice.VersionService.get_server_version')
+    @mock.patch('zanataclient.zanatalib.projectservice.IterationService.config')
     def test_get_context_data_remote_locale_map(
-            self, mock_get_server_version, mock_get_locales, mock_read_project_config
+            self, mock_config, mock_get_server_version, mock_get_locales, mock_read_project_config
     ):
+        mock_config.return_value = mock_project_remote_config
         mock_get_server_version.return_value = version_service_return_content
         mock_get_locales.return_value = project_locales_return_content
         mock_read_project_config.return_value = project_config_without_locale_map
@@ -150,6 +160,11 @@ class ProjectContextTest(unittest.TestCase):
         locale_map = self.context.process_locales(iteration_locales_return_content)
         self.assertEqual(locale_map, {'bn-IN': 'bn-IN', 'pa-IN': 'pa', 'en-US': 'en-US',
                                       'hi-IN': 'hi', 'ta-IN': 'ta-IN'})
+
+    def test_init_context(self):
+        context_data = self.init_context.get_context_data()
+        self.assertIn('servers', context_data)
+        self.assertIn('http://localhost:8080/zanata', context_data['servers'])
 
 if __name__ == '__main__':
     unittest.main()

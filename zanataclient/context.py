@@ -33,7 +33,9 @@ from parseconfig import ZanataConfig
 from zanatalib.error import (
     UnAvaliableResourceException, UnavailableServiceError
 )
-from zanatalib.projectservice import LocaleService
+from zanatalib.projectservice import (
+    LocaleService, IterationService
+)
 from zanatalib.versionservice import VersionService
 
 log = Logger()
@@ -43,58 +45,23 @@ user_config_file_tuple = ('zanata.ini', 'flies.ini')
 client_version_file = 'VERSION-FILE'
 
 
-class ProjectContext(object):
+class ContextBase(object):
     """
     Base class to build context_data dict for the project.
-    Order of precedence would be (1) command options (2) local config (3) remote config
     """
     def __init__(self, command_options, *args, **kwargs):
         self.command_options = command_options
+        self.mode = args[0] if len(args) > 0 and args[0] else 'default'
         self.log = Logger()
         self.config = ZanataConfig()
 
-        self.remote_config, self.local_config,\
-            self.command_dict, self.context_data = [{} for i in range(4)]
+        self.remote_config, self.local_config, \
+            self.command_dict = [{} for i in range(3)]
 
         for option_set in self.command_options:
             self.command_dict.update(
                 {option_set: self.command_options[option_set][0]['value']}
             )
-
-    def get_context_data(self):
-        """
-        updates context_data with remote_config, local_config and command_dict
-        """
-        build_configs = [self.build_local_config,
-                         self.build_remote_config]
-        [method() for method in build_configs]
-        # lowest to higest
-        precedence = [self.remote_config, self.local_config, self.command_dict]
-        context_data = reduce(
-            lambda option, value: dict(option.items() + value.items()), precedence
-        )
-        return self.filter_context_data(context_data)
-
-    def filter_context_data(self, data):
-        """
-        filters context data
-        """
-        # key was to fill http_header['token']
-        remove_items = ['key']
-        for item in remove_items:
-            data.pop(item, None)
-        return data
-
-    def build_local_config(self):
-        """
-        This builds local configuration dict.
-        """
-        local_config_methods = [self._update_project_config,
-                                self._update_url,
-                                self._update_user_config,
-                                self._update_http_headers,
-                                self._update_client_version]
-        [method() for method in local_config_methods]
 
     def _update_project_config(self):
         """
@@ -157,6 +124,9 @@ class ProjectContext(object):
                 # Read the user-config file
                 self.config.set_userconfig(path)
                 try:
+                    if self.mode == 'init':
+                        self.local_config.update({'servers': self.config.get_servers()})
+                        return
                     server = self.config.get_server(self.get_url())
                     if server:
                         user_name = self.config.get_config_value("username", "servers", server)
@@ -169,7 +139,7 @@ class ProjectContext(object):
                             log.info("zanata server: %s" % self.get_url())
                             return True
                 except Exception, e:
-                    log.info("Processing user-config file: %s" % str(e))
+                    log.error("Processing user-config file: %s" % str(e))
                     break
                 break
 
@@ -178,8 +148,8 @@ class ProjectContext(object):
         Updates http_header in local_config
         """
         headers = {
-            'X-Auth-User': self.command_options.get('user_name') or self.local_config.get('user_name') or '',
-            'X-Auth-Token': self.command_options.get('key') or self.local_config.get('key') or '',
+            'X-Auth-User': self.command_dict.get('user_name') or self.local_config.get('user_name') or '',
+            'X-Auth-Token': self.command_dict.get('key') or self.local_config.get('key') or '',
             'Accept': accept_format or 'application/json'
         }
         self.local_config.update({'http_headers': headers})
@@ -210,16 +180,6 @@ class ProjectContext(object):
             self.command_dict.get('project_id') or self.local_config.get('project_id'),
             self.command_dict.get('project_version') or self.local_config.get('project_version')
         )
-
-    def build_remote_config(self):
-        """
-        This builds remote configuration dict.
-        """
-        build_remote_config = [self._update_server_version,
-                               self._update_locale_mapping,
-                               self._update_project_type]
-        [method() for method in build_remote_config]
-        return self.remote_config
 
     def _update_server_version(self):
         """
@@ -267,9 +227,15 @@ class ProjectContext(object):
         """
         This fetches project_type from server
         """
-        # toDo implement
-        # /projects/p/{projectSlug}/iterations/i/{iterationSlug}/config
-        pass
+        if self.local_config.get('project_id') and self.local_config.get('project_version'):
+            if self.local_config.get('http_headers').get('Content-Type'):
+                self.local_config['http_headers']['Content-Type'] = 'application/xml'
+            project_config = \
+                IterationService(self.get_url(), self.local_config.get('http_headers')).config(
+                    self.local_config.get('project_id'), self.local_config.get('project_version')
+                )
+            if project_config.get('project-type'):
+                self.remote_config.update({'project_type': project_config['project-type']})
 
     def process_locales(self, locales):
         """
@@ -284,3 +250,73 @@ class ProjectContext(object):
                     {locale.get('alias') or locale.get('localeId'): locale.get('localeId')}
                 )
         return locale_map
+
+    def get_local_configs(self):
+        """
+        Selects methods for local configs for a given mode
+        :return: methods_list
+        """
+        context_local_configs = {
+            'default': [self._update_project_config, self._update_url, self._update_user_config,
+                        self._update_http_headers, self._update_client_version],
+            'init': [self._update_user_config, self._update_client_version],
+        }
+        return context_local_configs[self.mode]
+
+    def get_remote_configs(self):
+        """
+        Selects methods for remote configs for a given mode
+        :return: methods_list
+        """
+        context_remote_configs = {
+            'default': [self._update_server_version, self._update_locale_mapping,
+                        self._update_project_type],
+            'init': [],
+        }
+        return context_remote_configs[self.mode]
+
+
+class ProjectContext(ContextBase):
+    """
+    Class to build context_data dict for the project.
+    Order of precedence would be (1) command options (2) local config (3) remote config
+    """
+
+    def get_context_data(self):
+        """
+        updates context_data with remote_config, local_config and command_dict
+        """
+        build_configs = [self.build_local_config,
+                         self.build_remote_config]
+        [method() for method in build_configs]
+        # lowest to higest
+        precedence = [self.remote_config, self.local_config, self.command_dict]
+        context_data = reduce(
+            lambda option, value: dict(option.items() + value.items()), precedence
+        )
+        return self.filter_context_data(context_data)
+
+    def filter_context_data(self, data):
+        """
+        filters context data
+        """
+        # key was to fill http_header['token']
+        remove_items = ['key']
+        for item in remove_items:
+            data.pop(item, None)
+        return data
+
+    def build_local_config(self):
+        """
+        This builds local configuration dict.
+        """
+        local_config_methods = self.get_local_configs()
+        [method() for method in local_config_methods]
+
+    def build_remote_config(self):
+        """
+        This builds remote configuration dict.
+        """
+        build_remote_config = self.get_remote_configs()
+        [method() for method in build_remote_config]
+        return self.remote_config

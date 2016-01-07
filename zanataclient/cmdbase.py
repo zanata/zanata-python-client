@@ -32,10 +32,7 @@ from zanatalib.logger import Logger
 log = Logger()
 
 
-class CommandsBase(object):
-    """
-    This is base class for all zpc commands
-    """
+class CommandsInit(object):
     _fields = ['args', 'context_data']
 
     def __init__(self, *args, **kargs):
@@ -43,6 +40,20 @@ class CommandsBase(object):
             setattr(self, name, val)
         for key, value in kargs.iteritems():
             setattr(self, key, value)
+
+    def check_essential(self, item, message):
+        if not item:
+            log.error(message)
+            sys.exit(1)
+        return item
+
+
+class CommandsBase(CommandsInit):
+    """
+    This is base class for zpc commands
+    """
+    def __init__(self, *args, **kargs):
+        super(CommandsBase, self).__init__(*args, **kargs)
         self.zanatacmd = self.create_zanatacmd()
 
     def create_zanatacmd(self):
@@ -60,12 +71,6 @@ class CommandsBase(object):
                 log.error("Please specify username and apikey in zanata.ini or with '--username' and '--apikey' options")
                 sys.exit(1)
         return ZanataCommand(url, headers)
-
-    def check_essential(self, item, message):
-        if not item:
-            log.error(message)
-            sys.exit(1)
-        return item
 
 
 class ListProjects(CommandsBase):
@@ -107,19 +112,27 @@ class CreateProject(CommandsBase):
         super(CreateProject, self).__init__(*args, **kargs)
 
     def run(self):
-        if self.args:
+        if len(self.args) > 0:
             project_id = self.args[0]
         else:
             log.error("Please provide PROJECT_ID for creating project")
             sys.exit(1)
-        if self.context_data.get('project_name'):
-            project_name = self.context_data['project_name']
-        else:
-            log.error("Please specify project name with '--project-name' option")
-            sys.exit(1)
-        if self.context_data.get('project_desc'):
-            project_desc = self.context_data['project_desc']
-        self.zanatacmd.create_project(project_id, project_name, project_desc)
+        self.check_essential(
+            self.context_data.get('project_name'),
+            "Please specify project name with '--project-name' option"
+        )
+        project_name = self.context_data['project_name']
+        project_desc = self.context_data['project_desc'] \
+            if self.context_data.get('project_desc') else ''
+        project_type = (
+            self.context_data['project_type']
+            if self.context_data.get('project_type') and (self.context_data.get('project_type')
+                                                          in ('gettext', 'podir'))
+            else 'IterationProject'
+        )
+        self.zanatacmd.create_project(
+            project_id, project_name, project_desc, project_type
+        )
 
 
 class CreateVersion(CommandsBase):
