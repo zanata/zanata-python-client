@@ -1,5 +1,8 @@
-* Thu Dec 10 2015 Sundeep Anand <suanand@redhat.com>
-- Implemented zanata stats (ZNTA-780)
+* Thu Jan 7 2016 Sundeep Anand <suanand@redhat.com>
+- Implemented zanata init (ZNTA-780)
+- Bug ZNTA-853 - Crash when pushing local translations
+- Bug 1206995 - allow anonymous pull
+- Implemented zanata stats
 
 * Wed Dec 02 2015 Sundeep Anand <suanand@redhat.com> - 1.4.0
 - Bug 1215274 - specify minimum percentage completion on pull

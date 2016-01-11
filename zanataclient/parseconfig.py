@@ -60,6 +60,20 @@ class ZanataConfig:
         else:
             return None
 
+    def get_servers(self):
+        if self._config:
+            try:
+                servers = []
+                item_list = self.configparser.items('servers')
+                for item in item_list:
+                    if 'url' in item[0]:
+                        servers.append(item[1])
+                return servers
+            except ConfigParser.NoOptionError, ConfigParser.NoSectionError:
+                raise
+        else:
+            return None
+
     def get_config_value(self, name, section, server):
         if self._config:
             try:

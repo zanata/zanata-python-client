@@ -84,8 +84,8 @@ class ProjectService(Service):
         @raise UnAuthorizedException:
         @raise BadRequestException:
         """
-        body = '''{"name":"%s","id":"%s","description":"%s","type":"IterationProject"}''' % (
-            project.name, project.id, project.desc
+        body = '''{"name":"%s","id":"%s","description":"%s","type":"%s"}''' % (
+            project.name, project.id, project.desc, project.type
         )
         res, content = self.restclient.process_request(
             'create_project', project.id, body=body, headers=self.http_headers
@@ -146,6 +146,18 @@ class IterationService(Service):
 
     def delete(self):
         pass
+
+    def config(self, projectid, iterationid):
+        """
+        Retrieve project config from server
+        @param projectid: Id of Project Resource
+        @param iterationid: Id of Iteration Resource
+        @return: Project Config
+        @raise NoSuchProjectException
+        """
+        res, content = self.restclient.process_request('project_config', projectid, iterationid,
+                                                       headers=self.http_headers)
+        return self.messages(res, content)
 
 
 class LocaleService(Service):

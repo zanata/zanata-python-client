@@ -37,6 +37,13 @@ SERVICE_RESPONSE_401 = {'status': '401'}
 SERVICE_RESPONSE_503 = {'status': '503'}
 RESPONSE_CONTENT = {}
 RESPONSE_CONTENT_200 = '[{"project-name": "test-project", "project-id": "12345"}]'
+SERVICE_RESPONSE_200_XML = {'status': '200', 'content-type': 'application/xml'}
+RESPONSE_CONTENT_200_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' \
+                           '<config xmlns="http://zanata.org/namespace/config/">\n  ' \
+                           '<url>https://translate.zanata.org/zanata/</url>\n  ' \
+                           '<project>test-project</project>\n  ' \
+                           '<project-version>12345</project-version>\n  ' \
+                           '<project-type>podir</project-type>\n\n</config>\n'
 
 
 class ServiceTest(unittest.TestCase):
@@ -48,6 +55,12 @@ class ServiceTest(unittest.TestCase):
         result_set = self.service.messages(SERVICE_RESPONSE_200, RESPONSE_CONTENT_200)
         self.assertEqual(result_set[0]['project-id'], "12345")
         self.assertEqual(result_set[0]['project-name'], "test-project")
+
+    def test_messages_status_200_xml(self):
+        result_set = self.service.messages(SERVICE_RESPONSE_200_XML, RESPONSE_CONTENT_200_XML)
+        self.assertEqual(result_set['project-version'], "12345")
+        self.assertEqual(result_set['project'], "test-project")
+        self.assertEqual(result_set['project-type'], "podir")
 
     def test_messages_status_201(self):
         result_set = self.service.messages(SERVICE_RESPONSE_201, RESPONSE_CONTENT)

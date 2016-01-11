@@ -42,6 +42,7 @@ from pushcmd import PoPush
 from pushcmd import PublicanPush
 from pushcmd import GenericPush
 from pullcmd import GenericPull
+from initcmd import ZanataInit
 
 log = Logger()
 
@@ -308,7 +309,8 @@ subcmds = {
     'push': [],
     'pull': [],
     'glossary': ['push', 'delete'],
-    'stats': []
+    'stats': [],
+    'init': [],
 }
 
 usage = """Client for talking to a Zanata Server
@@ -316,6 +318,7 @@ Usage: zanata <command> [COMMANDOPTION]...
 
 list of commands:
 help                Display this help and exit
+init                Initialize Zanata project configuration
 list                List all available projects
 project info        Show information about a project
 version info        Show information about a version
@@ -375,11 +378,11 @@ def process_command(args):
 #################################
 
 
-def command(cmd, auth_req):
+def command(cmd, auth_req, mode=None):
     def command_decorator(func):
         @wraps(func)
         def run_func(command_options, args, project_type=None):
-            context_data = ProjectContext(command_options).get_context_data()
+            context_data = ProjectContext(command_options, mode).get_context_data()
             context_data['auth_req'] = auth_req
             if project_type:
                 context_data['project_type'] = project_type
@@ -452,6 +455,7 @@ def create_project(command_options, args):
         --apikey        : api key of user (defaults to zanata.ini value)
         --project-name  : project name
         --project-desc  : project description
+        --project-type  : project type (gettext, podir)
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     pass
@@ -690,6 +694,24 @@ def stats(command_options, args):
     pass
 
 
+@command(ZanataInit, False, 'init')
+def init(command_options, args):
+    """
+    Usage: zanata init [OPTIONS]
+
+    Initialize Zanata project configuration
+
+    Options:
+        --url               : URL of zanata server
+        --username          : user name (defaults to zanata.ini value)
+        --apikey            : api key of user (defaults to zanata.ini value)
+        --project-id        : id of the project (defaults to zanata.xml value)
+        --project-version   : id of the version (defaults to zanata.xml value)
+        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+    """
+    pass
+
+
 command_handler_factories = {
     'help': makeHandler(help_info),
     'list': makeHandler(list_project),
@@ -705,7 +727,8 @@ command_handler_factories = {
     'pull': makeHandler(pull),
     'glossary_push': makeHandler(glossary_push),
     'glossary_delete': makeHandler(glossary_delete),
-    'stats': makeHandler(stats)
+    'stats': makeHandler(stats),
+    'init': makeHandler(init),
 }
 
 

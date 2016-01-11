@@ -25,6 +25,9 @@ __all__ = (
     "Project", "Iteration", "Stats"
 )
 
+from xml.dom import minidom
+import xml.etree.cElementTree as ET
+
 
 class Link(object):
     def __init__(self, dict):
@@ -96,3 +99,44 @@ class Stats(object):
                 if isinstance(doc, dict) and doc.get('id') and doc.get('stats'):
                     trans_dict.update({doc['id']: doc['stats']})
         return trans_dict
+
+
+class ToolBox(object):
+    """
+    Various Useful Utilities
+    """
+    @staticmethod
+    def xmlstring2dict(xmlstring):
+        """
+        Converts xmlstring to python dict
+        :param xmlstring:
+        :return: dict
+        """
+        tree = ET.fromstring(xmlstring)
+        xmldict = {}
+        for child in tree:
+            xmldict[child.tag.split("}")[1]] = child.text
+        return xmldict
+
+    @staticmethod
+    def prettify(elem):
+        """
+        Return a pretty-printed XML string for the Element.
+        """
+        rough_string = ET.tostring(elem, 'utf-8')
+        reparsed = minidom.parseString(rough_string)
+        return reparsed.toprettyxml(indent="\t")
+
+    @staticmethod
+    def dict2xml(tag, dict):
+        '''
+        Converts dict of key/value pairs into XML
+        '''
+        xml_ns = "http://zanata.org/namespace/config/"
+        ET.register_namespace('', xml_ns)
+        elem = ET.Element(tag)
+        for key, val in dict.items():
+            child = ET.Element(key)
+            child.text = str(val)
+            elem.append(child)
+        return ToolBox.prettify(elem)

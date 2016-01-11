@@ -10,6 +10,7 @@ from error import NotAllowedException
 from error import SameNameDocumentException
 from error import ForbiddenException
 from rest.client import RestClient
+from projectutils import ToolBox
 
 import json
 import sys
@@ -56,7 +57,8 @@ class Service(object):
             if extra_msg:
                 raise ProjectExistException('Status 200', extra_msg)
             try:
-                rst = json.loads(content)
+                rst = ToolBox.xmlstring2dict(content) \
+                    if res.get('content-type') and 'xml' in res['content-type'] else json.loads(content)
             except ValueError, e:
                 if content.strip() == "":
                     return rst

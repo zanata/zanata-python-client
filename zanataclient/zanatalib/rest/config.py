@@ -19,24 +19,26 @@
 # Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA  02110-1301, USA.
 
-from collections import namedtuple
+from collections import (
+    namedtuple, OrderedDict
+)
 
 middle_url = '/seam/resource/restv1'
 http_methods = ('GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS')
 media_types = ('application/json', 'application/vnd.zanata.projects+json', 'application/vnd.zanata.Version+json',
                'application/vnd.zanata.project.iteration+json', 'application/vnd.zanata.glossary+json',
-               'application/vnd.zanata.project.locales+json')
+               'application/vnd.zanata.project.locales+json', 'application/xml')
 project_types = ('utf8properties', 'properties', 'gettext', 'podir', 'xliff', 'xml', 'file')
 
 # based on https://zanata.ci.cloudbees.com/job/zanata-api-site/site/zanata-common-api/rest-api-docs/index.html
 # please add, modify resource details here, and make entry in service-to-resource mappings and in zpc_services
 resource_config_dict = {
-    'AccountResource': {},
-    'AsynchronousProcessResource': {},
-    'CopyTransResource': {},
-    'FileResource': {},
-    'GlossaryResource': {
-        '/glossary': {
+    'AccountResource': OrderedDict(),
+    'AsynchronousProcessResource': OrderedDict(),
+    'CopyTransResource': OrderedDict(),
+    'FileResource': OrderedDict(),
+    'GlossaryResource': OrderedDict([
+        ('/glossary', {
             http_methods[2]: {
                 'path_params': None,
                 'query_params': None,
@@ -48,19 +50,19 @@ resource_config_dict = {
                 'query_params': None,
                 'response_media_type': media_types[4],
             },
-        },
-    },
-    'ProjectIterationLocalesResource': {
-        '/projects/p/{projectSlug}/iterations/i/{iterationSlug}/locales': {
+        }),
+    ]),
+    'ProjectIterationLocalesResource': OrderedDict([
+        ('/projects/p/{projectSlug}/iterations/i/{iterationSlug}/locales', {
             http_methods[0]: {
                 'path_params': ('projectSlug', 'iterationSlug'),
                 'query_params': None,
                 'response_media_type': media_types[5],
             },
-        }
-    },
-    'ProjectIterationResource': {
-        '/projects/p/{projectSlug}/iterations/i/{iterationSlug}': {
+        }),
+    ]),
+    'ProjectIterationResource': OrderedDict([
+        ('/projects/p/{projectSlug}/iterations/i/{iterationSlug}', {
             http_methods[0]: {
                 'path_params': ('projectSlug', 'iterationSlug'),
                 'query_params': None,
@@ -72,19 +74,27 @@ resource_config_dict = {
                 'request_media_type': media_types[3],
                 'response_media_type': media_types[0],
             },
-        },
-    },
-    'ProjectLocalesResource': {
-        '/projects/p/{projectSlug}/locales': {
+        }),
+        ('/projects/p/{projectSlug}/iterations/i/{iterationSlug}/config', {
+            http_methods[0]: {
+                'path_params': ('projectSlug', 'iterationSlug'),
+                'query_params': None,
+                'request_media_type': media_types[6],
+                'response_media_type': media_types[6],
+            },
+        })]
+    ),
+    'ProjectLocalesResource': OrderedDict([
+        ('/projects/p/{projectSlug}/locales', {
             http_methods[0]: {
                 'path_params': ('projectSlug',),
                 'query_params': None,
                 'response_media_type': media_types[5],
             },
-        }
-    },
-    'ProjectResource': {
-        '/projects/p/{projectSlug}': {
+        }),
+    ]),
+    'ProjectResource': OrderedDict([
+        ('/projects/p/{projectSlug}', {
             http_methods[0]: {
                 'path_params': ('projectSlug',),
                 'query_params': None,
@@ -96,19 +106,19 @@ resource_config_dict = {
                 'request_media_type': media_types[0],
                 'response_media_type': media_types[0],
             },
-        },
-    },
-    'ProjectsResource': {
-        '/projects': {
+        }),
+    ]),
+    'ProjectsResource': OrderedDict([
+        ('/projects', {
             http_methods[0]: {
                 'path_params': None,
                 'query_params': None,
                 'response_media_type': media_types[1],
             },
-        },
-    },
-    'SourceDocResource': {
-        '/projects/p/{projectSlug}/iterations/i/{iterationSlug}/r': {
+        }),
+    ]),
+    'SourceDocResource': OrderedDict([
+        ('/projects/p/{projectSlug}/iterations/i/{iterationSlug}/r', {
             http_methods[0]: {
                 'path_params': ('projectSlug', 'iterationSlug'),
                 'query_params': None,
@@ -120,8 +130,8 @@ resource_config_dict = {
                 'request_media_type': media_types[0],
                 'response_media_type': media_types[0],
             },
-        },
-        '/projects/p/{projectSlug}/iterations/i/{iterationSlug}/r/{id}': {
+        }),
+        ('/projects/p/{projectSlug}/iterations/i/{iterationSlug}/r/{id}', {
             http_methods[0]: {
                 'path_params': ('projectSlug', 'iterationSlug', 'id'),
                 'query_params': None,
@@ -138,26 +148,26 @@ resource_config_dict = {
                 'query_params': None,
                 'response_media_type': media_types[0],
             },
-        },
-    },
-    'StatisticsResource': {
-        '/stats/proj/{projectSlug}/iter/{iterationSlug}': {
+        }),
+    ]),
+    'StatisticsResource': OrderedDict([
+        ('/stats/proj/{projectSlug}/iter/{iterationSlug}', {
             http_methods[0]: {
                 'path_params': ('projectSlug', 'iterationSlug'),
                 'query_params': None,
                 'response_media_type': media_types[0],
             },
-        },
-        '/stats/proj/{projectSlug}/iter/{iterationSlug}/doc/{docId}': {
+        }),
+        ('/stats/proj/{projectSlug}/iter/{iterationSlug}/doc/{docId}', {
             http_methods[0]: {
                 'path_params': ('projectSlug', 'iterationSlug', 'docId'),
                 'query_params': None,
                 'response_media_type': media_types[0],
             },
-        }
-    },
-    'TranslatedDocResource': {
-        '/projects/p/{projectSlug}/iterations/i/{iterationSlug}/r/{id}/translations/{locale}': {
+        }),
+    ]),
+    'TranslatedDocResource': OrderedDict([
+        ('/projects/p/{projectSlug}/iterations/i/{iterationSlug}/r/{id}/translations/{locale}', {
             http_methods[0]: {
                 'path_params': ('projectSlug', 'iterationSlug', 'id', 'locale'),
                 'query_params': None,
@@ -169,18 +179,18 @@ resource_config_dict = {
                 'request_media_type': media_types[0],
                 'response_media_type': media_types[0],
             },
-        }
-    },
-    'TranslationMemoryResource': {},
-    'VersionResource': {
-        '/version': {
+        }),
+    ]),
+    'TranslationMemoryResource': OrderedDict(),
+    'VersionResource': OrderedDict([
+        ('/version', {
             http_methods[0]: {
                 'path_params': None,
                 'query_params': None,
                 'response_media_type': media_types[2],
             },
-        }
-    }
+        }),
+    ]),
 }
 
 resource = namedtuple('service', 'rest_resource mount_point http_method')
@@ -210,6 +220,8 @@ iteration_locales = resource('ProjectIterationLocalesResource',
                              resource_config_dict['ProjectIterationLocalesResource'].keys()[0], http_methods[0])
 proj_trans_stats = resource('StatisticsResource', resource_config_dict['StatisticsResource'].keys()[0], http_methods[0])
 doc_trans_stats = resource('StatisticsResource', resource_config_dict['StatisticsResource'].keys()[1], http_methods[0])
+project_config = resource('ProjectIterationResource', resource_config_dict['ProjectIterationResource'].keys()[1],
+                          http_methods[0])
 # zanata-python-client operates on services listed here
 zpc_services = {
     'server_version': server_version,
@@ -231,6 +243,7 @@ zpc_services = {
     'iteration_locales': iteration_locales,
     'proj_trans_stats': proj_trans_stats,
     'doc_trans_stats': doc_trans_stats,
+    'project_config': project_config,
 }
 
 
