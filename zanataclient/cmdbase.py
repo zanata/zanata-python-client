@@ -236,6 +236,9 @@ class Stats(CommandsBase):
                          for cmd in ('detailstats', 'wordstats', 'docid')
                          if cmd in self.context_data])
         cmd_opts['locale_map'] = self.context_data.get('locale_map')
+        if self.context_data.get('lang') and isinstance(self.context_data['lang'], str):
+            cmd_opts['lang'] = filter(lambda locale: locale if locale else None,
+                                      self.context_data['lang'].split(','))
         self.zanatacmd.display_translation_stats(*id_version, **cmd_opts)
 
 

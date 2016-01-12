@@ -1,4 +1,4 @@
-* Thu Jan 7 2016 Sundeep Anand <suanand@redhat.com>
+* Tue Jan 12 2016 Sundeep Anand <suanand@redhat.com> - 1.4.1
 - Implemented zanata init (ZNTA-780)
 - Bug ZNTA-853 - Crash when pushing local translations
 - Bug 1206995 - allow anonymous pull

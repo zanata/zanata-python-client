@@ -37,16 +37,29 @@ class StatService(Service):
     def disable_ssl_cert_validation(self):
         self.restclient.disable_ssl_cert_validation()
 
-    def get_project_stats(self, project_id, project_version, word=False):
+    def _append_locales(self, ext, locales):
+        for locale in locales:
+            ext += '&locale=%s' % locale
+        return ext
+
+    def get_project_stats(
+            self, project_id, project_version, word=False, locales=None
+    ):
         ext = "?detail=true&word=true" if word else "?detail=true&word=false"
+        if isinstance(locales, list) and len(locales) > 0:
+            ext = self._append_locales(ext, locales)
         res, content = self.restclient.process_request(
             'proj_trans_stats', project_id, project_version,
             headers=self.http_headers, extension=ext
         )
         return self.messages(res, content)
 
-    def get_doc_stats(self, project_id, project_version, doc_id, word=False):
+    def get_doc_stats(
+            self, project_id, project_version, doc_id, word=False, locales=None
+    ):
         ext = "?detail=true&word=true" if word else "?detail=true&word=false"
+        if isinstance(locales, list) and len(locales) > 0:
+            ext = self._append_locales(ext, locales)
         res, content = self.restclient.process_request(
             'doc_trans_stats', project_id, project_version, doc_id,
             headers=self.http_headers, extension=ext
