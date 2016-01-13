@@ -251,12 +251,12 @@ class ZanataInit(CommandsInit, ContextBase):
             elements = match.split('/')
             elements[0] = transdir
             elements[len(elements) - 1] = locale + '.po'
-            print("\t  " + '/'.join(elements))
+            self.ptxt('info_blue', "\t  " + '/'.join(elements))
         elif self.local_config.get('project_type') == 'podir':
             elements = match.split('/')
             elements[0] = transdir
             elements.insert(len(elements) - 1, locale)
-            print("\t  " + '/'.join(elements).replace('pot', 'po'))
+            self.ptxt('info_blue', "\t  " + '/'.join(elements).replace('pot', 'po'))
 
     def print_dir_contents(self, directory, mode, transdir):
         matches = []
@@ -267,12 +267,13 @@ class ZanataInit(CommandsInit, ContextBase):
         if len(matches) > 0:
             locale = 'en-US'
             if mode == 'source':
-                print("\n\tFound %s documents: " % mode)
+                self.ptxt('header', "\n\tFound %s documents: " % mode)
             else:
-                print('\n\tZanata will put translation files as below (e.g. for locale %s): ' % locale)
+                self.ptxt('header', '\n\tZanata will put translation files as '
+                                    'below (e.g. for locale %s): ' % locale)
             for match in matches:
                 if mode == 'source':
-                    print("\t\t%s" % match.rstrip(ext))
+                    self.ptxt('info_blue', "\t\t%s" % match.rstrip(ext))
                 else:
                     self.print_trans_matches(match, locale, transdir)
 

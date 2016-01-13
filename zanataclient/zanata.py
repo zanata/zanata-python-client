@@ -688,6 +688,7 @@ def stats(command_options, args):
         --project-version   : id of the version (defaults to zanata.xml value)
         --details           : Include statistics for lower levels (i.e., for documents in a project version)
         --docid             : Document Id to fetch statistics for
+        --lang              : Language list (comma separated)
         --word              : Include word level statistics. By default only message level statistics are shown
         --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """

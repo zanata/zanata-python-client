@@ -626,10 +626,11 @@ class ZanataCommand:
         try:
             project_id, project_version = args
             server_return = self.zanata_resource.stats.get_project_stats(
-                project_id, project_version, 'wordstats' in kwargs
+                project_id, project_version, 'wordstats' in kwargs, kwargs.get('lang')
             ) if not kwargs.get('docid') else \
                 self.zanata_resource.stats.get_doc_stats(
-                    project_id, project_version, kwargs['docid'], 'wordstats' in kwargs
+                    project_id, project_version, kwargs['docid'],
+                    'wordstats' in kwargs, kwargs.get('lang')
             )
         except ZanataException, e:
             self.log.error(str(e))
