@@ -3,6 +3,7 @@
 Build script for zanata-python-client
 """
 from setuptools import setup, find_packages
+import sys
 import os
 import subprocess
 
@@ -39,6 +40,9 @@ EOF
             file.close
 
     return number
+
+assert sys.version_info >= (2, 7), (
+    "Only Python 2.7 and later is supported by zanata-python-client.")
 
 setup(
     name="zanata-python-client",
@@ -77,5 +81,6 @@ setup(
         'License :: OSI Approved :: GNU Lesser General Public License (LGPL)',
         'Operating System :: Unix',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
     ],
 )
