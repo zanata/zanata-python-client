@@ -25,11 +25,11 @@ __all__ = (
     "ZanataResource",
 )
 
-from docservice import DocumentService
-from projectservice import ProjectService
-from versionservice import VersionService
-from glossaryservice import GlossaryService
-from statservice import StatService
+from .docservice import DocumentService
+from .projectservice import ProjectService
+from .versionservice import VersionService
+from .glossaryservice import GlossaryService
+from .statservice import StatService
 
 
 class ZanataResource:

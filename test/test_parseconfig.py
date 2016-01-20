@@ -41,7 +41,7 @@ class ConfigTest(unittest.TestCase):
         user_name = self.config.get_config_value("username", 'servers', server)
         apikey = self.config.get_config_value("key", 'servers', server)
         servers = self.config.get_servers()
-        self.assertIn('http://localhost:8080/zanata', servers)
+        self.assertTrue('http://localhost:8080/zanata' in servers)
         self.assertEqual(server, "local")
         self.assertEqual(user_name, "username")
         self.assertEqual(apikey, "key")

@@ -23,11 +23,13 @@ __all__ = (
     "ZanataConfig",
 )
 
-import ConfigParser
 import os.path
-from zanatalib.logger import Logger
+from .zanatalib.logger import Logger
 from xml.dom import minidom
-
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 
 project_config = {}
 
@@ -38,7 +40,7 @@ class ZanataConfig:
         self._config = ""
 
     def set_userconfig(self, path):
-        self.configparser = ConfigParser.ConfigParser()
+        self.configparser = ConfigParser()
         self._config = self.configparser.read(['zanata.ini', path])
 
     def get_server(self, url):
@@ -55,7 +57,7 @@ class ZanataConfig:
                     if url == address:
                         server = item[0][:-4]
                 return server
-            except ConfigParser.NoOptionError, ConfigParser.NoSectionError:
+            except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
                 raise
         else:
             return None
@@ -69,7 +71,7 @@ class ZanataConfig:
                     if 'url' in item[0]:
                         servers.append(item[1])
                 return servers
-            except ConfigParser.NoOptionError, ConfigParser.NoSectionError:
+            except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
                 raise
         else:
             return None
@@ -79,7 +81,7 @@ class ZanataConfig:
             try:
                 value = self.configparser.get(section, server + '.' + name)
                 return value
-            except ConfigParser.NoOptionError, ConfigParser.NoSectionError:
+            except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
                 raise
         else:
             return None

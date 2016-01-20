@@ -35,7 +35,7 @@ except ImportError:
     import simplejson as json
 import sys
 
-from zanatalib.logger import Logger
+from .zanatalib.logger import Logger
 
 
 class PublicanUtility:
@@ -208,7 +208,7 @@ class PublicanUtility:
             entry = {"key": item[0], "value": item[1]}
             entries.append(entry)
 
-        if pofile.metadata.has_key('Content-Type'):
+        if 'Content-Type' in pofile.metadata:
             self.validate_content_type(pofile.metadata['Content-Type'], object_type)
 
         extensions = [{"object-type": object_type, "comment": pofile.header, "entries": entries}]
@@ -221,7 +221,7 @@ class PublicanUtility:
         """
         try:
             po = polib.pofile(path)
-        except Exception, e:
+        except Exception as e:
             self.log.error(str(e))
             sys.exit(1)
 
@@ -383,7 +383,7 @@ class PublicanUtility:
                 po.metadata[item['key']] = item['value']
             # specify Content-Type charset to UTF-8
             pattern = r'charset=[^;]*'
-            if po.metadata.has_key('Content-Type'):
+            if 'Content-Type' in po.metadata:
                 re.sub(pattern, "charset=UTF-8", po.metadata['Content-Type'])
             else:
                 po.metadata['Content-Type'] = "text/plain; charset=UTF-8"

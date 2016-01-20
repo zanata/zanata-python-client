@@ -1,3 +1,6 @@
+* Wed Jan 20 2016 Sundeep Anand <suanand@redhat.com> - 1.4.2
+- Python 2.6 Support
+
 * Tue Jan 12 2016 Sundeep Anand <suanand@redhat.com> - 1.4.1
 - Implemented zanata init (ZNTA-780)
 - Bug ZNTA-853 - Crash when pushing local translations

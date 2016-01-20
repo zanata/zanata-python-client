@@ -46,18 +46,18 @@ class Logger:
 
     def info(self, message):
         if self.enable_infoprefix:
-            print self.info_prefix + message
+            print(self.info_prefix + message)
         else:
-            print message
+            print(message)
 
     def warn(self, message):
         if self.enable_warnprefix:
-            print self.warn_prefix + message
+            print(self.warn_prefix + message)
         else:
-            print message
+            print(message)
 
     def error(self, message):
         if self.enable_errprefix:
-            print self.error_prefix + message
+            print(self.error_prefix + message)
         else:
-            print message
+            print(message)

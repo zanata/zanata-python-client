@@ -24,8 +24,8 @@ import os
 import sys
 import string
 
-from zanatalib.logger import Logger
-from pushcmd import PushPull
+from .zanatalib.logger import Logger
+from .pushcmd import PushPull
 
 log = Logger()
 
@@ -44,7 +44,7 @@ class GenericPull(PushPull):
         # list the files in project
         try:
             filelist = self.zanatacmd.get_file_list(self.project_id, self.version_id)
-        except Exception, e:
+        except Exception as e:
             log.error(str(e))
             sys.exit(1)
 
@@ -53,25 +53,25 @@ class GenericPull(PushPull):
 
         if self.context_data.get('publican_po'):
             # Keep dir option for publican/po pull
-            if self.context_data.has_key('dir'):
+            if 'dir' in self.context_data:
                 output_folder = self.context_data.get('dir')
 
-            if self.context_data.has_key('dstdir'):
+            if 'dstdir' in self.context_data:
                 output_folder = self.context_data.get('dstdir')
         else:
             # Disable dir option for generic pull command
-            if self.context_data.has_key('dir'):
+            if 'dir' in self.context_data:
                 log.warn("dir option is disabled in pull command, please use --transdir, or specify value in zanata.xml")
 
-            if self.context_data.has_key('dstdir'):
+            if 'dstdir' in self.context_data:
                 log.warn("dstdir option is changed to transdir option for generic pull command")
                 output_folder = self.context_data.get('dstdir')
 
-        if self.context_data.has_key('noskeletons'):
+        if 'noskeletons' in self.context_data:
             skeletons = False
 
         outpath = self.create_outpath(output_folder)
         filedict = self.zanatacmd.get_project_translation_stats(
             self.project_id, self.version_id, self.context_data['mindocpercent'], lang_list, locale_map
-        ) if self.context_data.get('mindocpercent') else {file: lang_list for file in filelist}
+        ) if self.context_data.get('mindocpercent') else dict((file, lang_list) for file in filelist)
         self.zanatacmd.pull_command(locale_map, self.project_id, self.version_id, filedict, outpath, command_type, skeletons)

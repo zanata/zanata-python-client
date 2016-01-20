@@ -25,9 +25,9 @@ __all__ = (
 )
 
 
-from projectutils import Project
-from projectutils import Iteration
-from service import Service
+from .projectutils import Project
+from .projectutils import Iteration
+from .service import Service
 
 
 class ProjectService(Service):
@@ -67,9 +67,9 @@ class ProjectService(Service):
         res, content = self.restclient.process_request('list_project', projectid,
                                                        headers=self.http_headers)
         server_return = self.messages(res, content)
-        if server_return.has_key('status'):
+        if 'status' in server_return:
             if server_return['status'] == "Retired":
-                print "Warning: The project %s is retired!" % projectid
+                print("Warning: The project %s is retired!" % projectid)
         project = Project(server_return)
         project.set_iteration(self.iterations)
         return project
@@ -122,9 +122,9 @@ class IterationService(Service):
         res, content = self.restclient.process_request('get_iteration', projectid, iterationid,
                                                        headers=self.http_headers)
         server_return = self.messages(res, content)
-        if server_return.has_key('status'):
+        if 'status' in server_return:
             if server_return['status'] == "Retired":
-                print "Warning: The project %s is retired!" % iterationid
+                print("Warning: The project %s is retired!" % iterationid)
         return Iteration(server_return)
 
     def create(self, projectid, iteration):
