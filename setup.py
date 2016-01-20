@@ -3,9 +3,13 @@
 Build script for zanata-python-client
 """
 from setuptools import setup, find_packages
-import sys
 import os
 import subprocess
+
+
+def read(fname):
+    return (open(os.path.join(os.path.dirname(__file__), fname), 'rb')
+            .read().decode('utf-8'))
 
 
 def get_client_version():
@@ -41,18 +45,16 @@ EOF
 
     return number
 
-assert sys.version_info >= (2, 7), (
-    "Only Python 2.7 and later is supported by zanata-python-client.")
+requirements = read('requirements.txt').splitlines() + [
+    'setuptools',
+]
 
 setup(
     name="zanata-python-client",
     version=get_client_version(),
     packages=find_packages(),
     include_package_data=True,
-    install_requires=[
-        'polib',
-        'httplib2'
-    ],
+    install_requires=requirements,
     description="Zanata Python Client.",
     author='Jian Ni, Ding-Yi Chen, Anish Patil',
     author_email='jni@redhat.com, dchen@redhat.com, apatil@redhat.com',
@@ -81,6 +83,5 @@ setup(
         'License :: OSI Approved :: GNU Lesser General Public License (LGPL)',
         'Operating System :: Unix',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
     ],
 )

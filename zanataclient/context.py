@@ -27,16 +27,17 @@ __all__ = (
 import re
 import os
 import sys
+import functools
 
-from zanatalib.logger import Logger
-from parseconfig import ZanataConfig
-from zanatalib.error import (
+from .zanatalib.logger import Logger
+from .parseconfig import ZanataConfig
+from .zanatalib.error import (
     UnAvaliableResourceException, UnavailableServiceError
 )
-from zanatalib.projectservice import (
+from .zanatalib.projectservice import (
     LocaleService, IterationService
 )
-from zanatalib.versionservice import VersionService
+from .zanatalib.versionservice import VersionService
 
 log = Logger()
 
@@ -138,7 +139,7 @@ class ContextBase(object):
                             self.local_config.update({'user_name': user_name, 'key': apikey})
                             log.info("zanata server: %s" % self.get_url())
                             return True
-                except Exception, e:
+                except Exception as e:
                     log.error("Processing user-config file: %s" % str(e))
                     break
                 break
@@ -187,7 +188,7 @@ class ContextBase(object):
         """
         version = VersionService(self.get_url(), self.local_config.get('http_headers'))
 
-        if self.command_dict.has_key('disablesslcert'):
+        if 'disablesslcert' in self.command_dict:
             version.disable_ssl_cert_validation()
 
         try:
@@ -291,7 +292,7 @@ class ProjectContext(ContextBase):
         [method() for method in build_configs]
         # lowest to higest
         precedence = [self.remote_config, self.local_config, self.command_dict]
-        context_data = reduce(
+        context_data = functools.reduce(
             lambda option, value: dict(option.items() + value.items()), precedence
         )
         return self.filter_context_data(context_data)

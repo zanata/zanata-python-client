@@ -23,11 +23,14 @@ all__ = (
     "ServiceTest",
 )
 
-import unittest
 import sys
 import os
 sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
 from zanataclient.zanatalib.service import Service
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 
 # test data
@@ -66,6 +69,10 @@ class ServiceTest(unittest.TestCase):
         result_set = self.service.messages(SERVICE_RESPONSE_201, RESPONSE_CONTENT)
         self.assertTrue(result_set)
 
+    @unittest.skipIf(
+        sys.version_info < (2, 7),
+        'https://docs.python.org/2/library/unittest.html#unittest.TestCase.assertRaises'
+    )
     def test_messages_status_401_503(self):
         with self.assertRaises(SystemExit):
             self.service.messages(SERVICE_RESPONSE_401, RESPONSE_CONTENT)

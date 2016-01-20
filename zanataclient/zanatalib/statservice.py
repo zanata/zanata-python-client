@@ -25,7 +25,7 @@ __all__ = (
     "StatService",
 )
 
-from service import Service
+from .service import Service
 
 
 class StatService(Service):

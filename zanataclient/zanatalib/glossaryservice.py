@@ -26,7 +26,7 @@ __all__ = (
 )
 
 
-from service import Service
+from .service import Service
 
 
 class GlossaryService(Service):
