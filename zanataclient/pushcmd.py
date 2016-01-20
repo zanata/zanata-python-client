@@ -23,8 +23,8 @@
 import os
 import sys
 
-from cmdbase import PushPull
-from zanatalib.logger import Logger
+from .cmdbase import PushPull
+from .zanatalib.logger import Logger
 
 log = Logger()
 
@@ -40,14 +40,14 @@ class GenericPush(PushPull):
         force = False
         project_type, deletefiles, tmlfolder, filelist = self.get_files()
         # Disable dir option for generic push command
-        if self.context_data.has_key('dir'):
+        if 'dir' in self.context_data:
             log.warn("dir option is disabled in push command, please use --srcdir and --transdir, or specify value in zanata.xml")
 
-        if self.context_data.has_key('pushtrans'):
+        if 'pushtrans' in self.context_data:
             log.warn("--push-trans is deprecated, please use '--push-type both' instead")
             pushtrans = True
 
-        if self.context_data.has_key('pushtype'):
+        if 'pushtype' in self.context_data:
             push_type = self.context_data.get('pushtype')
             if push_type == "source":
                 pushtrans = False
@@ -56,7 +56,7 @@ class GenericPush(PushPull):
             elif push_type == "both":
                 pushtrans = True
 
-        if self.context_data.has_key('pushtransonly'):
+        if 'pushtransonly' in self.context_data:
             push_trans_only = True
 
         if push_trans_only:
@@ -71,7 +71,7 @@ class GenericPush(PushPull):
             log.error("Can not find source folder, please specify the source folder with '--srcdir' or using zanata.xml")
             sys.exit(1)
 
-        if self.context_data.has_key('force'):
+        if 'force' in self.context_data:
             force = True
 
         if project_type == 'podir':
@@ -107,7 +107,7 @@ class PublicanPush(PushPull):
 
         log.info("Reuse previous translation on server:%s" % self.copytrans)
 
-        if self.context_data.has_key('force'):
+        if 'force' in self.context_data:
             force = True
 
         log.info("POT directory (originals):%s" % tmlfolder)
@@ -142,9 +142,9 @@ class PoPush(PushPull):
         else:
             log.info("Importing source documents only")
 
-        if self.context_data.has_key('force'):
+        if 'force' in self.context_data:
             force = True
-        if deletefiles == True:
+        if deletefiles is True:
             self.zanatacmd.del_server_content(tmlfolder, self.project_id, self.version_id, filelist, force, "gettext")
 
         if importpo:

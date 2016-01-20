@@ -25,7 +25,7 @@ __all__ = (
     "VersionService",
 )
 
-from service import Service
+from .service import Service
 
 
 class VersionService(Service):

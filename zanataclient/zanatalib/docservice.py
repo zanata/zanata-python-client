@@ -25,7 +25,7 @@ __all__ = (
     "DocumentService",
 )
 
-from service import Service
+from .service import Service
 
 
 class DocumentService(Service):

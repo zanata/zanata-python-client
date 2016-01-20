@@ -19,9 +19,13 @@
 # Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA  02110-1301, USA.
 
-from collections import (
-    namedtuple, OrderedDict
-)
+from collections import namedtuple
+
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
+
 
 middle_url = '/seam/resource/restv1'
 http_methods = ('GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS')
@@ -195,32 +199,32 @@ resource_config_dict = {
 
 resource = namedtuple('service', 'rest_resource mount_point http_method')
 # service-to-resource mappings
-server_version = resource('VersionResource', resource_config_dict['VersionResource'].keys()[0], http_methods[0])
-list_projects = resource('ProjectsResource', resource_config_dict['ProjectsResource'].keys()[0], http_methods[0])
-list_project = resource('ProjectResource', resource_config_dict['ProjectResource'].keys()[0], http_methods[0])
-create_project = resource('ProjectResource', resource_config_dict['ProjectResource'].keys()[0], http_methods[2])
-get_iteration = resource('ProjectIterationResource', resource_config_dict['ProjectIterationResource'].keys()[0],
+server_version = resource('VersionResource', list(resource_config_dict['VersionResource'].keys())[0], http_methods[0])
+list_projects = resource('ProjectsResource', list(resource_config_dict['ProjectsResource'].keys())[0], http_methods[0])
+list_project = resource('ProjectResource', list(resource_config_dict['ProjectResource'].keys())[0], http_methods[0])
+create_project = resource('ProjectResource', list(resource_config_dict['ProjectResource'].keys())[0], http_methods[2])
+get_iteration = resource('ProjectIterationResource', list(resource_config_dict['ProjectIterationResource'].keys())[0],
                          http_methods[0])
-create_iteration = resource('ProjectIterationResource', resource_config_dict['ProjectIterationResource'].keys()[0],
+create_iteration = resource('ProjectIterationResource', list(resource_config_dict['ProjectIterationResource'].keys())[0],
                             http_methods[2])
-commit_glossary = resource('GlossaryResource', resource_config_dict['GlossaryResource'].keys()[0], http_methods[2])
-delete_glossary = resource('GlossaryResource', resource_config_dict['GlossaryResource'].keys()[0], http_methods[3])
-list_files = resource('SourceDocResource', resource_config_dict['SourceDocResource'].keys()[0], http_methods[0])
-commit_template = resource('SourceDocResource', resource_config_dict['SourceDocResource'].keys()[0], http_methods[1])
-retrieve_template = resource('SourceDocResource', resource_config_dict['SourceDocResource'].keys()[1], http_methods[0])
-update_template = resource('SourceDocResource', resource_config_dict['SourceDocResource'].keys()[1], http_methods[2])
-delete_template = resource('SourceDocResource', resource_config_dict['SourceDocResource'].keys()[1], http_methods[3])
-retrieve_translation = resource('TranslatedDocResource', resource_config_dict['TranslatedDocResource'].keys()[0],
+commit_glossary = resource('GlossaryResource', list(resource_config_dict['GlossaryResource'].keys())[0], http_methods[2])
+delete_glossary = resource('GlossaryResource', list(resource_config_dict['GlossaryResource'].keys())[0], http_methods[3])
+list_files = resource('SourceDocResource', list(resource_config_dict['SourceDocResource'].keys())[0], http_methods[0])
+commit_template = resource('SourceDocResource', list(resource_config_dict['SourceDocResource'].keys())[0], http_methods[1])
+retrieve_template = resource('SourceDocResource', list(resource_config_dict['SourceDocResource'].keys())[1], http_methods[0])
+update_template = resource('SourceDocResource', list(resource_config_dict['SourceDocResource'].keys())[1], http_methods[2])
+delete_template = resource('SourceDocResource', list(resource_config_dict['SourceDocResource'].keys())[1], http_methods[3])
+retrieve_translation = resource('TranslatedDocResource', list(resource_config_dict['TranslatedDocResource'].keys())[0],
                                 http_methods[0])
-commit_translation = resource('TranslatedDocResource', resource_config_dict['TranslatedDocResource'].keys()[0],
+commit_translation = resource('TranslatedDocResource', list(resource_config_dict['TranslatedDocResource'].keys())[0],
                               http_methods[2])
-project_locales = resource('ProjectLocalesResource', resource_config_dict['ProjectLocalesResource'].keys()[0],
+project_locales = resource('ProjectLocalesResource', list(resource_config_dict['ProjectLocalesResource'].keys())[0],
                            http_methods[0])
 iteration_locales = resource('ProjectIterationLocalesResource',
-                             resource_config_dict['ProjectIterationLocalesResource'].keys()[0], http_methods[0])
-proj_trans_stats = resource('StatisticsResource', resource_config_dict['StatisticsResource'].keys()[0], http_methods[0])
-doc_trans_stats = resource('StatisticsResource', resource_config_dict['StatisticsResource'].keys()[1], http_methods[0])
-project_config = resource('ProjectIterationResource', resource_config_dict['ProjectIterationResource'].keys()[1],
+                             list(resource_config_dict['ProjectIterationLocalesResource'].keys())[0], http_methods[0])
+proj_trans_stats = resource('StatisticsResource', list(resource_config_dict['StatisticsResource'].keys())[0], http_methods[0])
+doc_trans_stats = resource('StatisticsResource', list(resource_config_dict['StatisticsResource'].keys())[1], http_methods[0])
+project_config = resource('ProjectIterationResource', list(resource_config_dict['ProjectIterationResource'].keys())[1],
                           http_methods[0])
 # zanata-python-client operates on services listed here
 zpc_services = {
@@ -265,7 +269,7 @@ class ServiceConfig(object):
 
     @property
     def mount_points(self):
-        return self._config_dict[self._service.rest_resource].keys()
+        return list(self._config_dict[self._service.rest_resource].keys())
 
     @property
     def resource(self):

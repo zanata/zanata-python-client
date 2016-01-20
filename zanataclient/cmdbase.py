@@ -24,10 +24,10 @@ import os
 import sys
 import string
 
-from zanatalib.error import NoSuchFileException
-from zanatacmd import ZanataCommand
-from publicanutil import PublicanUtility
-from zanatalib.logger import Logger
+from .zanatalib.error import NoSuchFileException
+from .zanatacmd import ZanataCommand
+from .publicanutil import PublicanUtility
+from .zanatalib.logger import Logger
 
 log = Logger()
 
@@ -38,7 +38,7 @@ class CommandsInit(object):
     def __init__(self, *args, **kargs):
         for name, val in zip(self._fields, args):
             setattr(self, name, val)
-        for key, value in kargs.iteritems():
+        for key, value in kargs.items():
             setattr(self, key, value)
 
     def check_essential(self, item, message):
@@ -61,7 +61,7 @@ class CommandsBase(CommandsInit):
             self.context_data.get('url'),
             self.context_data.get('http_headers')
         )
-        if self.context_data.has_key('disablesslcert'):
+        if 'disablesslcert' in self.context_data:
             zanatacmd.disable_ssl_cert_validation()
         return zanatacmd
 
@@ -190,7 +190,7 @@ class GlossaryPush(CommandsBase):
             if lang in locale_map:
                 lang = locale_map[lang]
 
-            if self.context_data.has_key('sourcecomments'):
+            if 'sourcecomments' in self.context_data:
                 sourcecomments = True
             else:
                 sourcecomments = False
@@ -261,8 +261,8 @@ class PushPull(CommandsBase):
         self.plural_support = self.check_plural_support(server_version)
         self.log_message(self.project_id, self.version_id, username)
         self.zanatacmd.verify_project(self.project_id, self.version_id)
-        if self.context_data.has_key('copytrans'):
-            if self.context_data.has_key('nocopytrans'):
+        if 'copytrans' in self.context_data:
+            if 'nocopytrans' in self.context_data:
                 log.error("--copytrans option cannot be used with --no-copytrans. Aborting.")
                 sys.exit(1)
             else:
@@ -283,7 +283,7 @@ class PushPull(CommandsBase):
             log.error("The project type is not correct, please use 'podir' and 'gettext' as project type")
             sys.exit(1)
 
-        if self.context_data.has_key('srcfile'):
+        if 'srcfile' in self.context_data:
             if project_type == 'gettext':
                 tmlfolder, import_file = self.process_srcfile()
                 filelist.append(import_file)
@@ -297,7 +297,7 @@ class PushPull(CommandsBase):
             try:
                 full_path = self.search_file(tmlfolder, self.args[0])
                 filelist.append(full_path)
-            except NoSuchFileException, e:
+            except NoSuchFileException as e:
                 log.error(e.msg)
                 sys.exit(1)
         else:
@@ -314,7 +314,7 @@ class PushPull(CommandsBase):
     def process_merge(self):
         merge = ""
 
-        if self.context_data.has_key('merge'):
+        if 'merge' in self.context_data:
             merge = self.context_data.get('merge')
             if merge != 'auto' and merge != 'import':
                 log.info("merge option %s is not recognized, assuming default value 'auto'" % merge)
@@ -328,9 +328,9 @@ class PushPull(CommandsBase):
 
     def get_lang_list(self):
         lang_list = []
-        if self.context_data.has_key('lang'):
+        if 'lang' in self.context_data:
             lang_list = self.context_data.get('lang').split(',')
-        elif self.context_data.has_key('locale_map'):
+        elif 'locale_map' in self.context_data:
             lang_list = self.context_data.get('locale_map').keys()
         else:
             log.error("Please specify the language with '--lang' option or in zanata.xml")
@@ -341,9 +341,9 @@ class PushPull(CommandsBase):
     def process_srcdir_withsub(self):
         tmlfolder = ""
 
-        if self.context_data.has_key('srcdir'):
+        if 'srcdir' in self.context_data:
             tmlfolder = self.context_data.get('srcdir')
-        elif self.context_data.has_key('dir'):
+        elif 'dir' in self.context_data:
             # Keep dir option for publican/po push
             tmlfolder = self.context_data.get('dir')
         else:
@@ -360,7 +360,7 @@ class PushPull(CommandsBase):
     def process_srcdir(self):
         tmlfolder = ""
 
-        if self.context_data.has_key('srcdir'):
+        if 'srcdir' in self.context_data:
             tmlfolder = self.context_data.get('srcdir')
         else:
             tmlfolder = os.path.abspath(os.getcwd())
@@ -372,7 +372,7 @@ class PushPull(CommandsBase):
         tmlfolder = ""
         file_path = ""
 
-        if self.context_data.has_key('srcfile'):
+        if 'srcfile' in self.context_data:
             path = self.context_data.get('srcfile')
             file_path = os.path.abspath(path)
             tmlfolder = file_path[0:file_path.rfind('/')]
@@ -382,7 +382,7 @@ class PushPull(CommandsBase):
     def process_transdir(self, src_folder):
         trans_folder = ""
 
-        if self.context_data.has_key('transdir'):
+        if 'transdir' in self.context_data:
             trans_folder = self.context_data.get('transdir')
         elif src_folder:
             trans_folder = src_folder
@@ -393,7 +393,7 @@ class PushPull(CommandsBase):
         return trans_folder
 
     def create_outpath(self, output_folder):
-        if self.context_data.has_key('transdir'):
+        if 'transdir'in self.context_data:
             output = self.context_data.get('transdir')
         elif output_folder:
             output = output_folder
@@ -419,7 +419,7 @@ class PushPull(CommandsBase):
         raise NoSuchFileException('Error 404', 'File %s not found' % filename)
 
     def check_plural_support(self, server_version):
-        if server_version == None:
+        if not server_version:
             return False
 
         version = str(server_version.split('-')[0])
@@ -434,9 +434,9 @@ class PushPull(CommandsBase):
     def get_importpo(self):
         importpo = False
 
-        if self.context_data.has_key('importpo'):
+        if 'importpo' in self.context_data:
             importpo = True
-        elif self.context_data.has_key('pushtrans'):
+        elif 'pushtrans' in self.context_data:
             importpo = True
             log.info("please use --import-po for old publican push command")
 
@@ -445,9 +445,9 @@ class PushPull(CommandsBase):
     def get_pushtrans(self):
         pushtrans = False
 
-        if self.context_data.has_key('pushtrans'):
+        if 'pushtrans' in self.context_data:
             pushtrans = True
-        elif self.context_data.has_key('importpo'):
+        elif 'importpo' in self.context_data:
             pushtrans = True
             log.info("--import-po option is deprecated, please use '--push-type both'  instead")
 

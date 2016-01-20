@@ -71,8 +71,11 @@ class ProjectContextTest(unittest.TestCase):
         self.init_context = ProjectContext(command_options, 'init')
 
     def test_command_options(self):
-        command_options_keys = ['project_type', 'comment_cols', 'user_config', 'project_config']
-        self.assertEqual(self.context.command_options.keys(), command_options_keys)
+        command_options_keys = ['project_type', 'project_config', 'comment_cols', 'user_config']
+        self.assertTrue(list(self.context.command_options.keys())[0] in command_options_keys)
+        self.assertTrue(list(self.context.command_options.keys())[1] in command_options_keys)
+        self.assertTrue(list(self.context.command_options.keys())[2] in command_options_keys)
+        self.assertTrue(list(self.context.command_options.keys())[3] in command_options_keys)
         self.assertEqual(
             self.context.command_dict,
             {'project_config': './testfiles/zanata.xml', 'comment_cols': 'en-US,es,pos,description',
@@ -94,8 +97,8 @@ class ProjectContextTest(unittest.TestCase):
             self.context.local_config['http_headers'],
             {'Accept': 'application/json', 'X-Auth-User': 'username', 'X-Auth-Token': 'key'}
         )
-        self.assertIn('client_version', self.context.local_config,
-                      'local_config should contain client_version')
+        self.assertTrue('client_version' in self.context.local_config,
+                        'local_config should contain client_version')
 
     @mock.patch('zanataclient.zanatalib.projectservice.LocaleService.get_locales')
     @mock.patch('zanataclient.zanatalib.versionservice.VersionService.get_server_version')
@@ -163,8 +166,8 @@ class ProjectContextTest(unittest.TestCase):
 
     def test_init_context(self):
         context_data = self.init_context.get_context_data()
-        self.assertIn('servers', context_data)
-        self.assertIn('http://localhost:8080/zanata', context_data['servers'])
+        self.assertTrue('servers' in context_data)
+        self.assertTrue('http://localhost:8080/zanata' in context_data['servers'])
 
 if __name__ == '__main__':
     unittest.main()

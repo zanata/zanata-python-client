@@ -24,19 +24,27 @@ import os
 import sys
 import fnmatch
 from datetime import datetime
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
 
-from cmdbase import (
+from .cmdbase import (
     CommandsInit, CommandsBase
 )
-from context import ContextBase
-from parseconfig import ZanataConfig
-from zanatalib.logger import(
+from .context import ContextBase
+from .parseconfig import ZanataConfig
+from .zanatalib.logger import(
     Logger, TextColour
 )
-from zanatalib.projectutils import ToolBox
+from .zanatalib.projectutils import ToolBox
 
 log = Logger()
+
+try:
+    input = raw_input
+except NameError:
+    pass
 
 
 class ZanataInit(CommandsInit, ContextBase):
@@ -88,7 +96,7 @@ class ZanataInit(CommandsInit, ContextBase):
                 counter += 1
                 counter_dict.update({str(counter): option})
                 self.ptxt('info_blue', "\t%s) %s" % (str(counter), option))
-        choice = raw_input(message)
+        choice = input(message)
         while choice not in counter_dict:
             if filter_mode:
                 filtered_options = filter(
@@ -98,13 +106,13 @@ class ZanataInit(CommandsInit, ContextBase):
                 return self.print_options(header, filtered_options, message, True)
             else:
                 self.ptxt('alert', "Expecting %s but got: %s" % (str(counter_dict.keys()), choice))
-                choice = raw_input(message)
+                choice = input(message)
         return counter_dict[choice]
 
     def print_yes_no(self, message):
-        yes_no = raw_input(message)
+        yes_no = input(message)
         while yes_no not in ('y', 'n', 'Y', 'N'):
-            yes_no = raw_input(message)
+            yes_no = input(message)
         return yes_no in ('y', 'Y')
 
     def update_server_url(self):
@@ -137,7 +145,7 @@ class ZanataInit(CommandsInit, ContextBase):
         )
 
     def _choose_from_existing_projects(self):
-        projects_dict = {project.id: project.name for project in self.zanata_cmd.get_projects()}
+        projects_dict = dict((project.id, project.name) for project in self.zanata_cmd.get_projects())
         project_choice = self.print_options(
             "\n\t======= Available project(s): ID (name) ======",
             ['%s %s%s%s' % (id, '(', name, ')') for id, name in projects_dict.items()],
@@ -153,10 +161,10 @@ class ZanataInit(CommandsInit, ContextBase):
         print("Refer to http://zanata.org/help/projects/create-project/ for help.")
         print("Project ID must start and end with letter or number, and contain only "
               "letters, numbers, underscores and hyphens.")
-        input_project_id = raw_input("[?] What ID should your project have? ")
-        input_project_name = raw_input("[?] What display name should your project have? ")
-        input_project_desc = raw_input("[?] What discription should your project have? ")
-        input_project_type = raw_input("[?] What is your project type (gettext, podir)? ")
+        input_project_id = input("[?] What ID should your project have? ")
+        input_project_name = input("[?] What display name should your project have? ")
+        input_project_desc = input("[?] What discription should your project have? ")
+        input_project_type = input("[?] What is your project type (gettext, podir)? ")
         project_type = input_project_type if input_project_type in ('gettext', 'podir') \
             else 'IterationProject'
         try:
@@ -202,7 +210,7 @@ class ZanataInit(CommandsInit, ContextBase):
         log.info('Now working with version: %s' % version_choice)
 
     def _create_new_version(self):
-        input_version_id = raw_input("[?] What ID should your version have: ")
+        input_version_id = input("[?] What ID should your version have: ")
         try:
             log.info("Creating version on the server...")
             if not self.zanata_cmd.create_version(self.local_config.get('project_id'),
@@ -278,11 +286,11 @@ class ZanataInit(CommandsInit, ContextBase):
                     self.print_trans_matches(match, locale, transdir)
 
     def input_dirs(self, message, mode):
-        input_dir = raw_input(message)
+        input_dir = input(message)
         while not (input_dir and os.path.isdir(os.path.curdir + '/' + input_dir)):
             self.ptxt('alert', "Directory %s does not exist! Please re-enter." % input_dir) if input_dir \
                 else self.ptxt('alert', "Can not have blank answer. Please try again.")
-            input_dir = raw_input(message)
+            input_dir = input(message)
         if mode == 'target' and self.local_config.get('srcdir'):
             list_dir = self.local_config['srcdir']
         else:

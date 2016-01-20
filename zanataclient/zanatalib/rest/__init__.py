@@ -20,4 +20,4 @@
 # Boston, MA  02110-1301, USA.
 
 
-from client import RestClient
+from .client import RestClient

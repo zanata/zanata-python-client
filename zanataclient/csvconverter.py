@@ -33,7 +33,7 @@ try:
 except ImportError:
     import simplejson as json
 
-from zanatalib.logger import Logger
+from .zanatalib.logger import Logger
 
 
 class CSVConverter:
@@ -94,8 +94,8 @@ class CSVConverter:
                 csv_locales_len = len(csv_locales)
                 comments_len = len(comments)
                 if glossary_len != csv_locales_len + comments_len:
-                    print "Wrong entries in csv file, please check your csv file"
-                    print "Entry in csv file", item
+                    print("Wrong entries in csv file, please check your csv file")
+                    print("Entry in csv file", item)
                     sys.exit(1)
                 glossary_comments = item[-2:]
                 for j in range(csv_locales_len):

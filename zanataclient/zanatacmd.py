@@ -23,24 +23,25 @@
 import sys
 import os
 
-from publicanutil import PublicanUtility
-from csvconverter import CSVConverter
-from zanatalib.resource import ZanataResource
-from zanatalib.glossaryservice import GlossaryService
-from zanatalib.projectutils import (
+from .publicanutil import PublicanUtility
+from .csvconverter import CSVConverter
+from .zanatalib.resource import ZanataResource
+from .zanatalib.projectutils import (
     Project, Iteration, Stats
 )
-from zanatalib.logger import Logger
-from zanatalib.error import ZanataException
-from zanatalib.error import NoSuchProjectException
-from zanatalib.error import UnAuthorizedException
-from zanatalib.error import UnAvaliableResourceException
-from zanatalib.error import BadRequestBodyException
-from zanatalib.error import SameNameDocumentException
-from zanatalib.error import InvalidOptionException
-from zanatalib.error import UnexpectedStatusException
-from zanatalib.error import UnavailableServiceError
-from zanatalib.error import InternalServerError
+from .zanatalib.logger import Logger
+from .zanatalib.error import (
+    ZanataException, NoSuchProjectException, UnAuthorizedException,
+    UnAvaliableResourceException, BadRequestBodyException,
+    SameNameDocumentException, InvalidOptionException,
+    UnexpectedStatusException, UnavailableServiceError,
+    InternalServerError
+)
+
+try:
+    input = raw_input
+except NameError:
+    pass
 
 
 class ZanataCommand:
@@ -103,16 +104,16 @@ class ZanataCommand:
     def verify_project(self, project_id, version_id):
         try:
             self.zanata_resource.projects.get(project_id)
-        except NoSuchProjectException, e:
+        except NoSuchProjectException as e:
             self.log.error(str(e))
             sys.exit(1)
 
         try:
             self.zanata_resource.projects.iterations.get(project_id, version_id)
-        except NoSuchProjectException, e:
+        except NoSuchProjectException as e:
             self.log.error(str(e))
             sys.exit(1)
-        except ZanataException, e:
+        except ZanataException as e:
             self.log.error(str(e))
 
     def update_template(self, project_id, iteration_id, filename, body, copytrans):
@@ -125,7 +126,7 @@ class ZanataCommand:
             result = self.zanata_resource.documents.update_template(project_id, iteration_id, request_name, body, copytrans)
             if result:
                 self.log.info("Successfully updated template %s on the server" % filename)
-        except ZanataException, e:
+        except ZanataException as e:
             self.log.error(str(e))
 
     def commit_translation(self, project_id, iteration_id, request_name, pofile, lang, body, merge):
@@ -134,14 +135,14 @@ class ZanataCommand:
             if result:
                 self.log.warn(result)
             self.log.info("Successfully pushed translation %s to the Zanata server" % pofile)
-        except ZanataException, e:
+        except ZanataException as e:
             self.log.error(str(e))
 
     def del_server_content(self, tmlfolder, project_id, iteration_id, push_files, force, project_type):
         # Get the file list of this version of project
         try:
             filelist = self.zanata_resource.documents.get_file_list(project_id, iteration_id)
-        except Exception, e:
+        except Exception as e:
             self.log.error(str(e))
             sys.exit(1)
 
@@ -149,7 +150,7 @@ class ZanataCommand:
             self.log.info("This will overwrite/delete any existing documents on the server.")
             if not force:
                 while True:
-                    option = raw_input("Are you sure (y/n)?")
+                    option = input("Are you sure (y/n)?")
                     if option.lower() == "yes" or option.lower() == "y":
                         break
                     elif option.lower() == "no" or option.lower() == "n":
@@ -180,7 +181,7 @@ class ZanataCommand:
 
                     try:
                         self.zanata_resource.documents.delete_template(project_id, iteration_id, request)
-                    except ZanataException, e:
+                    except ZanataException as e:
                         self.log.error(str(e))
                         sys.exit(1)
 
@@ -200,11 +201,11 @@ class ZanataCommand:
             sys.exit(1)
 
         for project in projects:
-            print ("\nProject ID:          %s") % project.id
-            print ("Project Name:        %s") % project.name
+            print("\nProject ID:          %s") % project.id
+            print("Project Name:        %s") % project.name
             if hasattr(project, 'defaultType') and project.defaultType.strip():
-                print ("Project Type:        %s") % project.defaultType
-            print ("Project Links:       %s") % [{'href': link.href, 'type': link.type, 'rel': link.rel} for link in project.links]
+                print("Project Type:        %s") % project.defaultType
+            print("Project Links:       %s") % [{'href': link.href, 'type': link.type, 'rel': link.rel} for link in project.links]
 
     def project_info(self, project_id):
         """
@@ -212,14 +213,14 @@ class ZanataCommand:
         """
         try:
             p = self.zanata_resource.projects.get(project_id)
-            print ("\nProject ID:        %s") % p.id
-            print ("Project Name:      %s") % p.name
+            print("\nProject ID:        %s") % p.id
+            print("Project Name:      %s") % p.name
             if hasattr(p, 'defaultType') and p.defaultType.strip():
-                print ("Project Type:      %s") % p.defaultType
+                print("Project Type:      %s") % p.defaultType
             if hasattr(p, 'description') and p.description.strip():
-                print ("Project Desc:      %s") % p.description
-            print ("\n")
-        except NoSuchProjectException, e:
+                print("Project Desc:      %s") % p.description
+            print("\n")
+        except NoSuchProjectException as e:
             self.log.error(str(e))
         except InvalidOptionException:
             self.log.error("Options are not valid")
@@ -232,7 +233,7 @@ class ZanataCommand:
                 for iteration in p.iterations:
                     project_versions.append(iteration.get('id'))
             return project_versions
-        except NoSuchProjectException, e:
+        except NoSuchProjectException as e:
             self.log.error(str(e))
         except InvalidOptionException:
             self.log.error("Options are not valid")
@@ -244,12 +245,12 @@ class ZanataCommand:
         try:
             project = self.zanata_resource.projects.get(project_id)
             iteration = project.get_iteration(iteration_id)
-            print ("Version ID: %s") % iteration.id
+            print("Version ID: %s") % iteration.id
             if hasattr(iteration, 'name'):
-                print ("Version Name: %s") % iteration.name
+                print("Version Name: %s") % iteration.name
             if hasattr(iteration, 'description'):
-                print ("Version Description: %s") % iteration.description
-        except NoSuchProjectException, e:
+                print("Version Description: %s") % iteration.description
+        except NoSuchProjectException as e:
             self.log.error(str(e))
 
     def create_project(self, project_id, project_name, project_desc, project_type):
@@ -265,7 +266,7 @@ class ZanataCommand:
             if result:
                 self.log.info("Successfully created project: %s" % project_id)
                 return True
-        except ZanataException, e:
+        except ZanataException as e:
             self.log.error(str(e))
 
     def create_version(self, project_id, version_id, version_name=None, version_desc=None):
@@ -280,7 +281,7 @@ class ZanataCommand:
             if result:
                 self.log.info("Successfully created version: %s" % version_id)
                 return True
-        except ZanataException, e:
+        except ZanataException as e:
             self.log.error(str(e))
 
     def import_po(self, potfile, trans_folder, project_id, iteration_id, lang_list, locale_map, merge, project_type):
@@ -339,7 +340,7 @@ class ZanataCommand:
 
         try:
             filelist = self.zanata_resource.documents.get_file_list(project_id, iteration_id)
-        except ZanataException, e:
+        except ZanataException as e:
             self.log.error(str(e))
 
         if not filelist:
@@ -377,7 +378,7 @@ class ZanataCommand:
                         pofile = filepath[0:filepath.rfind('/') + 1] + pofile_name
                     except:
                         pofile = None
-                        print "Can not find " + name
+                        print("Can not find " + name)
 
                 elif project_type == "podir":
                     if '/' in filename:
@@ -420,16 +421,16 @@ class ZanataCommand:
                 result = self.update_template(project_id, iteration_id, filename, body, copytrans)
                 if result:
                     self.log.info("Successfully pushed %s to the server" % filepath)
-            except UnAuthorizedException, e:
+            except UnAuthorizedException as e:
                 self.log.error(str(e))
                 break
-            except BadRequestBodyException, e:
+            except BadRequestBodyException as e:
                 self.log.error(str(e))
                 continue
-            except UnexpectedStatusException, e:
+            except UnexpectedStatusException as e:
                 self.log.error(str(e))
                 continue
-            except InternalServerError, e:
+            except InternalServerError as e:
                 self.log.error(str(e))
                 sys.exit(1)
 
@@ -468,16 +469,16 @@ class ZanataCommand:
 
             try:
                 pot = self.zanata_resource.documents.retrieve_template(project_id, iteration_id, request_name)
-            except UnAuthorizedException, e:
+            except UnAuthorizedException as e:
                 self.log.error(str(e))
                 break
-            except UnAvaliableResourceException, e:
+            except UnAvaliableResourceException as e:
                 self.log.error("Can't find pot file for %s on server" % name)
                 break
-            except UnexpectedStatusException, e:
+            except UnexpectedStatusException as e:
                 self.log.error(str(e))
                 break
-            except InternalServerError, e:
+            except InternalServerError as e:
                 self.log.error(str(e))
                 sys.exit(1)
 
@@ -512,17 +513,17 @@ class ZanataCommand:
                 try:
                     result = self.zanata_resource.documents.retrieve_translation(lang, project_id, iteration_id, request_name, skeletons)
                     publicanutil.save_to_pofile(pofile, result, pot, skeletons, item, name)
-                except UnAuthorizedException, e:
+                except UnAuthorizedException as e:
                     self.log.error(str(e))
                     break
-                except UnAvaliableResourceException, e:
+                except UnAvaliableResourceException as e:
                     self.log.info("There is no %s translation for %s" % (item, name))
-                except BadRequestBodyException, e:
+                except BadRequestBodyException as e:
                     self.log.error(str(e))
                     continue
-                except UnexpectedStatusException, e:
+                except UnexpectedStatusException as e:
                     self.log.error(str(e))
-                except InternalServerError, e:
+                except InternalServerError as e:
                     self.log.error(str(e))
                     sys.exit(1)
 
@@ -540,7 +541,7 @@ class ZanataCommand:
                 self.log.info("Push part %s of glossary file" % i)
             try:
                 self.zanata_resource.glossary.commit_glossary(jsons[i])
-            except ZanataException, e:
+            except ZanataException as e:
                 self.log.error(str(e))
                 sys.exit(1)
             i += 1
@@ -554,13 +555,13 @@ class ZanataCommand:
             content = self.zanata_resource.glossary.commit_glossary(json)
             if content:
                 self.log.info("Successfully pushed glossary to the server")
-        except ZanataException, e:
+        except ZanataException as e:
             self.log.error(str(e))
 
     def delete_glossary(self, lang=None):
         try:
             self.zanata_resource.glossary.delete(lang)
-        except ZanataException, e:
+        except ZanataException as e:
             self.log.error(str(e))
         else:
             self.log.info("Successfully delete the glossary terms on the server")
@@ -569,7 +570,7 @@ class ZanataCommand:
         doc_locales_dict = {}
         try:
             server_return = self.zanata_resource.stats.get_project_stats(project_id, project_version)
-        except ZanataException, e:
+        except ZanataException as e:
             self.log.error(str(e))
         else:
             percent_dict = Stats(server_return).trans_percent_dict
@@ -590,7 +591,7 @@ class ZanataCommand:
             return doc_locales_dict
 
     def _print_double_line(self, length):
-        print '=' * length
+        print('=' * length)
 
     def _print_new_line_row(self, sequence, header=None):
         pattern = (
@@ -598,7 +599,7 @@ class ZanataCommand:
             if header else
             " %-10s %-8s %-4s %5s %10s %14s %32s"
         )
-        print pattern % sequence
+        print(pattern % sequence)
 
     def _display_stats(self, collection, locale_map):
         self._print_double_line(90)
@@ -619,7 +620,7 @@ class ZanataCommand:
         print('\n')
 
     def _display_doc_stats(self, doc_name, stats_dict, locale_map):
-        print ('Document: %s' % doc_name)
+        print('Document: %s' % doc_name)
         self._display_stats(stats_dict, locale_map)
 
     def display_translation_stats(self, *args, **kwargs):
@@ -632,7 +633,7 @@ class ZanataCommand:
                     project_id, project_version, kwargs['docid'],
                     'wordstats' in kwargs, kwargs.get('lang')
             )
-        except ZanataException, e:
+        except ZanataException as e:
             self.log.error(str(e))
         else:
             trans_stats = Stats(server_return)

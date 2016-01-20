@@ -28,21 +28,21 @@ import signal
 import subprocess
 from functools import wraps
 
-from zanatalib.logger import Logger
-from context import ProjectContext
-from cmdbase import (
+from .zanatalib.logger import Logger
+from .context import ProjectContext
+from .cmdbase import (
     ListProjects, ProjectInfo, VersionInfo, CreateProject,
     CreateVersion, GlossaryPush, GlossaryDelete, Stats
 )
-from command import makeHandler
-from command import strip_docstring
-from command import parse_command_line
-from command import handle_program
-from pushcmd import PoPush
-from pushcmd import PublicanPush
-from pushcmd import GenericPush
-from pullcmd import GenericPull
-from initcmd import ZanataInit
+from .command import makeHandler
+from .command import strip_docstring
+from .command import parse_command_line
+from .command import handle_program
+from .pushcmd import PoPush
+from .pushcmd import PublicanPush
+from .pushcmd import GenericPush
+from .pullcmd import GenericPull
+from .initcmd import ZanataInit
 
 log = Logger()
 
@@ -348,26 +348,26 @@ def process_command(args):
         for arg in args[1:]:
             command = command + '_' + arg
 
-    if command_handler_factories.has_key(command):
+    if command in command_handler_factories:
         if hasattr(help, command):
-            print strip_docstring(getattr(help, command))
+            print(strip_docstring(getattr(help, command)))
         else:
             fn = command_handler_factories[command]()
-            print strip_docstring((fn.__doc__ or 'No help'))
+            print(strip_docstring((fn.__doc__ or 'No help')))
         sys.exit(0)
     else:
         if command == 'project':
-            print ("Command: 'zanata project info'\n"
-                   "         'zanata project create'")
+            print("Command: 'zanata project info'\n"
+                  "         'zanata project create'")
         elif command == 'version':
-            print ("Command: 'zanata version info'\n"
-                   "         'zanata version create'")
+            print("Command: 'zanata version info'\n"
+                  "         'zanata version create'")
         elif command == 'publican':
-            print ("Command: 'zanata publican push'\n"
-                   "         'zanata publican pull'")
+            print("Command: 'zanata publican push'\n"
+                  "         'zanata publican pull'")
         elif command == 'po':
-            print ("Command: 'zanata po push'\n"
-                   "         'zanata po pull'")
+            print("Command: 'zanata po push'\n"
+                  "         'zanata po pull'")
         else:
             log.error("No such command %r, Try 'zanata --help' for more information." % command.replace('_', ' '))
 
@@ -397,7 +397,7 @@ def help_info(command_options, args):
     if args:
         process_command(args)
     else:
-        print usage
+        print(usage)
 
 
 @command(ListProjects, False)
@@ -734,7 +734,7 @@ command_handler_factories = {
 
 
 def signal_handler(signal, frame):
-    print '\nPressed Ctrl+C! Stop processing!'
+    print('\nPressed Ctrl+C! Stop processing!')
     sys.exit(0)
 
 
@@ -755,13 +755,13 @@ def run():
             args,
             program_name=os.path.split(sys.argv[0])[1],
         )
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err)
+        print(str(err))
         if command:
-            print "Try zanata %(command)s --help' for more information." % {
+            print("Try zanata %(command)s --help' for more information." % {
                 'command': command,
-            }
+            })
         else:
-            print usage
+            print(usage)
         sys.exit(2)

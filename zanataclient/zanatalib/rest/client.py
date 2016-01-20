@@ -23,20 +23,23 @@ __all__ = (
     "RestClient",
 )
 
-import urlparse
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 import sys
 import warnings
-import StringIO
+from io import StringIO
 warnings.simplefilter("ignore", DeprecationWarning)
 import httplib2
 
-from config import http_methods, ServiceConfig
+from .config import ServiceConfig
 
 
 class RestClient(object):
     def __init__(self, base_url, disable_ssl_certificate_validation=True):
         self.base_url = base_url
-        self.url = urlparse.urlparse(base_url)
+        self.url = urlparse(base_url)
         self.http_client = httplib2.Http(disable_ssl_certificate_validation=True)
 
     def disable_ssl_cert_validation(self):
@@ -51,7 +54,7 @@ class RestClient(object):
         if body is not None:
             thelen = str(len(body))
             headers['Content-Length'] = thelen
-            body = StringIO.StringIO(body)
+            body = StringIO(body)
 
         try:
             response, content = self.http_client.request(resource, method.upper(), body, headers=headers)
@@ -62,27 +65,28 @@ class RestClient(object):
                     elif 'location' in response.previous:
                         new_url = response.previous['location']
                     if new_url:
-                        print "\nRedirecting to: %s" % '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse.urlparse(new_url))
-                        print "HTTP Redirect: Please update the Server URL."
+                        print("\nRedirecting to: %s" % '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse(new_url)))
+                        print("HTTP Redirect: Please update the Server URL.")
                         response, content = self.http_client.request(new_url, method.upper(), body, headers=headers)
             return (response, content.decode("UTF-8"))
-        except httplib2.ServerNotFoundError, e:
-            print "error: %s, Maybe the Zanata server is down?" % e
+        except httplib2.ServerNotFoundError as e:
+            print("error: %s, Maybe the Zanata server is down?" % e)
             sys.exit(2)
-        except httplib2.HttpLib2Error, e:
-            print "error: %s" % e
+        except httplib2.HttpLib2Error as e:
+            print("error: %s" % e)
             sys.exit(2)
-        except MemoryError, e:
-            print "error: The file is too big to process"
-        except Exception, e:
+        except MemoryError as e:
+            print("error: The file is too big to process")
+        except Exception as e:
             value = str(e).rstrip()
             if value == 'a float is required':
-                print "error: Error happens when processing https"
+                print("error: Error happens when processing https")
                 if sys.version_info[:2] == (2, 6):
-                    print "If version of python-httplib2 < 0.4.0, please use the patch in http://code.google.com/p/httplib2/issues/detail?id=39"
+                    print("If version of python-httplib2 < 0.4.0, "
+                          "please use the patch in http://code.google.com/p/httplib2/issues/detail?id=39")
                 sys.exit(2)
             else:
-                print "error: %s" % e
+                print("error: %s" % e)
                 sys.exit(2)
 
     def process_request(self, service_name, *args, **kwargs):

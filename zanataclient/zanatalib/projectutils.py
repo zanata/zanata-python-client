@@ -25,6 +25,7 @@ __all__ = (
     "Project", "Iteration", "Stats"
 )
 
+import sys
 from xml.dom import minidom
 import xml.etree.cElementTree as ET
 
@@ -67,7 +68,7 @@ class Stats(object):
         for stat in stats_dict:
             if stat.get('locale'):
                 trans_percent.update({
-                    stat['locale']: int((float(stat.get('translated', 0) * 100) /
+                    stat['locale']: int((float(stat.get('translated', 0) * 100) //
                                          float(stat.get('total', 0))))
                 })
         return {doc_name: trans_percent}
@@ -132,8 +133,9 @@ class ToolBox(object):
         '''
         Converts dict of key/value pairs into XML
         '''
-        xml_ns = "http://zanata.org/namespace/config/"
-        ET.register_namespace('', xml_ns)
+        if sys.version_info >= (2, 7):
+            xml_ns = "http://zanata.org/namespace/config/"
+            ET.register_namespace('', xml_ns)
         elem = ET.Element(tag)
         for key, val in dict.items():
             child = ET.Element(key)
