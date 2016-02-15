@@ -272,6 +272,8 @@ class PushPull(CommandsBase):
         #    log.warn("copytrans is now disabled by default")
         else:
             self.copytrans = False
+        self.file_mapping_rules = self.context_data['file_mapping_rules'] \
+            if 'file_mapping_rules' in self.context_data else None
 
     # Functions in PoPush and GenericPush get tmlfile,file list
     def get_files(self):
@@ -280,7 +282,7 @@ class PushPull(CommandsBase):
         tmlfolder = ""
         project_type = self.context_data.get('project_type')
         if project_type != 'podir' and project_type != 'gettext':
-            log.error("The project type is not correct, please use 'podir' and 'gettext' as project type")
+            log.error("The project type is not correct, please use 'podir' or 'gettext' as project type")
             sys.exit(1)
 
         if 'srcfile' in self.context_data:

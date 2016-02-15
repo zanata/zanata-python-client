@@ -9,5 +9,9 @@
         </locales>
         <src-dir>/home/user/project/source</src-dir>
         <trans-dir>/home/user/project/target</trans-dir>
+        <rules>
+            <rule pattern="**/pot/*.pot">{locale}/{path}/{filename}.po</rule>
+            <rule pattern="**/po/*.pot">{path}/{locale_with_underscore}.po</rule>
+        </rules>
 </config>
 

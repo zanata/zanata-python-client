@@ -54,6 +54,10 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(project_config['locale_map'], {"zh-CN": "zh-Hans"})
         self.assertEqual(project_config['srcdir'], "/home/user/project/source")
         self.assertEqual(project_config['transdir'], "/home/user/project/target")
+        self.assertEqual(project_config['file_mapping_rules']['**/pot/*.pot'],
+                         '{locale}/{path}/{filename}.po')
+        self.assertEqual(project_config['file_mapping_rules']['**/po/*.pot'],
+                         '{path}/{locale_with_underscore}.po')
 
 if __name__ == '__main__':
     unittest.main()
