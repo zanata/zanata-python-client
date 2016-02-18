@@ -308,7 +308,7 @@ class PushPull(CommandsBase):
             filelist = publicanutil.get_file_list(tmlfolder, ".pot")
 
             if not filelist:
-                log.error("The template folder is empty")
+                log.error("No source files found in directory %s.", tmlfolder)
                 sys.exit(1)
             deletefiles = True
         return project_type, deletefiles, tmlfolder, filelist

@@ -31,10 +31,6 @@ from .service import Service
 class DocumentService(Service):
     _fields = ['projects', 'base_url', 'http_headers']
 
-    def _to_unicode(self, some_string):
-        if not isinstance(some_string, unicode):
-            return unicode(some_string)
-
     def __init__(self, *args, **kargs):
         super(DocumentService, self).__init__(*args, **kargs)
 

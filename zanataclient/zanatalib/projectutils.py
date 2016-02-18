@@ -194,6 +194,8 @@ class FileMappingRule(object):
     def _get_custom_mapping_rule(self):
         if self.mapping_rules and len(self.mapping_rules) > 0:
             for pattern, rule in self.mapping_rules.items():
+                if '/' in pattern and '/' not in self.remote_filepath:
+                    self.remote_filepath = '/' + self.remote_filepath
                 if pattern == rule or fnmatch.fnmatch(
                         self.remote_filepath,
                         pattern.rstrip('.%s' % self.template_extension)
@@ -209,9 +211,11 @@ class FileMappingRule(object):
             filename=self.filename, extension=self.extension
         )
         if self.translation_folder:
+            if os.path.isabs(map_path):
+                map_path = map_path[1:]
             map_path = os.path.join(self.translation_folder, map_path)
         subdirectory = map_path[:map_path.rfind('/')]
-        if not os.path.isdir(subdirectory):
+        if subdirectory and not os.path.isdir(subdirectory):
             os.makedirs(subdirectory)
         return map_path
 

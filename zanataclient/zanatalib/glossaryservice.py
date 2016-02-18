@@ -37,7 +37,8 @@ class GlossaryService(Service):
 
     def commit_glossary(self, resources):
         res, content = self.restclient.process_request(
-            'commit_glossary', body=resources, headers=self.http_headers
+            'commit_glossary', body=self._to_unicode(resources),
+            headers=self.http_headers
         )
         return self.messages(res, content)
 
