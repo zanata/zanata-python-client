@@ -35,16 +35,19 @@ class DocumentService(Service):
         super(DocumentService, self).__init__(*args, **kargs)
 
     def get_file_list(self, projectid, iterationid):
-        res, content = self.projects.restclient.process_request('list_files', projectid, iterationid,
-                                                                headers=self.http_headers)
+        res, content = self.projects.restclient.process_request(
+            'list_files', projectid, iterationid, headers=self.http_headers
+        )
         files = self.messages(res, content)
         filelist = [item.get('name') for item in files]
         return filelist
 
     def update_template(self, projectid, iterationid, file_id, resources, copytrans):
         ext = "?ext=gettext&ext=comment&copyTrans=%s" % copytrans
-        res, content = self.projects.restclient.process_request('update_template', projectid, iterationid, file_id,
-                                                                body=resources, headers=self.http_headers, extension=ext)
+        res, content = self.projects.restclient.process_request(
+            'update_template', projectid, iterationid, file_id, body=self._to_unicode(resources),
+            headers=self.http_headers, extension=ext
+        )
         return self.messages(res, content)
 
     def commit_template(self, projectid, iterationid, resources, copytrans):
@@ -59,19 +62,25 @@ class DocumentService(Service):
         @raise SameNameDocumentException:
         """
         ext = "?ext=gettext&ext=comment&copyTrans=%s" % copytrans
-        res, content = self.projects.restclient.process_request('commit_template', projectid, iterationid,
-                                                                body=resources, headers=self.http_headers, extension=ext)
+        res, content = self.projects.restclient.process_request(
+            'commit_template', projectid, iterationid, body=self._to_unicode(resources),
+            headers=self.http_headers, extension=ext
+        )
         return self.messages(res, content)
 
     def delete_template(self, projectid, iterationid, file_id):
-        res, content = self.projects.restclient.process_request('delete_template', projectid, iterationid, file_id,
-                                                                headers=self.http_headers)
+        res, content = self.projects.restclient.process_request(
+            'delete_template', projectid, iterationid, file_id,
+            headers=self.http_headers
+        )
         return self.messages(res, content)
 
     def retrieve_template(self, projectid, iterationid, file_id):
         ext = "?ext=gettext&ext=comment"
-        res, content = self.projects.restclient.process_request('retrieve_template', projectid, iterationid, file_id,
-                                                                headers=self.http_headers, extension=ext)
+        res, content = self.projects.restclient.process_request(
+            'retrieve_template', projectid, iterationid, file_id,
+            headers=self.http_headers, extension=ext
+        )
         return self.messages(res, content)
 
     def retrieve_translation(self, lang, projectid, iterationid, file_id, skeletons):
@@ -88,12 +97,16 @@ class DocumentService(Service):
         ext = "?ext=gettext&ext=comment"
         if skeletons:
             ext = ext + "&skeletons=true"
-        res, content = self.projects.restclient.process_request('retrieve_translation', projectid, iterationid, file_id, lang,
-                                                                headers=self.http_headers, extension=ext)
+        res, content = self.projects.restclient.process_request(
+            'retrieve_translation', projectid, iterationid, file_id, lang,
+            headers=self.http_headers, extension=ext
+        )
         return self.messages(res, content)
 
     def commit_translation(self, projectid, iterationid, fileid, localeid, resources, merge):
         ext = "?ext=gettext&ext=comment&merge=%s" % merge
-        res, content = self.projects.restclient.process_request('commit_translation', projectid, iterationid, fileid, localeid,
-                                                                body=resources, headers=self.http_headers, extension=ext)
+        res, content = self.projects.restclient.process_request(
+            'commit_translation', projectid, iterationid, fileid, localeid, body=self._to_unicode(resources),
+            headers=self.http_headers, extension=ext
+        )
         return self.messages(res, content)

@@ -31,6 +31,11 @@ try:
 except ImportError:
     from configparser import ConfigParser
 
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
+
 project_config = {}
 
 
@@ -119,7 +124,7 @@ class ZanataConfig:
         if xmldoc.getElementsByTagName("locales"):
             locales = xmldoc.getElementsByTagName("locales")[0]
             localelist = locales.getElementsByTagName("locale")
-            project_config['locale_map'] = {}
+            project_config['locale_map'] = OrderedDict()
 
             for locale in localelist:
                 for node in locale.childNodes:
@@ -137,6 +142,21 @@ class ZanataConfig:
         if xmldoc.getElementsByTagName("trans-dir"):
             node = xmldoc.getElementsByTagName("trans-dir")[0]
             project_config['transdir'] = getCombinedTextChildren(node)
+
+        # Read File Mapping Rules
+        if xmldoc.getElementsByTagName("rules"):
+            rules = xmldoc.getElementsByTagName("rules")[0]
+            patterns = rules.getElementsByTagName("rule")
+            project_config['file_mapping_rules'] = OrderedDict()
+
+            for pattern in patterns:
+                for node in pattern.childNodes:
+                    if node.nodeType == node.TEXT_NODE:
+                        if pattern.getAttribute("pattern"):
+                            pattern_map = {str(pattern.getAttribute("pattern")): str(node.data)}
+                        else:
+                            pattern_map = {str(node.data): str(node.data)}
+                        project_config['file_mapping_rules'].update(pattern_map)
 
         return dict((node, value.strip() if isinstance(value, str) else value)
                     for node, value in project_config.items() if value)

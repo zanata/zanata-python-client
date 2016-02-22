@@ -88,7 +88,7 @@ class ProjectService(Service):
             project.name, project.id, project.desc, project.type
         )
         res, content = self.restclient.process_request(
-            'create_project', project.id, body=body, headers=self.http_headers
+            'create_project', project.id, body=self._to_unicode(body), headers=self.http_headers
         )
         return self.messages(res, content, "The project is already exist on server")
 
@@ -140,7 +140,7 @@ class IterationService(Service):
         """
         body = '''{"name":"%s","id":"%s","description":"%s"}''' % (iteration.name, iteration.id, iteration.desc)
         res, content = self.restclient.process_request(
-            'create_iteration', projectid, iteration.id, body=body, headers=self.http_headers
+            'create_iteration', projectid, iteration.id, body=self._to_unicode(body), headers=self.http_headers
         )
         return self.messages(res, content, "The Version is already exist on server")
 

@@ -22,10 +22,12 @@
 
 
 __all__ = (
-    "Project", "Iteration", "Stats"
+    "Project", "Iteration", "Stats", "ToolBox", "FileMappingRule"
 )
 
+import os
 import sys
+import fnmatch
 from xml.dom import minidom
 import xml.etree.cElementTree as ET
 
@@ -142,3 +144,86 @@ class ToolBox(object):
             child.text = str(val)
             elem.append(child)
         return ToolBox.prettify(elem)
+
+
+class FileMappingRule(object):
+    """
+    Build translation's paths for pull and push considering rules
+
+    The mapping rules configuration is optional in zanata.xml.
+    If not specified, standard rules are applied according to project type.
+    """
+
+    project_filemapping_default_config = {
+        'gettext': '{path}/{locale_with_underscore}.{extension}',
+        'podir': '{locale}/{path}/{filename}.{extension}',
+        'properties': '{path}/{filename}_{locale_with_underscore}.{extension}',
+        'utf8properties': '{path}/{filename}_{locale_with_underscore}.{extension}',
+        'xliff': '{path}/{filename}_{locale_with_underscore}.{extension}',
+        'xml': '{path}/{filename}_{locale_with_underscore}.{extension}',
+        'file': '{locale}/{path}/{filename}.{extension}'
+    }
+
+    def __init__(self, *args, **kwargs):
+        self.project_type, self.locale, self.extension, self.mapping_rules = args
+        self.path = kwargs.get('path')
+        self.filename = kwargs.get('filename')
+        self.locale_with_underscore = self.locale.replace('-', '_')
+        self.translation_folder = kwargs.get('trans_folder')
+        self.remote_filepath = kwargs.get('remote_filepath')
+        self.template_extension = 'pot'
+
+    def _apply_standard_mapping_rules(self):
+        if self.project_type in self.project_filemapping_default_config:
+            map_path = self.project_filemapping_default_config[self.project_type]
+            map_path = map_path.format(
+                path=self.path, locale=self.locale,
+                locale_with_underscore=self.locale_with_underscore,
+                filename=self.filename, extension=self.extension
+            )
+            if self.translation_folder:
+                map_path = os.path.join(self.translation_folder, map_path)
+            subdirectory = map_path[:map_path.rfind('/')]
+            if not os.path.isdir(subdirectory):
+                os.makedirs(subdirectory)
+            return map_path
+        else:
+            print("Unsupported Project Type.")
+            sys.exit(1)
+
+    def _get_custom_mapping_rule(self):
+        if self.mapping_rules and len(self.mapping_rules) > 0:
+            for pattern, rule in self.mapping_rules.items():
+                if '/' in pattern and '/' not in self.remote_filepath:
+                    self.remote_filepath = '/' + self.remote_filepath
+                if pattern == rule or fnmatch.fnmatch(
+                        self.remote_filepath,
+                        pattern.rstrip('.%s' % self.template_extension)
+                ):
+                    return rule
+        return False
+
+    def _apply_custom_mapping_rules(self):
+        map_path = self._get_custom_mapping_rule()
+        map_path = map_path.format(
+            path=self.path, locale=self.locale,
+            locale_with_underscore=self.locale_with_underscore,
+            filename=self.filename, extension=self.extension
+        )
+        if self.translation_folder:
+            if os.path.isabs(map_path):
+                map_path = map_path[1:]
+            map_path = os.path.join(self.translation_folder, map_path)
+        subdirectory = map_path[:map_path.rfind('/')]
+        if subdirectory and not os.path.isdir(subdirectory):
+            os.makedirs(subdirectory)
+        return map_path
+
+    @property
+    def translation_path(self):
+        translation_path = (
+            self._apply_standard_mapping_rules()
+            if not self.mapping_rules else
+            self._apply_custom_mapping_rules()
+        )
+        return translation_path

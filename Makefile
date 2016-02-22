@@ -1,5 +1,7 @@
 # Makefile for python client
 
+NOSE_FLAGS=--with-coverage --cover-package=zanataclient --cover-tests -sv
+
 default: all
 
 sdist: all lint test
@@ -29,7 +31,7 @@ flake8:
 	flake8 --ignore=E501,F403,F841,F401 zanataclient test
 
 test:
-	(cd test; python test_all.py)
+	(cd test; nosetests ${NOSE_FLAGS} test_all.py)
 
 all: zanataclient/VERSION-FILE
 

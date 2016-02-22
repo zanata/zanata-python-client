@@ -27,7 +27,7 @@ from .publicanutil import PublicanUtility
 from .csvconverter import CSVConverter
 from .zanatalib.resource import ZanataResource
 from .zanatalib.projectutils import (
-    Project, Iteration, Stats
+    Project, Iteration, Stats, FileMappingRule
 )
 from .zanatalib.logger import Logger
 from .zanatalib.error import (
@@ -206,6 +206,8 @@ class ZanataCommand:
             if hasattr(project, 'defaultType') and project.defaultType.strip():
                 print("Project Type:        %s") % project.defaultType
             print("Project Links:       %s") % [{'href': link.href, 'type': link.type, 'rel': link.rel} for link in project.links]
+            if hasattr(project, 'status'):
+                print("Project Status:      %s") % project.status
 
     def project_info(self, project_id):
         """
@@ -219,6 +221,11 @@ class ZanataCommand:
                 print("Project Type:      %s") % p.defaultType
             if hasattr(p, 'description') and p.description.strip():
                 print("Project Desc:      %s") % p.description
+            if hasattr(p, 'status'):
+                print("Project Status:    %s") % p.status
+            versions = self.get_project_versions(project_id)
+            if versions:
+                print(" %s Version(s):    [%s]") % (len(versions), ", ".join(versions))
             print("\n")
         except NoSuchProjectException as e:
             self.log.error(str(e))
@@ -245,11 +252,16 @@ class ZanataCommand:
         try:
             project = self.zanata_resource.projects.get(project_id)
             iteration = project.get_iteration(iteration_id)
-            print("Version ID: %s") % iteration.id
+            print("\nVersion ID: %s") % iteration.id
             if hasattr(iteration, 'name'):
                 print("Version Name: %s") % iteration.name
             if hasattr(iteration, 'description'):
                 print("Version Description: %s") % iteration.description
+            # This can be implemented with some flag etc.
+            # filelist = self.zanata_resource.documents.get_file_list(project_id, iteration_id)
+            # if filelist:
+            #     print(" %s Document(s): [%s]") % (len(filelist), ", ".join(filelist))
+            print("\n")
         except NoSuchProjectException as e:
             self.log.error(str(e))
 
@@ -284,45 +296,37 @@ class ZanataCommand:
         except ZanataException as e:
             self.log.error(str(e))
 
-    def import_po(self, potfile, trans_folder, project_id, iteration_id, lang_list, locale_map, merge, project_type):
+    def import_po(self, potfile, trans_folder, project_id, iteration_id, lang_list, locale_map,
+                  merge, project_type, file_mapping_rules):
         sub_dir = ""
         publicanutil = PublicanUtility()
-        for item in lang_list:
+
+        for local_lang in lang_list:
             if not locale_map:
-                lang = item
+                remote_lang = local_lang
             else:
-                if item in locale_map:
-                    lang = locale_map[item]
+                if local_lang in locale_map:
+                    remote_lang = locale_map[local_lang]
                 else:
-                    lang = item
+                    remote_lang = local_lang
 
             if '/' in potfile:
+                name = potfile.split('/')[-1]
                 request_name = potfile.replace('/', ',')
                 sub_dir = potfile[0:potfile.rfind('/')]
             else:
-                request_name = potfile
+                name = request_name = potfile
 
-            self.log.info("Pushing %s translation for %s to server:" % (item, potfile))
+            self.log.info("Pushing %s translation for %s to server:" % (local_lang, potfile))
 
-            if project_type == "podir":
-                folder = os.path.join(trans_folder, item)
-
-                if not os.path.isdir(folder):
-                    self.log.error("Can not find translation, please specify path of the translation folder")
-                    continue
-
-                pofile = os.path.join(folder, potfile + '.po')
-
-            elif project_type == "gettext":
-                filename = item.replace('-', '_') + '.po'
-                if sub_dir:
-                    path = os.path.join(trans_folder, sub_dir)
-                else:
-                    path = trans_folder
-                pofile = os.path.join(path, filename)
+            pofile = FileMappingRule(
+                project_type, local_lang, 'po', file_mapping_rules, **{
+                    'trans_folder': trans_folder, 'path': sub_dir, 'filename': name, 'remote_filepath': potfile,
+                }
+            ).translation_path
 
             if not os.path.isfile(pofile):
-                self.log.error("Can not find the %s translation for %s" % (item, potfile))
+                self.log.error("Can not find the %s translation for %s" % (local_lang, potfile))
                 continue
 
             body = publicanutil.pofile_to_json(pofile)
@@ -331,11 +335,11 @@ class ZanataCommand:
                 self.log.error("No content or all entries are obsolete in %s" % pofile)
                 sys.exit(1)
 
-            self.commit_translation(project_id, iteration_id, request_name, pofile, lang, body, merge)
+            self.commit_translation(project_id, iteration_id, request_name, pofile, remote_lang, body, merge)
 
-    def push_trans_command(self, transfolder, project_id, iteration_id, lang_list, locale_map, project_type, merge):
+    def push_trans_command(self, transfolder, project_id, iteration_id, lang_list, locale_map,
+                           project_type, merge, file_mapping_rules):
         filelist = ""
-        folder = ""
         publicanutil = PublicanUtility()
 
         try:
@@ -347,63 +351,49 @@ class ZanataCommand:
             self.log.error("There is no source files on the server, please push source files first")
             sys.exit(1)
 
-        for item in lang_list:
+        for local_lang in lang_list:
             if not locale_map:
-                lang = item
+                remote_lang = local_lang
             else:
-                if item in locale_map:
-                    lang = locale_map[item]
+                if local_lang in locale_map:
+                    remote_lang = locale_map[local_lang]
                 else:
-                    lang = item
+                    remote_lang = local_lang
 
-            self.log.info("Pushing %s translation for %s to server:" % (item, project_id))
-
-            if project_type == "podir":
-                folder = os.path.join(transfolder, item)
-                if not os.path.exists(folder):
-                    self.log.error("The folder %s is not exist" % os.path.abspath(folder))
-                    continue
-            elif project_type == "gettext":
-                folder = transfolder
+            self.log.info("Pushing %s translation for %s to server:" % (local_lang, project_id))
 
             for filename in filelist:
-                if project_type == "gettext":
-                    pofile_name = item.replace('-', '_') + '.po'
-                    if '/' in filename:
-                        name = filename[filename.rfind('/') + 1:] + '.pot'
-                    else:
-                        name = filename + '.pot'
-                    filepath = publicanutil.get_pofile_path(folder, name)
-                    try:
-                        pofile = filepath[0:filepath.rfind('/') + 1] + pofile_name
-                    except:
-                        pofile = None
-                        print("Can not find " + name)
+                sub_dir = ''
+                if '/' in filename:
+                    name = filename.split('/')[-1]
+                    sub_dir = filename[0:filename.rfind('/')]
+                else:
+                    name = filename
 
-                elif project_type == "podir":
-                    if '/' in filename:
-                        name = filename[filename.rfind('/') + 1:] + '.po'
-                    else:
-                        name = filename + '.po'
-                    pofile = publicanutil.get_pofile_path(folder, name)
-
-                self.log.info("Pushing the %s translation of %s to server:" % (item, filename))
+                pofile = FileMappingRule(
+                    project_type, local_lang, 'po', file_mapping_rules, **{
+                        'trans_folder': transfolder, 'path': sub_dir, 'filename': name, 'remote_filepath': filename,
+                    }
+                ).translation_path
 
                 if not pofile or not os.path.isfile(pofile):
-                    self.log.error("Can not find the %s translation for %s" % (item, filename))
+                    self.log.error("Can not find the %s translation for %s" % (local_lang, filename))
                     continue
+                else:
+                    self.log.info("Pushing the %s translation of %s to server:" % (local_lang, filename))
 
                 request_name = filename.replace('/', ',')
 
                 body = publicanutil.pofile_to_json(pofile)
 
                 if not body:
-                    self.log.error("No content or all entries are obsolete in %s" % filepath)
+                    self.log.error("No content or all entries are obsolete in %s" % sub_dir)
                     sys.exit(1)
 
-                self.commit_translation(project_id, iteration_id, request_name, pofile, lang, body, merge)
+                self.commit_translation(project_id, iteration_id, request_name, pofile, remote_lang, body, merge)
 
-    def push_command(self, file_list, srcfolder, project_id, iteration_id, copytrans, plural_support=False, import_param=None):
+    def push_command(self, file_list, srcfolder, project_id, iteration_id, copytrans, plural_support=False,
+                     import_param=None, file_mapping_rules=None):
         """
         Push the content of publican files to a Project version on Zanata server
         @param args: name of the publican file
@@ -441,9 +431,10 @@ class ZanataCommand:
                 transdir = import_param['transdir']
                 locale_map = import_param['locale_map']
 
-                self.import_po(filename, transdir, project_id, iteration_id, lang_list, locale_map, merge, project_type)
+                self.import_po(filename, transdir, project_id, iteration_id, lang_list, locale_map,
+                               merge, project_type, file_mapping_rules)
 
-    def pull_command(self, locale_map, project_id, iteration_id, filedict, output, project_type, skeletons):
+    def pull_command(self, locale_map, project_id, iteration_id, filedict, output, project_type, skeletons, mapping_rules):
         """
         Retrieve the content of documents in a Project version from Zanata server. If the name of publican
         file is specified, the content of that file will be pulled from server. Otherwise, all the document of that
@@ -462,8 +453,7 @@ class ZanataCommand:
                 folder = file_item[0:file_item.rfind('/')]
                 request_name = file_item.replace('/', ',')
             else:
-                name = file_item
-                request_name = file_item
+                name = request_name = file_item
 
             self.log.info("Fetching the content of %s from Zanata server" % name)
 
@@ -482,42 +472,31 @@ class ZanataCommand:
                 self.log.error(str(e))
                 sys.exit(1)
 
-            for item in lang_list:
+            for local_lang in lang_list:
                 if not locale_map:
-                    lang = item
+                    remote_lang = local_lang
                 else:
-                    if item in locale_map:
-                        lang = locale_map[item]
+                    if local_lang in locale_map:
+                        remote_lang = locale_map[local_lang]
                     else:
-                        lang = item
+                        remote_lang = local_lang
 
-                save_name = item.replace('-', '_')
-                if project_type == "podir":
-                    outpath = os.path.join(output, item)
-                    if not os.path.isdir(outpath):
-                        os.mkdir(outpath)
-                    save_name = name
-                elif project_type == "gettext":
-                    outpath = output
+                file_mapped_path = FileMappingRule(
+                    project_type, local_lang, 'po', mapping_rules, **{
+                        'trans_folder': output, 'path': folder, 'filename': name, 'remote_filepath': file_item,
+                    }
+                ).translation_path
 
-                if folder:
-                    subdirectory = os.path.join(outpath, folder)
-                    if not os.path.isdir(subdirectory):
-                        os.makedirs(subdirectory)
-                    pofile = os.path.join(subdirectory, save_name + '.po')
-                else:
-                    pofile = os.path.join(outpath, save_name + '.po')
-
-                self.log.info("Retrieving %s translation from server: " % item)
+                self.log.info("Retrieving %s translation from server: " % local_lang)
 
                 try:
-                    result = self.zanata_resource.documents.retrieve_translation(lang, project_id, iteration_id, request_name, skeletons)
-                    publicanutil.save_to_pofile(pofile, result, pot, skeletons, item, name)
+                    result = self.zanata_resource.documents.retrieve_translation(remote_lang, project_id, iteration_id, request_name, skeletons)
+                    publicanutil.save_to_pofile(file_mapped_path, result, pot, skeletons, local_lang, name)
                 except UnAuthorizedException as e:
                     self.log.error(str(e))
                     break
                 except UnAvaliableResourceException as e:
-                    self.log.info("There is no %s translation for %s" % (item, name))
+                    self.log.info("There is no %s translation for %s" % (local_lang, name))
                 except BadRequestBodyException as e:
                     self.log.error(str(e))
                     continue
