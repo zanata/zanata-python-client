@@ -206,6 +206,8 @@ class ZanataCommand:
             if hasattr(project, 'defaultType') and project.defaultType.strip():
                 print("Project Type:        %s") % project.defaultType
             print("Project Links:       %s") % [{'href': link.href, 'type': link.type, 'rel': link.rel} for link in project.links]
+            if hasattr(project, 'status'):
+                print("Project Status:      %s") % project.status
 
     def project_info(self, project_id):
         """
@@ -219,6 +221,11 @@ class ZanataCommand:
                 print("Project Type:      %s") % p.defaultType
             if hasattr(p, 'description') and p.description.strip():
                 print("Project Desc:      %s") % p.description
+            if hasattr(p, 'status'):
+                print("Project Status:    %s") % p.status
+            versions = self.get_project_versions(project_id)
+            if versions:
+                print(" %s Version(s):    [%s]") % (len(versions), ", ".join(versions))
             print("\n")
         except NoSuchProjectException as e:
             self.log.error(str(e))
@@ -245,11 +252,15 @@ class ZanataCommand:
         try:
             project = self.zanata_resource.projects.get(project_id)
             iteration = project.get_iteration(iteration_id)
-            print("Version ID: %s") % iteration.id
+            print("\nVersion ID: %s") % iteration.id
             if hasattr(iteration, 'name'):
                 print("Version Name: %s") % iteration.name
             if hasattr(iteration, 'description'):
                 print("Version Description: %s") % iteration.description
+            filelist = self.zanata_resource.documents.get_file_list(project_id, iteration_id)
+            if filelist:
+                print(" %s Document(s): [%s]") % (len(filelist), ", ".join(filelist))
+            print("\n")
         except NoSuchProjectException as e:
             self.log.error(str(e))
 
