@@ -257,9 +257,10 @@ class ZanataCommand:
                 print("Version Name: %s") % iteration.name
             if hasattr(iteration, 'description'):
                 print("Version Description: %s") % iteration.description
-            filelist = self.zanata_resource.documents.get_file_list(project_id, iteration_id)
-            if filelist:
-                print(" %s Document(s): [%s]") % (len(filelist), ", ".join(filelist))
+            # This can be implemented with some flag etc.
+            # filelist = self.zanata_resource.documents.get_file_list(project_id, iteration_id)
+            # if filelist:
+            #     print(" %s Document(s): [%s]") % (len(filelist), ", ".join(filelist))
             print("\n")
         except NoSuchProjectException as e:
             self.log.error(str(e))
