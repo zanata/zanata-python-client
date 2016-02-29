@@ -28,7 +28,7 @@ __all__ = (
 import os
 import sys
 import fnmatch
-from xml.dom import minidom
+from lxml import etree
 import xml.etree.cElementTree as ET
 
 
@@ -108,6 +108,8 @@ class ToolBox(object):
     """
     Various Useful Utilities
     """
+    XMLNS = "http://zanata.org/namespace/config/"
+
     @staticmethod
     def xmlstring2dict(xmlstring):
         """
@@ -122,28 +124,43 @@ class ToolBox(object):
         return xmldict
 
     @staticmethod
-    def prettify(elem):
+    def populate_etree(element, data):
         """
-        Return a pretty-printed XML string for the Element.
+        Populates an etree with the given dictionary
         """
-        rough_string = ET.tostring(elem, 'utf-8')
-        reparsed = minidom.parseString(rough_string)
-        return reparsed.toprettyxml(indent="\t")
+        if not isinstance(data, dict):
+            raise AttributeError('Unexpected Dict Structure')
+        for k, v in data.items():
+            if isinstance(v, dict):
+                # child dictionary
+                child = etree.Element(k)
+                ToolBox.populate_etree(child, v)
+                element.append(child)
+            elif isinstance(v, list) or isinstance(v, tuple):
+                # child list or tuple of dictionaries
+                for item in v:
+                    child = etree.Element(k)
+                    ToolBox.populate_etree(child, item)
+                    element.append(child)
+            elif k.lower() == 'text':
+                # set text
+                element.text = v
+            else:
+                # set attribute
+                element.set(k, unicode(v))
 
     @staticmethod
-    def dict2xml(tag, dict):
-        '''
+    def dict2xml(root_elem, dict_object):
+        """
         Converts dict of key/value pairs into XML
-        '''
-        if sys.version_info >= (2, 7):
-            xml_ns = "http://zanata.org/namespace/config/"
-            ET.register_namespace('', xml_ns)
-        elem = ET.Element(tag)
-        for key, val in dict.items():
-            child = ET.Element(key)
-            child.text = str(val)
-            elem.append(child)
-        return ToolBox.prettify(elem)
+        """
+        root = etree.Element(root_elem, xmlns=ToolBox.XMLNS)
+        ToolBox.populate_etree(root, dict_object)
+
+        return etree.tostring(
+            root, pretty_print=True, xml_declaration=True,
+            encoding='UTF-8', standalone=True
+        )
 
 
 class FileMappingRule(object):

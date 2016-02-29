@@ -1,4 +1,5 @@
-* Mon Feb 22 2016 Sundeep Anand <suanand@redhat.com>
+* Mon Feb 29 2016 Sundeep Anand <suanand@redhat.com>
+- ZNTA-934 - java-client compatable zanata.xml
 - ZNTA-927 - Project Status and Versions
 - Bug 1139950 - Flexible Translation file naming
 

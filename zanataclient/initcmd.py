@@ -327,12 +327,12 @@ class ZanataInit(CommandsInit, ContextBase):
 
     def dump_project_config(self):
         project_config_dict = OrderedDict()
-        project_config_dict['url'] = self.local_config.get('url')
-        project_config_dict['project'] = self.local_config.get('project_id')
-        project_config_dict['project-version'] = self.local_config.get('project_version')
-        project_config_dict['project-type'] = self.local_config.get('project_type')
-        project_config_dict['src-dir'] = self.local_config.get('srcdir')
-        project_config_dict['trans-dir'] = self.local_config.get('transdir')
+        project_config_dict['url'] = {'text': self.local_config.get('url')}
+        project_config_dict['project'] = {'text': self.local_config.get('project_id')}
+        project_config_dict['project-version'] = {'text': self.local_config.get('project_version')}
+        project_config_dict['project-type'] = {'text': self.local_config.get('project_type')}
+        project_config_dict['src-dir'] = {'text': self.local_config.get('srcdir')}
+        project_config_dict['trans-dir'] = {'text': self.local_config.get('transdir')}
         xmldoc = ToolBox.dict2xml('config', project_config_dict)
         try:
             with open('zanata.xml', 'w') as project_config_file:
@@ -346,7 +346,7 @@ class ZanataInit(CommandsInit, ContextBase):
         print("\tWhat can I do next?")
         if self.local_config.get('backup_file'):
             print("\t- Compare the new config to the old one [%s] and see if any customization can be reused. "
-                  "i.e. command hooks or locale mappings" % self.local_config['backup_file'])
+                  "i.e. rules or command hooks" % self.local_config['backup_file'])
         print("\t- Go to your project-version homepage to view details and change advanced options: "
               "https://translate.zanata.org/zanata/iteration/view/%s/%s" % (self.local_config.get('project_id'),
                                                                             self.local_config.get('project_version')))
