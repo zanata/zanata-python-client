@@ -235,7 +235,7 @@ class ContextBase(object):
                 IterationService(self.get_url(), self.local_config.get('http_headers')).config(
                     self.local_config.get('project_id'), self.local_config.get('project_version')
                 )
-            if project_config.get('project-type'):
+            if project_config and project_config.get('project-type'):
                 self.remote_config.update({'project_type': project_config['project-type']})
 
     def process_locales(self, locales):
@@ -245,7 +245,7 @@ class ContextBase(object):
         :return: locale_map
         """
         locale_map = {}
-        if len(locales) > 0:
+        if locales and len(locales) > 0:
             for locale in locales:
                 locale_map.update(
                     {locale.get('alias') or locale.get('localeId'): locale.get('localeId')}

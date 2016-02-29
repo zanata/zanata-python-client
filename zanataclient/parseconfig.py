@@ -39,14 +39,18 @@ except ImportError:
 project_config = {}
 
 
-class ZanataConfig:
+class ZanataConfig(object):
     def __init__(self):
         self.configparser = ""
         self._config = ""
+        self.log = Logger()
 
     def set_userconfig(self, path):
-        self.configparser = ConfigParser()
-        self._config = self.configparser.read(['zanata.ini', path])
+        try:
+            self.configparser = ConfigParser()
+            self._config = self.configparser.read(['zanata.ini', path])
+        except:
+            self.log.error("Invalid User Config")
 
     def get_server(self, url):
         if self._config:
