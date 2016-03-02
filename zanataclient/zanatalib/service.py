@@ -10,6 +10,7 @@ from error import NotAllowedException
 from error import SameNameDocumentException
 from error import ForbiddenException
 from rest.client import RestClient
+from rest.config import media_types
 from projectutils import ToolBox
 
 import json
@@ -62,8 +63,13 @@ class Service(object):
             except ValueError, e:
                 if content.strip() == "":
                     return rst
-                print "Exception while decoding", e, "its may due to file already exists on the server or not a PO file "
-                return rst
+                if res.get('content-type') and res['content-type'] not in media_types:
+                    print("\n\tInvalid media type %s in REST response.\n\tPlease check that the server URL is correct, "
+                          "including the protocol (http/https).\n\tIf the URL is correct, "
+                          "there may be a configuration problem on the server.\n" % res['content-type'])
+                    sys.exit(1)
+                else:
+                    print("Exception while decoding: %s" % e)
             return rst
         elif res['status'] == '201':
             return True

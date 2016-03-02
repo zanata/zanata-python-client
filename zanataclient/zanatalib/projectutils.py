@@ -190,6 +190,16 @@ class FileMappingRule(object):
         self.remote_filepath = kwargs.get('remote_filepath')
         self.template_extension = 'pot'
 
+    def _process_map_path(self, map_path):
+        if self.translation_folder:
+            if os.path.isabs(map_path):
+                map_path = map_path[1:]
+            map_path = os.path.join(self.translation_folder, map_path)
+        subdirectory = map_path[:map_path.rfind('/')]
+        if subdirectory and not os.path.isdir(subdirectory):
+            os.makedirs(subdirectory)
+        return map_path
+
     def _apply_standard_mapping_rules(self):
         if self.project_type in self.project_filemapping_default_config:
             map_path = self.project_filemapping_default_config[self.project_type]
@@ -198,12 +208,7 @@ class FileMappingRule(object):
                 locale_with_underscore=self.locale_with_underscore,
                 filename=self.filename, extension=self.extension
             )
-            if self.translation_folder:
-                map_path = os.path.join(self.translation_folder, map_path)
-            subdirectory = map_path[:map_path.rfind('/')]
-            if not os.path.isdir(subdirectory):
-                os.makedirs(subdirectory)
-            return map_path
+            return self._process_map_path(map_path)
         else:
             print("Unsupported Project Type.")
             sys.exit(1)
@@ -227,14 +232,7 @@ class FileMappingRule(object):
             locale_with_underscore=self.locale_with_underscore,
             filename=self.filename, extension=self.extension
         )
-        if self.translation_folder:
-            if os.path.isabs(map_path):
-                map_path = map_path[1:]
-            map_path = os.path.join(self.translation_folder, map_path)
-        subdirectory = map_path[:map_path.rfind('/')]
-        if subdirectory and not os.path.isdir(subdirectory):
-            os.makedirs(subdirectory)
-        return map_path
+        return self._process_map_path(map_path)
 
     @property
     def translation_path(self):
