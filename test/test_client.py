@@ -50,6 +50,10 @@ class FalseDict(dict):
     def previous(self):
         return None
 
+    @property
+    def status(self):
+        return 200
+
 response = FalseDict()
 response.update({'status': '200', 'access-control-allow-headers': 'X-Requested-With, Content-Type, Accept,',
                  'content-location': 'http://localhost:8080/zanata/seam/resource/restv1/projects',
