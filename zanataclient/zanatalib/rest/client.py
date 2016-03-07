@@ -127,10 +127,12 @@ class RestHandle(object):
     def manage_redirection(self, rest_resp, args_dict):
         url = self.base_url
         if rest_resp.previous and rest_resp.previous.status == 301 and '-x-permanent-redirect-url' in rest_resp.previous:
-            self.base_url = rest_resp.previous['-x-permanent-redirect-url']
-            if self.uri in self.base_url:
-                self.base_url = self.base_url.replace(self.uri, "")
-            url = self._get_url()
+            redirect_url = rest_resp.previous['-x-permanent-redirect-url']
+            if self.uri in redirect_url:
+                url = redirect_url
+            else:
+                self.base_url = redirect_url
+                url = self._get_url()
         elif rest_resp.previous and rest_resp.previous.status == 302 and 'location' in rest_resp.previous:
             url = rest_resp.previous['location']
             self._http_https_msg(url)
