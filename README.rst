@@ -2,10 +2,6 @@
     :target: https://travis-ci.org/zanata/zanata-python-client
     :alt: Travis CI
 
-.. image:: https://landscape.io/github/zanata/zanata-python-client/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/zanata/zanata-python-client/master
-   :alt: Code Health
-
 Introduction
 ============
 

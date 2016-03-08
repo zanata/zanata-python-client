@@ -62,8 +62,8 @@ class ZanataConfig(object):
                         address = item[1][:-1]
                     else:
                         address = item[1]
-
-                    if url == address:
+                    # to handle ssl (302) redirects
+                    if url == address or address in url.replace('http', 'https'):
                         server = item[0][:-4]
                 return server
             except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):

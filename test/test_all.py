@@ -26,6 +26,7 @@ from test_publicanutil import PublicanUtilityTest
 # from test_zanatacmd import ZanataCmdTest
 from test_service import ServiceTest
 from test_context import ProjectContextTest
+from test_client import RestHandleTest
 
 suite = unittest.TestSuite()
 # suite.addTest(unittest.makeSuite(ZanataTest))
@@ -34,4 +35,5 @@ suite.addTest(unittest.makeSuite(PublicanUtilityTest))
 # suite.addTest(unittest.makeSuite(ZanataCmdTest))
 suite.addTest(unittest.makeSuite(ServiceTest))
 suite.addTest(unittest.makeSuite(ProjectContextTest))
+suite.addTest(unittest.makeSuite(RestHandleTest))
 results = unittest.TextTestRunner(verbosity=2).run(suite)

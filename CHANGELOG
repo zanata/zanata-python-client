@@ -1,5 +1,6 @@
-* Mon Feb 29 2016 Sundeep Anand <suanand@redhat.com>
-- ZNTA-934 - java-client compatable zanata.xml
+* Web Mar 02 2016 Sundeep Anand <suanand@redhat.com>
+- ZNTA-936 - redirection 301, 302 handling
+- ZNTA-934 - java-client compatible zanata.xml
 - ZNTA-927 - Project Status and Versions
 - Bug 1139950 - Flexible Translation file naming
 
