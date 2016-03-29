@@ -304,11 +304,12 @@ class PushPull(CommandsBase):
                 sys.exit(1)
         else:
             # get all the pot files from the template folder
+            supported_file_ext = ".pot"
             publicanutil = PublicanUtility()
-            filelist = publicanutil.get_file_list(tmlfolder, ".pot")
+            filelist = publicanutil.get_file_list(tmlfolder, supported_file_ext)
 
             if not filelist:
-                log.error("No source files found in directory %s.", tmlfolder)
+                log.error("No %s files found in directory %s." % (supported_file_ext, tmlfolder))
                 sys.exit(1)
             deletefiles = True
         return project_type, deletefiles, tmlfolder, filelist
