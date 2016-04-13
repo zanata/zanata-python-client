@@ -30,7 +30,10 @@ except ImportError:
 import os
 import sys
 import warnings
-from io import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 warnings.simplefilter("ignore", DeprecationWarning)
 import httplib2
 

@@ -1,4 +1,6 @@
-* Web Mar 02 2016 Sundeep Anand <suanand@redhat.com>
+* Web Apr 13 2016 Sundeep Anand <suanand@redhat.com> - 1.5.0
+- ZNTA-946 - zanata push StringIO fix
+- ZNTA-303 - podir projects handling
 - ZNTA-936 - redirection 301, 302 handling
 - ZNTA-934 - java-client compatible zanata.xml
 - ZNTA-927 - Project Status and Versions
