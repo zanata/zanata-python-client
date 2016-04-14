@@ -31,6 +31,7 @@ import os
 import os.path
 import subprocess
 
+
 class OptionConfigurationError(Exception):
     pass
 
@@ -311,12 +312,12 @@ def handle_program(
         # If running from git repo, then use "git describe"
         # otherwise, use VERSION-FILE
         version_number = ""
-        git_config=os.path.join(os.path.dirname(sys.argv[0]),'.git', 'config')
+        git_config = os.path.join(os.path.dirname(sys.argv[0]), '.git', 'config')
         git_executable = spawn.find_executable("git")
         if os.path.isfile(git_config) and not (git_executable is None):
-            proc= subprocess.Popen(["git", "describe"], stdout=subprocess.PIPE)
-            (out,err) = proc.communicate()
-            version_number=out[1:-1]
+            proc= subprocess.Popen(["git", "describe"], stdout = subprocess.PIPE)
+            (out, err) = proc.communicate()
+            version_number = out[1:-1]
         else:
             # Not from git, use VERSION-FILE
             path = os.path.dirname(os.path.realpath(__file__))
