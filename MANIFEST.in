@@ -1,0 +1,6 @@
+include zanataclient/VERSION-FILE
+include CHANGELOG
+include COPYING
+include COPYING.LESSER
+include zanata.ini
+include zanata_example.xml
