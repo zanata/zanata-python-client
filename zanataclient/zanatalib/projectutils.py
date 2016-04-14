@@ -198,6 +198,8 @@ class FileMappingRule(object):
         subdirectory = map_path[:map_path.rfind('/')]
         if subdirectory and not os.path.isdir(subdirectory):
             os.makedirs(subdirectory)
+        if '//' in map_path:
+            map_path = map_path.replace('//', '/')
         return map_path
 
     def _apply_standard_mapping_rules(self):
