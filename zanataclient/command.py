@@ -24,9 +24,12 @@
 # http://jimmyg.org/blog/2009/python-command-line-interface-%28cli%29-with-sub-commands.html
 # Copyright (C) 2009 James Gardner - http://jimmyg.org/
 
+from distutils import spawn
 import getopt
 import sys
 import os
+import os.path
+import subprocess
 
 
 class OptionConfigurationError(Exception):
@@ -306,18 +309,27 @@ def handle_program(
             ))
         sys.exit(0)
     elif 'client_version' in program_options:
-        # Retrieve the version of client
+        # If running from git repo, then use "git describe"
+        # otherwise, use VERSION-FILE
         version_number = ""
-        path = os.path.dirname(os.path.realpath(__file__))
-        version_file = os.path.join(path, 'VERSION-FILE')
-        try:
-            version = open(version_file, 'rb')
-            client_version = version.read()
-            version.close()
-            version_number = client_version.rstrip().strip('version: ')
-        except IOError:
-            print("Please run VERSION-GEN or 'make install' to generate VERSION-FILE")
-            version_number = "UNKNOWN"
+        git_config = os.path.join(os.path.dirname(sys.argv[0]), '.git', 'config')
+        git_executable = spawn.find_executable("git")
+        if os.path.isfile(git_config) and not (git_executable is None):
+            proc = subprocess.Popen(["git", "describe"], stdout=subprocess.PIPE)
+            (out, err) = proc.communicate()
+            version_number = out[1:-1]
+        else:
+            # Not from git, use VERSION-FILE
+            path = os.path.dirname(os.path.realpath(__file__))
+            version_file = os.path.join(path, 'VERSION-FILE')
+            try:
+                version = open(version_file, 'rb')
+                client_version = version.read()
+                version.close()
+                version_number = client_version.rstrip().strip('version: ')
+            except IOError:
+                print("Please run VERSION-GEN or 'make install' to generate VERSION-FILE")
+                version_number = "UNKNOWN"
 
         print("zanata python client version: %s" % version_number)
     else:
