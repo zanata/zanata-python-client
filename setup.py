@@ -39,7 +39,7 @@ setup(
     install_requires=requirements,
     description="Zanata Python Client.",
     author='Jian Ni, Ding-Yi Chen, Anish Patil, Sundeep Anand',
-    author_email='dchen@redhat.com, apatil@redhat.com, suandand@redhat.com',
+    author_email='dchen@redhat.com, apatil@redhat.com, suanand@redhat.com',
     license='LGPLv2+',
     platforms=["Linux"],
     scripts=["zanata", "flies"],

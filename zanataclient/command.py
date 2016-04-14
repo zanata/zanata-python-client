@@ -315,7 +315,7 @@ def handle_program(
         git_config = os.path.join(os.path.dirname(sys.argv[0]), '.git', 'config')
         git_executable = spawn.find_executable("git")
         if os.path.isfile(git_config) and not (git_executable is None):
-            proc= subprocess.Popen(["git", "describe"], stdout = subprocess.PIPE)
+            proc = subprocess.Popen(["git", "describe"], stdout=subprocess.PIPE)
             (out, err) = proc.communicate()
             version_number = out[1:-1]
         else:
