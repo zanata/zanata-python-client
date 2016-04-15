@@ -3,7 +3,6 @@ build/
 .cache/*
 .fliesrc
 *~
-VERSION-FILE
 dist/
 *.egg-info/
 .idea/
