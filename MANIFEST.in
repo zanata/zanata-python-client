@@ -2,5 +2,7 @@ include zanataclient/VERSION-FILE
 include CHANGELOG
 include COPYING
 include COPYING.LESSER
+include requirements*.txt
 include zanata.ini
 include zanata_example.xml
+
