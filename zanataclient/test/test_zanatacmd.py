@@ -27,7 +27,7 @@ import unittest
 import sys
 import os
 from minimock import Mock
-sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
+sys.path.insert(0, os.path.abspath(__file__ + "/../../.."))
 
 from zanataclient.zanatacmd import ZanataCommand
 from zanataclient.zanatalib import ZanataResource

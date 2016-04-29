@@ -26,7 +26,7 @@ all__ = (
 import unittest
 import sys
 import os
-sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
+sys.path.insert(0, os.path.abspath(__file__ + "/../../.."))
 
 from zanataclient.parseconfig import ZanataConfig
 

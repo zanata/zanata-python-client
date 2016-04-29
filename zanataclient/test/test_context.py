@@ -27,7 +27,7 @@ import unittest
 import sys
 import os
 import mock
-sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
+sys.path.insert(0, os.path.abspath(__file__ + "/../../.."))
 from zanataclient.context import ProjectContext
 
 # test data

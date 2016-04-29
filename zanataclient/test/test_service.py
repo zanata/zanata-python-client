@@ -25,7 +25,7 @@ all__ = (
 
 import sys
 import os
-sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
+sys.path.insert(0, os.path.abspath(__file__ + "/../../.."))
 from zanataclient.zanatalib.service import Service
 if sys.version_info < (2, 7):
     import unittest2 as unittest
