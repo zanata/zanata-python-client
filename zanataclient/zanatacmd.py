@@ -20,23 +20,27 @@
 # Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA  02110-1301, USA.
 
-import sys
 import os
+import sys
 
-from .publicanutil import PublicanUtility
 from .csvconverter import CSVConverter
-from .zanatalib.resource import ZanataResource
-from .zanatalib.projectutils import (
-    Project, Iteration, Stats, FileMappingRule
+from .publicanutil import PublicanUtility
+from .zanatalib.error import (
+    BadRequestBodyException,
+    InternalServerError,
+    InvalidOptionException,
+    NoSuchProjectException,
+    SameNameDocumentException,
+    UnAuthorizedException,
+    UnAvaliableResourceException,
+    UnavailableServiceError,
+    UnexpectedStatusException,
+    ZanataException,
 )
 from .zanatalib.logger import Logger
-from .zanatalib.error import (
-    ZanataException, NoSuchProjectException, UnAuthorizedException,
-    UnAvaliableResourceException, BadRequestBodyException,
-    SameNameDocumentException, InvalidOptionException,
-    UnexpectedStatusException, UnavailableServiceError,
-    InternalServerError
-)
+from .zanatalib.projectutils import FileMappingRule, Iteration, Project, Stats
+from .zanatalib.resource import ZanataResource
+
 
 try:
     input = raw_input

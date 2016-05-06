@@ -21,13 +21,14 @@
 # Boston, MA  02110-1301, USA.
 
 import os
-import sys
 import string
+import sys
 
-from .zanatalib.error import NoSuchFileException
-from .zanatacmd import ZanataCommand
 from .publicanutil import PublicanUtility
+from .zanatacmd import ZanataCommand
+from .zanatalib.error import NoSuchFileException
 from .zanatalib.logger import Logger
+
 
 log = Logger()
 

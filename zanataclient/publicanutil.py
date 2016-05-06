@@ -24,18 +24,19 @@ __all__ = (
     "PublicanUtility",
 )
 
-import polib
 import hashlib
 import os
 import re
+import sys
+
+import polib
+
+from .zanatalib.logger import Logger
 
 try:
     import json
 except ImportError:
     import simplejson as json
-import sys
-
-from .zanatalib.logger import Logger
 
 
 class PublicanUtility:

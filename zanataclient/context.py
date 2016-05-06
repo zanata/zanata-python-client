@@ -24,20 +24,20 @@ __all__ = (
     "ProjectContext",
 )
 
-import re
-import os
-import sys
 import functools
+import os
+import re
+import sys
 
-from .zanatalib.logger import Logger
 from .parseconfig import ZanataConfig
 from .zanatalib.error import (
-    UnAvaliableResourceException, UnavailableServiceError
+    UnAvaliableResourceException,
+    UnavailableServiceError,
 )
-from .zanatalib.projectservice import (
-    LocaleService, IterationService
-)
+from .zanatalib.logger import Logger
+from .zanatalib.projectservice import IterationService, LocaleService
 from .zanatalib.versionservice import VersionService
+
 
 log = Logger()
 
@@ -117,7 +117,7 @@ class ContextBase(object):
         user_config = [os.path.join(os.path.expanduser("~") + '/.config', filename)
                        for filename in user_config_file_tuple]
         if 'user_config' in self.command_dict and self.command_dict.get('user_config'):
-            user_config.append(self.command_dict['user_config'])
+            user_config.insert(0, self.command_dict['user_config'])
 
         for path in user_config:
             if os.path.exists(path):

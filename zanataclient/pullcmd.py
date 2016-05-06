@@ -21,11 +21,12 @@
 # Boston, MA  02110-1301, USA.
 
 import os
-import sys
 import string
+import sys
 
-from .zanatalib.logger import Logger
 from .pushcmd import PushPull
+from .zanatalib.logger import Logger
+
 
 log = Logger()
 

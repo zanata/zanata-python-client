@@ -21,28 +21,35 @@
 # Boston, MA  02110-1301, USA.
 
 import getopt
-import sys
 import os
-import string
 import signal
+import string
 import subprocess
+import sys
 from functools import wraps
 
-from .zanatalib.logger import Logger
-from .context import ProjectContext
 from .cmdbase import (
-    ListProjects, ProjectInfo, VersionInfo, CreateProject,
-    CreateVersion, GlossaryPush, GlossaryDelete, Stats
+    CreateProject,
+    CreateVersion,
+    GlossaryDelete,
+    GlossaryPush,
+    ListProjects,
+    ProjectInfo,
+    Stats,
+    VersionInfo,
 )
-from .command import makeHandler
-from .command import strip_docstring
-from .command import parse_command_line
-from .command import handle_program
-from .pushcmd import PoPush
-from .pushcmd import PublicanPush
-from .pushcmd import GenericPush
-from .pullcmd import GenericPull
+from .command import (
+    handle_program,
+    makeHandler,
+    parse_command_line,
+    strip_docstring,
+)
+from .context import ProjectContext
 from .initcmd import ZanataInit
+from .pullcmd import GenericPull
+from .pushcmd import GenericPush, PoPush, PublicanPush
+from .zanatalib.logger import Logger
+
 
 log = Logger()
 

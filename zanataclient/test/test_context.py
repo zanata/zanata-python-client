@@ -23,12 +23,15 @@ all__ = (
     "ProjectContextTest",
 )
 
-import unittest
-import sys
 import os
+import sys
+import unittest
+
 import mock
-sys.path.insert(0, os.path.abspath(__file__ + "/../../.."))
+
 from zanataclient.context import ProjectContext
+
+sys.path.insert(0, os.path.abspath(__file__ + "/../../.."))
 
 # test data
 command_options = {'comment_cols': [{'name': '--commentcols', 'value': 'en-US,es,pos,description',

@@ -24,8 +24,11 @@ __all__ = (
 )
 
 import os.path
-from .zanatalib.logger import Logger
 from xml.dom import minidom
+
+from .zanatalib.logger import Logger
+
+
 try:
     from ConfigParser import ConfigParser
 except ImportError:

@@ -26,10 +26,10 @@ __all__ = (
 )
 
 from .docservice import DocumentService
-from .projectservice import ProjectService
-from .versionservice import VersionService
 from .glossaryservice import GlossaryService
+from .projectservice import ProjectService
 from .statservice import StatService
+from .versionservice import VersionService
 
 
 class ZanataResource:
