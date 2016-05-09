@@ -20,24 +20,23 @@
 # Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA  02110-1301, USA.
 
+import fnmatch
 import os
 import sys
-import fnmatch
 from datetime import datetime
+
+from .cmdbase import CommandsBase, CommandsInit
+from .context import ContextBase
+from .parseconfig import ZanataConfig
+from .zanatalib.logger import Logger, TextColour
+from .zanatalib.projectutils import ToolBox
+
+
 try:
     from collections import OrderedDict
 except ImportError:
     from ordereddict import OrderedDict
 
-from .cmdbase import (
-    CommandsInit, CommandsBase
-)
-from .context import ContextBase
-from .parseconfig import ZanataConfig
-from .zanatalib.logger import(
-    Logger, TextColour
-)
-from .zanatalib.projectutils import ToolBox
 
 log = Logger()
 

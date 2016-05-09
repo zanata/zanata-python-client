@@ -21,28 +21,35 @@
 # Boston, MA  02110-1301, USA.
 
 import getopt
-import sys
 import os
-import string
 import signal
+import string
 import subprocess
+import sys
 from functools import wraps
 
-from .zanatalib.logger import Logger
-from .context import ProjectContext
 from .cmdbase import (
-    ListProjects, ProjectInfo, VersionInfo, CreateProject,
-    CreateVersion, GlossaryPush, GlossaryDelete, Stats
+    CreateProject,
+    CreateVersion,
+    GlossaryDelete,
+    GlossaryPush,
+    ListProjects,
+    ProjectInfo,
+    Stats,
+    VersionInfo,
 )
-from .command import makeHandler
-from .command import strip_docstring
-from .command import parse_command_line
-from .command import handle_program
-from .pushcmd import PoPush
-from .pushcmd import PublicanPush
-from .pushcmd import GenericPush
-from .pullcmd import GenericPull
+from .command import (
+    handle_program,
+    makeHandler,
+    parse_command_line,
+    strip_docstring,
+)
+from .context import ProjectContext
 from .initcmd import ZanataInit
+from .pullcmd import GenericPull
+from .pushcmd import GenericPush, PoPush, PublicanPush
+from .zanatalib.logger import Logger
+
 
 log = Logger()
 
@@ -314,24 +321,25 @@ subcmds = {
 }
 
 usage = """Client for talking to a Zanata Server
+
 Usage: zanata <command> [COMMANDOPTION]...
 
 list of commands:
+glossary push       Push the glossary files to Zanata server
 help                Display this help and exit
 init                Initialize Zanata project configuration
 list                List all available projects
-project info        Show information about a project
-version info        Show information about a version
+po pull             Pull the content of gettext project
+po push             Push the content of gettext project to Zanata server
 project create      Create a project
-version create      Create a version within a project
-publican pull       Pull the content of publican file
-publican push       Push the content of publican file to Zanata server
-po pull             Pull the content of software project file
-po push             Push the content of software project file to Zanata server
-push                Push the content of software project/docbook project to Zanata server
+project info        Show information about a project
+publican pull       Pull the content of publican (podir) project
+publican push       Push the content of publican (podir) project to Zanata server
 pull                Pull the content of software project/docbook project from Zanata server
-glossary push       Push the glossary files to Zanata server
+push                Push the content of software project/docbook project to Zanata server
 stats               Displays translation statistics for a Zanata project version
+version create      Create a version within a project
+version info        Show information about a version
 
 available system options:
 --help              Display this help or detail usage of commands
@@ -339,6 +347,8 @@ available system options:
 
 Use 'zanata help' for the full list of commands
 Use 'zanata help <command>, zanata <command> --help or zanata <command> -h' for detail usage of commands
+
+User configuration to be saved in $HOME/.config/zanata.ini or pointed using --user-config option.
 """
 
 
@@ -408,8 +418,8 @@ def list_project(command_options, args):
     List all available projects
 
     Options:
-        --url address of the Zanata server, eg http://example.com/zanata
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+        --disable-ssl-cert disable ssl certificate validation
+        --url address of the Zanata server, e.g. https://translate.zanata.org/
     """
     pass
 
@@ -419,11 +429,11 @@ def project_info(command_options, args):
     """
     Usage: zanata project info [OPTIONS]
 
-    Show infomation about a project
+    Show information about a project
 
     Options:
-        --project-id: project id
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+        --disable-ssl-cert  : disable ssl certificate validation
+        --project-id        : project id
     """
     pass
 
@@ -433,12 +443,12 @@ def version_info(command_options, args):
     """
     Usage: zanata version info [OPTIONS]
 
-    Show infomation about a version
+    Show information about a version
 
     Options:
-        --project-id: project id
-        --project-version: id of project version
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+        --disable-ssl-cert  : disable ssl certificate validation
+        --project-id        : project id
+        --project-version   : id of project version
     """
     pass
 
@@ -451,12 +461,12 @@ def create_project(command_options, args):
     Create a project
 
     Options:
-        --username      : user name (defaults to zanata.ini value)
-        --apikey        : api key of user (defaults to zanata.ini value)
-        --project-name  : project name
-        --project-desc  : project description
-        --project-type  : project type (gettext, podir)
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+        --apikey            : api key of user (defaults to zanata.ini value)
+        --disable-ssl-cert  : disable ssl certificate validation
+        --project-desc      : project description
+        --project-name      : project name
+        --project-type      : project type (gettext, podir)
+        --username          : user name (defaults to zanata.ini value)
     """
     pass
 
@@ -469,12 +479,12 @@ def create_version(command_options, args):
     Create a version
 
     Options:
-        --username      : user name (defaults to zanata.ini value)
-        --apikey        : api key of user (defaults to zanata.ini value)
-        --project-id    : id of the project
-        --version-name  : version name (Deprecated)
-        --version-desc  : version description (Deprecated)
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+        --apikey            : api key of user (defaults to zanata.ini value)
+        --disable-ssl-cert  : disable ssl certificate validation
+        --project-id        : id of the project
+        --username          : user name (defaults to zanata.ini value)
+        --version-desc      : version description (Deprecated)
+        --version-name      : version name (Deprecated)
     """
     pass
 
@@ -486,16 +496,16 @@ def po_pull(command_options, args):
     Retrieve gettext project translation files from server
 
     Options:
-        --username          : user name (defaults to zanata.ini value)
         --apikey            : api key of user (defaults to zanata.ini value)
-        --project-id        : id of the project (defaults to zanata.xml value)
-        --project-version   : id of the version (defaults to zanata.xml value)
-        --dstdir            : output folder (same as --transdir option)
         --dir               : output folder for po files (same as --transdir)
-        --transdir          : output folder for po files
+        --disable-ssl-cert  : disable ssl certificate validation
+        --dstdir            : output folder (same as --transdir option)
         --lang              : language list
         --noskeleton        : omit po files when translations not found
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+        --project-id        : id of the project (defaults to zanata.xml value)
+        --project-version   : id of the version (defaults to zanata.xml value)
+        --transdir          : output folder for po files
+        --username          : user name (defaults to zanata.ini value)
     """
     pull(command_options, args, "gettext")
 
@@ -508,23 +518,23 @@ def po_push(command_options, args):
     Push software project source and translation files to server
 
     Options:
-        -f                  : force to remove content on server side
-        --username          : user name (defaults to zanata.ini value)
         --apikey            : api key of user (defaults to zanata.ini value)
-        --project-id        : id of the project (defaults to zanata.xml value)
-        --project-version   : id of the version (defaults to zanata.xml value)
+        --copytrans         : ask server to copy translations from other versions
         --dir               : the path of the folder that contains pot files and po files,
                                 no need to specify --srcdir and --transdir if --dir option specified
-        --srcdir            : the path of the po folder(e.g. ./po)
-        --srcfile           : the path of the source file
-        --transdir          : the path of the folder that contains po files(e.g. ./po)
+        --disable-ssl-cert  : disable ssl certificate validation
         --import-po         : push local translations to server
+        --lang              : language list
         --merge             : override merge algorithm: auto (default) or import
-        --copytrans         : ask server to copy translations from other versions
         --no-copytrans      : no effect (kept for backward compatibility). Incompatible
                                 with --copytrans option.
-        --lang              : language list
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+        --project-id        : id of the project (defaults to zanata.xml value)
+        --project-version   : id of the version (defaults to zanata.xml value)
+        --srcdir            : the path of the po folder (e.g. ./po)
+        --srcfile           : the path of the source file
+        --transdir          : the path of the folder that contains po files (e.g. ./po)
+        --username          : user name (defaults to zanata.ini value)
+        -f                  : force to remove content on server side
     """
     pass
 
@@ -536,16 +546,16 @@ def publican_pull(command_options, args):
     Retrieve translated publican content files from server
 
     Options:
-        --username          : user name (defaults to zanata.ini value)
         --apikey            : api key of user (defaults to zanata.ini value)
-        --project-id        : id of the project (defaults to zanata.xml value)
-        --project-version   : id of the version (defaults to zanata.xml value)
-        --dstdir            : output folder (same as --transdir option)
         --dir               : output folder (same as --transdir option)
-        --transdir          : translations will be written to this folder (one sub-folder per locale)
+        --disable-ssl-cert  : disable ssl certificate validation
+        --dstdir            : output folder (same as --transdir option)
         --lang              : language list
         --noskeleton        : omit po files when translations not found
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+        --project-id        : id of the project (defaults to zanata.xml value)
+        --project-version   : id of the version (defaults to zanata.xml value)
+        --transdir          : translations will be written to this folder (one sub-folder per locale)
+        --username          : user name (defaults to zanata.ini value)
     """
     pull(command_options, args, "podir")
 
@@ -560,23 +570,22 @@ def publican_push(command_options, args):
     Arguments: documents
 
     Options:
-        -f                  : force to remove content on server side
-        --username          : user name (defaults to zanata.ini value)
         --apikey            : api key of user (defaults to zanata.ini value)
-        --project-id        : id of the project (defaults to zanata.xml value)
-        --project-version   : id of the version (defaults to zanata.xml value)
+        --copytrans         : ask server to copy translations from other versions
         --dir               : the path of the folder that contains pot folder and locale folders,
                                 no need to specify --srcdir and --transdir if --dir option specified
-        --srcdir            : the path of the pot folder (e.g. ./pot)
-        --transdir          : the path of the folder that contain locale folders
-                                (e.g. ./myproject)
+        --disable-ssl-cert  : disable ssl certificate validation
         --import-po         : push local translations to server
-        --merge             : override merge algorithm: auto (default) or import
-        --copytrans         : ask server to copy translations from other versions
-        --no-copytrans      : no effect (kept for backward compatibility). Incompatible
-                                with --copytrans option.
         --lang              : language list
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+        --merge             : override merge algorithm: auto (default) or import
+        --no-copytrans      : no effect (kept for backward compatibility).
+                                Incompatible with --copytrans option.
+        --project-id        : id of the project (defaults to zanata.xml value)
+        --project-version   : id of the version (defaults to zanata.xml value)
+        --srcdir            : the path of the pot folder (e.g. ./pot)
+        --transdir          : the path of the folder that contain locale folders (e.g. ./myproject)
+        --username          : user name (defaults to zanata.ini value)
+        -f                  : force to remove content on server side
     """
     pass
 
@@ -591,24 +600,24 @@ def push(command_options, args):
     Arguments: documents
 
     Options:
-        -f                  : force to remove content on server side
-        --username          : user name (defaults to zanata.ini value)
         --apikey            : api key of user (defaults to zanata.ini value)
-        --project-type      : project type (gettext or podir)
-        --project-id        : id of the project (defaults to zanata.xml value)
-        --project-version   : id of the version (defaults to zanata.xml value)
-        --srcdir            : the path of the pot folder (e.g. ./pot)
-        --srcfile           : the path of the pot file(gettext project only)
-        --transdir          : the path of the folder that contain locale folders
-                                (e.g. ./myproject)
-        --push-trans        : push local translations to server
-        --push-trans-only   : push translations only
-        --push-type         : source: push source document only, target: push translations only, same as push-trans-only
-                                both: push source and translations together, same as push-trans
+        --disable-ssl-cert  : disable ssl certificate validation
+        --lang              : language list (defaults to zanata.xml locales)
         --merge             : override merge algorithm: auto (default) or import
         --no-copytrans      : prevent server from copying translations from other versions
-        --lang              : language list (defaults to zanata.xml locales)
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+        --project-id        : id of the project (defaults to zanata.xml value)
+        --project-type      : project type (gettext or podir)
+        --project-version   : id of the version (defaults to zanata.xml value)
+        --push-trans        : push local translations to server
+        --push-trans-only   : push translations only
+        --push-type         : source: push source document only,
+                                target: push translations only, same as push-trans-only
+                                both: push source and translations together, same as push-trans
+        --srcdir            : the path of the pot folder (e.g. ./pot)
+        --srcfile           : the path of the pot file (gettext project only)
+        --transdir          : the path of the folder that contain locale folders (e.g. ./myproject)
+        --username          : user name (defaults to zanata.ini value)
+        -f                  : force to remove content on server side
     """
     pass
 
@@ -621,17 +630,17 @@ def pull(command_options, args, project_type=None):
     Retrieve translated publican content files from server
 
     Options:
-        --username          : user name (defaults to zanata.ini value)
         --apikey            : api key of user (defaults to zanata.ini value)
-        --project-type      : project type (gettext or podir)
-        --project-id        : id of the project (defaults to zanata.xml value)
-        --project-version   : id of the version (defaults to zanata.xml value)
-        --transdir          : translations will be written to this folder
+        --disable-ssl-cert  : disable ssl certificate validation
         --lang              : language list (defaults to zanata.xml locales)
         --min-doc-percent   : Only pull translation documents that have at least this percentage of messages translated.
                                 Accepts an integer from 0 to 100.
         --noskeletons       : omit po files when translations not found
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+        --project-id        : id of the project (defaults to zanata.xml value)
+        --project-type      : project type (gettext or podir)
+        --project-version   : id of the version (defaults to zanata.xml value)
+        --transdir          : translations will be written to this folder
+        --username          : user name (defaults to zanata.ini value)
     """
     pass
 
@@ -644,14 +653,14 @@ def glossary_push(command_options, args):
     Push glossary file in po/csv format to zanata server
 
     Options:
+        --apikey            : api key of user (defaults to zanata.ini value)
+        --commentcols       : comments header of glossary file (csv format)
+        --disable-ssl-cert  : disable ssl certificate validation
+        --lang              : language of glossary file
+        --sourcecommentsastarget: treat extracted comments and references as target comments
+                                    of term or treat as source reference of entry
         --url               : URL of zanata server
         --username          : user name (defaults to zanata.ini value)
-        --apikey            : api key of user (defaults to zanata.ini value)
-        --lang(po format)   : language of glossary file
-        --sourcecommentsastarget(po format): treat extracted comments and references as target comments of term
-                                  or treat as source reference of entry
-        --commentcols(csv format): comments header of csv format glossary file
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     pass
 
@@ -664,11 +673,11 @@ def glossary_delete(command_options, args):
     Delete glossary file at zanata server
 
     Options:
+        --apikey            : api key of user (defaults to zanata.ini value)
+        --disable-ssl-cert  : disable ssl certificate validation
+        --lang              : language of glossary file
         --url               : URL of zanata server
         --username          : user name (defaults to zanata.ini value)
-        --apikey            : api key of user (defaults to zanata.ini value)
-        --lang(po format)   : language of glossary file
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
     """
     pass
 
@@ -681,16 +690,18 @@ def stats(command_options, args):
     Displays translation statistics for a Zanata project version
 
     Options:
-        --url               : URL of zanata server
-        --username          : user name (defaults to zanata.ini value)
         --apikey            : api key of user (defaults to zanata.ini value)
-        --project-id        : id of the project (defaults to zanata.xml value)
-        --project-version   : id of the version (defaults to zanata.xml value)
-        --details           : Include statistics for lower levels (i.e., for documents in a project version)
+        --details           : Include statistics for lower levels
+                                (i.e. for documents in a project version)
+        --disable-ssl-cert  : disable ssl certificate validation
         --docid             : Document Id to fetch statistics for
         --lang              : Language list (comma separated)
-        --word              : Include word level statistics. By default only message level statistics are shown
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+        --project-id        : id of the project (defaults to zanata.xml value)
+        --project-version   : id of the version (defaults to zanata.xml value)
+        --url               : URL of zanata server
+        --username          : user name (defaults to zanata.ini value)
+        --word              : Include word level statistics. By default
+                                only message level statistics are shown
     """
     pass
 
@@ -700,15 +711,15 @@ def init(command_options, args):
     """
     Usage: zanata init [OPTIONS]
 
-    Initialize Zanata project configuration
+    Initialize Zanata project configuration (zanata.xml)
 
     Options:
-        --url               : URL of zanata server
-        --username          : user name (defaults to zanata.ini value)
         --apikey            : api key of user (defaults to zanata.ini value)
+        --disable-ssl-cert  : disable ssl certificate validation
         --project-id        : id of the project (defaults to zanata.xml value)
         --project-version   : id of the version (defaults to zanata.xml value)
-        --disable-ssl-cert disable ssl certificate validation in 0.7.x python-httplib2
+        --url               : URL of zanata server
+        --username          : user name (defaults to zanata.ini value)
     """
     pass
 

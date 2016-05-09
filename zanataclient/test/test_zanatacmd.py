@@ -23,15 +23,17 @@ all__ = (
     "ZanataCmdTest",
 )
 
-import unittest
-import sys
 import os
+import sys
+import unittest
+
 from minimock import Mock
-sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
 
 from zanataclient.zanatacmd import ZanataCommand
 from zanataclient.zanatalib import ZanataResource
 from zanataclient.zanatalib.projectutils import Project
+
+sys.path.insert(0, os.path.abspath(__file__ + "/../../.."))
 
 
 class ZanataCmdTest(unittest.TestCase):

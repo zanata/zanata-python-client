@@ -23,13 +23,14 @@ all__ = (
     "PublicanUtilityTest",
 )
 
-import unittest
-import sys
-import os
 import json
-sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
+import os
+import sys
+import unittest
 
 from zanataclient.publicanutil import PublicanUtility
+
+sys.path.insert(0, os.path.abspath(__file__ + "/../../.."))
 
 
 class PublicanUtilityTest(unittest.TestCase):

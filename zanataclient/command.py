@@ -24,12 +24,12 @@
 # http://jimmyg.org/blog/2009/python-command-line-interface-%28cli%29-with-sub-commands.html
 # Copyright (C) 2009 James Gardner - http://jimmyg.org/
 
-from distutils import spawn
 import getopt
-import sys
 import os
 import os.path
 import subprocess
+import sys
+from distutils import spawn
 
 
 class OptionConfigurationError(Exception):

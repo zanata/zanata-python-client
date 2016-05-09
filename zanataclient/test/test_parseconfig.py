@@ -23,12 +23,13 @@ all__ = (
     "ConfigTest",
 )
 
-import unittest
-import sys
 import os
-sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
+import sys
+import unittest
 
 from zanataclient.parseconfig import ZanataConfig
+
+sys.path.insert(0, os.path.abspath(__file__ + "/../../.."))
 
 
 class ConfigTest(unittest.TestCase):

@@ -30,15 +30,18 @@ except ImportError:
 import os
 import sys
 import warnings
+
+import httplib2
+
+from .config import ServiceConfig
+from ..logger import Logger
+
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
 warnings.simplefilter("ignore", DeprecationWarning)
-import httplib2
 
-from .config import ServiceConfig
-from ..logger import Logger
 
 CACHE_DIR_NAME = ".cache"
 NO_CERT_VALIDATION = True

@@ -25,11 +25,12 @@ __all__ = (
     "Project", "Iteration", "Stats", "ToolBox", "FileMappingRule"
 )
 
+import fnmatch
 import os
 import sys
-import fnmatch
+from xml.etree import cElementTree as ET
+
 from lxml import etree
-import xml.etree.cElementTree as ET
 
 
 class Link(object):

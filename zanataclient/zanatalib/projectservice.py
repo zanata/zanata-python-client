@@ -25,8 +25,7 @@ __all__ = (
 )
 
 
-from .projectutils import Project
-from .projectutils import Iteration
+from .projectutils import Iteration, Project
 from .service import Service
 
 

@@ -28,12 +28,12 @@ import csv
 import sys
 from os.path import expanduser
 
+from .zanatalib.logger import Logger
+
 try:
     import json
 except ImportError:
     import simplejson as json
-
-from .zanatalib.logger import Logger
 
 
 class CSVConverter:

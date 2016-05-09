@@ -23,10 +23,13 @@ all__ = (
     "ServiceTest",
 )
 
-import sys
 import os
-sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
+import sys
+
 from zanataclient.zanatalib.service import Service
+
+
+sys.path.insert(0, os.path.abspath(__file__ + "/../../.."))
 if sys.version_info < (2, 7):
     import unittest2 as unittest
 else:

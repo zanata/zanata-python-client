@@ -28,10 +28,10 @@ lint-report:
 	pylint --reports=n zanata zanataclient
 
 flake8:
-	flake8 --ignore=E501,F403,F841,F401 zanataclient test
+	flake8 --ignore=E501,F403,F841,F401 zanataclient
 
 test:
-	(cd test; nosetests ${NOSE_FLAGS} test_all.py)
+	(cd zanataclient/test; nosetests ${NOSE_FLAGS} test_all.py)
 
 all: zanataclient/VERSION-FILE
 

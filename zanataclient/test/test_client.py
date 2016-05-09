@@ -23,15 +23,19 @@ all__ = (
     "RestHandleTest",
 )
 
-import sys
 import os
+import sys
+
 import mock
+
+from zanataclient.zanatalib.rest.client import RestHandle
+
+
 if sys.version_info < (2, 7):
     import unittest2 as unittest
 else:
     import unittest
-sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
-from zanataclient.zanatalib.rest.client import RestHandle
+sys.path.insert(0, os.path.abspath(__file__ + "/../../.."))
 
 # test data
 URL = r'http://localhost:8080/zanata'
