@@ -32,7 +32,7 @@ __all__ = (
 
 class ZanataException(Exception):
     def __init__(self, expr, msg):
-        link = "Please take a reference in "\
+        link = "Please refer to "\
                "https://github.com/zanata/zanata/wiki/Python-Client-Troubleshooting"
         self.expr = expr
         self.msg = msg + '\n' + link
