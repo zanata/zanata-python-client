@@ -564,10 +564,13 @@ class ZanataCommand:
                         disqualify_locales.append(locale)
                 disqualify_locales = [alias for alias, locale in locale_map.items()
                                       for lang in disqualify_locales if lang == locale]
-                if disqualify_locales:
+                if disqualify_locales and min_doc_percent != 1:
                     self.log.info('Translation file for document %s for locales [%s] are skipped '
                                   'because they are less than %s%% translated (--min-doc-percent setting)' %
                                   (doc, ', '.join(map(str, disqualify_locales)), min_doc_percent))
+                else:
+                    self.log.info('No translations found for document %s for locales [%s]' %
+                                  (doc, ', '.join(map(str, disqualify_locales))))
                 qualify_lang_set = set(lang_list) - set(disqualify_locales)
                 doc_locales_dict.update({doc: list(qualify_lang_set)})
         finally:

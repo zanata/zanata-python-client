@@ -71,10 +71,11 @@ class GenericPull(PushPull):
         if 'noskeletons' in self.context_data:
             skeletons = False
 
+        mindocpercent = self.context_data['mindocpercent'] if self.context_data.get('mindocpercent') else 1
         outpath = self.create_outpath(output_folder)
         filedict = self.zanatacmd.get_project_translation_stats(
-            self.project_id, self.version_id, self.context_data['mindocpercent'], lang_list, locale_map
-        ) if self.context_data.get('mindocpercent') else dict((file, lang_list) for file in filelist)
+            self.project_id, self.version_id, mindocpercent, lang_list, locale_map
+        )
 
         self.zanatacmd.pull_command(locale_map, self.project_id, self.version_id,
                                     filedict, outpath, command_type, skeletons, self.file_mapping_rules)
