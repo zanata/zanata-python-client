@@ -101,6 +101,9 @@ class DocumentService(Service):
             'retrieve_translation', projectid, iterationid, file_id, lang,
             headers=self.http_headers, extension=ext
         )
+        # for no-skeletons server returns 404
+        if not skeletons and res.status == 404:
+            return False
         return self.messages(res, content)
 
     def commit_translation(self, projectid, iterationid, fileid, localeid, resources, merge):

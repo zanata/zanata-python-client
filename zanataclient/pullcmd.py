@@ -36,7 +36,7 @@ class GenericPull(PushPull):
         super(GenericPull, self).__init__(*args, **kargs)
 
     def run(self):
-        skeletons = True
+        skeletons = False
         filelist = []
         output_folder = None
 
@@ -68,14 +68,13 @@ class GenericPull(PushPull):
                 log.warn("dstdir option is changed to transdir option for generic pull command")
                 output_folder = self.context_data.get('dstdir')
 
-        if 'noskeletons' in self.context_data:
-            skeletons = False
+        if 'skeletons' in self.context_data:
+            skeletons = True
 
-        mindocpercent = self.context_data['mindocpercent'] if self.context_data.get('mindocpercent') else 1
         outpath = self.create_outpath(output_folder)
         filedict = self.zanatacmd.get_project_translation_stats(
-            self.project_id, self.version_id, mindocpercent, lang_list, locale_map
-        )
+            self.project_id, self.version_id, self.context_data['mindocpercent'], lang_list, locale_map
+        ) if self.context_data.get('mindocpercent') else dict((file, lang_list) for file in filelist)
 
         self.zanatacmd.pull_command(locale_map, self.project_id, self.version_id,
                                     filedict, outpath, command_type, skeletons, self.file_mapping_rules)

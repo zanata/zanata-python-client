@@ -129,7 +129,7 @@ class ZanataCommand:
         try:
             result = self.zanata_resource.documents.update_template(project_id, iteration_id, request_name, body, copytrans)
             if result:
-                self.log.info("Successfully updated template %s on the server" % filename)
+                self.log.success("Successfully updated template %s on the server" % filename)
         except ZanataException as e:
             self.log.error(str(e))
 
@@ -138,7 +138,7 @@ class ZanataCommand:
             result = self.zanata_resource.documents.commit_translation(project_id, iteration_id, request_name, lang, body, merge)
             if result:
                 self.log.warn(result)
-            self.log.info("Successfully pushed translation %s to the Zanata server" % pofile)
+            self.log.success("Successfully pushed translation %s to the Zanata server" % pofile)
         except ZanataException as e:
             self.log.error(str(e))
 
@@ -151,7 +151,7 @@ class ZanataCommand:
             sys.exit(1)
 
         if filelist:
-            self.log.info("This will overwrite/delete any existing documents on the server.")
+            self.log.warn("This will overwrite/delete any existing documents on the server.")
             if not force:
                 while True:
                     option = input("Are you sure (y/n)?")
@@ -280,7 +280,7 @@ class ZanataCommand:
             p = Project(item)
             result = self.zanata_resource.projects.create(p)
             if result:
-                self.log.info("Successfully created project: %s" % project_id)
+                self.log.success("Successfully created project: %s" % project_id)
                 return True
         except ZanataException as e:
             self.log.error(str(e))
@@ -295,7 +295,7 @@ class ZanataCommand:
             iteration = Iteration(item)
             result = self.zanata_resource.projects.iterations.create(project_id, iteration)
             if result:
-                self.log.info("Successfully created version: %s" % version_id)
+                self.log.success("Successfully created version: %s" % version_id)
                 return True
         except ZanataException as e:
             self.log.error(str(e))
@@ -414,7 +414,7 @@ class ZanataCommand:
             try:
                 result = self.update_template(project_id, iteration_id, filename, body, copytrans)
                 if result:
-                    self.log.info("Successfully pushed %s to the server" % filepath)
+                    self.log.success("Successfully pushed %s to the server" % filepath)
             except UnAuthorizedException as e:
                 self.log.error(str(e))
                 break
@@ -494,13 +494,15 @@ class ZanataCommand:
                 self.log.info("Retrieving %s translation from server: " % local_lang)
 
                 try:
-                    result = self.zanata_resource.documents.retrieve_translation(remote_lang, project_id, iteration_id, request_name, skeletons)
+                    result = self.zanata_resource.documents.retrieve_translation(
+                        remote_lang, project_id, iteration_id, request_name, skeletons
+                    )
                     publicanutil.save_to_pofile(file_mapped_path, result, pot, skeletons, local_lang, name)
                 except UnAuthorizedException as e:
                     self.log.error(str(e))
                     break
                 except UnAvaliableResourceException as e:
-                    self.log.info("There is no %s translation for %s" % (local_lang, name))
+                    self.log.warn("There is no %s translation for %s" % (local_lang, name))
                 except BadRequestBodyException as e:
                     self.log.error(str(e))
                     continue
@@ -564,13 +566,10 @@ class ZanataCommand:
                         disqualify_locales.append(locale)
                 disqualify_locales = [alias for alias, locale in locale_map.items()
                                       for lang in disqualify_locales if lang == locale]
-                if disqualify_locales and min_doc_percent != 1:
+                if disqualify_locales:
                     self.log.info('Translation file for document %s for locales [%s] are skipped '
                                   'because they are less than %s%% translated (--min-doc-percent setting)' %
                                   (doc, ', '.join(map(str, disqualify_locales)), min_doc_percent))
-                else:
-                    self.log.info('No translations found for document %s for locales [%s]' %
-                                  (doc, ', '.join(map(str, disqualify_locales))))
                 qualify_lang_set = set(lang_list) - set(disqualify_locales)
                 doc_locales_dict.update({doc: list(qualify_lang_set)})
         finally:

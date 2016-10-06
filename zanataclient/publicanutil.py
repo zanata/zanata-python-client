@@ -492,7 +492,10 @@ class PublicanUtility:
                         if poentry.flags == [u'']:
                             poentry.flags = None
 
-        # finally save resulting po to outpath as lang/myfile.po
-        po.save()
-        # pylint: disable=E1103
-        self.log.info("Writing po file to %s" % (path))
+            # finally save resulting po to outpath as lang/myfile.po
+            po.save()
+            # pylint: disable=E1103
+            self.log.success("Writing po file to %s" % (path))
+
+        else:
+            self.log.warn("No translations found in %s for document %s" % (locale, doc_name))
