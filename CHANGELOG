@@ -1,4 +1,5 @@
-* Fri May 06 2016 Sundeep Anand <suanand@redhat.com>
+* Thu Oct 06 2016 Sundeep Anand <suanand@redhat.com>
+- Bug 1368381 - download only those which have translations
 - ZNTA-106 - zanata-python-client installs a test module
 
 * Thu Apr 14 2016 Sundeep Anand <suanand@redhat.com> - 1.5.0

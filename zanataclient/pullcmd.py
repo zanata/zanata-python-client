@@ -36,7 +36,7 @@ class GenericPull(PushPull):
         super(GenericPull, self).__init__(*args, **kargs)
 
     def run(self):
-        skeletons = True
+        skeletons = False
         filelist = []
         output_folder = None
 
@@ -68,8 +68,8 @@ class GenericPull(PushPull):
                 log.warn("dstdir option is changed to transdir option for generic pull command")
                 output_folder = self.context_data.get('dstdir')
 
-        if 'noskeletons' in self.context_data:
-            skeletons = False
+        if 'skeletons' in self.context_data:
+            skeletons = True
 
         outpath = self.create_outpath(output_folder)
         filedict = self.zanatacmd.get_project_translation_stats(

@@ -252,10 +252,10 @@ option_sets = {
             long=['--sourcecommentsastarget'],
         ),
     ],
-    'noskeletons': [
+    'skeletons': [
         dict(
             type='command',
-            long=['--noskeletons'],
+            long=['--create-skeletons'],
         ),
     ],
     'pushtransonly': [
@@ -501,7 +501,7 @@ def po_pull(command_options, args):
         --disable-ssl-cert  : disable ssl certificate validation
         --dstdir            : output folder (same as --transdir option)
         --lang              : language list
-        --noskeleton        : omit po files when translations not found
+        --create-skeletons  : download po files even if translations not found
         --project-id        : id of the project (defaults to zanata.xml value)
         --project-version   : id of the version (defaults to zanata.xml value)
         --transdir          : output folder for po files
@@ -551,7 +551,7 @@ def publican_pull(command_options, args):
         --disable-ssl-cert  : disable ssl certificate validation
         --dstdir            : output folder (same as --transdir option)
         --lang              : language list
-        --noskeleton        : omit po files when translations not found
+        --create-skeletons  : download po files even if translations not found
         --project-id        : id of the project (defaults to zanata.xml value)
         --project-version   : id of the version (defaults to zanata.xml value)
         --transdir          : translations will be written to this folder (one sub-folder per locale)
@@ -635,7 +635,7 @@ def pull(command_options, args, project_type=None):
         --lang              : language list (defaults to zanata.xml locales)
         --min-doc-percent   : Only pull translation documents that have at least this percentage of messages translated.
                                 Accepts an integer from 0 to 100.
-        --noskeletons       : omit po files when translations not found
+        --create-skeletons  : download po files even if translations not found
         --project-id        : id of the project (defaults to zanata.xml value)
         --project-type      : project type (gettext or podir)
         --project-version   : id of the version (defaults to zanata.xml value)

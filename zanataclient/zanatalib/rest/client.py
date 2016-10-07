@@ -141,10 +141,10 @@ class RestHandle(object):
                 url = self._get_url()
         elif rest_resp.previous and rest_resp.previous.status == 302 and 'location' in rest_resp.previous:
             url = rest_resp.previous['location']
-            self._http_https_msg(url)
+            # self._http_https_msg(url)
         elif rest_resp.status == 302 and 'location' in rest_resp:
             url = rest_resp['location']
-            self._http_https_msg(url)
+            # self._http_https_msg(url)
         return self._call_request(url, self.method, **args_dict)
 
     def get_response_content(self):
