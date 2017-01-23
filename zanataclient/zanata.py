@@ -608,7 +608,6 @@ def push(command_options, args):
         --project-id        : id of the project (defaults to zanata.xml value)
         --project-type      : project type (gettext or podir)
         --project-version   : id of the version (defaults to zanata.xml value)
-        --push-trans-only   : push translations only
         --push-type         : source: push source document only,
                                 target: push translations only, same as push-trans-only
                                 both: push source and translations together, same as push-trans
@@ -618,6 +617,7 @@ def push(command_options, args):
         --username          : user name (defaults to zanata.ini value)
         -f                  : force to remove content on server side
         --push-trans        : deprecated: use '--push-type both' instead
+        --push-trans-only   : deprecated: use '--push-type target' instead
     """
     pass
 
