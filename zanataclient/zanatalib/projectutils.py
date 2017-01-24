@@ -196,9 +196,6 @@ class FileMappingRule(object):
             if os.path.isabs(map_path):
                 map_path = map_path[1:]
             map_path = os.path.join(self.translation_folder, map_path)
-        subdirectory = map_path[:map_path.rfind('/')]
-        if subdirectory and not os.path.isdir(subdirectory):
-            os.makedirs(subdirectory)
         if '//' in map_path:
             map_path = map_path.replace('//', '/')
         return map_path

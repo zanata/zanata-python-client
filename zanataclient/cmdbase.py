@@ -397,7 +397,7 @@ class PushPull(CommandsBase):
         return trans_folder
 
     def create_outpath(self, output_folder):
-        if 'transdir'in self.context_data:
+        if 'transdir' in self.context_data:
             output = self.context_data.get('transdir')
         elif output_folder:
             output = output_folder

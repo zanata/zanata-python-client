@@ -492,7 +492,10 @@ class PublicanUtility:
                         if poentry.flags == [u'']:
                             poentry.flags = None
 
-            # finally save resulting po to outpath as lang/myfile.po
+            # finally save resulting po to outpath
+            subdirectory = path[:path.rfind('/')]
+            if subdirectory and not os.path.isdir(subdirectory):
+                os.makedirs(subdirectory)
             po.save()
             # pylint: disable=E1103
             self.log.success("Writing po file to %s" % (path))
