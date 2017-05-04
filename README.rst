@@ -57,7 +57,7 @@ https://github.com/zanata/zanata-server/blob/master/zanata.xml
 
 You can also override the URL of the server with the command line option
 ``--url``.  Use ``--username`` for user name and ``--apikey`` for api key of
-user. 
+user.
 
 Command List
 ============
@@ -209,3 +209,6 @@ will load all the info from the configuration file::
 
     $ zanata po pull
 
+If you want to retrieve the statistics for a project version, you can use the command below::
+
+    $ zanata stats --project-id={project_id} --project-version={iteration_id}
