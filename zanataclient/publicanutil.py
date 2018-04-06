@@ -413,7 +413,7 @@ class PublicanUtility:
                             poentry.occurrences = None
 
                         if entry.get('flags'):
-                            poentry.flags = entry.get('flags')
+                            poentry.flags = [flag for flag in entry.get('flags')]
 
                         if entry.get('context') is not None:
                             poentry.msgctxt = entry.get('context')
