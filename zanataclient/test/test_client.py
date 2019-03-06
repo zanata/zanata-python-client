@@ -68,9 +68,9 @@ response.update({'status': '200', 'access-control-allow-headers': 'X-Requested-W
                  'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET',
                  'content-type': 'application/json'})
 
-content = u'[{"id":"black-silver","defaultType":"","name":"Black Silver",' \
-          u'"links":[{"href":"p/black-silver","rel":"self","type":"application/vnd.zanata.project+json"}],' \
-          u'"status":"ACTIVE"}]'
+content = b'[{"id":"black-silver","defaultType":"","name":"Black Silver",' \
+          b'"links":[{"href":"p/black-silver","rel":"self","type":"application/vnd.zanata.project+json"}],' \
+          b'"status":"ACTIVE"}]'
 
 
 class RestHandleTest(unittest.TestCase):

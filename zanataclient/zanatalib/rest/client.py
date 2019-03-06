@@ -162,7 +162,7 @@ class RestHandle(object):
                 response, content = self.manage_redirection(response, args_dict)
                 redirects_count -= 1
 
-        return response, content
+        return response, content.decode("UTF-8")
 
 
 class RestClient(object):

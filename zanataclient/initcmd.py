@@ -40,11 +40,6 @@ except ImportError:
 
 log = Logger()
 
-try:
-    input = raw_input
-except NameError:
-    pass
-
 
 class ZanataInit(CommandsInit, ContextBase):
     """
@@ -335,7 +330,7 @@ class ZanataInit(CommandsInit, ContextBase):
         xmldoc = ToolBox.dict2xml('config', project_config_dict)
         try:
             with open('zanata.xml', 'w') as project_config_file:
-                project_config_file.write(xmldoc)
+                project_config_file.write(xmldoc.decode("utf-8"))
         except IOError:
             log.error("Something went wrong. Try Again.")
         else:

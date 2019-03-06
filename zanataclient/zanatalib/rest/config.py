@@ -19,13 +19,8 @@
 # Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA  02110-1301, USA.
 
+from collections import OrderedDict
 from collections import namedtuple
-
-
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
 
 
 middle_url = '/seam/resource/restv1'
