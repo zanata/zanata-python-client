@@ -89,7 +89,7 @@ class ProjectService(Service):
         res, content = self.restclient.process_request(
             'create_project', project.id, body=self._to_unicode(body), headers=self.http_headers
         )
-        return self.messages(res, content, "The project is already exist on server")
+        return self.messages(res, content, "The project {0} could not be created.".format(project.id))
 
     def delete(self):
         pass

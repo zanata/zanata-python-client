@@ -428,7 +428,7 @@ class PushPull(CommandsBase):
 
         version = str(server_version.split('-')[0])
         main_ver = version[:3]
-        version_number = string.atof(main_ver)
+        version_number = float(main_ver)
 
         if version_number >= 1.6:
             return True

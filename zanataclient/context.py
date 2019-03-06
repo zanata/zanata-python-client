@@ -164,7 +164,7 @@ class ContextBase(object):
         version_file = os.path.join(path, client_version_file)
 
         try:
-            version = open(version_file, 'rb')
+            version = open(version_file, 'r')
             client_version = version.read()
             version.close()
             version_number = client_version.rstrip()[len('version: '):]
@@ -290,11 +290,9 @@ class ProjectContext(ContextBase):
         build_configs = [self.build_local_config,
                          self.build_remote_config]
         [method() for method in build_configs]
-        # lowest to higest
+        # lowest to highest
         precedence = [self.remote_config, self.local_config, self.command_dict]
-        context_data = functools.reduce(
-            lambda option, value: dict(option.items() + value.items()), precedence
-        )
+        context_data = functools.reduce(lambda option, value: {**option, **value}, precedence)
         return self.filter_context_data(context_data)
 
     def filter_context_data(self, data):

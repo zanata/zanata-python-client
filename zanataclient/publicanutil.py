@@ -184,7 +184,7 @@ class PublicanUtility:
 
     def validate_content_type(self, content_type, object_type):
         PATTERN = r'.+? charset=([\w_\-:\.]+)'
-        rxt = re.compile(unicode(PATTERN))
+        rxt = re.compile(PATTERN)
 
         match = rxt.search(content_type)
         if match:
