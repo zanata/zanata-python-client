@@ -15,7 +15,6 @@ from zanataclient.zanatalib.error import (
     UnexpectedStatusException,
 )
 from zanataclient.zanatalib.projectutils import ToolBox
-
 from zanataclient.zanatalib.rest.client import RestClient
 from zanataclient.zanatalib.rest.config import media_types
 

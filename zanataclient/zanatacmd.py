@@ -165,7 +165,7 @@ class ZanataCommand:
 
             for name in filelist:
                 delete = False
-                request = name.replace(',', '\,').replace('/', ',')
+                request = name.replace(",", "\\,").replace("/", ",")
 
                 if ".pot" in name:
                     path = os.path.join(tmlfolder, name)

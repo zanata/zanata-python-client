@@ -71,8 +71,7 @@ class Stats(object):
         for stat in stats_dict:
             if stat.get('locale'):
                 trans_percent.update({
-                    stat['locale']: int((float(stat.get('translated', 0) * 100) //
-                                         float(stat.get('total', 0))))
+                    stat['locale']: int((float(stat.get('translated', 0) * 100) // float(stat.get('total', 0))))
                 })
         return {doc_name: trans_percent}
 
@@ -148,7 +147,7 @@ class ToolBox(object):
                 element.text = v
             else:
                 # set attribute
-                element.set(k, unicode(v))
+                element.set(k, str(v))
 
     @staticmethod
     def dict2xml(root_elem, dict_object):

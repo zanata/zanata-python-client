@@ -170,8 +170,8 @@ class ZanataInit(CommandsInit, ContextBase):
             log.info("Creating project on the server...")
             if not self.zanata_cmd.create_project(input_project_id, input_project_name,
                                                   input_project_desc, project_type):
-                raise
-        except:
+                raise Exception
+        except Exception as e:
             if self.print_yes_no("[?] Do you want to try again (y/n)? "):
                 return self._create_new_project()
             else:
@@ -214,8 +214,8 @@ class ZanataInit(CommandsInit, ContextBase):
             log.info("Creating version on the server...")
             if not self.zanata_cmd.create_version(self.local_config.get('project_id'),
                                                   input_version_id):
-                raise
-        except:
+                raise Exception
+        except Exception as e:
             if self.print_yes_no("[?] Do you want to try again (y/n)? "):
                 return self._create_new_version()
             else:

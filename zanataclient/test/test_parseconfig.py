@@ -60,5 +60,6 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(project_config['file_mapping_rules']['**/po/*.pot'],
                          '{path}/{locale_with_underscore}.po')
 
+
 if __name__ == '__main__':
     unittest.main()

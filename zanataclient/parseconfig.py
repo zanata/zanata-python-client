@@ -52,7 +52,7 @@ class ZanataConfig(object):
         try:
             self.configparser = ConfigParser()
             self._config = self.configparser.read(['zanata.ini', path])
-        except:
+        except Exception:
             self.log.error("Invalid User Config")
 
     def get_server(self, url):

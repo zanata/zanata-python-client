@@ -58,6 +58,7 @@ class FalseDict(dict):
     def status(self):
         return 200
 
+
 response = FalseDict()
 response.update({'status': '200', 'access-control-allow-headers': 'X-Requested-With, Content-Type, Accept,',
                  'content-location': 'http://localhost:8080/zanata/seam/resource/restv1/projects',
@@ -97,6 +98,7 @@ class RestHandleTest(unittest.TestCase):
         self.assertTrue('name' in response_content[1], 'project name should be in content')
         self.assertTrue('links' in response_content[1], 'links should be in content')
         self.assertTrue('status' in response_content[1], 'project status should be in content')
+
 
 if __name__ == '__main__':
     unittest.main()

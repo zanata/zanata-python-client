@@ -70,5 +70,6 @@ class ZanataCmdTest(unittest.TestCase):
     def test_push_command(self):
         pass
 
+
 if __name__ == '__main__':
     unittest.main()
