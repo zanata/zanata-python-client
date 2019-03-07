@@ -48,28 +48,24 @@ class Logger:
 
     def success(self, message):
         if self.enable_successprefix:
-            print(TextColour.OKGREEN + self.success_prefix
-                  + message + TextColour.ENDC)
+            print(TextColour.OKGREEN + self.success_prefix + message + TextColour.ENDC)
         else:
             print(message)
 
     def info(self, message):
         if self.enable_infoprefix:
-            print(TextColour.OKBLUE + self.info_prefix
-                  + message + TextColour.ENDC)
+            print(TextColour.OKBLUE + self.info_prefix + message + TextColour.ENDC)
         else:
             print(message)
 
     def warn(self, message):
         if self.enable_warnprefix:
-            print(TextColour.WARNING + self.warn_prefix
-                  + message + TextColour.ENDC)
+            print(TextColour.WARNING + self.warn_prefix + message + TextColour.ENDC)
         else:
             print(message)
 
     def error(self, message):
         if self.enable_errprefix:
-            print(TextColour.FAIL + self.error_prefix
-                  + message + TextColour.ENDC)
+            print(TextColour.FAIL + self.error_prefix + message + TextColour.ENDC)
         else:
             print(message)

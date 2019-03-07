@@ -2,7 +2,7 @@
 import json
 import sys
 
-from error import (
+from zanataclient.zanatalib.error import (
     BadRequestBodyException,
     ForbiddenException,
     InternalServerError,
@@ -14,10 +14,9 @@ from error import (
     UnavailableServiceError,
     UnexpectedStatusException,
 )
-from projectutils import ToolBox
-
-from rest.client import RestClient
-from rest.config import media_types
+from zanataclient.zanatalib.projectutils import ToolBox
+from zanataclient.zanatalib.rest.client import RestClient
+from zanataclient.zanatalib.rest.config import media_types
 
 
 __all__ = (
@@ -44,7 +43,7 @@ class Service(object):
     def __init__(self, *args, **kargs):
         for name, val in zip(self._fields, args):
             setattr(self, name, val)
-        for key, value in kargs.iteritems():
+        for key, value in kargs.items():
             setattr(self, key, value)
         self.restclient = RestClient(self.base_url)
 
@@ -52,7 +51,7 @@ class Service(object):
         try:
             raise exception_class(error, error_msg)
         except exception_class as e:
-            print '', e
+            print(str(e))
         finally:
             sys.exit(1)
 
@@ -64,7 +63,7 @@ class Service(object):
             try:
                 rst = ToolBox.xmlstring2dict(content) \
                     if res.get('content-type') and 'xml' in res['content-type'] else json.loads(content)
-            except ValueError, e:
+            except ValueError as e:
                 if content.strip() == "":
                     return rst
                 if res.get('content-type') and res['content-type'] not in media_types:
@@ -74,6 +73,8 @@ class Service(object):
                     sys.exit(1)
                 else:
                     print("Exception while decoding: %s" % e)
+                    if isinstance(content, str):
+                        print(content)
             return rst
         elif res['status'] == '201':
             return True
@@ -84,6 +85,6 @@ class Service(object):
                                   'Error', 'Unexpected Status (%s), failed to push: %s' % (res['status'], extra_msg or ""))
 
     def _to_unicode(self, some_string):
-        if not isinstance(some_string, unicode):
-            return unicode(some_string)
+        if not isinstance(some_string, str):
+            return str(some_string)
         return some_string

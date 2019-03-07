@@ -1,4 +1,4 @@
+future
 httplib2
 lxml
-ordereddict
 polib

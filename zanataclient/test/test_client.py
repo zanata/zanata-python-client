@@ -58,6 +58,7 @@ class FalseDict(dict):
     def status(self):
         return 200
 
+
 response = FalseDict()
 response.update({'status': '200', 'access-control-allow-headers': 'X-Requested-With, Content-Type, Accept,',
                  'content-location': 'http://localhost:8080/zanata/seam/resource/restv1/projects',
@@ -67,9 +68,9 @@ response.update({'status': '200', 'access-control-allow-headers': 'X-Requested-W
                  'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET',
                  'content-type': 'application/json'})
 
-content = u'[{"id":"black-silver","defaultType":"","name":"Black Silver",' \
-          u'"links":[{"href":"p/black-silver","rel":"self","type":"application/vnd.zanata.project+json"}],' \
-          u'"status":"ACTIVE"}]'
+content = b'[{"id":"black-silver","defaultType":"","name":"Black Silver",' \
+          b'"links":[{"href":"p/black-silver","rel":"self","type":"application/vnd.zanata.project+json"}],' \
+          b'"status":"ACTIVE"}]'
 
 
 class RestHandleTest(unittest.TestCase):
@@ -97,6 +98,7 @@ class RestHandleTest(unittest.TestCase):
         self.assertTrue('name' in response_content[1], 'project name should be in content')
         self.assertTrue('links' in response_content[1], 'links should be in content')
         self.assertTrue('status' in response_content[1], 'project status should be in content')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -83,5 +83,6 @@ class ServiceTest(unittest.TestCase):
             self.service.messages(SERVICE_RESPONSE_503, RESPONSE_CONTENT)
         self.assertEqual(ex.exception.code, 1)
 
+
 if __name__ == '__main__':
     unittest.main()

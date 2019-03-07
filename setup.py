@@ -18,7 +18,7 @@ def get_client_version():
     path = os.path.dirname(os.path.realpath(__file__))
     version_file = os.path.join(path, 'zanataclient', 'VERSION-FILE')
     try:
-        version = open(version_file, 'rb')
+        version = open(version_file, 'r')
         client_version = version.read()
         version.close()
         version_number = client_version.rstrip().strip('version: ')
@@ -65,7 +65,9 @@ setup(
         'License :: OSI Approved :: GNU Lesser General Public License (LGPL)',
         'Operating System :: Unix',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
 )

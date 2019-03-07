@@ -18,6 +18,11 @@ clean:
 	python setup.py clean
 	rm -f zanataclient/VERSION-FILE
 
+clean-pyc:
+	find . -name '*.pyc' -exec rm -f {} +
+	find . -name '*.pyo' -exec rm -f {} +
+	find . -name '*~' -exec rm -f {} +
+
 run:
 	python zanata help
 
@@ -28,7 +33,7 @@ lint-report:
 	pylint --reports=n zanata zanataclient
 
 flake8:
-	flake8 --ignore=E501,F403,F841,F401 zanataclient
+	flake8 --ignore=E402,E501,F403,F841,F401 zanataclient
 
 test:
 	(cd zanataclient/test; nosetests ${NOSE_FLAGS} test_all.py)

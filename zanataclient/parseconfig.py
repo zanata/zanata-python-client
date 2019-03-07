@@ -24,6 +24,7 @@ __all__ = (
 )
 
 import os.path
+from collections import OrderedDict
 from xml.dom import minidom
 
 from .zanatalib.logger import Logger
@@ -34,10 +35,6 @@ try:
 except ImportError:
     from configparser import ConfigParser
 
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
 
 project_config = {}
 
@@ -52,7 +49,7 @@ class ZanataConfig(object):
         try:
             self.configparser = ConfigParser()
             self._config = self.configparser.read(['zanata.ini', path])
-        except:
+        except Exception:
             self.log.error("Invalid User Config")
 
     def get_server(self, url):

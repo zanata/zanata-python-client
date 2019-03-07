@@ -81,5 +81,7 @@ class PublicanUtilityTest(unittest.TestCase):
         self.assertEqual(result['extensions'], expect_json['extensions'])
         json_data.close()
     """
+
+
 if __name__ == '__main__':
     unittest.main()

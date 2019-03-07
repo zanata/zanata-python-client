@@ -23,27 +23,21 @@
 import fnmatch
 import os
 import sys
+try:
+    from builtins import input
+except ImportError:
+    from __builtin__ import input
+from collections import OrderedDict
 from datetime import datetime
 
-from .cmdbase import CommandsBase, CommandsInit
-from .context import ContextBase
-from .parseconfig import ZanataConfig
-from .zanatalib.logger import Logger, TextColour
-from .zanatalib.projectutils import ToolBox
-
-
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
+from zanataclient.cmdbase import CommandsBase, CommandsInit
+from zanataclient.context import ContextBase
+from zanataclient.parseconfig import ZanataConfig
+from zanataclient.zanatalib.logger import Logger, TextColour
+from zanataclient.zanatalib.projectutils import ToolBox
 
 
 log = Logger()
-
-try:
-    input = raw_input
-except NameError:
-    pass
 
 
 class ZanataInit(CommandsInit, ContextBase):
@@ -69,7 +63,7 @@ class ZanataInit(CommandsInit, ContextBase):
                         self._update_user_config, self._update_http_headers,
                         self._update_client_version, self.check_config_exists,
                         self.set_zanata_command, self.project_options,
-                        self.version_options, self._update_project_type,
+                        self.version_options, self.update_project_type,
                         self.post_project_version, self.source_target_dirs,
                         self.dump_project_config, self.whats_next]
         }
@@ -170,8 +164,8 @@ class ZanataInit(CommandsInit, ContextBase):
             log.info("Creating project on the server...")
             if not self.zanata_cmd.create_project(input_project_id, input_project_name,
                                                   input_project_desc, project_type):
-                raise
-        except:
+                raise Exception
+        except Exception as e:
             if self.print_yes_no("[?] Do you want to try again (y/n)? "):
                 return self._create_new_project()
             else:
@@ -214,8 +208,8 @@ class ZanataInit(CommandsInit, ContextBase):
             log.info("Creating version on the server...")
             if not self.zanata_cmd.create_version(self.local_config.get('project_id'),
                                                   input_version_id):
-                raise
-        except:
+                raise Exception
+        except Exception as e:
             if self.print_yes_no("[?] Do you want to try again (y/n)? "):
                 return self._create_new_version()
             else:
@@ -335,7 +329,7 @@ class ZanataInit(CommandsInit, ContextBase):
         xmldoc = ToolBox.dict2xml('config', project_config_dict)
         try:
             with open('zanata.xml', 'w') as project_config_file:
-                project_config_file.write(xmldoc)
+                project_config_file.write(xmldoc.decode("utf-8"))
         except IOError:
             log.error("Something went wrong. Try Again.")
         else:

@@ -111,6 +111,7 @@ class CSVConverter:
         # glossary = {'source-locales':srclocales, 'glossary-entries':entries, 'target-locales':targetlocales}
         return json.dumps(glossary)
 
+
 if __name__ == "__main__":
     converter = CSVConverter()
     converter.convert_to_json("~/Downloads/test_data.csv", {'es': 'es-ES'}, ["description", "pos"])

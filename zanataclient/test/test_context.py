@@ -172,5 +172,6 @@ class ProjectContextTest(unittest.TestCase):
         self.assertTrue('servers' in context_data)
         self.assertTrue('http://localhost:8080/zanata' in context_data['servers'])
 
+
 if __name__ == '__main__':
     unittest.main()

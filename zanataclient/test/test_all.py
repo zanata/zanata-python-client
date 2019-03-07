@@ -21,18 +21,13 @@
 
 import unittest
 
-from test_client import RestHandleTest
-
-from test_context import ProjectContextTest
-
-from test_parseconfig import ConfigTest
-
-from test_publicanutil import PublicanUtilityTest
-
-from test_service import ServiceTest
+from zanataclient.test.test_client import RestHandleTest
+from zanataclient.test.test_context import ProjectContextTest
+from zanataclient.test.test_parseconfig import ConfigTest
+from zanataclient.test.test_publicanutil import PublicanUtilityTest
+from zanataclient.test.test_service import ServiceTest
 
 # from test_zanata import ZanataTest
-
 # from test_zanatacmd import ZanataCmdTest
 
 suite = unittest.TestSuite()
