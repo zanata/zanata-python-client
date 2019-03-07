@@ -73,6 +73,8 @@ class Service(object):
                     sys.exit(1)
                 else:
                     print("Exception while decoding: %s" % e)
+                    if isinstance(content, str):
+                        print(content)
             return rst
         elif res['status'] == '201':
             return True

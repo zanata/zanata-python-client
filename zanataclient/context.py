@@ -224,7 +224,7 @@ class ContextBase(object):
             locale_map = self.process_locales(locales)
             self.remote_config.update({'locale_map': locale_map})
 
-    def _update_project_type(self):
+    def update_project_type(self):
         """
         This fetches project_type from server
         """
@@ -271,7 +271,7 @@ class ContextBase(object):
         """
         context_remote_configs = {
             'default': [self._update_server_version, self._update_locale_mapping,
-                        self._update_project_type],
+                        self.update_project_type],
             'init': [],
         }
         return context_remote_configs[self.mode]
@@ -287,12 +287,18 @@ class ProjectContext(ContextBase):
         """
         updates context_data with remote_config, local_config and command_dict
         """
+
+        def merge_dicts(i, j):
+            z = i.copy()
+            z.update(j)
+            return z
+
         build_configs = [self.build_local_config,
                          self.build_remote_config]
         [method() for method in build_configs]
         # lowest to highest
         precedence = [self.remote_config, self.local_config, self.command_dict]
-        context_data = functools.reduce(lambda option, value: {**option, **value}, precedence)
+        context_data = functools.reduce(lambda option, value: merge_dicts(option, value), precedence)
         return self.filter_context_data(context_data)
 
     def filter_context_data(self, data):

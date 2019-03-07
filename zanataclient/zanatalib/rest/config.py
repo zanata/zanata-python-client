@@ -27,7 +27,7 @@ middle_url = '/seam/resource/restv1'
 http_methods = ('GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS')
 media_types = ('application/json', 'application/vnd.zanata.projects+json', 'application/vnd.zanata.Version+json',
                'application/vnd.zanata.project.iteration+json', 'application/vnd.zanata.glossary+json',
-               'application/vnd.zanata.project.locales+json', 'application/xml')
+               'application/vnd.zanata.project.locales+json', 'application/xml', 'application/json;charset=ISO-8859-1')
 
 # based on https://zanata.ci.cloudbees.com/job/zanata-api-site/site/zanata-common-api/rest-api-docs/index.html
 # please add, modify resource details here, and make entry in service-to-resource mappings and in zpc_services

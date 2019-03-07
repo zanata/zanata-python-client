@@ -23,19 +23,19 @@
 import fnmatch
 import os
 import sys
-from datetime import datetime
-
-from .cmdbase import CommandsBase, CommandsInit
-from .context import ContextBase
-from .parseconfig import ZanataConfig
-from .zanatalib.logger import Logger, TextColour
-from .zanatalib.projectutils import ToolBox
-
 
 try:
-    from collections import OrderedDict
+    from builtins import input
 except ImportError:
-    from ordereddict import OrderedDict
+    from __builtin__ import input
+from collections import OrderedDict
+from datetime import datetime
+
+from zanataclient.cmdbase import CommandsBase, CommandsInit
+from zanataclient.context import ContextBase
+from zanataclient.parseconfig import ZanataConfig
+from zanataclient.zanatalib.logger import Logger, TextColour
+from zanataclient.zanatalib.projectutils import ToolBox
 
 
 log = Logger()
@@ -64,7 +64,7 @@ class ZanataInit(CommandsInit, ContextBase):
                         self._update_user_config, self._update_http_headers,
                         self._update_client_version, self.check_config_exists,
                         self.set_zanata_command, self.project_options,
-                        self.version_options, self._update_project_type,
+                        self.version_options, self.update_project_type,
                         self.post_project_version, self.source_target_dirs,
                         self.dump_project_config, self.whats_next]
         }

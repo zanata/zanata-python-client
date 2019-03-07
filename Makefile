@@ -18,6 +18,11 @@ clean:
 	python setup.py clean
 	rm -f zanataclient/VERSION-FILE
 
+clean-pyc:
+	find . -name '*.pyc' -exec rm -f {} +
+	find . -name '*.pyo' -exec rm -f {} +
+	find . -name '*~' -exec rm -f {} +
+
 run:
 	python zanata help
 
