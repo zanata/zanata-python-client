@@ -23,7 +23,6 @@
 import fnmatch
 import os
 import sys
-
 try:
     from builtins import input
 except ImportError:
