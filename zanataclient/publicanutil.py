@@ -122,7 +122,7 @@ class PublicanUtility:
 
         if entry.msgid_plural:
             keys = entry.msgstr_plural.keys()
-            keys.sort()
+            sorted(keys)
             for key in keys:
                 contents.append(entry.msgstr_plural[key])
         else:
@@ -170,7 +170,7 @@ class PublicanUtility:
             if entry.msgid_plural:
                 content = []
                 keys = entry.msgstr_plural.keys()
-                keys.sort()
+                sorted(keys)
                 for key in keys:
                     content.append(entry.msgstr_plural[key])
                 textflowtarget = {'resId': textflowId, 'state': state, 'contents': content, 'extensions': extensions}
